@@ -1,5 +1,6 @@
-// src/app/[lang]/page.tsx
-
+import { headers } from "next/headers";
+import { getSiteIdForDomain } from "@/4-shared/lib/getSiteIdForDomain";
+import { getSiteIdForSubdomain } from "@/4-shared/lib/getSiteIdForSubdomain";
 import { fetchHeroSection } from "@/3-entities/sections/api/fetchHeroSection";
 import { fetchProgramSection } from "@/3-entities/sections/api/fetchProgramSection";
 import type {
@@ -9,15 +10,42 @@ import type {
 import { HeroSection } from "@/3-entities/sections/ui/HeroSection";
 import { ProgramSectionComponent } from "@/3-entities/sections/ui/ProgramSection";
 
+// Utility to extract subdomain
+function extractSubdomain(host: string): string | null {
+  const platformDomain = "wedding-web.com";
+  if (!host.endsWith(`.${platformDomain}`)) return null;
+  const subdomain = host.slice(0, host.length - platformDomain.length - 1); // Remove ".wedding-web.com"
+  return subdomain || null;
+}
+
 // SSR: Metadata for SEO
 export async function generateMetadata({
   params,
 }: {
-  params: { lang: string };
+  params: Promise<{ lang: string }>;
 }) {
-  const siteId = "aa34aa33-0ad3-4231-952c-89d7fd655d53"; // Will be dynamic for tenants in future
+  const resolvedParams = await params;
+  const lang = resolvedParams.lang;
+
+  const headersList = await headers();
+  const host = headersList.get("host") ?? "";
+
+  let siteId: string | null = null;
+  const subdomain = extractSubdomain(host);
+  if (subdomain) {
+    siteId = await getSiteIdForSubdomain(subdomain);
+  } else {
+    siteId = await getSiteIdForDomain(host);
+  }
+
+  if (!siteId) {
+    return {
+      title: "Wedding Event Not Found",
+      description: "This wedding event website is not published or configured.",
+    };
+  }
+
   const hero: HeroSectionType | null = await fetchHeroSection(siteId);
-  const lang = params.lang;
 
   const title = hero?.title?.[lang] || "Wedding Event Website";
   const description = hero?.content?.description?.[lang] || "";
@@ -30,6 +58,7 @@ export async function generateMetadata({
       title,
       description,
       images: image ? [image] : [],
+      // locale must be a string, not boolean!
       locale: lang,
     },
     alternates: {
@@ -44,10 +73,35 @@ export async function generateMetadata({
 export default async function HomePage({
   params,
 }: {
-  params: { lang: string };
+  params: Promise<{ lang: string }>;
 }) {
-  const siteId = "aa34aa33-0ad3-4231-952c-89d7fd655d53"; // Dynamic in future
-  const lang = params.lang;
+  const resolvedParams = await params;
+  const lang = resolvedParams.lang;
+
+  const headersList = await headers();
+  const host = headersList.get("host") ?? "";
+
+  let siteId: string | null = null;
+  const subdomain = extractSubdomain(host);
+  if (subdomain) {
+    siteId = await getSiteIdForSubdomain(subdomain);
+  } else {
+    siteId = await getSiteIdForDomain(host);
+  }
+
+  if (!siteId) {
+    return (
+      <div className="w-full flex flex-col items-center justify-center min-h-[60vh] p-8">
+        <h1 className="text-3xl font-bold mb-4 text-red-700">
+          Wedding Event Not Found
+        </h1>
+        <p className="text-lg text-gray-600 max-w-lg text-center">
+          This wedding website is not yet published or available for this
+          domain: <strong>{host}</strong>
+        </p>
+      </div>
+    );
+  }
 
   const [hero, program]: [HeroSectionType | null, ProgramSectionType | null] =
     await Promise.all([fetchHeroSection(siteId), fetchProgramSection(siteId)]);
