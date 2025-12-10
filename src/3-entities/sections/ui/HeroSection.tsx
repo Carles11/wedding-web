@@ -1,12 +1,14 @@
-import type { HeroSection } from "@/4-shared/types";
+import type { HeroSection as HeroSectionType } from "@/4-shared/types";
 import Image from "next/image";
 
 type HeroSectionProps = {
-  hero: HeroSection;
+  hero: HeroSectionType;
   lang: string;
 };
+
 export function HeroSection({ hero, lang }: HeroSectionProps) {
   const title = hero.title?.[lang] ?? "";
+  const description = hero.content?.description?.[lang] ?? "";
   const backgroundImage = hero.content?.backgroundImage ?? "";
 
   return (
@@ -14,22 +16,14 @@ export function HeroSection({ hero, lang }: HeroSectionProps) {
       {backgroundImage && (
         <Image
           src={backgroundImage}
-          alt={title || "Hero image for event"} // Accessibility best practice
+          alt={title || "Hero image for event"}
           fill
           loading="eager"
           priority={true}
-          className="
-            object-cover object-center
-            brightness-[.84]
-            contrast-125
-            sepia
-            hue-rotate-[350deg]
-            saturate-140
-          "
+          className="object-cover object-center brightness-[.84] contrast-125 sepia hue-rotate-[350deg] saturate-140"
           style={{
             filter:
               "grayscale(0.07) sepia(0.18) contrast(1.15) brightness(0.84) hue-rotate(-10deg) saturate(1.4)",
-            // Inline for extra custom tuning (combines with Tailwind filters above)
           }}
         />
       )}
@@ -38,6 +32,9 @@ export function HeroSection({ hero, lang }: HeroSectionProps) {
         <h1 className="font-serif text-5xl md:text-6xl font-light text-white text-center tracking-wide drop-shadow-lg">
           {title}
         </h1>
+        <p className="mt-4 font-sans text-lg md:text-xl text-white text-center drop-shadow">
+          {description}
+        </p>
       </div>
     </section>
   );

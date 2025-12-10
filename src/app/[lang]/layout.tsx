@@ -1,31 +1,21 @@
-import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { LanguageToggle } from "@/2-features/language-toggle/ui/LanguageToggle";
 import "../globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "Wedding Event Website",
-  description:
-    "Multilingual SaaS wedding & event platform — fully SSR & SEO optimized",
-};
-
-export default function RootLayout({
+export default async function RootLayout({
   children,
   params,
 }: {
   children: React.ReactNode;
-  params: { lang: string }; // <-- This type!
+  params: Promise<{ lang: string }>;
 }) {
-  const { lang } = params;
+  const { lang } = await params;
   const availableLangs = ["es", "ca"];
   return (
     <html lang={lang} className="bg-white text-neutral-900 font-sans">
