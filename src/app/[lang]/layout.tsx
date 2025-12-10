@@ -18,15 +18,11 @@ export default async function RootLayout({
   const { lang } = await params;
   const availableLangs = ["es", "ca"];
   return (
-    <html lang={lang} className="bg-white text-neutral-900 font-sans">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <header className="w-full flex justify-end items-center p-4">
-          <LanguageToggle activeLang={lang} availableLangs={availableLangs} />
-        </header>
-        {children}
-      </body>
-    </html>
+    <>
+      <header className="w-full flex justify-end items-center p-4">
+        <LanguageToggle activeLang={lang} availableLangs={availableLangs} />
+      </header>
+      {children}
+    </>
   );
 }
