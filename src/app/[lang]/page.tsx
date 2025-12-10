@@ -1,3 +1,5 @@
+// src/app/[lang]/page.tsx
+
 import { fetchHeroSection } from "@/3-entities/sections/api/fetchHeroSection";
 import { fetchProgramSection } from "@/3-entities/sections/api/fetchProgramSection";
 import type {
@@ -7,11 +9,15 @@ import type {
 import { HeroSection } from "@/3-entities/sections/ui/HeroSection";
 import { ProgramSectionComponent } from "@/3-entities/sections/ui/ProgramSection";
 
-// SSR: Metadata for SEO (dynamic in future)
-export async function generateMetadata() {
-  const siteId = "aa34aa33-0ad3-4231-952c-89d7fd655d53"; // Use domain/subdomain routing for SaaS later
+// SSR: Metadata for SEO
+export async function generateMetadata({
+  params,
+}: {
+  params: { lang: string };
+}) {
+  const siteId = "aa34aa33-0ad3-4231-952c-89d7fd655d53"; // Will be dynamic for tenants in future
   const hero: HeroSectionType | null = await fetchHeroSection(siteId);
-  const lang = "es"; // Will be dynamic soon
+  const lang = params.lang;
 
   const title = hero?.title?.[lang] || "Wedding Event Website";
   const description = hero?.content?.description?.[lang] || "";
@@ -28,22 +34,26 @@ export async function generateMetadata() {
     },
     alternates: {
       languages: {
-        es: "/",
+        es: "/es",
         ca: "/ca",
       },
     },
   };
 }
 
-export default async function HomePage() {
-  const siteId = "aa34aa33-0ad3-4231-952c-89d7fd655d53"; // Dynamic, multi-tenant in future
-  const lang = "es"; // To be switched dynamically
+export default async function HomePage({
+  params,
+}: {
+  params: { lang: string };
+}) {
+  const siteId = "aa34aa33-0ad3-4231-952c-89d7fd655d53"; // Dynamic in future
+  const lang = params.lang;
 
   const [hero, program]: [HeroSectionType | null, ProgramSectionType | null] =
     await Promise.all([fetchHeroSection(siteId), fetchProgramSection(siteId)]);
 
   return (
-    <div className=" flex flex-col gap-16 md:gap-24 px-4 md:px-8 lg:px-16 pt-12 md:pt-16 pb-24 md:pb-32">
+    <div className="flex flex-col gap-16 md:gap-24 px-4 md:px-8 lg:px-16 pt-12 md:pt-16 pb-24 md:pb-32">
       {hero && <HeroSection hero={hero} lang={lang} />}
       {program && <ProgramSectionComponent program={program} lang={lang} />}
     </div>

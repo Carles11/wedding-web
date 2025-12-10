@@ -15,7 +15,7 @@ Create beautiful, customizable event pages for any couple, in any language, with
 
 ## Getting Started
 
-_(Add your installation and setup instructions here)_
+_(Installation and setup instructions will appear here soon)_
 
 ---
 
