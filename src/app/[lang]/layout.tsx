@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { LanguageToggle } from "@/2-features/language-toggle/ui/LanguageToggle";
-
 import "../globals.css";
 
 const geistSans = Geist({
@@ -17,7 +16,6 @@ export const metadata: Metadata = {
   title: "Wedding Event Website",
   description:
     "Multilingual SaaS wedding & event platform — fully SSR & SEO optimized",
-  // ...other global meta if needed
 };
 
 export default function RootLayout({
@@ -25,12 +23,10 @@ export default function RootLayout({
   params,
 }: {
   children: React.ReactNode;
-  params: { lang: string };
+  params: { lang: string }; // <-- This type!
 }) {
-  // No await, no async!
   const { lang } = params;
   const availableLangs = ["es", "ca"];
-
   return (
     <html lang={lang} className="bg-white text-neutral-900 font-sans">
       <body
