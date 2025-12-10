@@ -14,16 +14,18 @@ export function HeroSection({ hero, lang }: HeroSectionProps) {
       {backgroundImage && (
         <Image
           src={backgroundImage}
-          alt=""
+          alt={title || "Hero image for event"} // Accessibility best practice
           fill
+          loading="eager"
+          priority={true}
           className="
-    object-cover object-center
-    brightness-[.84]
-    contrast-125
-    sepia
-    hue-rotate-[350deg]
-    saturate-140
-    "
+            object-cover object-center
+            brightness-[.84]
+            contrast-125
+            sepia
+            hue-rotate-[350deg]
+            saturate-140
+          "
           style={{
             filter:
               "grayscale(0.07) sepia(0.18) contrast(1.15) brightness(0.84) hue-rotate(-10deg) saturate(1.4)",

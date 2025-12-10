@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   // ...other global meta if needed
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
   params,
 }: {
@@ -28,7 +28,7 @@ export default function RootLayout({
   params: { lang: string }; // <- Next.js provides the lang segment as param
 }) {
   // Use dynamic lang from the URL segment
-  const lang = params.lang; // e.g. "es" or "ca"
+  const { lang } = await params;
   const availableLangs = ["es", "ca"];
 
   return (

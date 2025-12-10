@@ -20,7 +20,6 @@ export function LanguageToggle({
           <li key={lang}>
             <Link
               href={`/${lang}${basePath}`}
-              locale={false} // disables Next.js legacy i18n routing, you control lang via param
               className={`px-3 py-2 rounded font-medium 
                 ${
                   lang === activeLang
