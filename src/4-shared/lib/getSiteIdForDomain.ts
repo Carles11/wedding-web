@@ -15,7 +15,7 @@ export async function getSiteIdForDomain(
   const { data, error } = await supabase
     .from("sites")
     .select("id")
-    .eq("domain", domain)
+    .contains("domains", [domain])
     .single();
 
   if (error) {
