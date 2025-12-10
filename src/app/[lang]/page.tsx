@@ -12,21 +12,21 @@ import { ProgramSectionComponent } from "@/3-entities/sections/ui/ProgramSection
 
 // Utility to extract subdomain
 function extractSubdomain(host: string): string | null {
-  const platformDomain = "wedding-web.com";
-  if (!host.endsWith(`.${platformDomain}`)) return null;
-  const subdomain = host.slice(0, host.length - platformDomain.length - 1); // Remove ".wedding-web.com"
-  return subdomain || null;
+  if (host.endsWith(".localhost:3000")) {
+    return host.replace(".localhost:3000", "");
+  }
+  if (host.endsWith(".wedding-web.com")) {
+    return host.replace(".wedding-web.com", "");
+  }
+  return null;
 }
 
-// SSR: Metadata for SEO
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ lang: string }>;
+  params: { lang: string };
 }) {
-  const resolvedParams = await params;
-  const lang = resolvedParams.lang;
-
+  const lang = params.lang;
   const headersList = await headers();
   const host = headersList.get("host") ?? "";
 
@@ -73,11 +73,9 @@ export async function generateMetadata({
 export default async function HomePage({
   params,
 }: {
-  params: Promise<{ lang: string }>;
+  params: { lang: string };
 }) {
-  const resolvedParams = await params;
-  const lang = resolvedParams.lang;
-
+  const lang = params.lang;
   const headersList = await headers();
   const host = headersList.get("host") ?? "";
 
