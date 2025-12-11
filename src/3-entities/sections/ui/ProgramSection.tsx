@@ -23,7 +23,7 @@ export function ProgramSectionComponent({
     "ca"
   );
   const wear = getTextForLang(program.content.wear, lang, "ca");
-
+  console.log("ProgramSection LANG:", lang, program.content);
   return (
     <section className="relative w-full h-1/4 flex justify-center -mt-16 md:-mt-20 z-30">
       <div

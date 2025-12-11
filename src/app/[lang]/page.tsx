@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { headers } from "next/headers";
 import { getSiteIdForDomain } from "@/4-shared/lib/getSiteIdForDomain";
 import { fetchHeroSection } from "@/3-entities/sections/api/fetchHeroSection";
@@ -10,17 +12,16 @@ import { ProgramSectionComponent } from "@/3-entities/sections/ui/ProgramSection
  * Uses host header and Supabase domains[] for multi-tenant event fetch.
  */
 
-export default async function HomePage({
-  params,
-}: {
-  params: { lang: string };
-}) {
+export default async function HomePage(props: { params: { lang: string } }) {
+  const realParams = "then" in props.params ? await props.params : props.params;
+  const lang = realParams.lang ?? "ca";
+
   // Use Next.js headers to get host
   const host = ((await headers()).get("host") ?? "").toLowerCase().trim();
-  console.log("SSR_HOST", host);
+
   // Lookup event tenant by host in Supabase
   const siteId = await getSiteIdForDomain(host);
-  console.log("SSR_SITE_ID", siteId);
+
   if (!siteId) {
     // No event found—render fallback error
     return (
@@ -45,10 +46,8 @@ export default async function HomePage({
   // Render event sections
   return (
     <div className="flex flex-col gap-16 md:gap-24 px-4 md:px-8 lg:px-16 pt-12 md:pt-16 pb-24 md:pb-32">
-      {hero && <HeroSection hero={hero} lang={params.lang} />}
-      {program && (
-        <ProgramSectionComponent program={program} lang={params.lang} />
-      )}
+      {hero && <HeroSection hero={hero} lang={lang} />}
+      {program && <ProgramSectionComponent program={program} lang={lang} />}
     </div>
   );
 }

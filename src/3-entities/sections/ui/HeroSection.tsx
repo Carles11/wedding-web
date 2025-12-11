@@ -11,7 +11,7 @@ export function HeroSection({ hero, lang }: HeroSectionProps) {
   const title = getTextForLang(hero.title, lang, "ca");
   const description = getTextForLang(hero.content?.description, lang, "ca");
   const backgroundImage = hero.content?.backgroundImage ?? "";
-
+  console.log("HeroSection LANG:", lang, hero.title);
   return (
     <section className="relative w-full h-[55vh] min-h-[340px] max-h-[60vh] overflow-hidden flex items-center justify-center rounded-xl shadow-lg">
       {backgroundImage && (
