@@ -6,7 +6,16 @@ export function Footer({
   return (
     <footer className="w-full py-6 text-center text-sm text-gray-600 bg-gray-100 border-t">
       <span>
-        © {new Date().getFullYear()} {siteName}. Site by{" "}
+        © {new Date().getFullYear()} made with{" "}
+        <a
+          href="https://weddweb.com"
+          rel="noopener"
+          target="_blank"
+          className="text-blue-700 underline hover:text-blue-900 font-semibold"
+        >
+          {siteName}
+        </a>
+        . Powered by{" "}
         <a
           href={repoUrl}
           rel="noopener"

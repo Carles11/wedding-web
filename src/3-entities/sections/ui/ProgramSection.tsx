@@ -1,34 +1,44 @@
 import type { ProgramSection } from "@/4-shared/types";
 import { getTextForLang } from "@/4-shared/lib/getTextForLang";
+import type { TranslationDictionary } from "@/4-shared/lib/i18n";
 
 type ProgramSectionProps = {
   program: ProgramSection;
   lang: string;
+  translations?: TranslationDictionary | null;
 };
 
 export function ProgramSectionComponent({
   program,
   lang,
+  translations,
 }: ProgramSectionProps) {
-  const headline = getTextForLang(program.content.headline, lang, "ca");
-  const when = getTextForLang(program.content.when, lang, "ca");
+  const headline = getTextForLang(program.content?.headline, lang, "ca");
+  const when = getTextForLang(program.content?.when, lang, "ca");
   const whereWedding = getTextForLang(
-    program.content.where?.wedding,
+    program.content?.where?.wedding,
     lang,
     "ca"
   );
   const whereBanquet = getTextForLang(
-    program.content.where?.banquet,
+    program.content?.where?.banquet,
     lang,
     "ca"
   );
-  const wear = getTextForLang(program.content.wear, lang, "ca");
+  const wear = getTextForLang(program.content?.wear, lang, "ca");
+
+  const whenLabel = translations?.["when"] ?? "When";
+  const whereLabel = translations?.["where"] ?? "Where";
+  const dresscodeLabel = translations?.["dresscode"] ?? "Dresscode";
+
   return (
-    <section className="relative w-full h-1/4 flex justify-center -mt-16 md:-mt-20 z-30">
+    <section
+      className="relative w-full h-1/4 flex justify-center mt-0 md:mt-20 z-30"
+      aria-labelledby="program-headline"
+    >
       <div
         className="
         max-w-4xl w-full
-        bg-[#f8f6f1] bg-opacity-90
         rounded-2xl
         shadow-lg
         border border-neutral-200
@@ -37,6 +47,7 @@ export function ProgramSectionComponent({
         "
       >
         <span
+          id="program-headline"
           className="
           font-sans text-2xl md:text-sm uppercase tracking-wider
           text-neutral-700 font-semibold text-center mb-10
@@ -45,31 +56,38 @@ export function ProgramSectionComponent({
         >
           {headline}
         </span>
+
         <div
           className="
-          grid grid-cols-3 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x
+          grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x
           divide-neutral-200
           w-full text-center
         "
         >
           <div className="pb-6 md:pb-0 md:pr-8">
             <div className="text-xs uppercase mb-2 tracking-wider text-neutral-600 font-bold">
-              When
+              {whenLabel}
             </div>
-            <div className="font-serif text-lg font-light">{when}</div>
+            <div className=" text-lg font-light">{when}</div>
           </div>
+
           <div className="py-6 md:py-0 md:px-8">
             <div className="text-xs uppercase mb-2 tracking-wider text-neutral-600 font-bold">
-              Where
+              {whereLabel}
             </div>
-            <div className="font-serif text-lg font-light">{whereWedding}</div>
-            <div className="text-sm mt-1 text-neutral-500">{whereBanquet}</div>
+            <div className="text-lg font-light">{whereWedding}</div>
+            {whereBanquet && (
+              <div className="text-sm mt-1 text-neutral-500">
+                {whereBanquet}
+              </div>
+            )}
           </div>
+
           <div className="pt-6 md:pt-0 md:pl-8">
             <div className="text-xs uppercase mb-2 tracking-wider text-neutral-600 font-bold">
-              Wear
+              {dresscodeLabel}
             </div>
-            <div className="font-serif text-lg font-light">{wear}</div>
+            <div className=" text-lg font-light">{wear}</div>
           </div>
         </div>
       </div>
