@@ -4,7 +4,7 @@ export function Footer({
   siteName = "Rio Frances",
 }) {
   return (
-    <footer className="w-full py-6 text-center text-sm text-gray-600 bg-gray-100 border-t mt-8">
+    <footer className="w-full py-6 text-center text-sm text-gray-600 bg-gray-100 border-t">
       <span>
         © {new Date().getFullYear()} {siteName}. Site by{" "}
         <a

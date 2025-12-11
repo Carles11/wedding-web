@@ -12,7 +12,7 @@ export default function RootLayout({
         {children}
         <Footer
           siteName="Rio Frances"
-          author="Carles11"
+          author="Carles"
           repoUrl="https://www.rio-frances.com"
         />
       </body>

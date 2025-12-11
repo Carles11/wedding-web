@@ -18,7 +18,10 @@ export default async function Page() {
   // Host header, always lowercase, trimmed for robust matching.
   const host = ((await headers()).get("host") ?? "").toLowerCase().trim();
   console.log("[SSR] Incoming host:", host);
-
+  if (host === "localhost" || host.startsWith("localhost:")) {
+    // Don't match any tenant site, show the main marketing page instead
+    return <MarketingLanding />;
+  }
   // Marketing domains = always show platform landing.
   if (MARKETING_DOMAINS.includes(host)) {
     console.log("[SSR] Marketing domain detected:", host);

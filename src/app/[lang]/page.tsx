@@ -45,7 +45,7 @@ export default async function HomePage(props: { params: { lang: string } }) {
 
   // Render event sections
   return (
-    <div className="flex flex-col gap-16 md:gap-24 px-4 md:px-8 lg:px-16 pt-12 md:pt-16 pb-24 md:pb-32">
+    <div className="flex flex-col gap-16 md:gap-24 ">
       {hero && <HeroSection hero={hero} lang={lang} />}
       {program && <ProgramSectionComponent program={program} lang={lang} />}
     </div>
