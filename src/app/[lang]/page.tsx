@@ -59,7 +59,7 @@ export default async function HomePage(props: { params: { lang: string } }) {
           aria-label="Page controls"
           className="absolute top-3 right-3 z-50 pointer-events-auto"
         >
-          <div className="bg-white/70 dark:bg-black/60 backdrop-blur-sm rounded-md p-1 shadow-sm">
+          <div className="backdrop-blur-sm rounded-md p-1 shadow-sm">
             <LanguageToggle activeLang={lang} availableLangs={availableLangs} />
           </div>
         </header>

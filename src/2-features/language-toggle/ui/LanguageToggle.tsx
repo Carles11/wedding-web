@@ -23,8 +23,8 @@ export function LanguageToggle({
               className={`px-3 py-2 rounded font-medium 
                 ${
                   lang === activeLang
-                    ? "bg-neutral-900 text-white"
-                    : "bg-neutral-200 text-neutral-800"
+                    ? "bg-neutral-900 text-white underline decoration-2 underline-offset-4"
+                    : "bg-transparent text-white/80"
                 }
                 transition
               `}
