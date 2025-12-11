@@ -1,4 +1,5 @@
 import type { ProgramSection } from "@/4-shared/types";
+import { getTextForLang } from "@/4-shared/lib/getTextForLang";
 
 type ProgramSectionProps = {
   program: ProgramSection;
@@ -9,11 +10,19 @@ export function ProgramSectionComponent({
   program,
   lang,
 }: ProgramSectionProps) {
-  const headline = program.content.headline?.[lang] ?? "";
-  const when = program.content.when?.[lang] ?? "";
-  const whereWedding = program.content.where?.wedding?.[lang] ?? "";
-  const whereBanquet = program.content.where?.banquet?.[lang] ?? "";
-  const wear = program.content.wear?.[lang] ?? "";
+  const headline = getTextForLang(program.content.headline, lang, "ca");
+  const when = getTextForLang(program.content.when, lang, "ca");
+  const whereWedding = getTextForLang(
+    program.content.where?.wedding,
+    lang,
+    "ca"
+  );
+  const whereBanquet = getTextForLang(
+    program.content.where?.banquet,
+    lang,
+    "ca"
+  );
+  const wear = getTextForLang(program.content.wear, lang, "ca");
 
   return (
     <section className="relative w-full h-1/4 flex justify-center -mt-16 md:-mt-20 z-30">

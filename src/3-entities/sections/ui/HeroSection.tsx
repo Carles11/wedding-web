@@ -1,5 +1,6 @@
 import type { HeroSection as HeroSectionType } from "@/4-shared/types";
 import Image from "next/image";
+import { getTextForLang } from "@/4-shared/lib/getTextForLang";
 
 type HeroSectionProps = {
   hero: HeroSectionType;
@@ -7,8 +8,8 @@ type HeroSectionProps = {
 };
 
 export function HeroSection({ hero, lang }: HeroSectionProps) {
-  const title = hero.title?.[lang] ?? "";
-  const description = hero.content?.description?.[lang] ?? "";
+  const title = getTextForLang(hero.title, lang, "ca");
+  const description = getTextForLang(hero.content?.description, lang, "ca");
   const backgroundImage = hero.content?.backgroundImage ?? "";
 
   return (
