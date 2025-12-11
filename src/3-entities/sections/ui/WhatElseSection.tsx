@@ -2,6 +2,7 @@ import React from "react";
 import { getTextForLang } from "@/4-shared/lib/getTextForLang";
 import SectionContainer from "@/4-shared/ui/section/SectionContainer";
 import type { TranslationDictionary } from "@/4-shared/lib/i18n";
+import UnderlinedLink from "@/4-shared/ui/link/UnderlinedLink";
 
 interface WhatElseItem {
   title: Record<string, string>;
@@ -27,6 +28,37 @@ type WhatElseSectionProps = {
   translations?: TranslationDictionary | null;
 };
 
+function getLearnMoreLabel(
+  lang: string,
+  translations?: TranslationDictionary | null
+) {
+  const dbLabel = translations?.["common.learn_more"];
+  if (dbLabel) return dbLabel;
+
+  switch (lang) {
+    case "es":
+      return "Conoce más";
+    case "ca":
+      return "Coneix més";
+    default:
+      return "Learn more";
+  }
+}
+
+function getLearnMoreAria(
+  lang: string,
+  titleText: string,
+  translations?: TranslationDictionary | null
+) {
+  const dbAria = translations?.["common.learn_more_aria"];
+  if (dbAria)
+    return (
+      dbAria.replace("{title}", titleText) ||
+      `${getLearnMoreLabel(lang, translations)} - ${titleText}`
+    );
+  return `${getLearnMoreLabel(lang, translations)} - ${titleText}`;
+}
+
 export default function WhatElseSection({
   data,
   lang,
@@ -39,44 +71,52 @@ export default function WhatElseSection({
     "What else to see?";
 
   const items: WhatElseItem[] = data?.content?.items ?? [];
+  const learnMoreLabel = getLearnMoreLabel(lang, translations);
 
   return (
     <SectionContainer
       id="whatelse"
       heading={headline}
-      headingId="details-heading"
+      headingId="whatelse-heading"
       variant="white"
       withDivider
       dividerMotive="love1"
-      dividerClassName="w-32 h-auto" // optional: tune size via Tailwind
-      dividerSize={110} // optional: exact pixel size for next/image
-      dividerOpacity={0.06} // optional: pick opacity
+      dividerClassName="w-32 h-auto"
+      dividerSize={110}
+      dividerOpacity={0.06}
     >
       <div className="grid gap-6 md:grid-cols-2">
-        {items.map((it: WhatElseItem, idx: number) => (
-          <article key={idx} className="p-4 border rounded-lg bg-neutral-50">
-            <h3 className="font-semibold text-neutral-800">
-              {getTextForLang(it.title, lang, "")}
-            </h3>
-            {it.description && (
-              <p className="text-sm text-neutral-600 mt-2">
-                {getTextForLang(it.description, lang, "")}
-              </p>
-            )}
-            {it.url && (
-              <div className="mt-3">
-                <a
-                  className="text-indigo-600 hover:underline"
-                  href={it.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {it.url}
-                </a>
-              </div>
-            )}
-          </article>
-        ))}
+        {items.map((it: WhatElseItem, idx: number) => {
+          const titleText = getTextForLang(it.title, lang, "");
+          const descText = it.description
+            ? getTextForLang(it.description, lang, "")
+            : null;
+          const ariaLabel = getLearnMoreAria(lang, titleText, translations);
+
+          return (
+            <article key={idx} className="p-4 border rounded-lg bg-neutral-50">
+              <h3 className="font-semibold text-neutral-800">{titleText}</h3>
+
+              {descText && (
+                <p className="text-sm text-neutral-600 mt-2">{descText}</p>
+              )}
+
+              {it.url && (
+                <div className="mt-3">
+                  <UnderlinedLink
+                    href={it.url}
+                    thicknessClass="h-0.5"
+                    durationMs={350}
+                    ariaLabel={ariaLabel}
+                    external
+                  >
+                    {learnMoreLabel}
+                  </UnderlinedLink>
+                </div>
+              )}
+            </article>
+          );
+        })}
       </div>
     </SectionContainer>
   );

@@ -21,7 +21,7 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const payingCustomer = false; // TODO: replace with real check in future
+  const payingCustomer = true; // TODO: replace with real check in future
 
   return (
     // NOTE: lang should be set dynamically per-page/tenant for multilingual sites.

@@ -2,11 +2,13 @@ import React from "react";
 import { getTextForLang } from "@/4-shared/lib/getTextForLang";
 import SectionContainer from "@/4-shared/ui/section/SectionContainer";
 import type { TranslationDictionary } from "@/4-shared/lib/i18n";
+import UnderlinedLink from "@/4-shared/ui/link/UnderlinedLink";
 
 interface Event {
   time: string;
   title: string | Record<string, string>;
   location: string | Record<string, string>;
+  location_url?: string | null;
 }
 
 interface Day {
@@ -55,6 +57,18 @@ export default function DetailsSection({
 
   const days: Day[] = data?.content?.days ?? [];
 
+  // Consistent underline configuration used across the site
+  const underlineConfig = {
+    initialHeightClass: "max-h-[2px]",
+    expandedHeightClass: "group-hover:max-h-[10px] group-focus:max-h-[10px]",
+    durationMs: 300,
+  };
+
+  const locationLinkLabel =
+    translations?.["program.location_url_label"] ??
+    translations?.["location_url"] ??
+    "Localízalo";
+
   return (
     <SectionContainer
       id="details"
@@ -85,32 +99,57 @@ export default function DetailsSection({
 
             <ul className="space-y-3">
               {Array.isArray(day.events) &&
-                day.events.map((ev: Event, idx: number) => (
-                  <li
-                    key={idx}
-                    className="flex flex-col md:flex-row md:items-center gap-3 md:gap-6"
-                  >
-                    <div className="w-28 text-sm font-mono text-neutral-600">
-                      {ev.time}
-                    </div>
-                    <div className="flex-1">
-                      <div className="font-semibold text-neutral-800">
-                        {getTextForLang(
-                          ev.title as Record<string, string> | undefined,
-                          lang,
-                          ""
+                day.events.map((ev: Event, idx: number) => {
+                  const evTitle = getTextForLang(
+                    ev.title as Record<string, string> | undefined,
+                    lang,
+                    ""
+                  );
+                  const evLocation = getTextForLang(
+                    ev.location as Record<string, string> | undefined,
+                    lang,
+                    ""
+                  );
+
+                  // aria label for the link: include the localized place when possible
+                  const locationAria = evLocation
+                    ? `Open location for ${evLocation}`
+                    : "Open location";
+
+                  return (
+                    <li
+                      key={idx}
+                      className="flex flex-col md:flex-row md:items-center gap-3 md:gap-6"
+                    >
+                      <div className="w-28 text-sm font-mono text-neutral-600">
+                        {ev.time}
+                      </div>
+                      <div className="flex-1">
+                        <div className="font-semibold text-neutral-800">
+                          {evTitle}
+                        </div>
+                        <div className="text-sm text-neutral-600">
+                          {evLocation}
+                        </div>
+
+                        {/* Render the location_url immediately under the location (if present) */}
+                        {ev.location_url && ev.location_url.trim() !== "" && (
+                          <div className="mt-2">
+                            <UnderlinedLink
+                              href={ev.location_url}
+                              external
+                              ariaLabel={locationAria}
+                              thicknessClass="h-0.5"
+                              {...underlineConfig}
+                            >
+                              {locationLinkLabel}
+                            </UnderlinedLink>
+                          </div>
                         )}
                       </div>
-                      <div className="text-sm text-neutral-600">
-                        {getTextForLang(
-                          ev.location as Record<string, string> | undefined,
-                          lang,
-                          ""
-                        )}
-                      </div>
-                    </div>
-                  </li>
-                ))}
+                    </li>
+                  );
+                })}
             </ul>
           </div>
         ))}
