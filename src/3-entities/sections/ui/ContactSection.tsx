@@ -1,33 +1,32 @@
+import React from "react";
 import { getTextForLang } from "@/4-shared/lib/getTextForLang";
+import SectionContainer from "@/4-shared/ui/section/SectionContainer";
 import type { TranslationDictionary } from "@/4-shared/lib/i18n";
 
-interface Person {
+interface ContactPerson {
   name: string;
   email?: string;
   phone?: string;
 }
 
-interface ContactContent {
-  headline?: string;
-  people?: Person[];
-}
-
-interface ContactData {
+interface ContactSectionData {
   title?: string;
-  content?: ContactContent;
+  content?: {
+    headline?: string;
+    people?: ContactPerson[];
+  };
 }
 
+/**
+ * ContactSection: simple couple contacts.
+ * - Anchor: id="contact"
+ */
 type ContactSectionProps = {
-  data: ContactData | null;
+  data: ContactSectionData | null;
   lang: string;
   translations?: TranslationDictionary | null;
 };
 
-/**
- * ContactSection (server component)
- * Renders couple contact info.
- * Anchor: id="contact"
- */
 export default function ContactSection({
   data,
   lang,
@@ -47,48 +46,51 @@ export default function ContactSection({
     translations?.["menu.contact"] ||
     "Contact";
 
-  const people: Person[] = data?.content?.people ?? [];
+  const people: ContactPerson[] = data?.content?.people ?? [];
 
   return (
-    <section
+    <SectionContainer
       id="contact"
-      aria-labelledby="contact-heading"
-      className="py-20 bg-neutral-50"
+      heading={headline}
+      headingId="accommodation-heading"
+      variant="muted"
+      withDivider
+      dividerMotive="contact1"
+      dividerClassName="w-36 h-auto"
+      dividerSize={120}
+      dividerOpacity={0.055}
     >
-      <div className="max-w-4xl mx-auto px-6">
-        <h2
-          id="contact-heading"
-          className="text-2xl font-semibold text-neutral-800 mb-6"
-        >
-          {headline}
-        </h2>
-
-        <div className="grid gap-6 md:grid-cols-2">
-          {people.map((p: Person, i: number) => (
-            <div key={i} className="p-4 bg-white rounded-lg shadow-sm border">
-              <div className="text-lg font-semibold text-neutral-800">
-                {p.name}
-              </div>
-              <div className="text-sm text-neutral-600 mt-2">
-                {p.email && (
-                  <div>
-                    <a href={`mailto:${p.email}`} className="hover:underline">
-                      {p.email}
-                    </a>
-                  </div>
-                )}
-                {p.phone && (
-                  <div>
-                    <a href={`tel:${p.phone}`} className="hover:underline">
-                      {p.phone}
-                    </a>
-                  </div>
-                )}
-              </div>
+      <div className="grid gap-6 md:grid-cols-2">
+        {people.map((p: ContactPerson, i: number) => (
+          <div key={i} className="p-4 bg-white rounded-lg shadow-sm border">
+            <div className="text-lg font-semibold text-neutral-800">
+              {p.name}
             </div>
-          ))}
-        </div>
+            <div className="text-sm text-neutral-600 mt-2 space-y-1">
+              {p.email && (
+                <div>
+                  <a
+                    href={`mailto:${p.email}`}
+                    className="hover:underline text-neutral-700"
+                  >
+                    {p.email}
+                  </a>
+                </div>
+              )}
+              {p.phone && (
+                <div>
+                  <a
+                    href={`tel:${p.phone}`}
+                    className="hover:underline text-neutral-700"
+                  >
+                    {p.phone}
+                  </a>
+                </div>
+              )}
+            </div>
+          </div>
+        ))}
       </div>
-    </section>
+    </SectionContainer>
   );
 }
