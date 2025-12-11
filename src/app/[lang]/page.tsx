@@ -1,12 +1,23 @@
-// app/(public)/[lang]/page.tsx  (full file)
 import { headers } from "next/headers";
 import { getSiteByDomain } from "@/4-shared/lib/getSiteByDomain";
 import { fetchHeroSection } from "@/3-entities/sections/api/fetchHeroSection";
 import { fetchProgramSection } from "@/3-entities/sections/api/fetchProgramSection";
-import { HeroSection } from "@/3-entities/sections/ui/HeroSection";
-import { ProgramSectionComponent } from "@/3-entities/sections/ui/ProgramSection";
+import { fetchDetailsSection } from "@/3-entities/sections/api/fetchDetailsSection";
+import { fetchAccommodationSection } from "@/3-entities/sections/api/fetchAccommodationSection";
+import { fetchWhatElseSection } from "@/3-entities/sections/api/fetchWhatElseSection";
+import { fetchContactSection } from "@/3-entities/sections/api/fetchContactSection";
+
+import HeroSection from "@/3-entities/sections/ui/HeroSection";
+import ProgramSectionComponent from "@/3-entities/sections/ui/ProgramSection";
+import DetailsSection from "@/3-entities/sections/ui/DetailsSection";
+import AccommodationSection from "@/3-entities/sections/ui/AccommodationSection";
+import WhatElseSection from "@/3-entities/sections/ui/WhatElseSection";
+import ContactSection from "@/3-entities/sections/ui/ContactSection";
+
 import Heading from "@/4-shared/ui/typography/Heading";
 import { LanguageToggle } from "@/2-features/language-toggle/ui/LanguageToggle";
+import TopMenu from "@/2-features/top-menu/ui/TopMenu";
+
 import { getMergedTranslations } from "@/4-shared/lib/i18n";
 
 export const dynamic = "force-dynamic";
@@ -46,15 +57,28 @@ export default async function HomePage(props: { params: { lang: string } }) {
     );
   }
 
-  // SSR fetch hero/program sections in parallel, scoped by site
-  const [hero, program] = await Promise.all([
-    fetchHeroSection(siteId),
-    fetchProgramSection(siteId),
-  ]);
+  // SSR fetch hero/program and the new sections in parallel, scoped by site
+  const [hero, program, details, accommodation, whatelse, contact] =
+    await Promise.all([
+      fetchHeroSection(siteId),
+      fetchProgramSection(siteId),
+      fetchDetailsSection(siteId),
+      fetchAccommodationSection(siteId),
+      fetchWhatElseSection(siteId),
+      fetchContactSection(siteId),
+    ]);
 
   return (
     <>
       <div className="relative">
+        {/* Top-left: menu */}
+        <div className="absolute top-3 left-3 z-50 pointer-events-auto">
+          <div className="backdrop-blur-sm rounded-md p-1 shadow-sm">
+            <TopMenu lang={lang} translations={translations} />
+          </div>
+        </div>
+
+        {/* Top-right: language toggle */}
         <header
           aria-label="Page controls"
           className="absolute top-3 right-3 z-50 pointer-events-auto"
@@ -64,12 +88,14 @@ export default async function HomePage(props: { params: { lang: string } }) {
           </div>
         </header>
 
+        {/* Hero */}
         {hero && (
           <HeroSection hero={hero} lang={lang} translations={translations} />
         )}
       </div>
 
       <main className="flex flex-col gap-16 md:gap-24">
+        {/* Program */}
         {program && (
           <ProgramSectionComponent
             program={program}
@@ -77,6 +103,34 @@ export default async function HomePage(props: { params: { lang: string } }) {
             translations={translations}
           />
         )}
+
+        {/* Details / Program timeline */}
+        <DetailsSection
+          data={details}
+          lang={lang}
+          translations={translations}
+        />
+
+        {/* Accommodation */}
+        <AccommodationSection
+          data={accommodation}
+          lang={lang}
+          translations={translations}
+        />
+
+        {/* What else to see & do */}
+        <WhatElseSection
+          data={whatelse}
+          lang={lang}
+          translations={translations}
+        />
+
+        {/* Contact */}
+        <ContactSection
+          data={contact}
+          lang={lang}
+          translations={translations}
+        />
       </main>
     </>
   );

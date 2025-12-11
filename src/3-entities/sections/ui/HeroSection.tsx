@@ -19,16 +19,32 @@ type HeroSectionProps = {
  * - translations is passed from server via getMergedTranslations(siteId, lang)
  * - All content text uses getTextForLang to prefer the requested lang with a fallback (site defaults)
  */
-export function HeroSection({ hero, lang, translations }: HeroSectionProps) {
+export default function HeroSection({
+  hero,
+  lang,
+  translations,
+}: HeroSectionProps) {
   const title = getTextForLang(hero.title, lang, "ca");
   const description = getTextForLang(hero.content?.description, lang, "ca");
   const backgroundImage = hero.content?.backgroundImage ?? "";
 
   // Optional structured fields inside hero.content (may not exist for all sites)
   // We safely read them and prefer the lang-specific values if present.
-  const heroDate = getTextForLang(hero.content?.date as Record<string, string> | undefined, lang, "");
-  const heroLocation = getTextForLang(hero.content?.location as Record<string, string> | undefined, lang, "");
-  const heroDresscode = getTextForLang(hero.content?.dresscode as Record<string, string> | undefined, lang, "");
+  const heroDate = getTextForLang(
+    hero.content?.date as Record<string, string> | undefined,
+    lang,
+    ""
+  );
+  const heroLocation = getTextForLang(
+    hero.content?.location as Record<string, string> | undefined,
+    lang,
+    ""
+  );
+  const heroDresscode = getTextForLang(
+    hero.content?.dresscode as Record<string, string> | undefined,
+    lang,
+    ""
+  );
 
   const whenLabel = translations?.["when"] ?? "When";
   const whereLabel = translations?.["where"] ?? "Where";

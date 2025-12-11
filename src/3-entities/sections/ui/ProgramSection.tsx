@@ -8,7 +8,7 @@ type ProgramSectionProps = {
   translations?: TranslationDictionary | null;
 };
 
-export function ProgramSectionComponent({
+export default function ProgramSectionComponent({
   program,
   lang,
   translations,
@@ -42,7 +42,7 @@ export function ProgramSectionComponent({
         rounded-2xl
         shadow-lg
         border border-neutral-200
-        px-6 md:px-12 py-10 md:py-16
+        px-6 md:px-22 py-10 md:py-16 mb-12 md:mb-22
         flex flex-col items-center
         "
       >
