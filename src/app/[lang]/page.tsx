@@ -1,34 +1,28 @@
 import { headers } from "next/headers";
 import { getSiteIdForDomain } from "@/4-shared/lib/getSiteIdForDomain";
-import { getSiteIdForSubdomain } from "@/4-shared/lib/getSiteIdForSubdomain";
 import { fetchHeroSection } from "@/3-entities/sections/api/fetchHeroSection";
 import { fetchProgramSection } from "@/3-entities/sections/api/fetchProgramSection";
 import { HeroSection } from "@/3-entities/sections/ui/HeroSection";
 import { ProgramSectionComponent } from "@/3-entities/sections/ui/ProgramSection";
 
+/**
+ * SSR handler for tenant event homepage by language.
+ * Uses host header and Supabase domains[] for multi-tenant event fetch.
+ */
+
 export default async function HomePage({
   params,
 }: {
-  params: Promise<{ lang: string }>;
+  params: { lang: string };
 }) {
-  const { lang } = await params;
-
-  const headersList = await headers();
-  const host = headersList.get("host") ?? "";
-  let siteId: string | null = null;
-  const subdomain = host.endsWith(".localhost:3000")
-    ? host.replace(".localhost:3000", "")
-    : host.endsWith(".wedding-web.com")
-    ? host.replace(".wedding-web.com", "")
-    : null;
-
-  if (subdomain) {
-    siteId = await getSiteIdForSubdomain(subdomain);
-  } else {
-    siteId = await getSiteIdForDomain(host);
-  }
-
+  // Use Next.js headers to get host
+  const host = ((await headers()).get("host") ?? "").toLowerCase().trim();
+  console.log("SSR_HOST", host);
+  // Lookup event tenant by host in Supabase
+  const siteId = await getSiteIdForDomain(host);
+  console.log("SSR_SITE_ID", siteId);
   if (!siteId) {
+    // No event found—render fallback error
     return (
       <div className="w-full flex flex-col items-center justify-center min-h-[60vh] p-8">
         <h1 className="text-3xl font-bold mb-4 text-red-700">
@@ -42,15 +36,19 @@ export default async function HomePage({
     );
   }
 
+  // SSR fetch hero/program sections in parallel, scoped by site
   const [hero, program] = await Promise.all([
     fetchHeroSection(siteId),
     fetchProgramSection(siteId),
   ]);
 
+  // Render event sections
   return (
     <div className="flex flex-col gap-16 md:gap-24 px-4 md:px-8 lg:px-16 pt-12 md:pt-16 pb-24 md:pb-32">
-      {hero && <HeroSection hero={hero} lang={lang} />}
-      {program && <ProgramSectionComponent program={program} lang={lang} />}
+      {hero && <HeroSection hero={hero} lang={params.lang} />}
+      {program && (
+        <ProgramSectionComponent program={program} lang={params.lang} />
+      )}
     </div>
   );
 }
