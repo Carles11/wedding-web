@@ -48,12 +48,12 @@ export default function ProgramSectionComponent({
         <span
           id="program-headline"
           className="
-          font-sans text-2xl md:text-sm uppercase tracking-wider
+          text-2xl md:text-md  tracking-wider
           text-neutral-700 font-semibold text-center mb-10
           letter-spacing-wide
         "
         >
-          {headline}
+          <h2>{headline}</h2>
         </span>
 
         <div
