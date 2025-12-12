@@ -7,7 +7,7 @@ export async function fetchContactSection(siteId: string) {
   if (!siteId) return null;
   const { data, error } = await supabaseAdmin
     .from("sections")
-    .select("id, site_id, type, title, content")
+    .select("id, site_id, type, title, subtitle, content")
     .eq("site_id", siteId)
     .eq("type", "contact")
     .limit(1)

@@ -1,4 +1,3 @@
-import React from "react";
 import { getTextForLang } from "@/4-shared/lib/getTextForLang";
 import SectionContainer from "@/4-shared/ui/section/SectionContainer";
 import type { TranslationDictionary } from "@/4-shared/lib/i18n";
@@ -12,6 +11,7 @@ interface ContactPerson {
 
 interface ContactSectionData {
   title?: string;
+  subtitle?: string | Record<string, string>;
   content?: {
     headline?: string;
     people?: ContactPerson[];
@@ -47,6 +47,12 @@ export default function ContactSection({
     translations?.["menu.contact"] ||
     "Contact";
 
+  const subtitle = getTextForLang(
+    data?.subtitle as Record<string, string> | undefined,
+    lang,
+    ""
+  );
+
   const people: ContactPerson[] = data?.content?.people ?? [];
 
   // Reuse the site's underline appearance so all links look consistent
@@ -61,6 +67,7 @@ export default function ContactSection({
       id="contact"
       heading={headline}
       headingId="accommodation-heading"
+      subtitle={subtitle}
       variant="muted"
       withDivider
       dividerMotive="contact1"

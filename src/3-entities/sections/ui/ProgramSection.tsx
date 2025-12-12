@@ -20,16 +20,16 @@ export default function ProgramSectionComponent({
     lang,
     "ca"
   );
-  const whereBanquet = getTextForLang(
-    program.content?.where?.banquet,
-    lang,
-    "ca"
-  );
-  const wear = getTextForLang(program.content?.wear, lang, "ca");
+  // const whereBanquet = getTextForLang(
+  //   program.content?.where?.banquet,
+  //   lang,
+  //   "ca"
+  // );
+  // const wear = getTextForLang(program.content?.wear, lang, "ca");
 
   const whenLabel = translations?.["when"] ?? "When";
   const whereLabel = translations?.["where"] ?? "Where";
-  const dresscodeLabel = translations?.["dresscode"] ?? "Dresscode";
+  // const dresscodeLabel = translations?.["dresscode"] ?? "Dresscode";
 
   return (
     <section
