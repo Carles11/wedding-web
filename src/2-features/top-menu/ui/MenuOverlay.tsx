@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useMemo } from "react";
+import ReactDOM from "react-dom";
 import Image from "next/image";
 import type { TranslationDictionary } from "@/4-shared/lib/i18n";
 
@@ -12,6 +13,7 @@ type MenuOverlayProps = {
   items: MenuItem[];
   lang: string;
   translations?: TranslationDictionary | null;
+  // Reuse the TopMenu.handleClick signature (it may close the menu itself).
   onItemClick: (
     e: React.MouseEvent,
     id: string,
@@ -19,6 +21,14 @@ type MenuOverlayProps = {
   ) => Promise<void> | void;
 };
 
+/**
+ * Full-screen menu overlay (portal)
+ * - Renders into document.body to avoid stacking-context/transform issues
+ * - Uses a very high z-index so it sits above header badges
+ * - Locks body scroll while open and restores it on close
+ * - Focus-trap + Escape to close
+ * - Calls onItemClick(e, id, true) and then triggers onClose() after a small hide animation
+ */
 export default function MenuOverlay({
   open,
   onClose,
@@ -34,15 +44,41 @@ export default function MenuOverlay({
   const getLabel = (k: string, fallback: string) =>
     translations?.[k] ?? fallback;
 
+  // Create portal container once on client
+  const container = useMemo(() => {
+    if (typeof document === "undefined") return null;
+    return document.createElement("div");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Append / remove portal container to body when open changes
+  useEffect(() => {
+    if (!container) return;
+    if (open) {
+      document.body.appendChild(container);
+    }
+    return () => {
+      if (container.parentNode === document.body) {
+        document.body.removeChild(container);
+      }
+    };
+  }, [open, container]);
+
+  // Body scroll lock while overlay is open
   const restoreBodyStyles = () => {
-    document.body.style.overflow = "";
-    document.body.style.position = "";
-    document.body.style.width = "";
+    try {
+      document.body.style.overflow = "";
+      document.body.style.position = "";
+      document.body.style.width = "";
+    } catch {
+      /* ignore */
+    }
   };
 
-  // Prevent body scroll when overlay is open
   useEffect(() => {
+    if (typeof document === "undefined") return;
     if (open) {
+      // lock scrolling
       document.body.style.overflow = "hidden";
       document.body.style.position = "fixed";
       document.body.style.width = "100%";
@@ -50,31 +86,75 @@ export default function MenuOverlay({
     } else {
       restoreBodyStyles();
     }
-
     return () => {
       restoreBodyStyles();
     };
   }, [open]);
 
-  const handleClose = () => {
-    if (isClosingRef.current) return;
-    onClose();
-  };
-
-  // Trap focus inside dialog
+  // Focus trap + Escape handling
   useEffect(() => {
     if (!open) return;
 
-    const handleKeyDown = (e: KeyboardEvent) => {
+    function onKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape") {
-        handleClose();
+        e.preventDefault();
+        if (!isClosingRef.current) onClose();
+        return;
       }
+
+      if (e.key === "Tab") {
+        const dialog = dialogRef.current;
+        if (!dialog) return;
+        const focusable = dialog.querySelectorAll<HTMLElement>(
+          'a,button,input,textarea,select,[tabindex]:not([tabindex="-1"])'
+        );
+        if (focusable.length === 0) return;
+
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    }
+
+    document.addEventListener("keydown", onKeyDown);
+    // focus first element when opened
+    const t = window.setTimeout(() => {
+      const dialog = dialogRef.current;
+      if (!dialog) return;
+      const focusable = dialog.querySelectorAll<HTMLElement>(
+        'a,button,input,textarea,select,[tabindex]:not([tabindex="-1"])'
+      );
+      if (focusable.length > 0) {
+        focusable[0].focus();
+      }
+    }, 0);
+
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      window.clearTimeout(t);
     };
+  }, [open, onClose]);
 
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [open, handleClose]);
+  // Prevent double-close
+  const handleClose = () => {
+    if (isClosingRef.current) return;
+    isClosingRef.current = true;
+    onClose();
+  };
 
+  // When an item is clicked we:
+  // - prevent default
+  // - start a short hide animation
+  // - restore body scrolling
+  // - call the provided onItemClick with (e, id, true)
+  // - finally call onClose() after a short timeout to allow animation
   const handleItemClick = async (e: React.MouseEvent, id: string) => {
     e.preventDefault();
     e.stopPropagation();
@@ -82,59 +162,65 @@ export default function MenuOverlay({
     if (isClosingRef.current) return;
     isClosingRef.current = true;
 
-    // First, visually hide the overlay
+    // start hide animation (fade out)
     if (overlayRef.current) {
+      overlayRef.current.style.transition =
+        "opacity 220ms ease, transform 220ms ease";
       overlayRef.current.style.opacity = "0";
+      overlayRef.current.style.transform = "scale(0.995)";
       overlayRef.current.style.pointerEvents = "none";
     }
 
-    // Restore body scroll immediately so page can scroll
+    // restore body scroll to allow scrolling during/after navigation
     restoreBodyStyles();
 
-    // Small delay to ensure overlay animation starts
+    // Next frame: run navigation
     requestAnimationFrame(async () => {
       try {
-        // Call the scroll function with isMobileOverlay flag
         await onItemClick(e, id, true);
-
-        // Close the overlay after scroll completes
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error("MenuOverlay onItemClick error:", err);
+      } finally {
+        // ensure the overlay actually closes after a small timeout so animation is visible
         setTimeout(() => {
           onClose();
-        }, 300);
-      } catch (error) {
-        console.error("Error during navigation:", error);
-        onClose();
+        }, 220);
       }
     });
   };
 
-  if (!open) return null;
+  if (!container || !open) return null;
 
   const closeIconSrc = "/assets/burgerMenu/burger2.png";
 
-  return (
+  return ReactDOM.createPortal(
     <div
       ref={overlayRef}
-      className="fixed inset-0 z-50 transition-opacity duration-300"
-      style={{
-        opacity: open ? 1 : 0,
-        pointerEvents: open ? "auto" : "none",
-      }}
+      className="fixed inset-0 z-[9999] flex items-center justify-center"
+      style={{ opacity: 1, pointerEvents: "auto" }}
       onClick={handleClose}
     >
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+      <div
+        className="absolute inset-0 bg-black/70 backdrop-blur-md"
+        aria-hidden="true"
+      />
 
-      {/* Centered menu content - prevent clicks inside from closing */}
+      {/* Centered dialog */}
       <div
         ref={dialogRef}
-        className="relative z-10 w-full h-full flex flex-col items-center justify-center"
+        role="dialog"
+        aria-modal="true"
+        aria-label={translations?.["menu.nav"] ?? "Main menu"}
+        className="relative z-10 w-full h-screen flex flex-col items-center justify-center px-6"
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Close control */}
         <button
           onClick={handleClose}
           aria-label={translations?.["menu.close"] ?? "Close menu"}
-          className="absolute top-4 right-4 p-3 rounded-full bg-black/40 text-white hover:bg-black/60 focus:outline-none transition-transform hover:scale-110 z-20"
+          className="absolute top-4 right-4 p-3 rounded-full bg-black/50 text-white hover:bg-black/60 focus:outline-none transition-transform hover:scale-110 z-20"
         >
           <Image
             src={closeIconSrc}
@@ -145,24 +231,32 @@ export default function MenuOverlay({
           />
         </button>
 
-        <nav className="w-full max-w-3xl px-4">
-          <ul className="flex flex-col items-center gap-6">
+        {/* Large centered menu */}
+        <nav className="w-full max-w-3xl">
+          <ul className="flex flex-col items-center gap-8">
             {items.map((it) => (
               <li key={it.id} className="w-full">
-                <button
-                  type="button"
-                  onClick={(e) => handleItemClick(e, it.id)}
-                  className="w-full text-center text-white text-3xl sm:text-4xl font-bold py-4 hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-white rounded-lg"
+                <a
+                  href={`/${lang}#${it.id}`}
+                  role="menuitem"
                   aria-label={getLabel(it.key, it.fallback)}
+                  onClick={(e) => handleItemClick(e as React.MouseEvent, it.id)}
+                  className="block w-full text-center text-white text-3xl sm:text-4xl md:text-5xl font-semibold py-4 px-6 hover:opacity-95 transition-opacity rounded-lg"
                 >
-                  <span className="block">{getLabel(it.key, it.fallback)}</span>
-                  <span className="block mx-auto mt-2 h-1 w-24 bg-white/60 rounded-full" />
-                </button>
+                  <span className="block leading-tight">
+                    {getLabel(it.key, it.fallback)}
+                  </span>
+                  <span
+                    className="block mx-auto mt-3 h-1 w-24 bg-white/60 rounded-full"
+                    aria-hidden
+                  />
+                </a>
               </li>
             ))}
           </ul>
         </nav>
       </div>
-    </div>
+    </div>,
+    container
   );
 }
