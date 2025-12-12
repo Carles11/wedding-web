@@ -75,11 +75,6 @@ export default function ProgramSectionComponent({
               {whereLabel}
             </div>
             <div className="text-lg font-light">{whereWedding}</div>
-            {whereBanquet && (
-              <div className="text-sm mt-1 text-neutral-500">
-                {whereBanquet}
-              </div>
-            )}
           </div>
 
           <div className="pt-6 md:pt-0 md:pl-8">
