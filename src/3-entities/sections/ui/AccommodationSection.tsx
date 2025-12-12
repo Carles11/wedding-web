@@ -166,7 +166,7 @@ export default function AccommodationSection({
                 aria-hidden
               />
               <div className="pl-3">
-                <h3 className="font-semibold text-lg text-neutral-800">
+                <h3 className="font-semibold text-2xl text-neutral-800">
                   {nameText}
                 </h3>
                 <address className="not-italic text-sm text-neutral-600 mt-1">
@@ -206,6 +206,7 @@ export default function AccommodationSection({
                   )}
                   {h.website && (
                     <div>
+                      <IconLink />
                       <UnderlinedLink
                         href={h.website}
                         external
@@ -216,7 +217,6 @@ export default function AccommodationSection({
                       >
                         {/* Inner wrapper keeps inline-flex for icon+text, but anchor remains inline-block */}
                         <span className="inline-flex items-center gap-2 max-w-[220px]">
-                          <IconLink />
                           {/* Truncate the text inside a block-level span with a constrained max-width */}
                           <span className="truncate block max-w-[250px]">
                             {h.website}

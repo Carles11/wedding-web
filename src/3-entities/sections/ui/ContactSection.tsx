@@ -2,6 +2,7 @@ import React from "react";
 import { getTextForLang } from "@/4-shared/lib/getTextForLang";
 import SectionContainer from "@/4-shared/ui/section/SectionContainer";
 import type { TranslationDictionary } from "@/4-shared/lib/i18n";
+import UnderlinedLink from "@/4-shared/ui/link/UnderlinedLink";
 
 interface ContactPerson {
   name: string;
@@ -48,6 +49,13 @@ export default function ContactSection({
 
   const people: ContactPerson[] = data?.content?.people ?? [];
 
+  // Reuse the site's underline appearance so all links look consistent
+  const underlineConfig = {
+    initialHeightClass: "max-h-[2px]",
+    expandedHeightClass: "group-hover:max-h-[10px] group-focus:max-h-[10px]",
+    durationMs: 300,
+  };
+
   return (
     <SectionContainer
       id="contact"
@@ -69,22 +77,28 @@ export default function ContactSection({
             <div className="text-sm text-neutral-600 mt-2 space-y-1">
               {p.email && (
                 <div>
-                  <a
+                  <UnderlinedLink
                     href={`mailto:${p.email}`}
-                    className="hover:underline text-neutral-700"
+                    className="text-neutral-700"
+                    ariaLabel={`Email ${p.name}`}
+                    thicknessClass="h-0.5"
+                    {...underlineConfig}
                   >
                     {p.email}
-                  </a>
+                  </UnderlinedLink>
                 </div>
               )}
               {p.phone && (
                 <div>
-                  <a
+                  <UnderlinedLink
                     href={`tel:${p.phone}`}
-                    className="hover:underline text-neutral-700"
+                    className="text-neutral-700"
+                    ariaLabel={`Call ${p.name}`}
+                    thicknessClass="h-0.5"
+                    {...underlineConfig}
                   >
                     {p.phone}
-                  </a>
+                  </UnderlinedLink>
                 </div>
               )}
             </div>

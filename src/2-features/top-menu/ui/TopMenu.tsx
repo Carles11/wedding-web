@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import Image from "next/image";
 import type { TranslationDictionary } from "@/4-shared/lib/i18n";
 
 type TopMenuProps = {
@@ -9,19 +10,13 @@ type TopMenuProps = {
   translations?: TranslationDictionary | null;
 };
 
-/**
- * TopMenu
- * - Client component for left-top menu, responsive (hamburger on mobile)
- * - Uses translations passed from server; falls back to English labels.
- * - Smooth scrolls to anchors with matching ids on the same page (/{lang}#anchor)
- */
 export default function TopMenu({ lang, translations }: TopMenuProps) {
   const [open, setOpen] = useState(false);
   const router = useRouter();
   const pathname = usePathname() ?? `/${lang}`;
+  const isScrollingRef = useRef(false);
 
-  // Menu items: id = anchor id used within the page
-  const items: { id: string; key: string; fallback: string }[] = [
+  const items = [
     { id: "details", key: "menu.details", fallback: "Details" },
     {
       id: "accommodation",
@@ -35,39 +30,84 @@ export default function TopMenu({ lang, translations }: TopMenuProps) {
   const getLabel = (k: string, fallback: string) =>
     translations?.[k] ?? fallback;
 
-  function updateUrlHash(id: string) {
-    if (typeof window !== "undefined") {
-      const newUrl = `${pathname.split("#")[0]}#${id}`;
-      history.replaceState(null, "", newUrl);
-    }
-  }
+  const openLabel = translations?.["menu.open"] ?? "Open menu";
+  const closeLabel = translations?.["menu.close"] ?? "Close menu";
 
-  async function handleClick(e: React.MouseEvent, id: string) {
-    e.preventDefault();
-    setOpen(false);
+  // Simple scroll function that works without overlay interference
+  const scrollToSection = (id: string) => {
+    if (isScrollingRef.current) return;
+    isScrollingRef.current = true;
 
-    // Try to scroll to the element if it exists on the page
     const anchor = document.getElementById(id);
-    if (anchor) {
-      anchor.scrollIntoView({ behavior: "smooth", block: "start" });
-      updateUrlHash(id);
+    if (!anchor) {
+      // If element not found, navigate to page with hash
+      router.push(`/${lang}#${id}`);
+      setOpen(false);
+      isScrollingRef.current = false;
       return;
     }
 
-    // Otherwise navigate to language-prefixed page with the hash
-    router.push(`/${lang}#${id}`);
-  }
+    // Close menu first
+    setOpen(false);
+
+    // Wait for menu to close (CSS transition) before scrolling
+    setTimeout(() => {
+      // Get exact position
+      const rect = anchor.getBoundingClientRect();
+      const scrollTop =
+        window.pageYOffset || document.documentElement.scrollTop;
+      const targetPosition = rect.top + scrollTop;
+
+      // Simple scroll without smooth behavior to ensure it works
+      window.scrollTo(0, targetPosition);
+
+      // Update URL hash
+      const newUrl = `${window.location.pathname}#${id}`;
+      window.history.replaceState({ ...window.history.state }, "", newUrl);
+
+      // Reset scrolling flag
+      setTimeout(() => {
+        isScrollingRef.current = false;
+      }, 100);
+    }, 50); // Small delay to ensure menu is closed
+  };
+
+  // Handle click for desktop and mobile
+  const handleClick = (e: React.MouseEvent, id: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    scrollToSection(id);
+  };
+
+  // Close menu on pathname change
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
+
+  // Close on Escape
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && open) {
+        setOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
+  }, [open]);
+
+  const burgerSrc = "/assets/burgerMenu/burger1.png";
+  const closeSrc = "/assets/burgerMenu/burger2.png";
 
   return (
     <nav aria-label="Main page sections" className="flex items-center">
-      {/* Desktop / md+ : horizontal links */}
+      {/* Desktop */}
       <ul className="hidden md:flex items-center gap-3">
         {items.map((it) => (
           <li key={it.id}>
             <a
               href={`/${lang}#${it.id}`}
               onClick={(e) => handleClick(e, it.id)}
-              className="text-white text-sm font-medium  hover:text-blue-400 transition"
+              className="text-white text-sm font-medium hover:text-blue-400 transition"
             >
               {getLabel(it.key, it.fallback)}
             </a>
@@ -75,49 +115,63 @@ export default function TopMenu({ lang, translations }: TopMenuProps) {
         ))}
       </ul>
 
-      {/* Mobile: hamburger */}
-      <div className="md:hidden relative">
+      {/* Mobile */}
+      <div className="md:hidden">
         <button
           aria-expanded={open}
-          aria-controls="topmenu-mobile"
-          onClick={() => setOpen((s) => !s)}
-          className="p-2 rounded-md inline-flex items-center justify-center text-white hover:bg-neutral-100"
-          title="Open menu"
+          onClick={() => setOpen(!open)}
+          className="p-2 text-white"
+          aria-label={open ? closeLabel : openLabel}
         >
-          {/* hamburger icon */}
-          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" aria-hidden>
-            <path
-              d="M4 6h16M4 12h16M4 18h16"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+          <Image
+            src={open ? closeSrc : burgerSrc}
+            alt=""
+            width={20}
+            height={20}
+            className="w-5 h-5"
+          />
         </button>
 
-        {open && (
+        {/* Mobile Menu - Simple fixed overlay */}
+        <div
+          className={`fixed inset-0 z-50 transition-all duration-300 ${
+            open ? "opacity-100 visible" : "opacity-0 invisible"
+          }`}
+          style={{
+            backgroundColor: "rgba(0, 0, 0, 0.9)",
+            backdropFilter: "blur(4px)",
+          }}
+          onClick={() => setOpen(false)}
+        >
           <div
-            id="topmenu-mobile"
-            role="menu"
-            className="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg ring-1 ring-black/5 z-50"
+            className="h-full flex flex-col items-center justify-center"
+            onClick={(e) => e.stopPropagation()}
           >
-            <ul className="flex flex-col py-2">
-              {items.map((it) => (
-                <li key={it.id}>
-                  <a
-                    role="menuitem"
-                    href={`/${lang}#${it.id}`}
-                    onClick={(e) => handleClick(e, it.id)}
-                    className="block px-4 py-2 text-sm text-neutral-800 hover:bg-neutral-50"
-                  >
-                    {getLabel(it.key, it.fallback)}
-                  </a>
-                </li>
-              ))}
-            </ul>
+            <button
+              onClick={() => setOpen(false)}
+              className="absolute top-4 right-4 p-2 text-white text-2xl"
+              aria-label={closeLabel}
+            >
+              <Image src={closeSrc} alt="" width={24} height={24} />
+            </button>
+
+            <nav className="w-full max-w-md px-4">
+              <ul className="space-y-6">
+                {items.map((it) => (
+                  <li key={it.id} className="text-center">
+                    <button
+                      onClick={() => scrollToSection(it.id)}
+                      className="text-white text-3xl font-bold py-3 w-full hover:opacity-80 transition-opacity"
+                    >
+                      {getLabel(it.key, it.fallback)}
+                      <div className="mx-auto mt-2 h-1 w-20 bg-white/50 rounded-full" />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </nav>
           </div>
-        )}
+        </div>
       </div>
     </nav>
   );

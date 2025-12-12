@@ -64,10 +64,7 @@ export default function DetailsSection({
     durationMs: 300,
   };
 
-  const locationLinkLabel =
-    translations?.["program.location_url_label"] ??
-    translations?.["location_url"] ??
-    "Localízalo";
+  const locationLinkLabel = translations?.["localize"] ?? "Localízalo";
 
   return (
     <SectionContainer
@@ -88,7 +85,7 @@ export default function DetailsSection({
             className="bg-neutral-50 rounded-lg p-4 md:p-6 border border-neutral-100 flex flex-col gap-4"
           >
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-neutral-800">
+              <h3 className="text-2xl font-semibold text-neutral-800">
                 {getTextForLang(
                   day.label as Record<string, string> | undefined,
                   lang,

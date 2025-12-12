@@ -95,7 +95,9 @@ export default function WhatElseSection({
 
           return (
             <article key={idx} className="p-4 border rounded-lg bg-neutral-50">
-              <h3 className="font-semibold text-neutral-800">{titleText}</h3>
+              <h3 className="font-semibold text-2xl text-neutral-800">
+                {titleText}
+              </h3>
 
               {descText && (
                 <p className="text-sm text-neutral-600 mt-2">{descText}</p>
