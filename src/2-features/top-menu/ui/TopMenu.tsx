@@ -39,7 +39,7 @@ export default function TopMenu({ lang, translations }: TopMenuProps) {
       const element = document.getElementById(id);
       if (element) {
         // Use instant scroll
-        element.scrollIntoView({ behavior: "auto" });
+        element.scrollIntoView({ behavior: "smooth" });
 
         // Update URL
         window.history.replaceState(
