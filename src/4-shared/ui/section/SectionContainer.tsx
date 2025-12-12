@@ -8,6 +8,7 @@ type SectionContainerProps = {
   subtitle?: React.ReactNode;
   variant?: "white" | "muted";
   withDivider?: boolean;
+  imageBackground?: boolean;
   // new: per-section divider customization
   dividerMotive?: string; // e.g. "flower1" | "flower2" | "sprig"
   dividerClassName?: string;
@@ -29,13 +30,14 @@ export default function SectionContainer({
   subtitle,
   variant = "white",
   withDivider = false,
+  imageBackground,
   dividerMotive,
   dividerClassName,
   dividerSize,
   dividerOpacity,
   children,
 }: SectionContainerProps) {
-  const bgClass = variant === "muted" ? "bg-neutral-50" : "bg-white";
+  const bgClass = variant === "muted" ? "bg-transparent" : "bg-white";
   const innerBg = variant === "muted" ? "bg-white" : "bg-white";
   const motive = dividerMotive ?? "flower1";
   const motifClass = dividerClassName ?? "w-36 h-auto";

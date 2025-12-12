@@ -7,7 +7,7 @@ export async function fetchContactSection(siteId: string) {
   if (!siteId) return null;
   const { data, error } = await supabaseAdmin
     .from("sections")
-    .select("id, site_id, type, title, subtitle, content")
+    .select("id, site_id, type, title, subtitle, content, background")
     .eq("site_id", siteId)
     .eq("type", "contact")
     .limit(1)
@@ -17,5 +17,6 @@ export async function fetchContactSection(siteId: string) {
     console.error("[fetchContactSection] supabase error:", error);
     return null;
   }
+  console.log("xxxxxxxxxxxxxxxxcontact section data:", data);
   return data ?? null;
 }
