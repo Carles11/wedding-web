@@ -17,6 +17,5 @@ export async function fetchContactSection(siteId: string) {
     console.error("[fetchContactSection] supabase error:", error);
     return null;
   }
-  console.log("xxxxxxxxxxxxxxxxcontact section data:", data);
   return data ?? null;
 }
