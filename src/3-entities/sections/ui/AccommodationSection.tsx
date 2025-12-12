@@ -14,6 +14,7 @@ type Hotel = {
 
 type AccommodationData = {
   title?: string | Record<string, string>;
+  subtitle?: string | Record<string, string>;
   content?: {
     headline?: string | Record<string, string>;
     hotels?: Hotel[];
@@ -118,6 +119,12 @@ export default function AccommodationSection({
     translations?.["menu.accommodation"] ||
     "Accommodation";
 
+  const subtitle = getTextForLang(
+    data?.subtitle as Record<string, string> | undefined,
+    lang,
+    ""
+  );
+
   const hotels: Hotel[] = data?.content?.hotels ?? [];
 
   // Reusable underline settings (consistent site-wide)
@@ -132,6 +139,7 @@ export default function AccommodationSection({
       id="accommodation"
       heading={headline}
       headingId="accommodation-heading"
+      subtitle={subtitle}
       variant="muted"
       withDivider
       dividerMotive="flower1"

@@ -5,6 +5,7 @@ type SectionContainerProps = {
   id?: string;
   heading?: React.ReactNode;
   headingId?: string;
+  subtitle?: React.ReactNode;
   variant?: "white" | "muted";
   withDivider?: boolean;
   // new: per-section divider customization
@@ -25,6 +26,7 @@ export default function SectionContainer({
   id,
   heading,
   headingId,
+  subtitle,
   variant = "white",
   withDivider = false,
   dividerMotive,
@@ -59,14 +61,17 @@ export default function SectionContainer({
         )}
 
         <div className="max-w-4xl mx-auto">
-          {heading && (
+          {(heading || subtitle) && (
             <header className="mb-6">
-              <h2
-                id={headingId}
-                className="text-2xl md:text-3xl font-extrabold leading-tight text-neutral-800"
-              >
-                {heading}
-              </h2>
+              {heading && (
+                <h2
+                  id={headingId}
+                  className="text-2xl md:text-3xl font-extrabold leading-tight text-neutral-800"
+                >
+                  {heading}
+                </h2>
+              )}
+              {subtitle && <p className="mt-2 text-neutral-600">{subtitle}</p>}
             </header>
           )}
 
