@@ -58,7 +58,7 @@ export default function ProgramSectionComponent({
 
         <div
           className="
-          grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x
+          grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x
           divide-neutral-200
           w-full text-center
         "
@@ -77,12 +77,12 @@ export default function ProgramSectionComponent({
             <div className="text-lg font-light">{whereWedding}</div>
           </div>
 
-          <div className="pt-6 md:pt-0 md:pl-8">
+          {/* <div className="pt-6 md:pt-0 md:pl-8">
             <div className="text-xs uppercase mb-2 tracking-wider text-neutral-600 font-bold">
               {dresscodeLabel}
             </div>
             <div className=" text-lg font-light">{wear}</div>
-          </div>
+          </div> */}
         </div>
       </div>
     </section>
