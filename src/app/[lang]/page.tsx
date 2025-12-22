@@ -94,7 +94,7 @@ export default async function HomePage(props: { params: { lang: string } }) {
         )}
       </div>
 
-      <main className="flex flex-col gap-16 md:gap-0">
+      <main className="flex flex-col gap-0">
         {/* Program */}
         {program && (
           <ProgramSectionComponent
