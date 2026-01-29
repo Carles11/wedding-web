@@ -3,24 +3,29 @@ import type { HeroSection } from "@/4-shared/types";
 
 // Fetch the hero section for a specific site (multi-tenant/SaaS)
 export async function fetchHeroSection(
-  siteId: string
+  siteId: string,
 ): Promise<HeroSection | null> {
+  if (!siteId) return null;
+
   const { data, error } = await supabase
     .from("sections")
     .select("*")
     .eq("site_id", siteId)
     .eq("type", "hero")
-    .single();
+    .maybeSingle();
 
   if (error || !data) return null;
 
-  // Parse hero.title if it's a string
-  if (typeof data.title === "string") {
+  // Parse hero.title if it's unexpectedly stored as a JSON string in the DB.
+  const maybeTitle = data as unknown as { title: unknown };
+  if (typeof maybeTitle.title === "string") {
     try {
-      data.title = JSON.parse(data.title);
+      const parsed = JSON.parse(maybeTitle.title) as Record<string, string>;
+      (data as HeroSection).title = parsed;
     } catch (e) {
-      data.title = { es: "", ca: "" };
+      (data as HeroSection).title = { es: "", ca: "" };
     }
   }
+
   return data as HeroSection;
 }

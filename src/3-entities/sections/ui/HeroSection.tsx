@@ -2,7 +2,7 @@ import type { HeroSection as HeroSectionType } from "@/4-shared/types";
 import Image from "next/image";
 import { getTextForLang } from "@/4-shared/lib/getTextForLang";
 import Heading from "@/4-shared/ui/typography/Heading";
-import type { TranslationDictionary } from "@/4-shared/lib/i18n";
+import type { TranslationDictionary } from "@/4-shared/types";
 
 type HeroSectionProps = {
   hero: HeroSectionType;
@@ -33,17 +33,17 @@ export default function HeroSection({
   const heroDate = getTextForLang(
     hero.content?.date as Record<string, string> | undefined,
     lang,
-    ""
+    "",
   );
   const heroLocation = getTextForLang(
     hero.content?.location as Record<string, string> | undefined,
     lang,
-    ""
+    "",
   );
   const heroDresscode = getTextForLang(
     hero.content?.dresscode as Record<string, string> | undefined,
     lang,
-    ""
+    "",
   );
 
   const whenLabel = translations?.["when"] ?? "When";

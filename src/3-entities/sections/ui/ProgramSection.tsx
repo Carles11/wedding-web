@@ -1,6 +1,6 @@
 import type { ProgramSection } from "@/4-shared/types";
 import { getTextForLang } from "@/4-shared/lib/getTextForLang";
-import type { TranslationDictionary } from "@/4-shared/lib/i18n";
+import type { TranslationDictionary } from "@/4-shared/types";
 
 type ProgramSectionProps = {
   program: ProgramSection;
@@ -18,7 +18,7 @@ export default function ProgramSectionComponent({
   const whereWedding = getTextForLang(
     program.content?.where?.wedding,
     lang,
-    "ca"
+    "ca",
   );
   // const whereBanquet = getTextForLang(
   //   program.content?.where?.banquet,

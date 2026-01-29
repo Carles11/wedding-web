@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { getTextForLang } from "@/4-shared/lib/getTextForLang";
 import SectionContainer from "@/4-shared/ui/section/SectionContainer";
-import type { TranslationDictionary } from "@/4-shared/lib/i18n";
+import type { TranslationDictionary } from "@/4-shared/types";
 import UnderlinedLink from "@/4-shared/ui/link/UnderlinedLink";
 
 interface ContactPerson {
@@ -52,12 +52,12 @@ export default function ContactSection({
     getTextForLang(
       data?.title as Record<string, string> | undefined,
       lang,
-      ""
+      "",
     ) ||
     getTextForLang(
       data?.content?.headline as Record<string, string> | undefined,
       lang,
-      ""
+      "",
     ) ||
     translations?.["menu.contact"] ||
     "Contact";
@@ -65,7 +65,7 @@ export default function ContactSection({
   const subtitle = getTextForLang(
     data?.subtitle as Record<string, string> | undefined,
     lang,
-    ""
+    "",
   );
 
   const people: ContactPerson[] = data?.content?.people ?? [];

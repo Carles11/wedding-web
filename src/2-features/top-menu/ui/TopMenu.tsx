@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import type { TranslationDictionary } from "@/4-shared/lib/i18n";
+import type { TranslationDictionary } from "@/4-shared/types";
 import MenuOverlay from "./MenuOverlay";
 
 type TopMenuProps = {
@@ -45,7 +45,7 @@ export default function TopMenu({ lang, translations }: TopMenuProps) {
         window.history.replaceState(
           null,
           "",
-          `${window.location.pathname}#${id}`
+          `${window.location.pathname}#${id}`,
         );
       }
     }, 10);

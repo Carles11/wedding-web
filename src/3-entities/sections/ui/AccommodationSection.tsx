@@ -1,7 +1,7 @@
 import React from "react";
 import { getTextForLang } from "@/4-shared/lib/getTextForLang";
 import SectionContainer from "@/4-shared/ui/section/SectionContainer";
-import type { TranslationDictionary } from "@/4-shared/lib/i18n";
+import type { TranslationDictionary } from "@/4-shared/types";
 import UnderlinedLink from "@/4-shared/ui/link/UnderlinedLink";
 
 type Hotel = {
@@ -109,12 +109,12 @@ export default function AccommodationSection({
     getTextForLang(
       data?.title as Record<string, string> | undefined,
       lang,
-      ""
+      "",
     ) ||
     getTextForLang(
       data?.content?.headline as Record<string, string> | undefined,
       lang,
-      ""
+      "",
     ) ||
     translations?.["menu.accommodation"] ||
     "Accommodation";
@@ -122,7 +122,7 @@ export default function AccommodationSection({
   const subtitle = getTextForLang(
     data?.subtitle as Record<string, string> | undefined,
     lang,
-    ""
+    "",
   );
 
   const hotels: Hotel[] = data?.content?.hotels ?? [];
@@ -152,12 +152,12 @@ export default function AccommodationSection({
           const nameText = getTextForLang(
             h.name as Record<string, string> | undefined,
             lang,
-            ""
+            "",
           );
           const addressText = getTextForLang(
             h.address as Record<string, string> | undefined,
             lang,
-            ""
+            "",
           );
 
           const phoneAria = `Call ${nameText || "hotel"}`;
