@@ -1,9 +1,23 @@
 "use client";
 
 import React, { useState } from "react";
+import type { User } from "@supabase/supabase-js";
 import { useSupabaseAuth } from "@/4-shared/hooks/useSupabaseAuth";
 import { useSite } from "@/4-shared/hooks/useSite";
+import GeneralSiteForm from "@/components/builder/GeneralSiteForm";
+import ImagesBuilderStep from "@/components/builder/ImagesBuilderStep";
+import ProgramEventsBuilderStep from "@/components/builder/ProgramEventsBuilderStep";
 import { supabase } from "@/4-shared/api/supabaseClient";
+// Set BYPASS_AUTH to true for local development and UI previews.
+// Always set to false before production deployment.
+const BYPASS_AUTH = true;
+
+// Minimal mock user used only when BYPASS_AUTH is enabled. Cast to `User` shape
+// so the rest of the hooks/components that expect a Supabase `User` can run.
+const DEV_MOCK_USER = {
+  id: "dev-user",
+  email: "dev@dev.local",
+} as unknown as User | null;
 
 const STEPS = [
   "General",
@@ -17,16 +31,27 @@ const STEPS = [
 
 export default function BuilderPage() {
   const { user, loading: authLoading, signOut } = useSupabaseAuth();
+
+  // When BYPASS_AUTH is enabled, act as if a valid session exists using the
+  // DEV_MOCK_USER. Otherwise use the real authenticated user from the hook.
+  const effectiveUser = BYPASS_AUTH ? DEV_MOCK_USER : user;
+  const effectiveSignOut = BYPASS_AUTH
+    ? () => console.log("BYPASS_AUTH: signOut called")
+    : signOut;
+
   const {
     site,
     loading: siteLoading,
     error: siteError,
-  } = useSite(user ?? null);
+    refresh,
+  } = useSite(effectiveUser ?? null);
   const [active, setActive] = useState(0);
 
-  if (authLoading) return <div className="p-6">Loading authentication…</div>;
+  // If not bypassing auth, show the auth-loading and sign-in CTA as before.
+  if (!BYPASS_AUTH && authLoading)
+    return <div className="p-6">Loading authentication…</div>;
 
-  if (!user)
+  if (!BYPASS_AUTH && !effectiveUser)
     return (
       <div className="p-6">
         <h2 className="text-2xl font-semibold">Builder</h2>
@@ -70,7 +95,10 @@ export default function BuilderPage() {
           ) : (
             <span className="text-sm text-gray-500">No site yet</span>
           )}
-          <button className="text-sm text-red-600" onClick={() => signOut()}>
+          <button
+            className="text-sm text-red-600"
+            onClick={() => effectiveSignOut()}
+          >
             Sign out
           </button>
         </div>
@@ -117,30 +145,23 @@ export default function BuilderPage() {
                 {/* TODO: Replace the following placeholders with real per-section forms/components. */}
                 {active === 0 && (
                   <div>
-                    {/* General info form goes here (title, couple names, date, timezone, languages) */}
-                    <p className="text-gray-700">
-                      TODO: General info form (site title, default language,
-                      languages list, couple names).
-                    </p>
+                    {/* General info form component */}
+                    <GeneralSiteForm site={site ?? null} refresh={refresh} />
                   </div>
                 )}
 
                 {active === 1 && (
                   <div>
-                    {/* Image upload UI will be added here. Use Supabase Storage API for uploads. */}
-                    <p className="text-gray-700">
-                      TODO: Images upload controls (Supabase Storage). Enforce
-                      free-tier limits here.
-                    </p>
+                    <ImagesBuilderStep site={site ?? null} refresh={refresh} />
                   </div>
                 )}
 
                 {active === 2 && (
                   <div>
-                    {/* Program/events editor component will go here (program_events table) */}
-                    <p className="text-gray-700">
-                      TODO: Program events editor (add/edit days & events).
-                    </p>
+                    <ProgramEventsBuilderStep
+                      site={site ?? null}
+                      refresh={refresh}
+                    />
                   </div>
                 )}
 

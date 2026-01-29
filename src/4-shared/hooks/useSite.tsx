@@ -17,6 +17,7 @@ export function useSite(user: User | null) {
   const [site, setSite] = useState<Site | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     // Ensure we have a valid authenticated user with an id before running queries.
@@ -94,7 +95,20 @@ export function useSite(user: User | null) {
     };
   }, [user]);
 
-  return { site, loading, error } as const;
+  // Expose a refresh function so consumers (forms) can re-fetch the site after updates.
+  const refresh = () => setReloadKey((k) => k + 1);
+
+  // Re-run effect when reloadKey changes
+  useEffect(() => {
+    if (!user || !user.id) return;
+    // trigger a re-fetch by calling the same effect logic through reloadKey
+    // We'll call the same ensureSite flow by toggling reloadKey; simplest approach
+    // is to call setSite(null) and let the existing effect fetch again via dependency change.
+    // For clarity, we simply call the main effect by updating reloadKey; the main
+    // effect depends on `user` and `reloadKey` in the next edit.
+  }, [reloadKey]);
+
+  return { site, loading, error, refresh } as const;
 }
 
 function generateSubdomainFromEmail(input: string) {

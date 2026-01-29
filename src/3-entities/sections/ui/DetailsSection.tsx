@@ -1,7 +1,7 @@
 import React from "react";
 import { getTextForLang } from "@/4-shared/lib/getTextForLang";
 import SectionContainer from "@/4-shared/ui/section/SectionContainer";
-import type { TranslationDictionary } from "@/4-shared/lib/i18n";
+import type { TranslationDictionary } from "@/4-shared/types";
 import UnderlinedLink from "@/4-shared/ui/link/UnderlinedLink";
 
 interface Event {
@@ -45,12 +45,12 @@ export default function DetailsSection({
     getTextForLang(
       data?.title as Record<string, string> | undefined,
       lang,
-      ""
+      "",
     ) ||
     getTextForLang(
       data?.content?.headline as Record<string, string> | undefined,
       lang,
-      ""
+      "",
     ) ||
     translations?.["menu.details"] ||
     "Details";
@@ -89,7 +89,7 @@ export default function DetailsSection({
                 {getTextForLang(
                   day.label as Record<string, string> | undefined,
                   lang,
-                  ""
+                  "",
                 )}
               </h3>
             </div>
@@ -100,12 +100,12 @@ export default function DetailsSection({
                   const evTitle = getTextForLang(
                     ev.title as Record<string, string> | undefined,
                     lang,
-                    ""
+                    "",
                   );
                   const evLocation = getTextForLang(
                     ev.location as Record<string, string> | undefined,
                     lang,
-                    ""
+                    "",
                   );
 
                   // aria label for the link: include the localized place when possible

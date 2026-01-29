@@ -1,7 +1,7 @@
 import React from "react";
 import { getTextForLang } from "@/4-shared/lib/getTextForLang";
 import SectionContainer from "@/4-shared/ui/section/SectionContainer";
-import type { TranslationDictionary } from "@/4-shared/lib/i18n";
+import type { TranslationDictionary } from "@/4-shared/types";
 import UnderlinedLink from "@/4-shared/ui/link/UnderlinedLink";
 
 interface WhatElseItem {
@@ -30,7 +30,7 @@ type WhatElseSectionProps = {
 
 function getLearnMoreLabel(
   lang: string,
-  translations?: TranslationDictionary | null
+  translations?: TranslationDictionary | null,
 ) {
   const dbLabel = translations?.["common.learn_more"];
   if (dbLabel) return dbLabel;
@@ -48,7 +48,7 @@ function getLearnMoreLabel(
 function getLearnMoreAria(
   lang: string,
   titleText: string,
-  translations?: TranslationDictionary | null
+  translations?: TranslationDictionary | null,
 ) {
   const dbAria = translations?.["common.learn_more_aria"];
   if (dbAria)
