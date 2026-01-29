@@ -43,7 +43,7 @@ export function useSite(user: User | null) {
         const { data, error: fetchErr } = await supabase
           .from("sites")
           .select("id, subdomain, default_lang, languages, domains")
-          .eq("owner", user.id)
+          .eq("owner_user_id", user.id)
           .limit(1)
           .maybeSingle();
 
@@ -57,11 +57,16 @@ export function useSite(user: User | null) {
           const defaultSubdomain = generateSubdomainFromEmail(
             user?.email || user?.id || "guest",
           );
+          const defaultTitle =
+            user?.email && user.email.includes("@")
+              ? `${user.email.split("@")[0]}'s Wedding`
+              : "Wedding Site";
           const { data: created, error: createErr } = await supabase
             .from("sites")
             .insert([
               {
-                owner: user?.id,
+                owner_user_id: user?.id,
+                title: defaultTitle,
                 subdomain: defaultSubdomain,
                 default_lang: "en",
                 languages: ["en"],
@@ -75,13 +80,28 @@ export function useSite(user: User | null) {
           if (mounted && created) setSite(created as Site);
         }
       } catch (err: unknown) {
-        console.error("[useSite] error ensuring site:", err);
-        if (mounted) {
-          if (err instanceof Error) {
-            setError(err.message);
-          } else {
-            setError(String(err));
+        if (err instanceof Error) {
+          console.error(
+            "[useSite] error ensuring site:",
+            err.message,
+            err.stack,
+          );
+          if (mounted) setError(err.message);
+        } else if (typeof err === "object" && err !== null) {
+          try {
+            const json = JSON.stringify(err);
+            console.error("[useSite] error ensuring site (object):", json);
+            if (mounted) setError(json);
+          } catch (jsonErr) {
+            console.error(
+              "[useSite] error ensuring site (object, stringify failed):",
+              err,
+            );
+            if (mounted) setError(String(err));
           }
+        } else {
+          console.error("[useSite] error ensuring site (raw):", err);
+          if (mounted) setError(String(err));
         }
       } finally {
         if (mounted) setLoading(false);

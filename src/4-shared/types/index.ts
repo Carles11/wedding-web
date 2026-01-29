@@ -7,3 +7,4 @@ export * from "./images";
 export * from "./programEvents";
 export * from "./accommodation";
 export * from "./whatToSee";
+export * from "./contact";

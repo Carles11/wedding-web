@@ -10,6 +10,7 @@ import GeneralSiteForm from "@/components/builder/GeneralSiteForm";
 import ImagesBuilderStep from "@/components/builder/ImagesBuilderStep";
 import ProgramEventsBuilderStep from "@/components/builder/ProgramEventsBuilderStep";
 import AccommodationBuilderStep from "@/components/builder/AccommodationBuilderStep";
+import ContactBuilderStep from "@/components/builder/ContactBuilderStep";
 import { supabase } from "@/4-shared/api/supabaseClient";
 // Set BYPASS_AUTH to true for local development and UI previews.
 // Always set to false before production deployment.
@@ -18,7 +19,8 @@ const BYPASS_AUTH = true;
 // Minimal mock user used only when BYPASS_AUTH is enabled. Cast to `User` shape
 // so the rest of the hooks/components that expect a Supabase `User` can run.
 const DEV_MOCK_USER = {
-  id: "dev-user",
+  // Use a valid UUID for dev/preview users so DB uuid columns accept it.
+  id: "00000000-0000-0000-0000-000000000001",
   email: "dev@dev.local",
 } as unknown as User | null;
 
@@ -194,11 +196,7 @@ export default function BuilderPage() {
                 )}
                 {active === 5 && (
                   <div>
-                    {/* Contact section editor */}
-                    <p className="text-gray-700">
-                      TODO: Contact form settings (emails, phone, auto-reply
-                      message).
-                    </p>
+                    <ContactBuilderStep site={site ?? null} refresh={refresh} />
                   </div>
                 )}
 

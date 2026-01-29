@@ -4,11 +4,15 @@
  */
 export type Site = {
   id: string;
-  owner?: string | null;
+  // The actual owner column in the DB is `owner_user_id` (uuid)
+  owner_user_id?: string | null;
+  // Site title (database has `title text not null`)
+  title: string;
   subdomain?: string | null;
   default_lang?: string | null;
   languages?: string[] | null;
   domains?: string[] | null;
+  created_at?: string | null;
   // Add other fields present in the `sites` table as needed.
 };
 

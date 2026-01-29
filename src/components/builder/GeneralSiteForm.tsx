@@ -128,7 +128,9 @@ export default function GeneralSiteForm({ site, refresh }: Props) {
         .from("sites")
         .update(payload)
         .eq("id", site.id)
-        .select("id, owner, subdomain, default_lang, languages, domains, title")
+        .select(
+          "id, owner_user_id, subdomain, default_lang, languages, domains, title",
+        )
         .maybeSingle();
 
       if (updateErr) throw updateErr;
