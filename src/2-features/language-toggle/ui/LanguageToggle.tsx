@@ -1,11 +1,5 @@
 import Link from "next/link";
-
-export type LanguageToggleProps = {
-  activeLang: string;
-  availableLangs: string[]; // e.g. ['es', 'ca']
-  basePath?: string; // e.g. "", "/program", etc - defaults to ""
-  className?: string;
-};
+import { LanguageToggleProps } from "@/4-shared/types";
 
 export function LanguageToggle({
   activeLang,

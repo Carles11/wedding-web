@@ -3,23 +3,7 @@
 import React, { useEffect, useRef, useMemo } from "react";
 import ReactDOM from "react-dom";
 import Image from "next/image";
-import type { TranslationDictionary } from "@/4-shared/lib/i18n";
-
-type MenuItem = { id: string; key: string; fallback: string };
-
-type MenuOverlayProps = {
-  open: boolean;
-  onClose: () => void;
-  items: MenuItem[];
-  lang: string;
-  translations?: TranslationDictionary | null;
-  // Reuse the TopMenu.handleClick signature (it may close the menu itself).
-  onItemClick: (
-    e: React.MouseEvent,
-    id: string,
-    isMobileOverlay?: boolean
-  ) => Promise<void> | void;
-};
+import { MenuOverlayProps } from "@/4-shared/types";
 
 /**
  * Full-screen menu overlay (portal)
@@ -106,7 +90,7 @@ export default function MenuOverlay({
         const dialog = dialogRef.current;
         if (!dialog) return;
         const focusable = dialog.querySelectorAll<HTMLElement>(
-          'a,button,input,textarea,select,[tabindex]:not([tabindex="-1"])'
+          'a,button,input,textarea,select,[tabindex]:not([tabindex="-1"])',
         );
         if (focusable.length === 0) return;
 
@@ -129,7 +113,7 @@ export default function MenuOverlay({
       const dialog = dialogRef.current;
       if (!dialog) return;
       const focusable = dialog.querySelectorAll<HTMLElement>(
-        'a,button,input,textarea,select,[tabindex]:not([tabindex="-1"])'
+        'a,button,input,textarea,select,[tabindex]:not([tabindex="-1"])',
       );
       if (focusable.length > 0) {
         focusable[0].focus();
@@ -257,6 +241,6 @@ export default function MenuOverlay({
         </nav>
       </div>
     </div>,
-    container
+    container,
   );
 }
