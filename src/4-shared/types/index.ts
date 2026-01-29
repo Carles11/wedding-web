@@ -5,3 +5,5 @@ export * from "./translations";
 export * from "./sites";
 export * from "./images";
 export * from "./programEvents";
+export * from "./accommodation";
+export * from "./whatToSee";

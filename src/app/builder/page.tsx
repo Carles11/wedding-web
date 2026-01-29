@@ -1,12 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
+import WhatToSeeBuilderStep from "@/components/builder/WhatToSeeBuilderStep";
+
+import { useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { useSupabaseAuth } from "@/4-shared/hooks/useSupabaseAuth";
 import { useSite } from "@/4-shared/hooks/useSite";
 import GeneralSiteForm from "@/components/builder/GeneralSiteForm";
 import ImagesBuilderStep from "@/components/builder/ImagesBuilderStep";
 import ProgramEventsBuilderStep from "@/components/builder/ProgramEventsBuilderStep";
+import AccommodationBuilderStep from "@/components/builder/AccommodationBuilderStep";
 import { supabase } from "@/4-shared/api/supabaseClient";
 // Set BYPASS_AUTH to true for local development and UI previews.
 // Always set to false before production deployment.
@@ -167,24 +170,28 @@ export default function BuilderPage() {
 
                 {active === 3 && (
                   <div>
-                    {/* Accommodation items (hotels) editor */}
-                    <p className="text-gray-700">
-                      TODO: Accommodation editor (hotels list). Free-tier limits
-                      apply.
-                    </p>
+                    <AccommodationBuilderStep
+                      site={site ?? null}
+                      refresh={refresh}
+                    />
                   </div>
                 )}
 
                 {active === 4 && (
-                  <div>
-                    {/* What to see/do section editor */}
-                    <p className="text-gray-700">
-                      TODO: What to see/DO editor (places, descriptions,
-                      images).
-                    </p>
-                  </div>
+                  <>
+                    <div>
+                      {/* What to see/do section editor */}
+                      <p className="text-gray-700">
+                        TODO: What to see/DO editor (places, descriptions,
+                        images).
+                      </p>
+                    </div>
+                    <WhatToSeeBuilderStep
+                      site={site ?? null}
+                      refresh={refresh}
+                    />
+                  </>
                 )}
-
                 {active === 5 && (
                   <div>
                     {/* Contact section editor */}
