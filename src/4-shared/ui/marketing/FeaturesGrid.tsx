@@ -26,6 +26,8 @@ export interface FeaturesGridProps {
   freeFeatures: Feature[];
   /** Features included in the premium tier */
   premiumFeatures: Feature[];
+  /** Label for the premium badge (e.g., "Popular") */
+  popularBadgeLabel?: string;
 }
 
 /**
@@ -39,6 +41,7 @@ export default function FeaturesGrid({
   premiumTierName,
   freeFeatures,
   premiumFeatures,
+  popularBadgeLabel = "Popular",
 }: FeaturesGridProps) {
   return (
     <section
@@ -85,7 +88,7 @@ export default function FeaturesGrid({
           {/* Premium Tier Card */}
           <article className="flex flex-col h-full p-6 bg-white border-2 border-[#6ABDA6] shadow-lg rounded-lg relative">
             <div className="absolute -top-3 right-3 bg-[#6ABDA6] text-white px-3 py-1 rounded-full text-sm font-semibold">
-              Popular
+              {popularBadgeLabel}
             </div>
             <header className="mb-4">
               <h3 className="text-lg md:text-xl font-semibold uppercase">

@@ -52,70 +52,53 @@ export default function MarketingPageWrapper({
           freeFeatures={[
             {
               icon: "🌐",
-              title: translations["marketing.features.free.subdomain_title"],
-              description:
-                translations["marketing.features.free.subdomain_desc"],
+              title: translations["marketing.features.free_plan_feature_1"],
+              description: translations["marketing.features.free_plan_feature_1"],
             },
             {
               icon: "🗣️",
-              title: translations["marketing.features.free.one_language_title"],
-              description:
-                translations["marketing.features.free.one_language_desc"],
+              title: translations["marketing.features.free_plan_feature_2"],
+              description: translations["marketing.features.free_plan_feature_2"],
             },
             {
               icon: "🏨",
-              title:
-                translations[
-                  "marketing.features.free.two_accommodations_title"
-                ],
-              description:
-                translations["marketing.features.free.two_accommodations_desc"],
+              title: translations["marketing.features.free_plan_feature_3"],
+              description: translations["marketing.features.free_plan_feature_3"],
             },
             {
               icon: "🎭",
-              title: translations["marketing.features.free.two_events_title"],
-              description:
-                translations["marketing.features.free.two_events_desc"],
+              title: translations["marketing.features.free_plan_feature_4"],
+              description: translations["marketing.features.free_plan_feature_4"],
             },
           ]}
           premiumFeatures={[
             {
               icon: "🔗",
-              title:
-                translations["marketing.features.premium.custom_domain_title"],
-              description:
-                translations["marketing.features.premium.custom_domain_desc"],
+              title: translations["marketing.features.premium_plan_feature_1"],
+              description: translations["marketing.features.premium_plan_feature_1"],
             },
             {
               icon: "🌍",
-              title:
-                translations[
-                  "marketing.features.premium.unlimited_languages_title"
-                ],
-              description:
-                translations[
-                  "marketing.features.premium.unlimited_languages_desc"
-                ],
+              title: translations["marketing.features.premium_plan_feature_2"],
+              description: translations["marketing.features.premium_plan_feature_2"],
             },
             {
               icon: "♾️",
-              title:
-                translations[
-                  "marketing.features.premium.unlimited_content_title"
-                ],
-              description:
-                translations[
-                  "marketing.features.premium.unlimited_content_desc"
-                ],
+              title: translations["marketing.features.premium_plan_feature_3"],
+              description: translations["marketing.features.premium_plan_feature_3"],
             },
             {
               icon: "🎁",
-              title:
-                translations["marketing.features.premium.gift_registry_title"],
-              description:
-                translations["marketing.features.premium.gift_registry_desc"],
+              title: translations["marketing.features.premium_plan_feature_4"],
+              description: translations["marketing.features.premium_plan_feature_4"],
+            },
+            {
+              icon: "🎁",
+              title: translations["marketing.features.premium_plan_feature_5"],
+              description: translations["marketing.features.premium_plan_feature_5"],
             },
           ]}
+          popularBadgeLabel={translations["marketing.features.popular_badge"]}
         />
 
         <TestimonialsSection

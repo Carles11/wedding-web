@@ -11,6 +11,8 @@ import { getSiteIdForDomain } from "@/4-shared/lib/getSiteIdForDomain";
 import { getSiteDefaultLang } from "@/4-shared/lib/getSiteDefaultLang";
 import { fetchMarketingTranslations } from "@/4-shared/lib/marketingTranslations";
 import MarketingPageWrapper from "@/app/_components/MarketingPageWrapper";
+import { getSEOMetadata } from "@/4-shared/config/seo";
+import type { Metadata } from "next";
 
 // Only show marketing landing on the SaaS home domains:
 const MARKETING_DOMAINS = ["weddweb.com", "www.weddweb.com"];
@@ -20,6 +22,7 @@ const SUPPORTED_LANGUAGES = [
   "zh",
   "hi",
   "es",
+  "ca",
   "ar",
   "fr",
   "de",
@@ -30,6 +33,56 @@ const SUPPORTED_LANGUAGES = [
 
 function isValidLanguage(lang: string | undefined): lang is string {
   return !!lang && SUPPORTED_LANGUAGES.includes(lang);
+}
+
+/**
+ * Generate page metadata using structured SEO config per-locale.
+ */
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ lang?: string }>;
+}): Promise<Metadata> {
+  const params = await searchParams;
+  const requested = params?.lang;
+  const lang = isValidLanguage(requested) ? requested : "en";
+
+  const seo = getSEOMetadata(lang, "marketing");
+
+  const images = seo.ogImage ? [{ url: seo.ogImage }] : [];
+
+  const languages =
+    seo.alternateLanguages?.reduce(
+      (acc, alt) => {
+        acc[alt.locale] = alt.url;
+        return acc;
+      },
+      {} as Record<string, string>,
+    ) ?? {};
+
+  return {
+    title: seo.title,
+    description: seo.description,
+    keywords: seo.keywords,
+    openGraph: {
+      title: seo.ogTitle ?? seo.title,
+      description: seo.ogDescription ?? seo.description,
+      images,
+      locale: seo.locale,
+      type: "website",
+      siteName: "WeddWeb",
+    },
+    twitter: {
+      card: seo.twitterCard ?? "summary_large_image",
+      title: seo.ogTitle ?? seo.title,
+      description: seo.ogDescription ?? seo.description,
+      images: seo.ogImage ? [seo.ogImage] : [],
+    },
+    alternates: {
+      canonical: seo.canonicalUrl,
+      languages,
+    },
+  } as Metadata;
 }
 
 export default async function HomePage({
