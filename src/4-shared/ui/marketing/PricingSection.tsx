@@ -1,34 +1,36 @@
 "use client";
-import React from "react";
 
 /**
  * Props for PricingSection
+ *
+ * @prop sectionTitle - Title for the pricing section
+ * @prop freePlanName - Display name for the free plan
+ * @prop freePlanPrice - Price string for the free plan
+ * @prop freePlanCTA - CTA text for the free plan button
+ * @prop freePlanFeatures - Feature list for the free plan (array of 4 strings)
+ * @prop premiumPlanName - Display name for the premium plan
+ * @prop premiumPlanPrice - Price string for the premium plan
+ * @prop premiumPlanCTA - CTA text for the premium plan button
+ * @prop premiumPlanFeatures - Feature list for the premium plan (array of 5 strings)
+ * @prop onFreePlanClick - Optional callback when free plan CTA is clicked
+ * @prop onPremiumPlanClick - Optional callback when premium plan CTA is clicked
  */
 export interface PricingSectionProps {
   sectionTitle: string;
   freePlanName: string;
   freePlanPrice: string;
+  /** CTA for free plan button */
+  freePlanCTA?: string;
+  /** Feature texts for free plan */
+  freePlanFeatures?: string[];
   premiumPlanName: string;
   premiumPlanPrice: string;
   premiumPlanCTA: string;
+  /** Feature texts for premium plan */
+  premiumPlanFeatures?: string[];
   onFreePlanClick?: () => void;
   onPremiumPlanClick?: () => void;
 }
-
-const freeFeatures = [
-  "Free subdomain (yourname.weddweb.com)",
-  "1 language",
-  "2 accommodation tips",
-  "2 activity suggestions",
-];
-
-const premiumFeatures = [
-  "Custom domain",
-  "Unlimited languages",
-  "Unlimited content",
-  "Gift registry (coming soon)",
-  "Priority support (future)",
-];
 
 /**
  * PricingSection component
@@ -40,10 +42,32 @@ export default function PricingSection({
   premiumPlanName,
   premiumPlanPrice,
   premiumPlanCTA,
+  freePlanCTA,
+  freePlanFeatures,
+  premiumPlanFeatures,
   onFreePlanClick,
   onPremiumPlanClick,
 }: PricingSectionProps) {
   const premiumComingSoon = premiumPlanPrice.toLowerCase().includes("coming");
+
+  const defaultFreeFeatures = [
+    "Free subdomain (yourname.weddweb.com)",
+    "1 language",
+    "2 accommodation tips",
+    "2 activity suggestions",
+  ];
+
+  const defaultPremiumFeatures = [
+    "Custom domain",
+    "Unlimited languages",
+    "Unlimited content",
+    "Gift registry (coming soon)",
+    "Priority support (future)",
+  ];
+
+  const freeFeaturesList = freePlanFeatures ?? defaultFreeFeatures;
+  const premiumFeaturesList = premiumPlanFeatures ?? defaultPremiumFeatures;
+  const freeCTA = freePlanCTA ?? "Get Started Free";
 
   return (
     <section aria-labelledby="pricing-heading" className="py-12 bg-gray-50">
@@ -70,7 +94,7 @@ export default function PricingSection({
               <div className="text-sm text-gray-600 mt-2">forever</div>
 
               <ul className="mt-6 space-y-3 text-sm text-gray-700">
-                {freeFeatures.map((f) => (
+                {freeFeaturesList.map((f) => (
                   <li key={f} className="flex items-start">
                     <span className="text-[#6ABDA6] mr-3 mt-0.5">✔</span>
                     <span>{f}</span>
@@ -83,10 +107,10 @@ export default function PricingSection({
               <button
                 type="button"
                 onClick={onFreePlanClick}
-                aria-label={`${freePlanName} - Get started free`}
+                aria-label={`${freePlanName} - ${freeCTA}`}
                 className="w-full inline-flex justify-center items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-800 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#6ABDA6]"
               >
-                Get Started Free
+                {freeCTA}
               </button>
             </div>
           </div>
@@ -118,7 +142,7 @@ export default function PricingSection({
               </div>
 
               <ul className="mt-6 space-y-3 text-sm text-gray-700">
-                {premiumFeatures.map((f) => (
+                {premiumFeaturesList.map((f) => (
                   <li key={f} className="flex items-start">
                     <span className="text-[#6ABDA6] mr-3 mt-0.5">✔</span>
                     <span>{f}</span>

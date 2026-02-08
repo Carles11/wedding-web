@@ -144,11 +144,25 @@ export default function MarketingPageWrapper({
           sectionTitle={translations["marketing.pricing.section_title"]}
           freePlanName={translations["marketing.pricing.free_plan_name"]}
           freePlanPrice={translations["marketing.pricing.free_plan_price"]}
+          freePlanCTA={translations["marketing.pricing.free_plan_cta"]}
+          freePlanFeatures={[
+            translations["marketing.pricing.free.feature_1"],
+            translations["marketing.pricing.free.feature_2"],
+            translations["marketing.pricing.free.feature_3"],
+            translations["marketing.pricing.free.feature_4"],
+          ]}
           premiumPlanName={translations["marketing.pricing.premium_plan_name"]}
           premiumPlanPrice={
             translations["marketing.pricing.premium_plan_price"]
           }
           premiumPlanCTA={translations["marketing.pricing.premium_plan_cta"]}
+          premiumPlanFeatures={[
+            translations["marketing.pricing.premium.feature_1"],
+            translations["marketing.pricing.premium.feature_2"],
+            translations["marketing.pricing.premium.feature_3"],
+            translations["marketing.pricing.premium.feature_4"],
+            translations["marketing.pricing.premium.feature_5"],
+          ]}
         />
 
         <CTASection
