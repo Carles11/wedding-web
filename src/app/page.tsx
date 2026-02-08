@@ -35,19 +35,18 @@ function isValidLanguage(lang: string | undefined): lang is string {
 export default async function HomePage({
   searchParams,
 }: {
-  searchParams: { lang?: string };
+  searchParams: Promise<{ lang?: string }>; // ← Changed to Promise
 }) {
+  // Await searchParams (Next.js 15+ requirement)
+  const params = await searchParams;
+
   // Host header, always lowercase, trimmed for robust matching.
   const host = ((await headers()).get("host") ?? "").toLowerCase().trim();
-  // if (host === "localhost" || host.startsWith("localhost:")) {
-  //   // Don't match any tenant site, show the main marketing page instead
-  //   return <MarketingLanding />;
-  // }
+
   // Marketing domains = always show platform landing.
   if (MARKETING_DOMAINS.includes(host)) {
-    const requested = searchParams?.lang;
+    const requested = params?.lang;
     const lang = isValidLanguage(requested) ? requested : "en";
-
     const translations = await fetchMarketingTranslations(lang, "en");
 
     return (
@@ -64,7 +63,12 @@ export default async function HomePage({
     redirect(`/${defaultLang}`);
   }
 
-  // Fallback: Unknown, not in Supabase "domains" array.
+  // Fallback: Unknown domain, show marketing page with default language
+  const requested = params?.lang;
+  const lang = isValidLanguage(requested) ? requested : "en";
+  const translations = await fetchMarketingTranslations(lang, "en");
 
-  return <MarketingLanding />;
+  return (
+    <MarketingPageWrapper initialLang={lang} translations={translations} />
+  );
 }
