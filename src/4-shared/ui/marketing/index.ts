@@ -6,3 +6,5 @@ export { default as TestimonialsSection } from "./TestimonialsSection";
 export type { ExampleSite } from "./TestimonialsSection";
 export { default as PricingSection } from "./PricingSection";
 export type { PricingSectionProps } from "./PricingSection";
+export { default as CTASection } from "./CTASection";
+export type { CTASectionProps } from "./CTASection";
