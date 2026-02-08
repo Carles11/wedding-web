@@ -9,12 +9,34 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getSiteIdForDomain } from "@/4-shared/lib/getSiteIdForDomain";
 import { getSiteDefaultLang } from "@/4-shared/lib/getSiteDefaultLang";
-import { MarketingLanding } from "@/4-shared/ui/marketingLanding/MarketingLanding";
+import { fetchMarketingTranslations } from "@/4-shared/lib/marketingTranslations";
+import MarketingPageWrapper from "@/app/_components/MarketingPageWrapper";
 
 // Only show marketing landing on the SaaS home domains:
 const MARKETING_DOMAINS = ["weddweb.com", "www.weddweb.com"];
 
-export default async function Page() {
+const SUPPORTED_LANGUAGES = [
+  "en",
+  "zh",
+  "hi",
+  "es",
+  "ar",
+  "fr",
+  "de",
+  "pt",
+  "ru",
+  "it",
+];
+
+function isValidLanguage(lang: string | undefined): lang is string {
+  return !!lang && SUPPORTED_LANGUAGES.includes(lang);
+}
+
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: { lang?: string };
+}) {
   // Host header, always lowercase, trimmed for robust matching.
   const host = ((await headers()).get("host") ?? "").toLowerCase().trim();
   // if (host === "localhost" || host.startsWith("localhost:")) {
@@ -23,7 +45,14 @@ export default async function Page() {
   // }
   // Marketing domains = always show platform landing.
   if (MARKETING_DOMAINS.includes(host)) {
-    return <MarketingLanding />;
+    const requested = searchParams?.lang;
+    const lang = isValidLanguage(requested) ? requested : "en";
+
+    const translations = await fetchMarketingTranslations(lang, "en");
+
+    return (
+      <MarketingPageWrapper initialLang={lang} translations={translations} />
+    );
   }
 
   // Try SSR tenant lookup by host for user event/custom domains.
