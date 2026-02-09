@@ -53,49 +53,58 @@ export default function MarketingPageWrapper({
             {
               icon: "🌐",
               title: translations["marketing.features.free_plan_feature_1"],
-              description: translations["marketing.features.free_plan_feature_1"],
+              description:
+                translations["marketing.features.free_plan_feature_1"],
             },
             {
               icon: "🗣️",
               title: translations["marketing.features.free_plan_feature_2"],
-              description: translations["marketing.features.free_plan_feature_2"],
+              description:
+                translations["marketing.features.free_plan_feature_2"],
             },
             {
               icon: "🏨",
               title: translations["marketing.features.free_plan_feature_3"],
-              description: translations["marketing.features.free_plan_feature_3"],
+              description:
+                translations["marketing.features.free_plan_feature_3"],
             },
             {
               icon: "🎭",
               title: translations["marketing.features.free_plan_feature_4"],
-              description: translations["marketing.features.free_plan_feature_4"],
+              description:
+                translations["marketing.features.free_plan_feature_4"],
             },
           ]}
           premiumFeatures={[
             {
               icon: "🔗",
               title: translations["marketing.features.premium_plan_feature_1"],
-              description: translations["marketing.features.premium_plan_feature_1"],
+              description:
+                translations["marketing.features.premium_plan_feature_1"],
             },
             {
               icon: "🌍",
               title: translations["marketing.features.premium_plan_feature_2"],
-              description: translations["marketing.features.premium_plan_feature_2"],
+              description:
+                translations["marketing.features.premium_plan_feature_2"],
             },
             {
               icon: "♾️",
               title: translations["marketing.features.premium_plan_feature_3"],
-              description: translations["marketing.features.premium_plan_feature_3"],
+              description:
+                translations["marketing.features.premium_plan_feature_3"],
             },
             {
               icon: "🎁",
               title: translations["marketing.features.premium_plan_feature_4"],
-              description: translations["marketing.features.premium_plan_feature_4"],
+              description:
+                translations["marketing.features.premium_plan_feature_4"],
             },
             {
               icon: "🎁",
               title: translations["marketing.features.premium_plan_feature_5"],
-              description: translations["marketing.features.premium_plan_feature_5"],
+              description:
+                translations["marketing.features.premium_plan_feature_5"],
             },
           ]}
           popularBadgeLabel={translations["marketing.features.popular_badge"]}
@@ -117,7 +126,7 @@ export default function MarketingPageWrapper({
             },
             {
               siteName: "Carles & Ines",
-              siteUrl: "https://www.carlesundines.weddweb.com",
+              siteUrl: "https://carlesundines.weddweb.com",
               isPremium: false,
             },
           ]}
