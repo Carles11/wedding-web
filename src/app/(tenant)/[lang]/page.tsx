@@ -1,3 +1,6 @@
+import { JsonLd } from "@/4-shared/ui/seo/JsonLd";
+import { generateEventSchema } from "@/4-shared/lib/seo/generateEventSchema";
+
 import { headers } from "next/headers";
 import type { Metadata } from "next";
 import { getSiteByDomain } from "@/4-shared/lib/getSiteByDomain";
@@ -99,12 +102,10 @@ export default async function HomePage(props: {
   const realParams = await props.params;
   const lang = realParams.lang ?? "ca";
 
-  // Resolve host and site
   const host = ((await headers()).get("host") ?? "").toLowerCase().trim();
   const site = await getSiteByDomain(host);
   const siteId = site?.id ?? null;
 
-  // available languages for this specific site
   const availableLangs =
     Array.isArray(site?.languages) && site.languages.length > 0
       ? site.languages
@@ -112,7 +113,6 @@ export default async function HomePage(props: {
         ? [site.default_lang]
         : ["en"];
 
-  // fetch translations early for localized fallback content
   const translations = await getMergedTranslations(siteId, lang, "en");
 
   if (!siteId) {
@@ -130,7 +130,6 @@ export default async function HomePage(props: {
     );
   }
 
-  // SSR fetch hero/program and the new sections in parallel, scoped by site
   const [hero, program, details, accommodation, whatelse, contact] =
     await Promise.all([
       fetchHeroSection(siteId),
@@ -141,8 +140,15 @@ export default async function HomePage(props: {
       fetchContactSection(siteId),
     ]);
 
+  // Generate structured data for SEO
+  const baseUrl = `https://${host}/${lang}`;
+  const eventSchema = generateEventSchema({ hero, program, lang, baseUrl });
+
   return (
     <>
+      {/* JSON-LD Structured Data */}
+      <JsonLd data={eventSchema} />
+
       <div className="relative">
         {/* Top-left: menu */}
         <div className="absolute top-3 left-3 z-50 pointer-events-auto">
