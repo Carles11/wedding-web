@@ -2,6 +2,8 @@ import "./globals.css";
 import { Footer } from "@/4-shared/ui/footer/Footer";
 import { Roboto, Niconne } from "next/font/google";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Analytics } from "@vercel/analytics/next";
+
 const roboto = Roboto({
   weight: ["400"],
   subsets: ["latin"],
@@ -41,6 +43,7 @@ export default function RootLayout({
           />
         )}
         <SpeedInsights />
+        <Analytics />
       </body>
     </html>
   );
