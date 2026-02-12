@@ -74,7 +74,7 @@ export default function PricingSection({
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2
           id="pricing-heading"
-          className="text-3xl md:text-4xl font-bold text-center mb-12"
+          className="text-3xl md:text-4xl font-bold text-center mb-12 p-4"
         >
           {sectionTitle}
         </h2>

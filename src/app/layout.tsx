@@ -23,7 +23,7 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const payingCustomer = false; // TODO: replace with real check in future
+  const payingCustomer = true; // TODO: replace with real check in future
 
   return (
     // NOTE: lang should be set dynamically per-page/tenant for multilingual sites.
@@ -37,11 +37,11 @@ export default function RootLayout({
         {/* TODO (future): Replace hardcoded Footer props with tenant/site metadata fetched via site_id */}
         {payingCustomer && (
           <Footer
-            siteName="weddweb.com"
-            author="Carles"
+            siteName="Weddweb.com"
+            author="Carles del Río Francés"
             repoUrl="https://www.rio-frances.com"
           />
-        )}
+        )}{" "}
         <SpeedInsights />
         <Analytics />
       </body>

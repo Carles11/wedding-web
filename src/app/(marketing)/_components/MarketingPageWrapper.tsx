@@ -43,6 +43,10 @@ export default function MarketingPageWrapper({
           subheadline={translations["marketing.hero.subheadline"]}
           ctaPrimary={translations["marketing.hero.cta_primary"]}
           ctaSecondary={translations["marketing.hero.cta_secondary"]}
+          onPrimaryClick={() => {}}
+          onSecondaryClick={() =>
+            window.open("https://www.inesundcarles.dog", "_blank")
+          }
         />
 
         <FeaturesGrid
