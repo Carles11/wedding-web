@@ -1,21 +1,9 @@
-export const dynamic = "force-dynamic";
-
-/**
- * Root SSR page for weddweb.com platform.
- * Detects marketing vs. tenant domains and SSR redirects accordingly.
- */
-
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
-import { getSiteIdForDomain } from "@/4-shared/lib/getSiteIdForDomain";
-import { getSiteDefaultLang } from "@/4-shared/lib/getSiteDefaultLang";
 import { fetchMarketingTranslations } from "@/4-shared/api/marketing";
 import MarketingPageWrapper from "@/app/(marketing)/_components/MarketingPageWrapper";
 import { getSEOMetadata } from "@/4-shared/config/seo";
 import type { Metadata } from "next";
 
-// Only show marketing landing on the SaaS home domains:
-const MARKETING_DOMAINS = ["weddweb.com", "www.weddweb.com"];
+export const dynamic = "force-dynamic";
 
 const SUPPORTED_LANGUAGES = [
   "en",
@@ -35,9 +23,6 @@ function isValidLanguage(lang: string | undefined): lang is string {
   return !!lang && SUPPORTED_LANGUAGES.includes(lang);
 }
 
-/**
- * Generate page metadata using structured SEO config per-locale.
- */
 export async function generateMetadata({
   searchParams,
 }: {
@@ -46,11 +31,9 @@ export async function generateMetadata({
   const params = await searchParams;
   const requested = params?.lang;
   const lang = isValidLanguage(requested) ? requested : "en";
-
   const seo = getSEOMetadata(lang, "marketing");
 
   const images = seo.ogImage ? [{ url: seo.ogImage }] : [];
-
   const languages =
     seo.alternateLanguages?.reduce(
       (acc, alt) => {
@@ -85,37 +68,16 @@ export async function generateMetadata({
   } as Metadata;
 }
 
-export default async function HomePage({
+/**
+ * Marketing landing page - only shows marketing content.
+ * Routing logic is handled by root page.tsx.
+ */
+export default async function MarketingPage({
   searchParams,
 }: {
-  searchParams: Promise<{ lang?: string }>; // ← Changed to Promise
+  searchParams: Promise<{ lang?: string }>;
 }) {
-  // Await searchParams (Next.js 15+ requirement)
   const params = await searchParams;
-
-  // Host header, always lowercase, trimmed for robust matching.
-  const host = ((await headers()).get("host") ?? "").toLowerCase().trim();
-
-  // Marketing domains = always show platform landing.
-  if (MARKETING_DOMAINS.includes(host) || host === "localhost:3000") {
-    const requested = params?.lang;
-    const lang = isValidLanguage(requested) ? requested : "en";
-    const translations = await fetchMarketingTranslations(lang, "en");
-
-    return (
-      <MarketingPageWrapper initialLang={lang} translations={translations} />
-    );
-  }
-
-  // Try SSR tenant lookup by host for user event/custom domains.
-  const siteId = await getSiteIdForDomain(host);
-  if (siteId) {
-    // SSR: redirect "/" → /[default_lang] (e.g. /ca) for event domain
-    const defaultLang = await getSiteDefaultLang(siteId);
-    redirect(`/${defaultLang}`);
-  }
-
-  // Fallback: Unknown domain, show marketing page with default language
   const requested = params?.lang;
   const lang = isValidLanguage(requested) ? requested : "en";
   const translations = await fetchMarketingTranslations(lang, "en");

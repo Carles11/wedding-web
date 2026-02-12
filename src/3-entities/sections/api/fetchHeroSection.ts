@@ -14,6 +14,9 @@ export async function fetchHeroSection(
     .eq("type", "hero")
     .maybeSingle();
 
+  console.log("🔍 [fetchHeroSection] Raw data:", JSON.stringify(data, null, 2));
+  console.log("🔍 [fetchHeroSection] Error:", error);
+
   if (error || !data) return null;
 
   // Parse hero.title if it's unexpectedly stored as a JSON string in the DB.

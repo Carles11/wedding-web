@@ -1,4 +1,5 @@
 import { headers } from "next/headers";
+import type { Metadata } from "next";
 import { getSiteByDomain } from "@/4-shared/lib/getSiteByDomain";
 import { fetchHeroSection } from "@/3-entities/sections/api/fetchHeroSection";
 import { fetchProgramSection } from "@/3-entities/sections/api/fetchProgramSection";
@@ -19,11 +20,83 @@ import { LanguageToggle } from "@/2-features/language-toggle/ui/LanguageToggle";
 import TopMenu from "@/2-features/top-menu/ui/TopMenu";
 
 import { getMergedTranslations } from "@/4-shared/lib/i18n";
+import { getTextForLang } from "@/4-shared/lib/getTextForLang";
 
 export const dynamic = "force-dynamic";
 
-export default async function HomePage(props: { params: { lang: string } }) {
-  const realParams = "then" in props.params ? await props.params : props.params;
+/**
+ * Generate SEO metadata for tenant wedding sites
+ * - Dynamic title/description per site and language
+ * - Open Graph tags for social sharing
+ * - hreflang alternates for multilingual SEO
+ */
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}): Promise<Metadata> {
+  const { lang } = await params;
+  const host = ((await headers()).get("host") ?? "").toLowerCase().trim();
+  const site = await getSiteByDomain(host);
+
+  if (!site) {
+    return {
+      title: "Wedding Event Not Found",
+      description: "This wedding website is not available.",
+    };
+  }
+
+  // Fetch hero for title/description
+  const hero = await fetchHeroSection(site.id);
+
+  const siteTitle = getTextForLang(hero?.title, lang, "ca") || "Wedding";
+  const siteDescription =
+    getTextForLang(hero?.content?.description, lang, "ca") || "";
+  const baseUrl = `https://${host}`;
+
+  // Get available languages from site
+  const availableLangs =
+    Array.isArray(site.languages) && site.languages.length > 0
+      ? site.languages
+      : [site.default_lang || "ca"];
+
+  // Build hreflang alternates
+  const languages: Record<string, string> = {};
+  availableLangs.forEach((l) => {
+    languages[l] = `${baseUrl}/${l}`;
+  });
+
+  return {
+    title: siteTitle,
+    description: siteDescription,
+    openGraph: {
+      title: siteTitle,
+      description: siteDescription,
+      type: "website",
+      locale: lang === "ca" ? "ca_ES" : lang === "es" ? "es_ES" : "en_US",
+      url: `${baseUrl}/${lang}`,
+      siteName: siteTitle,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: siteTitle,
+      description: siteDescription,
+    },
+    alternates: {
+      canonical: `${baseUrl}/${lang}`,
+      languages,
+    },
+    robots: {
+      index: true,
+      follow: true,
+    },
+  };
+}
+
+export default async function HomePage(props: {
+  params: Promise<{ lang: string }>;
+}) {
+  const realParams = await props.params;
   const lang = realParams.lang ?? "ca";
 
   // Resolve host and site
@@ -36,8 +109,8 @@ export default async function HomePage(props: { params: { lang: string } }) {
     Array.isArray(site?.languages) && site.languages.length > 0
       ? site.languages
       : site?.default_lang
-      ? [site.default_lang]
-      : ["en"];
+        ? [site.default_lang]
+        : ["en"];
 
   // fetch translations early for localized fallback content
   const translations = await getMergedTranslations(siteId, lang, "en");
