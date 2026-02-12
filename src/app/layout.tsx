@@ -23,25 +23,22 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const payingCustomer = true; // TODO: replace with real check in future
+  const payingCustomer = true;
 
   return (
-    // NOTE: lang should be set dynamically per-page/tenant for multilingual sites.
-    // Use app router locales or a tenant loader later. Avoid hardcoded lang for multi-tenant SaaS.
     <html
       lang="en"
       className={`${roboto.className} ${roboto.variable} ${niconne.variable}`}
     >
       <body>
         {children}
-        {/* TODO (future): Replace hardcoded Footer props with tenant/site metadata fetched via site_id */}
         {payingCustomer && (
           <Footer
             siteName="Weddweb.com"
             author="Carles del Río Francés"
             repoUrl="https://www.rio-frances.com"
           />
-        )}{" "}
+        )}
         <SpeedInsights />
         <Analytics />
       </body>
