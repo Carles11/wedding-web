@@ -1,16 +1,16 @@
 "use client";
 
-import WhatToSeeBuilderStep from "@/components/builder/WhatToSeeBuilderStep";
+import WhatToSeeBuilderStep from "@/3-widgets/builder/ui/WhatToSeeBuilderStep";
 
 import { useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { useSupabaseAuth } from "@/4-shared/hooks/useSupabaseAuth";
 import { useSite } from "@/4-shared/hooks/useSite";
-import GeneralSiteForm from "@/components/builder/GeneralSiteForm";
-import ImagesBuilderStep from "@/components/builder/ImagesBuilderStep";
-import ProgramEventsBuilderStep from "@/components/builder/ProgramEventsBuilderStep";
-import AccommodationBuilderStep from "@/components/builder/AccommodationBuilderStep";
-import ContactBuilderStep from "@/components/builder/ContactBuilderStep";
+import GeneralSiteForm from "@/3-widgets/builder/ui/GeneralSiteForm";
+import ImagesBuilderStep from "@/3-widgets/builder/ui/ImagesBuilderStep";
+import ProgramEventsBuilderStep from "@/3-widgets/builder/ui/ProgramEventsBuilderStep";
+import AccommodationBuilderStep from "@/3-widgets/builder/ui/AccommodationBuilderStep";
+import ContactBuilderStep from "@/3-widgets/builder/ui/ContactBuilderStep";
 import { supabase } from "@/4-shared/api/supabaseClient";
 // Set BYPASS_AUTH to true for local development and UI previews.
 // Always set to false before production deployment.
@@ -234,3 +234,4 @@ export default function BuilderPage() {
     </div>
   );
 }
+

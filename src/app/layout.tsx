@@ -1,7 +1,7 @@
 import "./globals.css";
 import { Footer } from "@/4-shared/ui/footer/Footer";
 import { Roboto, Niconne } from "next/font/google";
-
+import { SpeedInsights } from "@vercel/speed-insights/next";
 const roboto = Roboto({
   weight: ["400"],
   subsets: ["latin"],
@@ -40,6 +40,7 @@ export default function RootLayout({
             repoUrl="https://www.rio-frances.com"
           />
         )}
+        <SpeedInsights />
       </body>
     </html>
   );

@@ -1,5 +1,6 @@
 import { supabaseAdmin } from "@/4-shared/lib/supabaseServer";
 import type { TranslationDictionary } from "@/4-shared/types";
+import { fetchGlobalTranslations } from "@/4-shared/lib/globalTranslations";
 
 const MARKETING_CACHE_TTL_MS = 1000 * 60 * 5; // 5 minutes
 
@@ -59,8 +60,20 @@ export async function fetchMarketingTranslations(
   const existing = cache.get(cacheKey);
   if (existing && existing.expiresAt > now) return existing.value;
 
-  const localesToQuery =
-    fallback && fallback !== locale ? [locale, fallback] : [locale];
+  // Build a set of locale candidates to query. Some DB rows may store
+  // either full locales (e.g. "es-ES") or short locales (e.g. "es").
+  // Include both the exact locale and its base (part before '-') for
+  // both primary and fallback locales to increase matching coverage.
+  const candidates = new Set<string>();
+  const addLocale = (l?: string) => {
+    if (!l) return;
+    candidates.add(l);
+    const base = l.split("-")[0];
+    if (base) candidates.add(base);
+  };
+  addLocale(locale);
+  if (fallback && fallback !== locale) addLocale(fallback);
+  const localesToQuery = Array.from(candidates);
 
   try {
     const { data, error } = await supabaseAdmin
@@ -100,10 +113,24 @@ export async function fetchMarketingTranslations(
       result[k] = map[k].preferred ?? map[k].fallback ?? "";
     });
 
+    // Fall back to global translations for any keys missing in the
+    // marketing-specific table. This helps when some locales were only
+    // populated in the global translations table (observed for several
+    // marketing strings in non-`ca` locales).
+    try {
+      const global = await fetchGlobalTranslations(locale, fallback);
+      Object.keys(global).forEach((k) => {
+        if (!result[k] || result[k] === "") result[k] = global[k];
+      });
+    } catch (e) {
+      // Ignore fallback errors and proceed with `result` as-is.
+    }
+
     cache.set(cacheKey, {
       value: result,
       expiresAt: now + MARKETING_CACHE_TTL_MS,
     });
+
     return result;
   } catch (err) {
     console.error(

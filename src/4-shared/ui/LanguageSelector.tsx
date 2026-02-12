@@ -41,15 +41,6 @@ export default function LanguageSelector({
 
   return (
     <div className="inline-flex items-center gap-3">
-      {label && (
-        <label
-          htmlFor="marketing-lang-select"
-          className="text-sm font-medium text-gray-700"
-        >
-          {label}
-        </label>
-      )}
-
       <div className="relative inline-block">
         <select
           id="marketing-lang-select"

@@ -82,14 +82,14 @@ export default function ContactBuilderStep({ site, refresh }: Props) {
     // Validate that at least one partner has name+valid email.
     const bride =
       (form?.bride as
-        | { name?: string | null; email?: string | null }
+        | { name?: string | null; email?: string | null; phone?: string | null }
         | undefined) ?? {};
     const groom =
       (form?.groom as
-        | { name?: string | null; email?: string | null }
+        | { name?: string | null; email?: string | null; phone?: string | null }
         | undefined) ?? {};
 
-    function validContact(pt: { name?: string | null; email?: string | null }) {
+    function validContact(pt: { name?: string | null; email?: string | null; phone?: string | null }) {
       if (!pt?.name && !pt?.email) return false;
       if (!pt?.name || !pt?.email) return false;
       if (!EMAIL_RE.test(pt.email)) return false;
@@ -321,3 +321,4 @@ export default function ContactBuilderStep({ site, refresh }: Props) {
     </div>
   );
 }
+

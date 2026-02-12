@@ -38,7 +38,7 @@ export default function HeroMarketing({
       className="w-full min-h-[80vh] flex items-center"
       aria-label="Marketing hero"
     >
-      <div className="w-full bg-gradient-to-br from-[#E6FAF4] via-white to-[#FFF5EB] py-20">
+      <div className="w-full bg-gradient-to-br from-[#E6FAF4] via-white to-[#FFF5EB] py-20 h-[-webkit-fill-available]">
         <div className="mx-auto max-w-4xl px-6 text-center">
           <h1 className="text-4xl md:text-6xl font-extrabold text-gray-900 leading-tight">
             {headline}

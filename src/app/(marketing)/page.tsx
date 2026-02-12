@@ -9,8 +9,8 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getSiteIdForDomain } from "@/4-shared/lib/getSiteIdForDomain";
 import { getSiteDefaultLang } from "@/4-shared/lib/getSiteDefaultLang";
-import { fetchMarketingTranslations } from "@/4-shared/lib/marketingTranslations";
-import MarketingPageWrapper from "@/app/_components/MarketingPageWrapper";
+import { fetchMarketingTranslations } from "@/4-shared/api/marketing";
+import MarketingPageWrapper from "@/app/(marketing)/_components/MarketingPageWrapper";
 import { getSEOMetadata } from "@/4-shared/config/seo";
 import type { Metadata } from "next";
 
@@ -97,7 +97,7 @@ export default async function HomePage({
   const host = ((await headers()).get("host") ?? "").toLowerCase().trim();
 
   // Marketing domains = always show platform landing.
-  if (MARKETING_DOMAINS.includes(host)) {
+  if (MARKETING_DOMAINS.includes(host) || host === "localhost:3000") {
     const requested = params?.lang;
     const lang = isValidLanguage(requested) ? requested : "en";
     const translations = await fetchMarketingTranslations(lang, "en");
@@ -109,7 +109,6 @@ export default async function HomePage({
 
   // Try SSR tenant lookup by host for user event/custom domains.
   const siteId = await getSiteIdForDomain(host);
-
   if (siteId) {
     // SSR: redirect "/" → /[default_lang] (e.g. /ca) for event domain
     const defaultLang = await getSiteDefaultLang(siteId);

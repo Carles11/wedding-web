@@ -7,6 +7,7 @@ import React from "react";
 export type ExampleSite = {
   siteName: string;
   siteUrl: string;
+  siteDescription: string;
   previewImage?: string;
   isPremium: boolean;
 };
@@ -74,7 +75,7 @@ export default function TestimonialsSection({
                       {site.siteName}
                     </h3>
                     <p className="mt-2 text-sm text-gray-600">
-                      A beautiful wedding site built with WeddWeb
+                      {site.siteDescription}
                     </p>
                   </div>
 

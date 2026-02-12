@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import LanguageSelector from "@/4-shared/ui/LanguageSelector";
 import HeroMarketing, {
@@ -7,7 +7,7 @@ import HeroMarketing, {
   TestimonialsSection,
   PricingSection,
   CTASection,
-} from "@/4-shared/ui/marketing";
+} from "@/3-widgets/marketing/ui";
 
 interface Props {
   initialLang?: string;
@@ -29,7 +29,7 @@ export default function MarketingPageWrapper({
 
   return (
     <>
-      <div className="fixed top-4 right-4 z-50">
+      <div className="fixed top-4 right-4 z-50 bg-white/80 shadow-lg rounded-lg">
         <LanguageSelector
           currentLang={currentLang}
           label={translations["marketing.lang_selector.label"]}
@@ -122,11 +122,15 @@ export default function MarketingPageWrapper({
             {
               siteName: "Ines & Carles",
               siteUrl: "https://inesundcarles.dog",
+              siteDescription:
+                translations?.["marketing.testimonials.example_description"],
               isPremium: true,
             },
             {
               siteName: "Carles & Ines",
               siteUrl: "https://carlesundines.weddweb.com",
+              siteDescription:
+                translations?.["marketing.testimonials.example_description"],
               isPremium: false,
             },
           ]}
