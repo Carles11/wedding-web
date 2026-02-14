@@ -36,8 +36,8 @@ export default async function HomePage(props: { params: { lang: string } }) {
     Array.isArray(site?.languages) && site.languages.length > 0
       ? site.languages
       : site?.default_lang
-      ? [site.default_lang]
-      : ["en"];
+        ? [site.default_lang]
+        : ["en"];
 
   // fetch translations early for localized fallback content
   const translations = await getMergedTranslations(siteId, lang, "en");
@@ -90,7 +90,9 @@ export default async function HomePage(props: { params: { lang: string } }) {
 
         {/* Hero */}
         {hero && (
-          <HeroSection hero={hero} lang={lang} translations={translations} />
+          <>
+            <HeroSection hero={hero} lang={lang} translations={translations} />
+          </>
         )}
       </div>
 
