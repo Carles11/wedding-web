@@ -4,6 +4,7 @@
  */
 export type Site = {
   id: string;
+  title: string;
   owner?: string | null;
   subdomain?: string | null;
   default_lang?: string | null;
