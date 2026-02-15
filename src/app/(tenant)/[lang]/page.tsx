@@ -10,6 +10,7 @@ import { fetchDetailsSection } from "@/3-entities/sections/api/fetchDetailsSecti
 import { fetchAccommodationSection } from "@/3-entities/sections/api/fetchAccommodationSection";
 import { fetchWhatElseSection } from "@/3-entities/sections/api/fetchWhatElseSection";
 import { fetchContactSection } from "@/3-entities/sections/api/fetchContactSection";
+import { fetchBankDataSection } from "@/3-entities/sections/api/fetchBankDataSection";
 
 import HeroSection from "@/3-entities/sections/ui/HeroSection";
 import ProgramSectionComponent from "@/3-entities/sections/ui/ProgramSection";
@@ -17,6 +18,7 @@ import DetailsSection from "@/3-entities/sections/ui/DetailsSection";
 import AccommodationSection from "@/3-entities/sections/ui/AccommodationSection";
 import WhatElseSection from "@/3-entities/sections/ui/WhatElseSection";
 import ContactSection from "@/3-entities/sections/ui/ContactSection";
+import BankDataSection from "@/3-entities/sections/ui/BankDataSection";
 
 import Heading from "@/4-shared/ui/typography/Heading";
 import { LanguageToggle } from "@/2-features/language-toggle/ui/LanguageToggle";
@@ -130,13 +132,15 @@ export default async function HomePage(props: {
     );
   }
 
-  const [hero, program, details, accommodation, whatelse, contact] =
+  // SSR fetch hero/program and the new sections in parallel, scoped by site
+  const [hero, program, details, accommodation, whatelse, bankData, contact] =
     await Promise.all([
       fetchHeroSection(siteId),
       fetchProgramSection(siteId),
       fetchDetailsSection(siteId),
       fetchAccommodationSection(siteId),
       fetchWhatElseSection(siteId),
+      fetchBankDataSection(siteId),
       fetchContactSection(siteId),
     ]);
 
@@ -169,7 +173,9 @@ export default async function HomePage(props: {
 
         {/* Hero */}
         {hero && (
-          <HeroSection hero={hero} lang={lang} translations={translations} />
+          <>
+            <HeroSection hero={hero} lang={lang} translations={translations} />
+          </>
         )}
       </div>
 
@@ -203,6 +209,15 @@ export default async function HomePage(props: {
           lang={lang}
           translations={translations}
         />
+
+        {/* Bank Data */}
+        {bankData && (
+          <BankDataSection
+            data={bankData}
+            lang={lang}
+            translations={translations}
+          />
+        )}
 
         {/* Contact */}
         <ContactSection

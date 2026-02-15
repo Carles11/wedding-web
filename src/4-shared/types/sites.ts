@@ -4,10 +4,8 @@
  */
 export type Site = {
   id: string;
-  // The actual owner column in the DB is `owner_user_id` (uuid)
-  owner_user_id?: string | null;
-  // Site title (database has `title text not null`)
   title: string;
+  owner?: string | null;
   subdomain?: string | null;
   default_lang?: string | null;
   languages?: string[] | null;

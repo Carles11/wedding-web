@@ -74,7 +74,9 @@ export default function ProgramSectionComponent({
             <div className="text-xs uppercase mb-2 tracking-wider text-neutral-600 font-bold">
               {whereLabel}
             </div>
-            <div className="text-lg font-light">{whereWedding}</div>
+            <div className="text-lg font-light whitespace-pre-line">
+              {whereWedding}
+            </div>
           </div>
 
           {/* <div className="pt-6 md:pt-0 md:pl-8">
