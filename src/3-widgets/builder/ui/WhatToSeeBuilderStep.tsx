@@ -78,7 +78,10 @@ export default function WhatToSeeBuilderStep({ site, refresh }: Props) {
     });
   }
 
-  function updateField(field: keyof WhatToSeeEntry, value: any) {
+  function updateField(
+    field: keyof WhatToSeeEntry,
+    value: WhatToSeeEntry[keyof WhatToSeeEntry],
+  ) {
     setForm((s) => ({ ...(s ?? {}), [field]: value }));
   }
 
@@ -223,7 +226,11 @@ export default function WhatToSeeBuilderStep({ site, refresh }: Props) {
                       Name {lang === defaultLang ? "(required)" : ""}
                     </label>
                     <input
-                      value={(form.name as any)?.[lang] ?? ""}
+                      value={
+                        (form.name as Record<string, string> | undefined)?.[
+                          lang
+                        ] ?? ""
+                      }
                       onChange={(e) => updateI18n("name", lang, e.target.value)}
                       className="mt-1 w-full"
                     />
@@ -233,7 +240,11 @@ export default function WhatToSeeBuilderStep({ site, refresh }: Props) {
                       Description (optional)
                     </label>
                     <textarea
-                      value={(form.description as any)?.[lang] ?? ""}
+                      value={
+                        (
+                          form.description as Record<string, string> | undefined
+                        )?.[lang] ?? ""
+                      }
                       onChange={(e) =>
                         updateI18n("description", lang, e.target.value)
                       }
@@ -245,7 +256,11 @@ export default function WhatToSeeBuilderStep({ site, refresh }: Props) {
                       Notes (optional)
                     </label>
                     <textarea
-                      value={(form.notes as any)?.[lang] ?? ""}
+                      value={
+                        (form.notes as Record<string, string> | undefined)?.[
+                          lang
+                        ] ?? ""
+                      }
                       onChange={(e) =>
                         updateI18n("notes", lang, e.target.value)
                       }

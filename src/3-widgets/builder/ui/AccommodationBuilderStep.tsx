@@ -78,7 +78,10 @@ export default function AccommodationBuilderStep({ site, refresh }: Props) {
     });
   }
 
-  function updateField(field: keyof AccommodationEntry, value: any) {
+  function updateField(
+    field: keyof AccommodationEntry,
+    value: string | Record<string, string> | undefined,
+  ) {
     setForm((s) => ({ ...(s ?? {}), [field]: value }));
   }
 
@@ -228,7 +231,11 @@ export default function AccommodationBuilderStep({ site, refresh }: Props) {
                       Name {lang === defaultLang ? "(required)" : ""}
                     </label>
                     <input
-                      value={(form.name as any)?.[lang] ?? ""}
+                      value={
+                        (form.name as Record<string, string> | undefined)?.[
+                          lang
+                        ] ?? ""
+                      }
                       onChange={(e) =>
                         updateI18nField("name", lang, e.target.value)
                       }
@@ -240,7 +247,11 @@ export default function AccommodationBuilderStep({ site, refresh }: Props) {
                       Address (optional)
                     </label>
                     <input
-                      value={(form.address as any)?.[lang] ?? ""}
+                      value={
+                        (form.address as Record<string, string> | undefined)?.[
+                          lang
+                        ] ?? ""
+                      }
                       onChange={(e) =>
                         updateI18nField("address", lang, e.target.value)
                       }
@@ -252,7 +263,11 @@ export default function AccommodationBuilderStep({ site, refresh }: Props) {
                       Notes (optional)
                     </label>
                     <textarea
-                      value={(form.notes as any)?.[lang] ?? ""}
+                      value={
+                        (form.notes as Record<string, string> | undefined)?.[
+                          lang
+                        ] ?? ""
+                      }
                       onChange={(e) =>
                         updateI18nField("notes", lang, e.target.value)
                       }

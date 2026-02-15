@@ -7,7 +7,7 @@ import type { AccommodationSection } from "@/4-shared/types";
  */
 export async function upsertAccommodationSection(
   siteId: string,
-  content: any,
+  content: AccommodationSection["content"],
 ): Promise<AccommodationSection | null> {
   if (!siteId) return null;
 
@@ -18,7 +18,7 @@ export async function upsertAccommodationSection(
     .eq("site_id", siteId)
     .eq("type", "accommodation")
     .limit(1)
-    .maybeSingle();
+    .maybeSingle<{ id: string }>();
 
   if (fetchErr) {
     console.error("[upsertAccommodationSection] fetch error:", fetchErr);
@@ -26,11 +26,11 @@ export async function upsertAccommodationSection(
   }
 
   try {
-    if (existing && (existing as any).id) {
+    if (existing && existing.id) {
       const { data, error } = await supabase
         .from("sections")
         .update({ content })
-        .eq("id", (existing as any).id)
+        .eq("id", existing.id)
         .select("id, site_id, type, title, subtitle, content, created_at")
         .maybeSingle();
       if (error) {

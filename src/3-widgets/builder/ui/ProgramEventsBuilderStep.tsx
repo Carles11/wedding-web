@@ -13,11 +13,13 @@ type Props = { site: Site | null; refresh: () => void };
 
 const FREE_EVENT_LIMIT = 2;
 
-const DAY_TAGS: { key: ProgramEvent["day_tag"]; label: string }[] = [
-  ["day_before", "Day Before"] as any,
-  ["wedding_day", "Wedding Day"] as any,
-  ["day_after", "Day After"] as any,
-].map(([k, l]) => ({ key: k as any, label: l }));
+const DAY_TAGS: { key: ProgramEvent["day_tag"]; label: string }[] = (
+  [
+    ["day_before", "Day Before"],
+    ["wedding_day", "Wedding Day"],
+    ["day_after", "Day After"],
+  ] as [ProgramEvent["day_tag"], string][]
+).map(([k, l]) => ({ key: k, label: l }));
 
 export default function ProgramEventsBuilderStep({ site, refresh }: Props) {
   const [events, setEvents] = useState<ProgramEvent[]>([]);
@@ -134,7 +136,10 @@ export default function ProgramEventsBuilderStep({ site, refresh }: Props) {
         });
         if (!updated) throw new Error("Update failed");
       } else {
-        const payload: any = { ...(form as ProgramEvent), site_id: site.id };
+        const payload: Partial<ProgramEvent> & { site_id: string } = {
+          ...(form as ProgramEvent),
+          site_id: site.id,
+        };
         const created = await createProgramEvent(payload);
         if (!created) throw new Error("Create failed");
       }
@@ -268,12 +273,15 @@ export default function ProgramEventsBuilderStep({ site, refresh }: Props) {
               <select
                 value={form.day_tag ?? "wedding_day"}
                 onChange={(e) =>
-                  updateFormField("day_tag", e.target.value as any)
+                  updateFormField(
+                    "day_tag",
+                    e.target.value as ProgramEvent["day_tag"],
+                  )
                 }
                 className="mt-1 w-full"
               >
                 {DAY_TAGS.map((d) => (
-                  <option key={d.key as string} value={d.key as any}>
+                  <option key={d.key as string} value={d.key ?? ""}>
                     {d.label}
                   </option>
                 ))}
@@ -319,7 +327,11 @@ export default function ProgramEventsBuilderStep({ site, refresh }: Props) {
                       Title {lang === defaultLang ? "(required)" : ""}
                     </label>
                     <input
-                      value={(form.title as any)?.[lang] ?? ""}
+                      value={
+                        (form.title as Record<string, string> | undefined)?.[
+                          lang
+                        ] ?? ""
+                      }
                       onChange={(e) =>
                         updateI18nField("title", lang, e.target.value)
                       }
@@ -331,7 +343,11 @@ export default function ProgramEventsBuilderStep({ site, refresh }: Props) {
                       Location {lang === defaultLang ? "(required)" : ""}
                     </label>
                     <input
-                      value={(form.location as any)?.[lang] ?? ""}
+                      value={
+                        (form.location as Record<string, string> | undefined)?.[
+                          lang
+                        ] ?? ""
+                      }
                       onChange={(e) =>
                         updateI18nField("location", lang, e.target.value)
                       }
@@ -343,7 +359,11 @@ export default function ProgramEventsBuilderStep({ site, refresh }: Props) {
                       Description (optional)
                     </label>
                     <textarea
-                      value={(form.description as any)?.[lang] ?? ""}
+                      value={
+                        (
+                          form.description as Record<string, string> | undefined
+                        )?.[lang] ?? ""
+                      }
                       onChange={(e) =>
                         updateI18nField("description", lang, e.target.value)
                       }

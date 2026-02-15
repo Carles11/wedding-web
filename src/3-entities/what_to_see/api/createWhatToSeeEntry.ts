@@ -18,14 +18,14 @@ export async function createWhatToSeeEntry(
     try {
       if (
         typeof crypto !== "undefined" &&
-        typeof (crypto as any).randomUUID === "function"
+        typeof (crypto as Crypto).randomUUID === "function"
       )
-        return (crypto as any).randomUUID();
+        return (crypto as Crypto).randomUUID();
     } catch (e) {}
     return Math.random().toString(36).slice(2) + Date.now().toString(36);
   };
 
-  const newEntry: WhatToSeeEntry = { id: generateId(), ...(entry as any) };
+  const newEntry: WhatToSeeEntry = { id: generateId(), ...entry };
   const newEntries = [newEntry, ...entries];
   const updated = await upsertWhatToSeeSection(siteId, {
     ...(section?.content ?? {}),
