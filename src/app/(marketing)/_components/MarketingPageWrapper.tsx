@@ -32,6 +32,11 @@ export default function MarketingPageWrapper({
     router.push(`${pathname}?${params.toString()}`);
   };
 
+  const handlePrimaryClick = () => {
+    // For demo purposes, we'll just alert. In a real app, this could navigate to the builder or open a signup modal.
+    router.push("/builder");
+  };
+
   return (
     <>
       <div className="fixed top-4 right-4 z-50 bg-white/80 shadow-lg rounded-lg">
@@ -48,7 +53,7 @@ export default function MarketingPageWrapper({
           subheadline={translations["marketing.hero.subheadline"]}
           ctaPrimary={translations["marketing.hero.cta_primary"]}
           ctaSecondary={translations["marketing.hero.cta_secondary"]}
-          onPrimaryClick={() => {}}
+          onPrimaryClick={handlePrimaryClick}
           onSecondaryClick={() =>
             window.open("https://www.inesundcarles.dog", "_blank")
           }
@@ -160,6 +165,8 @@ export default function MarketingPageWrapper({
           premiumPlanPrice={
             translations["marketing.pricing.premium_plan_price"]
           }
+          comingSoonText={translations["marketing.pricing.premium_coming_soon"]}
+          perSiteText={translations["marketing.pricing.per_site"]}
           premiumPlanCTA={translations["marketing.pricing.premium_plan_cta"]}
           premiumPlanFeatures={[
             translations["marketing.pricing.premium.feature_1"],
@@ -168,12 +175,15 @@ export default function MarketingPageWrapper({
             translations["marketing.pricing.premium.feature_4"],
             translations["marketing.pricing.premium.feature_5"],
           ]}
+          onFreePlanClick={handlePrimaryClick}
+          onPremiumPlanClick={handlePrimaryClick}
         />
 
         <CTASection
           headline={translations["marketing.cta.headline"]}
           description={translations["marketing.cta.description"]}
           buttonText={translations["marketing.cta.button_text"]}
+          onButtonClick={handlePrimaryClick}
         />
       </main>
     </>

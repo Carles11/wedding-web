@@ -30,6 +30,8 @@ export interface PricingSectionProps {
   premiumPlanFeatures?: string[];
   onFreePlanClick?: () => void;
   onPremiumPlanClick?: () => void;
+  comingSoonText?: string;
+  perSiteText?: string;
 }
 
 /**
@@ -47,6 +49,8 @@ export default function PricingSection({
   premiumPlanFeatures,
   onFreePlanClick,
   onPremiumPlanClick,
+  comingSoonText,
+  perSiteText,
 }: PricingSectionProps) {
   const premiumComingSoon = premiumPlanPrice.toLowerCase().includes("coming");
 
@@ -84,14 +88,12 @@ export default function PricingSection({
           <div className="flex flex-col h-full bg-white border border-gray-200 rounded-lg shadow-md p-6 hover:shadow-lg transition transform duration-150">
             <div className="flex items-center justify-between">
               <h3 className="text-xl md:text-2xl font-bold">{freePlanName}</h3>
-              <div className="text-sm text-gray-500">{freePlanPrice}</div>
             </div>
 
             <div className="mt-6 flex-1">
               <div className="text-4xl md:text-5xl font-extrabold text-gray-900">
-                {freePlanPrice.split(" ")[0]}
+                {freePlanPrice}
               </div>
-              <div className="text-sm text-gray-600 mt-2">forever</div>
 
               <ul className="mt-6 space-y-3 text-sm text-gray-700">
                 {freeFeaturesList.map((f) => (
@@ -122,9 +124,6 @@ export default function PricingSection({
                 <h3 className="text-xl md:text-2xl font-bold">
                   {premiumPlanName}
                 </h3>
-                <div className="mt-1 text-sm text-gray-600">
-                  {premiumPlanPrice}
-                </div>
               </div>
               {premiumComingSoon && (
                 <span className="inline-flex items-center px-3 py-1 text-sm font-medium bg-[#F4A261] text-white rounded-md">
@@ -138,7 +137,7 @@ export default function PricingSection({
                 {premiumPlanPrice}
               </div>
               <div className="text-sm text-gray-600 mt-2">
-                {premiumComingSoon ? "Stay tuned" : "Per site"}
+                {premiumComingSoon ? comingSoonText : perSiteText}
               </div>
 
               <ul className="mt-6 space-y-3 text-sm text-gray-700">
