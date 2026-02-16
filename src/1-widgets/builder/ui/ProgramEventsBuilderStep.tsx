@@ -9,7 +9,12 @@ import {
   deleteProgramEvent,
 } from "@/3-entities/program_events/api";
 
-type Props = { site: Site | null; refresh: () => void };
+type Props = {
+  site: Site | null;
+  refresh: () => void;
+  lang: string;
+  translations: Record<string, string>;
+};
 
 const FREE_EVENT_LIMIT = 2;
 

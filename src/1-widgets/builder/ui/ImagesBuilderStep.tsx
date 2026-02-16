@@ -13,6 +13,8 @@ import {
 type Props = {
   site: Site | null;
   refresh: () => void;
+  lang: string;
+  translations: Record<string, string>;
 };
 
 const FREE_IMAGE_LIMIT = 2;

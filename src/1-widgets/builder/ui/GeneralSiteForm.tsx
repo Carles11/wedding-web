@@ -1,28 +1,38 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { supabase } from "@/4-shared/api/supabaseClient";
+import { getSiteGeneralContent } from "@/4-shared/api/builder/getSiteGeneralContent";
+import { saveSiteGeneralContent } from "@/4-shared/api/builder/saveSiteGeneralContent";
+import type { SupportedLanguage } from "@/4-shared/config/i18n";
+import {
+  SUPPORTED_LANGUAGES,
+  SUPPORTED_LANGUAGE_LABELS,
+} from "@/4-shared/config/i18n";
 import type { Site } from "@/4-shared/types";
 
 type Props = {
   site: Site | null;
-  refresh: () => void; // called after successful save to re-fetch site
+  refresh: () => void;
+  lang: string;
+  translations: Record<string, string>;
+  langLimit: number; // <--- NEW: max allowed languages from plan
+  planType: "free" | "monthly" | "yearly"; // <--- NEW: show upgrade CTA
 };
 
-const AVAILABLE_LANGS = [
-  { code: "en", label: "English" },
-  { code: "es", label: "Español" },
-  { code: "ca", label: "Català" },
-  { code: "fr", label: "Français" },
-];
-
-const FREE_LANG_LIMIT = 1; // Free plan allows only 1 language
-
-export default function GeneralSiteForm({ site, refresh }: Props) {
-  const [title, setTitle] = useState("");
-  const [subtitle, setSubtitle] = useState("");
+export default function GeneralSiteForm({
+  site,
+  refresh,
+  translations,
+  langLimit,
+  planType,
+}: Props) {
+  const [languages, setLanguages] = useState<SupportedLanguage[]>(["en"]);
+  const [defaultLang, setDefaultLang] = useState<SupportedLanguage>("en");
   const [subdomain, setSubdomain] = useState("");
-  const [languages, setLanguages] = useState<string[]>([]);
+  const [content, setContent] = useState<
+    Record<SupportedLanguage, { title: string; subtitle: string }>
+  >({});
+  const [activeLang, setActiveLang] = useState<SupportedLanguage>("en");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -30,61 +40,51 @@ export default function GeneralSiteForm({ site, refresh }: Props) {
 
   useEffect(() => {
     if (!site) return;
-    setTitle((site as Site).title ?? "");
-    // default_lang may be present
-    const langs =
-      site.languages ?? (site.default_lang ? [site.default_lang] : []);
-    setLanguages(langs ?? []);
-    setSubdomain(site.subdomain ?? "");
-    // Attempt to load existing hero section subtitle for the default_lang
-    (async () => {
-      try {
-        const { data } = await supabase
-          .from("sections")
-          .select("id, content")
-          .eq("site_id", site.id)
-          .eq("type", "hero")
-          .maybeSingle();
-        if (data && data.content) {
-          // content may be object; try to read subtitle for default_lang or fallback to plain subtitle
-          const content = data.content as Record<string, unknown>;
-          const def =
-            site.default_lang ?? (site.languages && site.languages[0]);
-          if (def && typeof content["subtitle"] === "object") {
-            const subObj = content["subtitle"] as Record<string, string>;
-            setSubtitle(subObj[def] ?? "");
-          } else if (typeof content["subtitle"] === "string") {
-            setSubtitle(content["subtitle"] as string);
-          }
-        }
-      } catch (err: unknown) {
-        // ignore fetch errors for initial subtitle load
-      }
-    })();
+    getSiteGeneralContent(site.id)
+      .then((res) => {
+        setLanguages(res.languages);
+        setDefaultLang(res.default_lang);
+        setSubdomain(res.subdomain);
+        setContent(
+          res.languages.reduce(
+            (obj, lang) => {
+              obj[lang] = {
+                title: res.titles[lang] ?? "",
+                subtitle: res.subtitles[lang] ?? "",
+              };
+              return obj;
+            },
+            {} as Record<
+              SupportedLanguage,
+              { title: string; subtitle: string }
+            >,
+          ),
+        );
+        setActiveLang(res.default_lang);
+      })
+      .catch((err) => {
+        setError(err.message);
+      });
   }, [site]);
 
-  function validateSubdomain(value: string) {
-    const v = value.toLowerCase();
-    if (v.length < 3 || v.length > 24) return "Subdomain must be 3-24 chars";
-    if (!/^[a-z0-9-]+$/.test(v))
-      return "Use only lowercase letters, numbers and hyphens";
-    return null;
-  }
-
-  const toggleLang = (code: string) => {
+  const handleLangCheckbox = (lang: SupportedLanguage) => {
+    setShowUpgradeCTA(false);
     setError(null);
     setSuccess(null);
-    if (languages.includes(code)) {
-      setLanguages((s) => s.filter((l) => l !== code));
-      setShowUpgradeCTA(false);
+    if (languages.includes(lang)) {
+      // Always allow disabling a language, even on free
+      const updated = languages.filter((l) => l !== lang);
+      setLanguages(updated);
+      // Switch to another if current was active
+      if (activeLang === lang && updated.length > 0) setActiveLang(updated[0]);
       return;
     }
-    // enforce free tier limit
-    if (languages.length >= FREE_LANG_LIMIT) {
+    if (languages.length >= langLimit) {
       setShowUpgradeCTA(true);
       return;
     }
-    setLanguages((s) => [...s, code]);
+    setLanguages((prev) => [...prev, lang]);
+    setActiveLang(lang);
   };
 
   const handleSubmit = async (e?: React.FormEvent) => {
@@ -92,160 +92,161 @@ export default function GeneralSiteForm({ site, refresh }: Props) {
     setError(null);
     setSuccess(null);
 
-    if (!title || title.trim().length === 0) {
-      setError("Please enter a site title.");
-      return;
-    }
-
     if (!site) {
-      setError("Site not ready. Please try again later.");
+      setError(
+        translations["builder.errors.site_not_ready"] || "Site not ready.",
+      );
       return;
     }
 
-    // If subdomain is empty, user can set it; otherwise show-only
-    if (!site.subdomain) {
-      const subErr = validateSubdomain(subdomain);
-      if (subErr) {
-        setError(subErr);
-        return;
-      }
+    const val = content[activeLang] || { title: "", subtitle: "" };
+    if (!val.title || val.title.trim().length === 0) {
+      setError(
+        translations["builder.errors.missing_title"] ||
+          "Please enter a site title.",
+      );
+      return;
     }
 
     setSaving(true);
     try {
-      const payload: Partial<Site> = {
-        title: title.trim(),
-        default_lang: languages[0] ?? site.default_lang ?? "en",
-        languages:
-          languages.length > 0
-            ? languages
-            : (site.languages ?? [site.default_lang ?? "en"]),
-      };
-      if (!site.subdomain) payload.subdomain = subdomain.toLowerCase();
-
-      // Update the sites row
-      const { data: updatedSite, error: updateErr } = await supabase
-        .from("sites")
-        .update(payload)
-        .eq("id", site.id)
-        .select(
-          "id, owner_user_id, subdomain, default_lang, languages, domains, title",
-        )
-        .maybeSingle();
-
-      if (updateErr) throw updateErr;
-
-      // Upsert hero section: set content.subtitle for default language
-      const heroContent: Record<string, unknown> = {};
-      const defLang =
-        payload.default_lang ?? site.default_lang ?? languages[0] ?? "en";
-      // For multilingual support we'd store an object keyed by language. For free tier we store plain string.
-      heroContent.subtitle = {
-        [defLang]: subtitle,
-      };
-
-      // Find existing hero
-      const { data: existingHero } = await supabase
-        .from("sections")
-        .select("id")
-        .eq("site_id", site.id)
-        .eq("type", "hero")
-        .maybeSingle();
-
-      const existingHeroRow = existingHero as unknown as { id?: string } | null;
-      if (existingHeroRow && existingHeroRow.id) {
-        await supabase
-          .from("sections")
-          .update({ content: heroContent })
-          .eq("id", existingHeroRow.id);
-      } else {
-        await supabase.from("sections").insert([
-          {
-            site_id: site.id,
-            type: "hero",
-            title: title.trim(),
-            content: heroContent,
-          },
-        ]);
-      }
-
-      setSuccess("Saved successfully");
-      // Ask parent to refresh site data
+      await saveSiteGeneralContent({
+        site_id: site.id,
+        lang: activeLang,
+        title: val.title.trim(),
+        subtitle: val.subtitle.trim(),
+        subdomain: !site.subdomain ? subdomain.trim().toLowerCase() : undefined,
+        languages,
+        default_lang: defaultLang,
+      });
+      setSuccess(
+        translations["builder.general.form.save_success"] ||
+          "Saved successfully.",
+      );
       refresh();
-    } catch (err: unknown) {
-      console.error("GeneralSiteForm save error:", err);
-      if (err instanceof Error) setError(err.message);
-      else setError(String(err));
-    } finally {
-      setSaving(false);
+    } catch (err: any) {
+      setError(err.message);
     }
+    setSaving(false);
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Language Selection Section */}
       <div>
         <label className="block text-sm font-medium text-gray-700">
-          Main title
+          {translations["builder.general.form.label.languages"] ?? "Languages"}
+        </label>
+        <p className="text-xs text-gray-500">
+          {planType === "free"
+            ? translations["builder.general.form.language_limit"] ||
+              "Free plan: choose one language. Upgrade to add more."
+            : translations["builder.general.form.language_limit_pro"] ||
+              "You can enable all languages on your plan."}
+        </p>
+        <div className="flex flex-wrap gap-2 my-2">
+          {SUPPORTED_LANGUAGES.map((lang) => (
+            <label key={lang} className="inline-flex items-center">
+              <input
+                type="checkbox"
+                value={lang}
+                checked={languages.includes(lang)}
+                onChange={() => handleLangCheckbox(lang)}
+                className="mr-2"
+                // Prevent enabling more than allowed
+                disabled={
+                  // You can't check if limit is reached and this lang isn't already enabled
+                  !languages.includes(lang) && languages.length >= langLimit
+                }
+              />
+              {SUPPORTED_LANGUAGE_LABELS[lang]}
+            </label>
+          ))}
+        </div>
+        {showUpgradeCTA && planType === "free" && (
+          <div className="mt-2 text-sm text-yellow-800">
+            {translations["builder.general.form.need_more_langs"] ||
+              "Need more languages?"}{" "}
+            <button
+              className="underline text-blue-600"
+              type="button"
+              onClick={() => {
+                // TODO: implement real upgrade flow
+                alert(
+                  translations["builder.general.form.upgrade"] ||
+                    "Upgrade to Pro to unlock more languages.",
+                );
+              }}
+            >
+              {translations["builder.general.form.upgrade"] || "Upgrade to Pro"}
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Language Switch Tabs */}
+      <div className="flex gap-1 mb-2">
+        {languages.map((lang) => (
+          <button
+            type="button"
+            key={lang}
+            className={`px-2 py-1 rounded ${
+              activeLang === lang
+                ? "bg-blue-700 text-white"
+                : "bg-white text-gray-800 border"
+            }`}
+            onClick={() => setActiveLang(lang)}
+            disabled={!languages.includes(lang)}
+          >
+            {SUPPORTED_LANGUAGE_LABELS[lang]}
+          </button>
+        ))}
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700">
+          {translations["builder.general.form.label.main_title"] ??
+            "Main title"}
         </label>
         <input
           className="mt-1 block w-full rounded border px-3 py-2"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          value={content[activeLang]?.title ?? ""}
+          onChange={(e) =>
+            setContent((c) => ({
+              ...c,
+              [activeLang]: {
+                ...c[activeLang],
+                title: e.target.value,
+              },
+            }))
+          }
           required
         />
       </div>
 
       <div>
         <label className="block text-sm font-medium text-gray-700">
-          Subtitle
+          {translations["builder.general.form.label.subtitle"] ?? "Subtitle"}
         </label>
         <textarea
           rows={3}
           className="mt-1 block w-full rounded border px-3 py-2"
-          value={subtitle}
-          onChange={(e) => setSubtitle(e.target.value)}
+          value={content[activeLang]?.subtitle ?? ""}
+          onChange={(e) =>
+            setContent((c) => ({
+              ...c,
+              [activeLang]: {
+                ...c[activeLang],
+                subtitle: e.target.value,
+              },
+            }))
+          }
         />
       </div>
 
       <div>
         <label className="block text-sm font-medium text-gray-700">
-          Languages
-        </label>
-        <p className="text-xs text-gray-500">
-          Free plan: choose one language. Upgrade to add more.
-        </p>
-        <div className="mt-2 flex gap-3">
-          {AVAILABLE_LANGS.map((l) => {
-            const checked = languages.includes(l.code);
-            const disabled = !checked && languages.length >= FREE_LANG_LIMIT;
-            return (
-              <label
-                key={l.code}
-                className={`inline-flex items-center gap-2 px-2 py-1 border rounded ${disabled ? "opacity-50" : ""}`}
-              >
-                <input
-                  type="checkbox"
-                  checked={checked}
-                  disabled={disabled}
-                  onChange={() => toggleLang(l.code)}
-                />
-                <span className="text-sm">{l.label}</span>
-              </label>
-            );
-          })}
-        </div>
-        {showUpgradeCTA && (
-          <div className="mt-2 text-sm text-yellow-800">
-            Need more languages?{" "}
-            <button className="underline text-blue-600">Upgrade to Pro</button>
-            {/* TODO: hook into billing/plan status and route to upgrade flow */}
-          </div>
-        )}
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700">
-          Subdomain
+          {translations["builder.general.form.label.subdomain"] ?? "Subdomain"}
         </label>
         {site?.subdomain ? (
           <div className="mt-1 text-sm text-gray-700">{site.subdomain}</div>
@@ -268,7 +269,9 @@ export default function GeneralSiteForm({ site, refresh }: Props) {
           className="px-4 py-2 bg-blue-600 text-white rounded"
           disabled={saving}
         >
-          {saving ? "Saving…" : "Save"}
+          {saving
+            ? (translations["builder.general.form.saving"] ?? "Saving…")
+            : (translations["builder.general.form.save"] ?? "Save")}
         </button>
         <a
           className={`text-sm ${site?.subdomain ? "text-blue-600" : "text-gray-400"}`}
@@ -280,7 +283,7 @@ export default function GeneralSiteForm({ site, refresh }: Props) {
           target="_blank"
           rel="noreferrer"
         >
-          Preview site
+          {translations["builder.general.form.preview"] ?? "Preview site"}
         </a>
         {success && <div className="text-sm text-green-600">{success}</div>}
         {error && <div className="text-sm text-red-600">{error}</div>}

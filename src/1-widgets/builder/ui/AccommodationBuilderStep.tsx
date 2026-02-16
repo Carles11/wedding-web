@@ -9,7 +9,12 @@ import {
   deleteAccommodationEntry,
 } from "@/3-entities/accommodation/api";
 
-type Props = { site: Site | null; refresh: () => void };
+type Props = {
+  site: Site | null;
+  refresh: () => void;
+  lang: string;
+  translations: Record<string, string>;
+};
 
 const FREE_ACCOMMODATION_LIMIT = 2;
 

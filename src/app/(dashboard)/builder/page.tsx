@@ -2,22 +2,12 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/3-entities/user/api/getCurrentUser";
 import { fetchBuilderTranslations } from "@/4-shared/api/builder/getTranslations";
 import BuilderClient from "./BuilderClient";
+import { SUPPORTED_LANGUAGES } from "@/4-shared/config/i18n";
 
-const SUPPORTED_LANGUAGES = [
-  "en",
-  "zh",
-  "hi",
-  "es",
-  "ca",
-  "ar",
-  "fr",
-  "de",
-  "pt",
-  "ru",
-  "it",
-];
-function isValidLanguage(lang: string | undefined): lang is string {
-  return !!lang && SUPPORTED_LANGUAGES.includes(lang);
+import type { SupportedLanguage } from "@/4-shared/config/i18n";
+
+function isValidLanguage(lang: string | undefined): lang is SupportedLanguage {
+  return !!lang && SUPPORTED_LANGUAGES.includes(lang as SupportedLanguage);
 }
 
 export default async function BuilderPage({

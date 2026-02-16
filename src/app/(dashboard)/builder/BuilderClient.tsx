@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useSupabaseAuth } from "@/4-shared/hooks/useSupabaseAuth";
 import { useSite } from "@/4-shared/hooks/useSite";
 import LanguageSelector from "@/4-shared/ui/LanguageSelector";
+import { getCurrentUserSubscription } from "@/4-shared/api/builder/getCurrentUserSubscription";
 
 import GeneralSiteForm from "@/1-widgets/builder/ui/GeneralSiteForm";
 import ImagesBuilderStep from "@/1-widgets/builder/ui/ImagesBuilderStep";
@@ -13,11 +14,48 @@ import AccommodationBuilderStep from "@/1-widgets/builder/ui/AccommodationBuilde
 import ContactBuilderStep from "@/1-widgets/builder/ui/ContactBuilderStep";
 import WhatToSeeBuilderStep from "@/1-widgets/builder/ui/WhatToSeeBuilderStep";
 import LogoutButton from "@/2-features/auth/ui/LogoutButton";
+import type { Site } from "@/4-shared/types";
+import {
+  GreenCheckIcon,
+  RedDotIcon,
+} from "@/4-shared/ui/icons/completenessIcons";
 
 interface Props {
   initialLang?: string;
   translations: Record<string, string>;
 }
+
+function isGeneralComplete(site?: Site | null): boolean {
+  return !!site?.title && !!site?.subdomain;
+}
+function isImagesComplete(site?: Site | null): boolean {
+  return false;
+}
+function isProgramComplete(site?: Site | null): boolean {
+  return false;
+}
+function isAccommodationComplete(site?: Site | null): boolean {
+  return false;
+}
+function isWhatToSeeComplete(site?: Site | null): boolean {
+  return false;
+}
+function isContactComplete(site?: Site | null): boolean {
+  return false;
+}
+function isDomainBillingComplete(site?: Site | null): boolean {
+  return true;
+}
+
+const STEP_COMPLETENESS: ((site?: Site | null) => boolean)[] = [
+  isGeneralComplete,
+  isImagesComplete,
+  isProgramComplete,
+  isAccommodationComplete,
+  isWhatToSeeComplete,
+  isContactComplete,
+  isDomainBillingComplete,
+];
 
 const STEP_KEYS = [
   "builder.nav.step.general",
@@ -47,6 +85,20 @@ export default function BuilderClient({
 
   const [active, setActive] = useState(0);
   const [currentLang, setCurrentLang] = useState(initialLang);
+
+  // NEW: Plan type and language limit
+  const [planType, setPlanType] = useState<"free" | "monthly" | "yearly">(
+    "free",
+  );
+  const langLimit = planType === "free" ? 1 : 11;
+
+  useEffect(() => {
+    if (user) {
+      getCurrentUserSubscription(user.id)
+        .then(setPlanType)
+        .catch(() => setPlanType("free"));
+    }
+  }, [user]);
 
   // Language toggle handler: updates the lang param & stays on this page
   const handleLanguageChange = (lang: string) => {
@@ -102,16 +154,23 @@ export default function BuilderClient({
               {translations["builder.nav.steps_title"]}
             </h3>
             <ul className="mt-4 space-y-2">
-              {STEP_KEYS.map((k, i) => (
-                <li key={k}>
-                  <button
-                    className={`w-full text-left px-3 py-2 rounded ${i === active ? "bg-blue-50 font-semibold" : "hover:bg-gray-50"}`}
-                    onClick={() => setActive(i)}
-                  >
-                    {translations[k]}
-                  </button>
-                </li>
-              ))}
+              {STEP_KEYS.map((k, i) => {
+                const isComplete = STEP_COMPLETENESS[i](site);
+                return (
+                  <li key={k}>
+                    <button
+                      className={`w-full text-left flex items-center px-3 py-2 rounded ${i === active ? "bg-blue-50 font-semibold" : "hover:bg-gray-50"}`}
+                      onClick={() => setActive(i)}
+                    >
+                      {/* Status icon before label */}
+                      <span className="w-6 flex justify-center items-center">
+                        {isComplete ? <GreenCheckIcon /> : <RedDotIcon />}
+                      </span>
+                      {translations[k]}
+                    </button>
+                  </li>
+                );
+              })}
             </ul>
           </nav>
 
@@ -142,28 +201,54 @@ export default function BuilderClient({
 
               <div className="mt-8 border rounded p-4 bg-gray-50">
                 {active === 0 && (
-                  <GeneralSiteForm site={site ?? null} refresh={refresh} />
+                  <GeneralSiteForm
+                    site={site ?? null}
+                    refresh={refresh}
+                    lang={currentLang}
+                    translations={translations}
+                    langLimit={langLimit} // <--- NEW: Pass limit
+                    planType={planType} // <--- optionally pass for CTA
+                  />
                 )}
                 {active === 1 && (
-                  <ImagesBuilderStep site={site ?? null} refresh={refresh} />
+                  <ImagesBuilderStep
+                    site={site ?? null}
+                    refresh={refresh}
+                    lang={currentLang}
+                    translations={translations}
+                  />
                 )}
                 {active === 2 && (
                   <ProgramEventsBuilderStep
                     site={site ?? null}
                     refresh={refresh}
+                    lang={currentLang}
+                    translations={translations}
                   />
                 )}
                 {active === 3 && (
                   <AccommodationBuilderStep
                     site={site ?? null}
                     refresh={refresh}
+                    lang={currentLang}
+                    translations={translations}
                   />
                 )}
                 {active === 4 && (
-                  <WhatToSeeBuilderStep site={site ?? null} refresh={refresh} />
+                  <WhatToSeeBuilderStep
+                    site={site ?? null}
+                    refresh={refresh}
+                    lang={currentLang}
+                    translations={translations}
+                  />
                 )}
                 {active === 5 && (
-                  <ContactBuilderStep site={site ?? null} refresh={refresh} />
+                  <ContactBuilderStep
+                    site={site ?? null}
+                    refresh={refresh}
+                    lang={currentLang}
+                    translations={translations}
+                  />
                 )}
                 {active === 6 && (
                   <div>

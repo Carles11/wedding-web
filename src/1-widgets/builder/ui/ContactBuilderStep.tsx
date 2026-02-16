@@ -11,7 +11,12 @@ import {
   getPublicUrlForImage,
 } from "@/3-entities/images/api";
 
-type Props = { site: Site | null; refresh: () => void };
+type Props = {
+  site: Site | null;
+  refresh: () => void;
+  lang: string;
+  translations: Record<string, string>;
+};
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 

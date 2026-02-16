@@ -9,7 +9,12 @@ import {
   deleteWhatToSeeEntry,
 } from "@/3-entities/what_to_see/api";
 
-type Props = { site: Site | null; refresh: () => void };
+type Props = {
+  site: Site | null;
+  refresh: () => void;
+  lang: string;
+  translations: Record<string, string>;
+};
 
 const FREE_LIMIT = 2;
 

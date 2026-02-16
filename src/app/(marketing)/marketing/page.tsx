@@ -2,27 +2,14 @@ import { fetchMarketingTranslations } from "@/4-shared/api/marketing";
 import MarketingPageWrapper from "@/app/(marketing)/_components/MarketingPageWrapper";
 import { getSEOMetadata } from "@/4-shared/config/seo";
 import type { Metadata } from "next";
+import { SUPPORTED_LANGUAGES } from "@/4-shared/config/i18n";
+import type { SupportedLanguage } from "@/4-shared/config/i18n";
 
 export const dynamic = "force-dynamic";
 
-const SUPPORTED_LANGUAGES = [
-  "en",
-  "zh",
-  "hi",
-  "es",
-  "ca",
-  "ar",
-  "fr",
-  "de",
-  "pt",
-  "ru",
-  "it",
-];
-
-function isValidLanguage(lang: string | undefined): lang is string {
-  return !!lang && SUPPORTED_LANGUAGES.includes(lang);
+function isValidLanguage(lang: string | undefined): lang is SupportedLanguage {
+  return !!lang && SUPPORTED_LANGUAGES.includes(lang as SupportedLanguage);
 }
-
 export async function generateMetadata({
   searchParams,
 }: {
