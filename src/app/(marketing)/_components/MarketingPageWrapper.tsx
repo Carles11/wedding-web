@@ -1,6 +1,6 @@
 "use client";
-import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import React, { useState } from "react";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import LanguageSelector from "@/4-shared/ui/LanguageSelector";
 import HeroMarketing, {
   FeaturesGrid,
@@ -19,12 +19,17 @@ export default function MarketingPageWrapper({
   translations,
 }: Props) {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [currentLang, setCurrentLang] = useState(initialLang || "en");
 
   const handleLanguageChange = (lang: string) => {
     setCurrentLang(lang);
-    // update URL query and navigate to fetch server translations
-    router.push(`/?lang=${lang}`);
+    // Clone current params and overwrite lang
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("lang", lang);
+    // Push back to the SAME route with updated lang param
+    router.push(`${pathname}?${params.toString()}`);
   };
 
   return (

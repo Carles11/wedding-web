@@ -7,29 +7,31 @@ export const dynamic = "force-dynamic";
 
 const MARKETING_DOMAINS = ["weddweb.com", "www.weddweb.com"];
 
+/**
+ * Root page: decides whether to render marketing or tenant site,
+ * always preserves query parameters (e.g. lang) in redirects.
+ */
 export default async function RootPage() {
-  const host = ((await headers()).get("host") ?? "").toLowerCase().trim();
+  const headerList = await headers();
+  const host = (headerList.get("host") ?? "").toLowerCase().trim();
 
-  console.log("🔍 [RootPage] Host:", host);
+  // Use x-next-url header for robust support in SSR/app router
+  const nextUrl = headerList.get("x-next-url") || "/";
+  const queryStart = nextUrl.indexOf("?");
+  const querySuffix = queryStart !== -1 ? nextUrl.slice(queryStart) : "";
 
-  // Marketing domain → redirect to marketing route
+  // Marketing domain → redirect to marketing route (preserving query)
   if (MARKETING_DOMAINS.includes(host) || host === "localhost:3000") {
-    console.log("✅ [RootPage] Marketing domain detected");
-    redirect("/marketing");
+    redirect(`/marketing${querySuffix}`);
   }
 
-  // Tenant domain → lookup site and redirect to default language
-  console.log("🔍 [RootPage] Looking up tenant site for:", host);
+  // Tenant domain → lookup and redirect to their default language (dynamic)
   const siteId = await getSiteIdForDomain(host);
-  console.log("🔍 [RootPage] Site ID found:", siteId);
-
   if (siteId) {
     const defaultLang = await getSiteDefaultLang(siteId);
-    console.log("✅ [RootPage] Redirecting to:", `/${defaultLang}`);
-    redirect(`/${defaultLang}`);
+    redirect(`/${defaultLang}${querySuffix}`);
   }
 
-  // Unknown domain → show marketing page
-  console.log("❌ [RootPage] No site found, showing marketing fallback");
-  redirect("/marketing");
+  // Unknown domain → fallback to marketing (preserving query)
+  redirect(`/marketing${querySuffix}`);
 }

@@ -79,6 +79,8 @@ export default async function MarketingPage({
 }) {
   const params = await searchParams;
   const requested = params?.lang;
+  console.log("Requested language:", requested);
+
   const lang = isValidLanguage(requested) ? requested : "en";
   const translations = await fetchMarketingTranslations(lang, "en");
 
