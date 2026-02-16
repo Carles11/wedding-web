@@ -3,12 +3,12 @@
 import { useState } from "react";
 import { useSupabaseAuth } from "@/4-shared/hooks/useSupabaseAuth";
 import { useSite } from "@/4-shared/hooks/useSite";
-import GeneralSiteForm from "@/3-widgets/builder/ui/GeneralSiteForm";
-import ImagesBuilderStep from "@/3-widgets/builder/ui/ImagesBuilderStep";
-import ProgramEventsBuilderStep from "@/3-widgets/builder/ui/ProgramEventsBuilderStep";
-import AccommodationBuilderStep from "@/3-widgets/builder/ui/AccommodationBuilderStep";
-import ContactBuilderStep from "@/3-widgets/builder/ui/ContactBuilderStep";
-import WhatToSeeBuilderStep from "@/3-widgets/builder/ui/WhatToSeeBuilderStep";
+import GeneralSiteForm from "@/1-widgets/builder/ui/GeneralSiteForm";
+import ImagesBuilderStep from "@/1-widgets/builder/ui/ImagesBuilderStep";
+import ProgramEventsBuilderStep from "@/1-widgets/builder/ui/ProgramEventsBuilderStep";
+import AccommodationBuilderStep from "@/1-widgets/builder/ui/AccommodationBuilderStep";
+import ContactBuilderStep from "@/1-widgets/builder/ui/ContactBuilderStep";
+import WhatToSeeBuilderStep from "@/1-widgets/builder/ui/WhatToSeeBuilderStep";
 import LogoutButton from "@/2-features/auth/ui/LogoutButton";
 
 const STEPS = [

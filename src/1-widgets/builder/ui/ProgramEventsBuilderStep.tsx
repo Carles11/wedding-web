@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { Site, ProgramEvent } from "@/4-shared/types";
 import {
   fetchProgramEventsBySite,

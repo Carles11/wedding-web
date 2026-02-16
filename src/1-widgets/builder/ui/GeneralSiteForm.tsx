@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { supabase } from "@/4-shared/api/supabaseClient";
-import type { Site, HeroSection } from "@/4-shared/types";
+import type { Site } from "@/4-shared/types";
 
 type Props = {
   site: Site | null;

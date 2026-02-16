@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import type { Site, ContactSection } from "@/4-shared/types";
 import {
   fetchContactSection,
@@ -89,7 +89,11 @@ export default function ContactBuilderStep({ site, refresh }: Props) {
         | { name?: string | null; email?: string | null; phone?: string | null }
         | undefined) ?? {};
 
-    function validContact(pt: { name?: string | null; email?: string | null; phone?: string | null }) {
+    function validContact(pt: {
+      name?: string | null;
+      email?: string | null;
+      phone?: string | null;
+    }) {
       if (!pt?.name && !pt?.email) return false;
       if (!pt?.name || !pt?.email) return false;
       if (!EMAIL_RE.test(pt.email)) return false;
@@ -321,4 +325,3 @@ export default function ContactBuilderStep({ site, refresh }: Props) {
     </div>
   );
 }
-

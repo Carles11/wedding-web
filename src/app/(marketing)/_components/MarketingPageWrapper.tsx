@@ -7,7 +7,7 @@ import HeroMarketing, {
   TestimonialsSection,
   PricingSection,
   CTASection,
-} from "@/3-widgets/marketing/ui";
+} from "@/1-widgets/marketing/ui";
 
 interface Props {
   initialLang?: string;
