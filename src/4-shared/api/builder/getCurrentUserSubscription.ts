@@ -12,7 +12,7 @@ export async function getCurrentUserSubscription(
     .order("created_at", { ascending: false })
     .limit(1)
     .maybeSingle();
-  console.log("Subscription query result:", { data, error });
+
   if (error || !data) return "free";
   if (
     ["active", "trialing"].includes(data.status) &&

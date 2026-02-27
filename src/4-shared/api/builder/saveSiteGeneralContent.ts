@@ -3,6 +3,7 @@ import type { SupportedLanguage } from "@/4-shared/config/i18n";
 
 type SaveOpts = {
   site_id: string;
+  heroId: string | null;
   lang: SupportedLanguage;
   title: string;
   subtitle: string;
@@ -13,6 +14,7 @@ type SaveOpts = {
 
 export async function saveSiteGeneralContent({
   site_id,
+  heroId,
   lang,
   title,
   subtitle,

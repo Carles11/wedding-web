@@ -17,7 +17,9 @@ export async function createSiteForUser(user: {
     user.email && user.email.includes("@")
       ? `${user.email.split("@")[0]}'s Wedding`
       : "Wedding Site";
-  const { data, error } = await supabaseAdmin
+
+  // 1. Insert site row
+  const { data: siteData, error: siteError } = await supabaseAdmin
     .from("sites")
     .insert([
       {
@@ -32,6 +34,24 @@ export async function createSiteForUser(user: {
     .select("id, subdomain, default_lang, languages, domains")
     .maybeSingle();
 
-  if (error) throw error;
-  return data as Site;
+  if (siteError || !siteData || !siteData.id) {
+    throw siteError || new Error("Could not create site");
+  }
+
+  // 2. Insert user_sites row for ownership
+  const { error: userSitesError } = await supabaseAdmin
+    .from("user_sites")
+    .insert([
+      {
+        user_id: user.id,
+        site_id: siteData.id,
+        role: "owner",
+      },
+    ]);
+
+  if (userSitesError) {
+    throw userSitesError;
+  }
+
+  return siteData as Site;
 }

@@ -1,20 +1,20 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
 import { createSiteForUser } from "@/4-shared/api/builder/createSiteForUser";
 
-// This version matches your installed @supabase/ssr, no TS errors!
 export async function POST() {
+  // 1. Await cookies()
+  const cookieStore = await cookies();
+
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-  const cookieStore = cookies();
-  console.log("cookieStore:", cookieStore, "Type:", typeof cookieStore);
 
+  // 2. Use getAll & setAll for cookie methods
   const supabase = createServerClient(supabaseUrl, supabaseKey, {
     cookies: {
-      get: (name: string) => cookieStore.get(name)?.value,
-      set: () => {},
-      remove: () => {},
+      getAll: () => cookieStore.getAll(),
+      setAll: () => {}, // If you don't set cookies server-side, leave as noop
     },
   });
 
@@ -25,7 +25,6 @@ export async function POST() {
   if (!user || !user.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-
   try {
     const site = await createSiteForUser({
       id: user.id,
@@ -33,6 +32,7 @@ export async function POST() {
     });
     return NextResponse.json({ site }, { status: 201 });
   } catch (e: unknown) {
+    // console.error("Provision error (route.ts):", e); // This makes sure it prints!
     const errorMessage = e instanceof Error ? e.message : "Server error";
     return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
