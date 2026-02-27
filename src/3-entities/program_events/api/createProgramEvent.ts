@@ -1,4 +1,4 @@
-import { supabase } from "@/4-shared/api/supabaseClient";
+import { createClient } from "@/4-shared/lib/supabase/client";
 import type { ProgramEvent } from "@/4-shared/types";
 
 export type CreateProgramEventPayload = Omit<
@@ -12,6 +12,8 @@ export async function createProgramEvent(
   payload: CreateProgramEventPayload,
 ): Promise<ProgramEvent | null> {
   if (!payload?.site_id) return null;
+
+  const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("program_events")
@@ -28,6 +30,3 @@ export async function createProgramEvent(
 
   return (data as ProgramEvent) ?? null;
 }
-
-// TODO: Consider server-side validation and plan enforcement to prevent
-// free-tier bypass and race conditions when creating events.

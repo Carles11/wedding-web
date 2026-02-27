@@ -15,8 +15,8 @@ type Props = {
   refresh: () => void;
   lang: string;
   translations: Record<string, string>;
-  langLimit: number; // <--- NEW: max allowed languages from plan
-  planType: "free" | "monthly" | "yearly"; // <--- NEW: show upgrade CTA
+  langLimit: number;
+  planType: "free" | "monthly" | "yearly";
 };
 
 export default function GeneralSiteForm({
@@ -26,11 +26,12 @@ export default function GeneralSiteForm({
   langLimit,
   planType,
 }: Props) {
-  const [languages, setLanguages] = useState<SupportedLanguage[]>(["en"]);
+  const [languages, setLanguages] = useState<SupportedLanguage[]>([]);
   const [defaultLang, setDefaultLang] = useState<SupportedLanguage>("en");
   const [subdomain, setSubdomain] = useState("");
+  const [heroId, setHeroId] = useState<string | null>(null);
   const [content, setContent] = useState<
-    Record<SupportedLanguage, { title: string; subtitle: string }>
+    Partial<Record<SupportedLanguage, { title: string; subtitle: string }>>
   >({});
   const [activeLang, setActiveLang] = useState<SupportedLanguage>("en");
   const [saving, setSaving] = useState(false);
@@ -45,6 +46,7 @@ export default function GeneralSiteForm({
         setLanguages(res.languages);
         setDefaultLang(res.default_lang);
         setSubdomain(res.subdomain);
+        setHeroId(res.heroId);
         setContent(
           res.languages.reduce(
             (obj, lang) => {
@@ -63,6 +65,7 @@ export default function GeneralSiteForm({
         setActiveLang(res.default_lang);
       })
       .catch((err) => {
+        console.error("Error fetching general content:", err);
         setError(err.message);
       });
   }, [site]);
@@ -72,10 +75,8 @@ export default function GeneralSiteForm({
     setError(null);
     setSuccess(null);
     if (languages.includes(lang)) {
-      // Always allow disabling a language, even on free
       const updated = languages.filter((l) => l !== lang);
       setLanguages(updated);
-      // Switch to another if current was active
       if (activeLang === lang && updated.length > 0) setActiveLang(updated[0]);
       return;
     }
@@ -112,6 +113,7 @@ export default function GeneralSiteForm({
     try {
       await saveSiteGeneralContent({
         site_id: site.id,
+        heroId,
         lang: activeLang,
         title: val.title.trim(),
         subtitle: val.subtitle.trim(),
@@ -124,8 +126,12 @@ export default function GeneralSiteForm({
           "Saved successfully.",
       );
       refresh();
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("An unknown error occurred.");
+      }
     }
     setSaving(false);
   };
@@ -133,6 +139,9 @@ export default function GeneralSiteForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {/* Language Selection Section */}
+      <div className="text-xs text-red-600">
+        DEBUG: planType={planType} langLimit={langLimit}
+      </div>
       <div>
         <label className="block text-sm font-medium text-gray-700">
           {translations["builder.general.form.label.languages"] ?? "Languages"}
@@ -153,9 +162,7 @@ export default function GeneralSiteForm({
                 checked={languages.includes(lang)}
                 onChange={() => handleLangCheckbox(lang)}
                 className="mr-2"
-                // Prevent enabling more than allowed
                 disabled={
-                  // You can't check if limit is reached and this lang isn't already enabled
                   !languages.includes(lang) && languages.length >= langLimit
                 }
               />
@@ -171,7 +178,6 @@ export default function GeneralSiteForm({
               className="underline text-blue-600"
               type="button"
               onClick={() => {
-                // TODO: implement real upgrade flow
                 alert(
                   translations["builder.general.form.upgrade"] ||
                     "Upgrade to Pro to unlock more languages.",

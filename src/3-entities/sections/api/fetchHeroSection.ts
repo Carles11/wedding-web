@@ -1,4 +1,4 @@
-import { supabase } from "@/4-shared/api/supabaseClient";
+import { createSupabaseSSRClient } from "@/4-shared/lib/supabase/server";
 import type { HeroSection } from "@/4-shared/types";
 
 // Fetch the hero section for a specific site (multi-tenant/SaaS)
@@ -7,6 +7,7 @@ export async function fetchHeroSection(
 ): Promise<HeroSection | null> {
   if (!siteId) return null;
 
+  const supabase = await createSupabaseSSRClient();
   const { data, error } = await supabase
     .from("sections")
     .select("*")

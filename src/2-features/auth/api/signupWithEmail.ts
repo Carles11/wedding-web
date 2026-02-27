@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/4-shared/lib/supabase/server";
+import { createSupabaseSSRClient } from "@/4-shared/lib/supabase/server";
 
 /**
  * Server action to sign up a new user with email and password.
@@ -16,7 +16,7 @@ export async function signupWithEmail(
   password: string,
   fullName?: string,
 ): Promise<{ error?: string; success?: boolean; needsVerification?: boolean }> {
-  const supabase = await createClient();
+  const supabase = await createSupabaseSSRClient();
 
   const { error } = await supabase.auth.signUp({
     email,

@@ -2,10 +2,8 @@
 
 import { useEffect, useState } from "react";
 import type { Site, ContactSection } from "@/4-shared/types";
-import {
-  fetchContactSection,
-  upsertContactSection,
-} from "@/3-entities/contact/api";
+import { upsertContactSection } from "@/3-entities/contact/api";
+import { fetchContactSection } from "@/3-entities/sections/api/fetchContactSection";
 import {
   fetchImagesBySite,
   getPublicUrlForImage,

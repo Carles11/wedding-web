@@ -1,4 +1,4 @@
-import { supabase } from "@/4-shared/api/supabaseClient";
+import { createClient } from "@/4-shared/lib/supabase/client";
 import type { ImageRow } from "@/4-shared/types";
 
 /**
@@ -7,6 +7,8 @@ import type { ImageRow } from "@/4-shared/types";
  */
 export async function deleteImage(image: ImageRow): Promise<boolean> {
   try {
+    const supabase = await createClient();
+
     if (image.bucket && image.path) {
       const { error: delErr } = await supabase.storage
         .from(image.bucket)

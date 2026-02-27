@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/4-shared/lib/supabase/server";
+import { createSupabaseSSRClient } from "@/4-shared/lib/supabase/server";
 
 /**
  * Server action to send a password reset email to the user.
@@ -12,7 +12,7 @@ import { createClient } from "@/4-shared/lib/supabase/server";
 export async function sendPasswordReset(
   email: string,
 ): Promise<{ error?: string; success?: boolean }> {
-  const supabase = await createClient();
+  const supabase = await createSupabaseSSRClient();
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/reset-password`,

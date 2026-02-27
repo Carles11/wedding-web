@@ -1,4 +1,4 @@
-import { supabaseAdmin } from "@/4-shared/lib/supabaseServer";
+import { supabaseAdmin } from "@/4-shared/lib/supabase/supabaseServer";
 
 /**
  * Server helper to fetch global translations with a tiny in-memory cache.
@@ -56,7 +56,7 @@ export function clearGlobalTranslationsCache() {
 export async function fetchGlobalTranslations(
   locale: string,
   fallbackLocale: string | null = null,
-  ttlSeconds: number = DEFAULT_TTL_SECONDS
+  ttlSeconds: number = DEFAULT_TTL_SECONDS,
 ): Promise<Record<string, string>> {
   if (!locale && !fallbackLocale) return {};
 

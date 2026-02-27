@@ -1,4 +1,4 @@
-import { supabase } from "@/4-shared/api/supabaseClient";
+import { createSupabaseSSRClient } from "@/4-shared/lib/supabase/server";
 import type { ProgramSection } from "@/4-shared/types";
 
 // Fetches the "program" section for a given site (SaaS/multi-tenant-safe)
@@ -6,6 +6,8 @@ export async function fetchProgramSection(
   siteId: string,
 ): Promise<ProgramSection | null> {
   if (!siteId) return null;
+
+  const supabase = await createSupabaseSSRClient();
 
   const { data, error } = await supabase
     .from("sections")

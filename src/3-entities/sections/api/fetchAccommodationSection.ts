@@ -1,11 +1,12 @@
-import { supabaseAdmin } from "@/4-shared/lib/supabaseServer";
+import { createClient } from "@/4-shared/lib/supabase/client";
 
 /**
  * Fetch the 'accommodation' section row for a given site.
  */
 export async function fetchAccommodationSection(siteId: string) {
   if (!siteId) return null;
-  const { data, error } = await supabaseAdmin
+  const supabase = await createClient();
+  const { data, error } = await supabase
     .from("sections")
     .select("id, site_id, type, title, subtitle,content")
     .eq("site_id", siteId)

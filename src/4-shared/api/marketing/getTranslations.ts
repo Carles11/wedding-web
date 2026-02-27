@@ -1,4 +1,4 @@
-import { supabaseAdmin } from "@/4-shared/lib/supabaseServer";
+import { supabaseAdmin } from "@/4-shared/lib/supabase/supabaseServer";
 import type { TranslationDictionary } from "@/4-shared/types";
 import { fetchGlobalTranslations } from "@/4-shared/lib/globalTranslations";
 

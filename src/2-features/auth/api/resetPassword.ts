@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/4-shared/lib/supabase/server";
+import { createSupabaseSSRClient } from "@/4-shared/lib/supabase/server";
 
 /**
  * Server action to reset the password for the currently authenticated user.
@@ -12,7 +12,7 @@ import { createClient } from "@/4-shared/lib/supabase/server";
 export async function resetPassword(
   newPassword: string,
 ): Promise<{ error?: string; success?: boolean }> {
-  const supabase = await createClient();
+  const supabase = await createSupabaseSSRClient();
 
   const { error } = await supabase.auth.updateUser({
     password: newPassword,

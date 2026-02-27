@@ -1,4 +1,4 @@
-import { supabase } from "@/4-shared/api/supabaseClient";
+import { createClient } from "@/4-shared/lib/supabase/client";
 import type { ImageRow } from "@/4-shared/types";
 
 /**
@@ -12,6 +12,8 @@ export async function updateImage(
   if (!id) return null;
 
   try {
+    const supabase = await createClient();
+
     const { data, error } = await supabase
       .from("images")
       .update(updates)
@@ -30,7 +32,3 @@ export async function updateImage(
     return null;
   }
 }
-
-// TODO: For explicit slot support consider adding a `slot: 'hero' | 'contact'` column
-// to the `images` table and migrate existing `section` values into it. Server-side
-// enforcement of slot uniqueness per site would be ideal to prevent race conditions.

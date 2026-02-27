@@ -11,7 +11,7 @@ import { cookies } from "next/headers";
  *
  * DO NOT use for: Admin operations (use supabaseAdmin instead)
  */
-export async function createClient() {
+export async function createSupabaseSSRClient() {
   const cookieStore = await cookies();
 
   return createServerClient(

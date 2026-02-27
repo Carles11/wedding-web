@@ -1,12 +1,12 @@
 "use server";
 
-import { createClient } from "@/4-shared/lib/supabase/server";
+import { createSupabaseSSRClient } from "@/4-shared/lib/supabase/server";
 
 export async function loginWithEmail(
   email: string,
   password: string,
 ): Promise<{ error?: string; success?: boolean }> {
-  const supabase = await createClient();
+  const supabase = await createSupabaseSSRClient();
 
   const { error } = await supabase.auth.signInWithPassword({
     email,

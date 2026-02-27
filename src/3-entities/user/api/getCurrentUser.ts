@@ -1,5 +1,5 @@
 import type { User } from "@supabase/supabase-js";
-import { createClient } from "@/4-shared/lib/supabase/server";
+import { createSupabaseSSRClient } from "@/4-shared/lib/supabase/server";
 
 /**
  * Server-side helper to get the current authenticated user.
@@ -9,7 +9,7 @@ import { createClient } from "@/4-shared/lib/supabase/server";
  */
 export async function getCurrentUser(): Promise<User | null> {
   try {
-    const supabase = await createClient();
+    const supabase = await createSupabaseSSRClient();
     const { data, error } = await supabase.auth.getUser();
 
     if (error || !data.user) {

@@ -1,10 +1,12 @@
-import { supabase } from "@/4-shared/api/supabaseClient";
+import { createClient } from "@/4-shared/lib/supabase/client";
 import type { WhatToSeeSection } from "@/4-shared/types";
 
 export async function fetchWhatToSeeSection(
   siteId: string,
 ): Promise<WhatToSeeSection | null> {
   if (!siteId) return null;
+
+  const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("sections")

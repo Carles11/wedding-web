@@ -1,12 +1,14 @@
-import { supabase } from "@/4-shared/api/supabaseClient";
+import { createClient } from "@/4-shared/lib/supabase/client";
 import type { ImageRow } from "@/4-shared/types";
 
 /**
  * Fetch images for a given site id from the `images` table.
- * Returns an array of ImageRow or empty array on none.
+ * Returns an array of ImageRow or empty array.
  */
 export async function fetchImagesBySite(siteId: string): Promise<ImageRow[]> {
   if (!siteId) return [];
+
+  const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("images")

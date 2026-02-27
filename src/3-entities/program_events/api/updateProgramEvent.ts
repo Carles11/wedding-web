@@ -1,4 +1,4 @@
-import { supabase } from "@/4-shared/api/supabaseClient";
+import { createClient } from "@/4-shared/lib/supabase/client";
 import type { ProgramEvent } from "@/4-shared/types";
 
 export async function updateProgramEvent(
@@ -6,6 +6,8 @@ export async function updateProgramEvent(
   updates: Partial<ProgramEvent>,
 ): Promise<ProgramEvent | null> {
   if (!id) return null;
+
+  const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("program_events")

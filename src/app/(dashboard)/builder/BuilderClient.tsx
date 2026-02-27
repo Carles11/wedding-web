@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useSupabaseAuth } from "@/4-shared/hooks/useSupabaseAuth";
 import { useSite } from "@/4-shared/hooks/useSite";
 import LanguageSelector from "@/4-shared/ui/LanguageSelector";
 import { getCurrentUserSubscription } from "@/4-shared/api/builder/getCurrentUserSubscription";
-
+import { SUPPORTED_LANGUAGES } from "@/4-shared/config/i18n";
 import GeneralSiteForm from "@/1-widgets/builder/ui/GeneralSiteForm";
 import ImagesBuilderStep from "@/1-widgets/builder/ui/ImagesBuilderStep";
 import ProgramEventsBuilderStep from "@/1-widgets/builder/ui/ProgramEventsBuilderStep";
@@ -25,28 +25,34 @@ interface Props {
   translations: Record<string, string>;
 }
 
+// Step completeness logic/helpers
 function isGeneralComplete(site?: Site | null): boolean {
   return !!site?.title && !!site?.subdomain;
 }
 function isImagesComplete(site?: Site | null): boolean {
+  // TODO: Implement real images completeness logic
   return false;
 }
 function isProgramComplete(site?: Site | null): boolean {
+  // TODO: Implement real program completeness logic
   return false;
 }
 function isAccommodationComplete(site?: Site | null): boolean {
+  // TODO: Implement real accommodations completeness logic
   return false;
 }
 function isWhatToSeeComplete(site?: Site | null): boolean {
+  // TODO: Implement real what-to-see completeness logic
   return false;
 }
 function isContactComplete(site?: Site | null): boolean {
+  // TODO: Implement real contact completeness logic
   return false;
 }
 function isDomainBillingComplete(site?: Site | null): boolean {
+  // Assume always true if not billing/connecting domain
   return true;
 }
-
 const STEP_COMPLETENESS: ((site?: Site | null) => boolean)[] = [
   isGeneralComplete,
   isImagesComplete,
@@ -86,27 +92,52 @@ export default function BuilderClient({
   const [active, setActive] = useState(0);
   const [currentLang, setCurrentLang] = useState(initialLang);
 
-  // NEW: Plan type and language limit
-  const [planType, setPlanType] = useState<"free" | "monthly" | "yearly">(
-    "free",
-  );
-  const langLimit = planType === "free" ? 1 : 11;
+  const [planType, setPlanType] = useState<
+    "free" | "monthly" | "yearly" | null
+  >(null);
+
+  const langLimit = planType === "free" ? 1 : SUPPORTED_LANGUAGES.length;
+
+  // Provision the site if it doesn't exist
+  const provisionSite = useCallback(async () => {
+    if (!user) return;
+    try {
+      await fetch("/api/provision-site", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: user.id, email: user.email }),
+      });
+      refresh();
+    } catch (err) {
+      // Optionally, show error UI
+      console.error("Failed to provision site:", err);
+    }
+  }, [user, refresh]);
+
+  useEffect(() => {
+    if (user && !site && !siteLoading) {
+      provisionSite();
+    }
+    // Only run when site not found after user is loaded
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, site, siteLoading]);
 
   useEffect(() => {
     if (user) {
       getCurrentUserSubscription(user.id)
-        .then(setPlanType)
+        .then((type) => setPlanType(type))
         .catch(() => setPlanType("free"));
     }
   }, [user]);
 
-  // Language toggle handler: updates the lang param & stays on this page
   const handleLanguageChange = (lang: string) => {
     setCurrentLang(lang);
     const params = new URLSearchParams(searchParams.toString());
     params.set("lang", lang);
     router.push(`${pathname}?${params.toString()}`);
   };
+
+  if (!site || !planType) return <div>Loading…</div>;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -162,7 +193,6 @@ export default function BuilderClient({
                       className={`w-full text-left flex items-center px-3 py-2 rounded ${i === active ? "bg-blue-50 font-semibold" : "hover:bg-gray-50"}`}
                       onClick={() => setActive(i)}
                     >
-                      {/* Status icon before label */}
                       <span className="w-6 flex justify-center items-center">
                         {isComplete ? <GreenCheckIcon /> : <RedDotIcon />}
                       </span>
@@ -200,51 +230,51 @@ export default function BuilderClient({
               )}
 
               <div className="mt-8 border rounded p-4 bg-gray-50">
-                {active === 0 && (
+                {active === 0 && site && (
                   <GeneralSiteForm
-                    site={site ?? null}
+                    site={site}
                     refresh={refresh}
                     lang={currentLang}
                     translations={translations}
-                    langLimit={langLimit} // <--- NEW: Pass limit
-                    planType={planType} // <--- optionally pass for CTA
+                    langLimit={langLimit}
+                    planType={planType}
                   />
                 )}
-                {active === 1 && (
+                {active === 1 && site && (
                   <ImagesBuilderStep
-                    site={site ?? null}
+                    site={site}
                     refresh={refresh}
                     lang={currentLang}
                     translations={translations}
                   />
                 )}
-                {active === 2 && (
+                {active === 2 && site && (
                   <ProgramEventsBuilderStep
-                    site={site ?? null}
+                    site={site}
                     refresh={refresh}
                     lang={currentLang}
                     translations={translations}
                   />
                 )}
-                {active === 3 && (
+                {active === 3 && site && (
                   <AccommodationBuilderStep
-                    site={site ?? null}
+                    site={site}
                     refresh={refresh}
                     lang={currentLang}
                     translations={translations}
                   />
                 )}
-                {active === 4 && (
+                {active === 4 && site && (
                   <WhatToSeeBuilderStep
-                    site={site ?? null}
+                    site={site}
                     refresh={refresh}
                     lang={currentLang}
                     translations={translations}
                   />
                 )}
-                {active === 5 && (
+                {active === 5 && site && (
                   <ContactBuilderStep
-                    site={site ?? null}
+                    site={site}
                     refresh={refresh}
                     lang={currentLang}
                     translations={translations}

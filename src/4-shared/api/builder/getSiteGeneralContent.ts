@@ -1,68 +1,100 @@
-import { supabase } from "@/4-shared/api/supabaseClient";
+import { createClient } from "@/4-shared/lib/supabase/client";
 import { SUPPORTED_LANGUAGES } from "@/4-shared/config/i18n";
 import type { SupportedLanguage } from "@/4-shared/config/i18n";
 
-type SiteGeneralContent = {
+type GeneralContent = {
   languages: SupportedLanguage[];
   default_lang: SupportedLanguage;
   subdomain: string;
+  heroId: string | null;
   titles: Record<SupportedLanguage, string>;
   subtitles: Record<SupportedLanguage, string>;
 };
 
 export async function getSiteGeneralContent(
   site_id: string,
-): Promise<SiteGeneralContent> {
-  // Fetch site metadata
-  const { data: site, error: siteError } = await supabase
+): Promise<GeneralContent> {
+  const supabase = await createClient();
+
+  // Get language config and subdomain
+  const { data: site, error: siteErr } = await supabase
     .from("sites")
     .select("languages, default_lang, subdomain")
     .eq("id", site_id)
     .maybeSingle();
-
-  if (siteError) throw siteError;
+  if (siteErr) throw siteErr;
   if (!site) throw new Error("Site not found");
 
-  const languages: SupportedLanguage[] = Array.isArray(site.languages)
+  // Robust handling: only use supported and enabled languages
+  const allLangs = Array.isArray(site.languages)
     ? site.languages
     : [site.default_lang ?? "en"];
 
-  // Fetch all titles/subtitles for this site in all enabled languages
-  const { data: translations, error: translationError } = await supabase
-    .from("site_translations")
-    .select("key, locale, value")
-    .eq("site_id", site_id)
-    .in("locale", languages);
-
-  if (translationError) throw translationError;
-
-  // Structure values
-  const supportedLanguages: SupportedLanguage[] = SUPPORTED_LANGUAGES.filter(
-    (lang) => languages.includes(lang as SupportedLanguage),
+  // Filter out any languages that aren't truly supported by the app/types
+  const enabledLangs: SupportedLanguage[] = SUPPORTED_LANGUAGES.filter((lang) =>
+    allLangs.includes(lang as SupportedLanguage),
   ) as SupportedLanguage[];
 
-  const titles: Record<SupportedLanguage, string> = Object.fromEntries(
-    supportedLanguages.map((lang) => [lang, ""]),
-  ) as Record<SupportedLanguage, string>;
-  const subtitles: Record<SupportedLanguage, string> = Object.fromEntries(
-    supportedLanguages.map((lang) => [lang, ""]),
-  ) as Record<SupportedLanguage, string>;
+  // Get hero section (if present)
+  const { data: hero, error: heroErr } = await supabase
+    .from("sections")
+    .select("id, title, content")
+    .eq("site_id", site_id)
+    .eq("type", "hero")
+    .maybeSingle();
+  if (heroErr) throw heroErr;
 
-  for (const lang of supportedLanguages) {
-    const titleRow = translations.find(
-      (t) => t.key === "main_title" && t.locale === lang,
-    );
-    const subtitleRow = translations.find(
-      (t) => t.key === "subtitle" && t.locale === lang,
-    );
-    titles[lang] = titleRow?.value ?? "";
-    subtitles[lang] = subtitleRow?.value ?? "";
+  function parseMaybeJSON<T>(input: unknown): T | object {
+    if (!input) return {};
+    if (typeof input === "string") {
+      try {
+        return JSON.parse(input);
+      } catch {
+        return {};
+      }
+    }
+    if (typeof input === "object") return input as T;
+    return {};
+  }
+  const titleObj = parseMaybeJSON<Record<SupportedLanguage, string>>(
+    hero?.title,
+  );
+  let subtitleObj: Partial<Record<SupportedLanguage, string>> = {};
+  const contentObj = parseMaybeJSON<{
+    subtitle?: Record<SupportedLanguage, string>;
+  }>(hero?.content);
+  if (
+    contentObj &&
+    typeof contentObj === "object" &&
+    "subtitle" in contentObj &&
+    typeof (contentObj as { subtitle?: Record<SupportedLanguage, string> })
+      .subtitle === "object" &&
+    (contentObj as { subtitle?: Record<SupportedLanguage, string> }).subtitle
+  ) {
+    subtitleObj =
+      (contentObj as { subtitle?: Record<SupportedLanguage, string> })
+        .subtitle ?? {};
+  }
+
+  // Build per-supported-language subtitle and title objects
+  const titles: Record<SupportedLanguage, string> = {} as Record<
+    SupportedLanguage,
+    string
+  >;
+  const subtitles: Record<SupportedLanguage, string> = {} as Record<
+    SupportedLanguage,
+    string
+  >;
+  for (const lang of enabledLangs) {
+    titles[lang] = (titleObj as Record<SupportedLanguage, string>)[lang] ?? "";
+    subtitles[lang] = subtitleObj[lang] ?? "";
   }
 
   return {
-    languages: supportedLanguages,
+    languages: enabledLangs,
     default_lang: site.default_lang ?? "en",
     subdomain: site.subdomain ?? "",
+    heroId: hero?.id ?? null,
     titles,
     subtitles,
   };

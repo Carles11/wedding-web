@@ -1,4 +1,4 @@
-import { supabaseAdmin } from "@/4-shared/lib/supabaseServer"; // ← CHANGED!
+import { supabaseAdmin } from "@/4-shared/lib/supabase/supabaseServer"; // ← CHANGED!
 
 /**
  * SSR-safe tenant lookup by domain (host).

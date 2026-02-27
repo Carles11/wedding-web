@@ -1,4 +1,4 @@
-import { supabase } from "@/4-shared/api/supabaseClient";
+import { createClient } from "@/4-shared/lib/supabase/client";
 import type { WhatToSeeSection } from "@/4-shared/types";
 
 export async function upsertWhatToSeeSection(
@@ -6,6 +6,8 @@ export async function upsertWhatToSeeSection(
   content: WhatToSeeSection["content"],
 ): Promise<WhatToSeeSection | null> {
   if (!siteId) return null;
+
+  const supabase = await createClient();
 
   const { data: existing, error: fetchErr } = await supabase
     .from("sections")
@@ -57,5 +59,3 @@ export async function upsertWhatToSeeSection(
     return null;
   }
 }
-
-// TODO: Consider migrating to a dedicated `what_to_see_entries` table for per-row CRUD and constraints.

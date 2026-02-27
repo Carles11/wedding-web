@@ -1,4 +1,4 @@
-import { supabase } from "@/4-shared/api/supabaseClient";
+import { createClient } from "@/4-shared/lib/supabase/client";
 import type { SupportedLanguage } from "@/4-shared/config/i18n";
 
 type SaveOpts = {
@@ -20,6 +20,8 @@ export async function saveSiteGeneralContent({
   languages,
   default_lang,
 }: SaveOpts): Promise<void> {
+  const supabase = await createClient();
+
   // 1. Upsert main_title + subtitle for selected language
   for (const [key, value] of [
     ["main_title", title],

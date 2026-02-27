@@ -1,5 +1,5 @@
 import type { AccommodationEntry } from "@/4-shared/types";
-import { fetchAccommodationSection } from "./fetchAccommodationSection";
+import { fetchAccommodationSection } from "@/3-entities/sections/api/fetchAccommodationSection";
 
 export async function fetchAccommodationEntries(
   siteId: string,

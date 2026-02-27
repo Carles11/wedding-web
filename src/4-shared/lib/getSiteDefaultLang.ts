@@ -1,4 +1,4 @@
-import { supabase } from "@/4-shared/api/supabaseClient";
+import { createSupabaseSSRClient } from "@/4-shared/lib/supabase/server";
 import type { Site } from "@/4-shared/types";
 
 /**
@@ -7,8 +7,8 @@ import type { Site } from "@/4-shared/types";
  */
 export async function getSiteDefaultLang(siteId: string): Promise<string> {
   if (!siteId) return "ca";
-  // Guard against invalid input
-  if (!siteId) return "ca";
+
+  const supabase = await createSupabaseSSRClient();
 
   // Avoid using `.from<T>()` generics unless DB types are generated and imported.
   const { data, error } = await supabase

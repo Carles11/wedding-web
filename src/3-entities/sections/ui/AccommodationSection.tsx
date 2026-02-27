@@ -1,4 +1,3 @@
-import React from "react";
 import { getTextForLang } from "@/4-shared/lib/getTextForLang";
 import SectionContainer from "@/4-shared/ui/section/SectionContainer";
 import type { TranslationDictionary } from "@/4-shared/types";

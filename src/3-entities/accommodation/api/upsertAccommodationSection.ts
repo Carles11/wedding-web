@@ -1,4 +1,4 @@
-import { supabase } from "@/4-shared/api/supabaseClient";
+import { createClient } from "@/4-shared/lib/supabase/client";
 import type { AccommodationSection } from "@/4-shared/types";
 
 /**
@@ -10,6 +10,8 @@ export async function upsertAccommodationSection(
   content: AccommodationSection["content"],
 ): Promise<AccommodationSection | null> {
   if (!siteId) return null;
+
+  const supabase = await createClient();
 
   // Try updating existing row first
   const { data: existing, error: fetchErr } = await supabase
@@ -64,6 +66,3 @@ export async function upsertAccommodationSection(
     return null;
   }
 }
-
-// TODO: Consider schema migration to store accommodations in a dedicated table
-// (accommodations) with one row per entry for simpler CRUD and constraints.

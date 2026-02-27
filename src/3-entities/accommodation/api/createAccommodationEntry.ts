@@ -1,6 +1,6 @@
 import type { AccommodationEntry } from "@/4-shared/types";
-import { fetchAccommodationSection } from "./fetchAccommodationSection";
 import { upsertAccommodationSection } from "./upsertAccommodationSection";
+import { fetchAccommodationSection } from "@/3-entities/sections/api/fetchAccommodationSection";
 
 export async function createAccommodationEntry(
   siteId: string,
@@ -21,9 +21,9 @@ export async function createAccommodationEntry(
       // browser-native UUID where available
       if (
         typeof crypto !== "undefined" &&
-        typeof (crypto as any).randomUUID === "function"
+        typeof (crypto as Crypto).randomUUID === "function"
       ) {
-        return (crypto as any).randomUUID();
+        return (crypto as Crypto).randomUUID();
       }
     } catch (e) {
       // ignore and fallback
@@ -32,7 +32,7 @@ export async function createAccommodationEntry(
     return Math.random().toString(36).slice(2) + Date.now().toString(36);
   };
 
-  const newEntry: AccommodationEntry = { id: generateId(), ...(entry as any) };
+  const newEntry: AccommodationEntry = { id: generateId(), ...entry };
   const newHotels = [newEntry, ...hotels];
 
   const updated = await upsertAccommodationSection(siteId, {

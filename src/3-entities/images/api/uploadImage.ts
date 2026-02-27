@@ -1,4 +1,4 @@
-import { supabase } from "@/4-shared/api/supabaseClient";
+import { createClient } from "@/4-shared/lib/supabase/client";
 import type { ImageRow } from "@/4-shared/types";
 
 const IMAGES_BUCKET = "images";
@@ -12,6 +12,8 @@ export async function uploadImageForSite(
   file: File,
 ): Promise<ImageRow | null> {
   if (!siteId) return null;
+
+  const supabase = createClient();
 
   const timestamp = Date.now();
   const safeName = file.name.replace(/[^a-z0-9.-]/gi, "_");

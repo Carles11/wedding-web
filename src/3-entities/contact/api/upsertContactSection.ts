@@ -1,4 +1,4 @@
-import { supabase } from "@/4-shared/api/supabaseClient";
+import { createClient } from "@/4-shared/lib/supabase/client";
 import type { ContactSection } from "@/4-shared/types";
 
 export async function upsertContactSection(
@@ -6,6 +6,8 @@ export async function upsertContactSection(
   content: ContactSection["content"],
 ): Promise<ContactSection | null> {
   if (!siteId) return null;
+
+  const supabase = await createClient();
 
   const { data: existing, error: fetchErr } = await supabase
     .from("sections")
@@ -58,6 +60,3 @@ export async function upsertContactSection(
     return null;
   }
 }
-
-// TODO: Add stricter server-side email validation and spam protections (rate
-// limiting/verification) before using this in production.
