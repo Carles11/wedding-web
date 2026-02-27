@@ -25,7 +25,6 @@ import { LanguageToggle } from "@/2-features/language-toggle/ui/LanguageToggle";
 import TopMenu from "@/2-features/top-menu/ui/TopMenu";
 
 import { getMergedTranslations } from "@/4-shared/lib/i18n";
-import { getTextForLang } from "@/4-shared/lib/getTextForLang";
 
 export const dynamic = "force-dynamic";
 
@@ -52,11 +51,10 @@ export async function generateMetadata({
   }
 
   // Fetch hero for title/description
-  const hero = await fetchHeroSection(site.id);
+  const hero = await fetchHeroSection(site.id, lang);
 
-  const siteTitle = getTextForLang(hero?.title, lang, "ca") || "Wedding";
-  const siteDescription =
-    getTextForLang(hero?.content?.description, lang, "ca") || "";
+  const siteTitle = hero?.title || "Wedding";
+  const siteDescription = hero?.description || "";
   const baseUrl = `https://${host}`;
 
   // Get available languages from site
@@ -135,7 +133,7 @@ export default async function HomePage(props: {
   // SSR fetch hero/program and the new sections in parallel, scoped by site
   const [hero, program, details, accommodation, whatelse, bankData, contact] =
     await Promise.all([
-      fetchHeroSection(siteId),
+      fetchHeroSection(siteId, lang),
       fetchProgramSection(siteId),
       fetchDetailsSection(siteId),
       fetchAccommodationSection(siteId),
@@ -174,7 +172,7 @@ export default async function HomePage(props: {
         {/* Hero */}
         {hero && (
           <>
-            <HeroSection hero={hero} lang={lang} translations={translations} />
+            <HeroSection hero={hero} translations={translations} />
           </>
         )}
       </div>

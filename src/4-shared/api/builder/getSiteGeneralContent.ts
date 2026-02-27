@@ -6,7 +6,7 @@ type GeneralContent = {
   languages: SupportedLanguage[];
   default_lang: SupportedLanguage;
   subdomain: string;
-  heroId: string | null;
+  heroId: string | null; // still keep for referencing image, etc.
   titles: Record<SupportedLanguage, string>;
   subtitles: Record<SupportedLanguage, string>;
 };
@@ -25,61 +25,32 @@ export async function getSiteGeneralContent(
   if (siteErr) throw siteErr;
   if (!site) throw new Error("Site not found");
 
-  // Robust handling: only use supported and enabled languages
+  // Use enabled languages
   const allLangs = Array.isArray(site.languages)
     ? site.languages
     : [site.default_lang ?? "en"];
-
-  // Filter out any languages that aren't truly supported by the app/types
   const enabledLangs: SupportedLanguage[] = SUPPORTED_LANGUAGES.filter((lang) =>
     allLangs.includes(lang as SupportedLanguage),
   ) as SupportedLanguage[];
 
-  // Get hero section (if present)
+  // Get hero section row just for id & image (not for title/description)
   const { data: hero, error: heroErr } = await supabase
     .from("sections")
-    .select("id, title, content")
+    .select("id, content")
     .eq("site_id", site_id)
     .eq("type", "hero")
     .maybeSingle();
   if (heroErr) throw heroErr;
 
-  function parseMaybeJSON<T>(input: unknown): T | object {
-    if (!input) return {};
-    if (typeof input === "string") {
-      try {
-        return JSON.parse(input);
-      } catch {
-        return {};
-      }
-    }
-    if (typeof input === "object") return input as T;
-    return {};
-  }
-  const titleObj = parseMaybeJSON<Record<SupportedLanguage, string>>(
-    hero?.title,
-  );
-  const contentObj = parseMaybeJSON<{
-    description?: Record<SupportedLanguage, string>;
-    backgroundImage?: string;
-  }>(hero?.content);
-
-  // Fix: Get description as subtitle
-  let subtitleObj: Partial<Record<SupportedLanguage, string>> = {};
-
-  if (
-    contentObj &&
-    typeof contentObj === "object" &&
-    "description" in contentObj &&
-    typeof (contentObj as { description?: Record<SupportedLanguage, string> })
-      .description === "object"
-  ) {
-    subtitleObj =
-      (contentObj as { description?: Record<SupportedLanguage, string> })
-        .description ?? {};
-  }
-
-  // Build per-supported-language subtitle and title objects
+  // Fetch hero title/description translations for all enabled languages in one query
+  const { data: translations, error: trErr } = await supabase
+    .from("site_translations")
+    .select("key, locale, value")
+    .eq("site_id", site_id)
+    .in("locale", enabledLangs)
+    .in("key", ["sections.hero.title", "sections.hero.description"]);
+  if (trErr) throw trErr;
+  // Build title/subtitle objects per language
   const titles: Record<SupportedLanguage, string> = {} as Record<
     SupportedLanguage,
     string
@@ -89,8 +60,14 @@ export async function getSiteGeneralContent(
     string
   >;
   for (const lang of enabledLangs) {
-    titles[lang] = (titleObj as Record<SupportedLanguage, string>)[lang] ?? "";
-    subtitles[lang] = subtitleObj[lang] ?? "";
+    titles[lang] =
+      translations?.find(
+        (t) => t.key === "sections.hero.title" && t.locale === lang,
+      )?.value ?? "";
+    subtitles[lang] =
+      translations?.find(
+        (t) => t.key === "sections.hero.description" && t.locale === lang,
+      )?.value ?? "";
   }
 
   return {

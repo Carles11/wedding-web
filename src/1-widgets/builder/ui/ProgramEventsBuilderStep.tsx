@@ -61,6 +61,7 @@ export default function ProgramEventsBuilderStep({ site, refresh }: Props) {
     setError(null);
     try {
       const rows = await fetchProgramEventsBySite(site.id);
+      console.log("Loaded events:", rows);
       setEvents(rows);
     } catch (err: unknown) {
       console.error(err);

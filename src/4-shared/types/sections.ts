@@ -1,16 +1,16 @@
 // Shared type for the Hero section, scalable for multilingual/SaaS structures
-export type HeroSection = {
+export type HeroSectionType = {
   id: string;
-  site_id: string; // Multi-tenant identifier (never hardcoded)
-  type: "hero";
-  title: Record<string, string>; // e.g., { es: "Bienvenido", ca: "Benvingut" }
-  content: {
-    description: Record<string, string>;
-    backgroundImage?: string;
-    [key: string]: unknown; // Allow extension for future content fields
-  };
-  // More shared fields (future-proofing for SaaS) can be added as needed
-  [key: string]: unknown;
+  site_id: string;
+  type: string;
+  title: string; // now always a string!
+  description: string; // now always a string!
+  backgroundImage?: string;
+  date?: string;
+  location?: string;
+  dresscode?: string;
+  sort_order?: number;
+  // remove or refactor any fields that used to be objects
 };
 
 // ProgramSection type matches your content JSON shape in DB

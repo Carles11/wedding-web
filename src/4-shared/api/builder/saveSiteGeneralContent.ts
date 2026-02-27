@@ -3,7 +3,6 @@ import type { SupportedLanguage } from "@/4-shared/config/i18n";
 
 type SaveOpts = {
   site_id: string;
-  heroId: string | null;
   lang: SupportedLanguage;
   title: string;
   subtitle: string;
@@ -14,7 +13,6 @@ type SaveOpts = {
 
 export async function saveSiteGeneralContent({
   site_id,
-  heroId,
   lang,
   title,
   subtitle,
@@ -26,8 +24,8 @@ export async function saveSiteGeneralContent({
 
   // 1. Upsert main_title + subtitle for selected language
   for (const [key, value] of [
-    ["main_title", title],
-    ["subtitle", subtitle],
+    ["sections.hero.title", title],
+    ["sections.hero.description", subtitle],
   ] as const) {
     const { error } = await supabase.from("site_translations").upsert(
       [

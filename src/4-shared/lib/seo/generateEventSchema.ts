@@ -1,4 +1,4 @@
-import type { HeroSection, ProgramSection } from "@/4-shared/types";
+import type { HeroSectionType, ProgramSection } from "@/4-shared/types";
 import { getTextForLang } from "@/4-shared/lib/getTextForLang";
 
 /**
@@ -6,7 +6,7 @@ import { getTextForLang } from "@/4-shared/lib/getTextForLang";
  * https://schema.org/Event
  */
 export function generateEventSchema(params: {
-  hero: HeroSection | null;
+  hero: HeroSectionType | null;
   program: ProgramSection | null;
   lang: string;
   baseUrl: string;
@@ -15,9 +15,11 @@ export function generateEventSchema(params: {
 
   if (!hero) return null;
 
-  const eventName = getTextForLang(hero.title, lang, "ca") || "Wedding";
-  const description =
-    getTextForLang(hero.content?.description, lang, "ca") || "";
+  // NEW: title and description are now simple strings!
+  const eventName = hero.title || "Wedding";
+  const description = hero.description || "";
+
+  // The program may still be old format—keep getTextForLang for now, refactor when migrated
   const eventDate = getTextForLang(program?.content?.when, lang, "ca");
   const locationName = getTextForLang(
     program?.content?.where?.wedding,
@@ -42,8 +44,9 @@ export function generateEventSchema(params: {
     eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
     eventStatus: "https://schema.org/EventScheduled",
     url: baseUrl,
-    ...(hero.content?.backgroundImage && {
-      image: hero.content.backgroundImage,
+    // NEW: Use hero.backgroundImage if present
+    ...(hero.backgroundImage && {
+      image: hero.backgroundImage,
     }),
   };
 

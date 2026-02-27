@@ -7,11 +7,10 @@ export async function fetchProgramEventsBySite(
   if (!siteId) return [];
 
   const supabase = await createClient();
-
   const { data, error } = await supabase
     .from("program_events")
     .select(
-      `id, site_id, day_tag, date, time, title, location, location_url, description, sort_order, created_at`,
+      `id, site_id,  date, time, title, location, description, sort_order, created_at`,
     )
     .eq("site_id", siteId)
     .order("sort_order", { ascending: true });
@@ -20,6 +19,5 @@ export async function fetchProgramEventsBySite(
     console.error("[fetchProgramEventsBySite] Supabase error:", error);
     return [];
   }
-
   return (data as ProgramEvent[]) ?? [];
 }

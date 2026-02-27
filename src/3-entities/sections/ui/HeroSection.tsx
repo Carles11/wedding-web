@@ -1,12 +1,10 @@
-import type { HeroSection as HeroSectionType } from "@/4-shared/types";
+import type { HeroSectionType } from "@/4-shared/types";
 import Image from "next/image";
-import { getTextForLang } from "@/4-shared/lib/getTextForLang";
 import Heading from "@/4-shared/ui/typography/Heading";
 import type { TranslationDictionary } from "@/4-shared/types";
 
 type HeroSectionProps = {
   hero: HeroSectionType;
-  lang: string;
   translations?: TranslationDictionary | null;
 };
 
@@ -19,32 +17,15 @@ type HeroSectionProps = {
  * - translations is passed from server via getMergedTranslations(siteId, lang)
  * - All content text uses getTextForLang to prefer the requested lang with a fallback (site defaults)
  */
-export default function HeroSection({
-  hero,
-  lang,
-  translations,
-}: HeroSectionProps) {
-  const title = getTextForLang(hero.title, lang, "ca");
-  const description = getTextForLang(hero.content?.description, lang, "ca");
-  const backgroundImage = hero.content?.backgroundImage ?? "";
+export default function HeroSection({ hero, translations }: HeroSectionProps) {
+  const title = hero.title ?? "";
+  const description = hero.description ?? "";
+  const backgroundImage = hero.backgroundImage ?? "";
 
-  // Optional structured fields inside hero.content (may not exist for all sites)
-  // We safely read them and prefer the lang-specific values if present.
-  const heroDate = getTextForLang(
-    hero.content?.date as Record<string, string> | undefined,
-    lang,
-    "",
-  );
-  const heroLocation = getTextForLang(
-    hero.content?.location as Record<string, string> | undefined,
-    lang,
-    "",
-  );
-  const heroDresscode = getTextForLang(
-    hero.content?.dresscode as Record<string, string> | undefined,
-    lang,
-    "",
-  );
+  // Optional structured info (keep for future migratable fields)
+  const heroDate: string = hero.date ?? "";
+  const heroLocation: string = hero.location ?? "";
+  const heroDresscode: string = hero.dresscode ?? "";
 
   const whenLabel = translations?.["when"] ?? "When";
   const whereLabel = translations?.["where"] ?? "Where";
@@ -70,7 +51,7 @@ export default function HeroSection({
         />
       )}
 
-      {/* Dark overlay for contrast */}
+      {/* Overlay */}
       <div className="absolute inset-0 bg-black/30" />
 
       {/* Content */}
@@ -89,7 +70,7 @@ export default function HeroSection({
           </p>
         )}
 
-        {/* Optional small info row using translations and site-provided values */}
+        {/* Info row, as before */}
         {(heroDate || heroLocation || heroDresscode) && (
           <div className="mt-6 flex flex-col sm:flex-row items-center gap-3 text-white/95 text-sm md:text-base">
             {heroDate && (
