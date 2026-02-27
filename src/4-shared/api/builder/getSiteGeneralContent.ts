@@ -59,21 +59,24 @@ export async function getSiteGeneralContent(
   const titleObj = parseMaybeJSON<Record<SupportedLanguage, string>>(
     hero?.title,
   );
-  let subtitleObj: Partial<Record<SupportedLanguage, string>> = {};
   const contentObj = parseMaybeJSON<{
-    subtitle?: Record<SupportedLanguage, string>;
+    description?: Record<SupportedLanguage, string>;
+    backgroundImage?: string;
   }>(hero?.content);
+
+  // Fix: Get description as subtitle
+  let subtitleObj: Partial<Record<SupportedLanguage, string>> = {};
+
   if (
     contentObj &&
     typeof contentObj === "object" &&
-    "subtitle" in contentObj &&
-    typeof (contentObj as { subtitle?: Record<SupportedLanguage, string> })
-      .subtitle === "object" &&
-    (contentObj as { subtitle?: Record<SupportedLanguage, string> }).subtitle
+    "description" in contentObj &&
+    typeof (contentObj as { description?: Record<SupportedLanguage, string> })
+      .description === "object"
   ) {
     subtitleObj =
-      (contentObj as { subtitle?: Record<SupportedLanguage, string> })
-        .subtitle ?? {};
+      (contentObj as { description?: Record<SupportedLanguage, string> })
+        .description ?? {};
   }
 
   // Build per-supported-language subtitle and title objects

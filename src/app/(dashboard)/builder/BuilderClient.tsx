@@ -27,6 +27,7 @@ interface Props {
 
 // Step completeness logic/helpers
 function isGeneralComplete(site?: Site | null): boolean {
+  console.log("Checking general completeness for site:", site);
   return !!site?.title && !!site?.subdomain;
 }
 function isImagesComplete(site?: Site | null): boolean {

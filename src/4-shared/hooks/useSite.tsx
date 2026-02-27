@@ -33,7 +33,7 @@ export function useSite(user: User | null) {
       try {
         const { data, error: fetchErr } = await supabase
           .from("sites")
-          .select("id, subdomain, default_lang, languages, domains")
+          .select("id, title, subdomain, default_lang, languages, domains")
           .eq("owner_user_id", user?.id)
           .limit(1)
           .maybeSingle();
