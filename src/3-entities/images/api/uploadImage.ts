@@ -1,51 +1,61 @@
 import { createClient } from "@/4-shared/lib/supabase/client";
 import type { ImageRow } from "@/4-shared/types";
+import { STORAGE_BUCKET_TENANT } from "@/4-shared/lib/supabase/buckets";
 
-const IMAGES_BUCKET = "images";
-
-/**
- * Uploads a File to Supabase Storage and inserts an `images` row linking to it.
- * Returns the created ImageRow or null on failure.
- */
+// Main upload handler
 export async function uploadImageForSite(
   siteId: string,
   file: File,
+  section: "hero" | "contact",
+  sectionId: string | null,
+  subdomain: string,
+  slot: string = "0",
 ): Promise<ImageRow | null> {
-  if (!siteId) return null;
-
   const supabase = createClient();
+  console.log("[DEBUG] uploadImageForSite params", {
+    siteId,
+    file,
+    sectionId,
+    section,
+    subdomain,
+    slot,
+  });
 
-  const timestamp = Date.now();
-  const safeName = file.name.replace(/[^a-z0-9.-]/gi, "_");
-  const path = `${siteId}/${timestamp}_${safeName}`;
+  const path = `${siteId}/${section}/${subdomain}_${slot}.jpg`;
+  console.log("[DEBUG] Uploading file to storage...", {
+    bucket: "tenant-images",
+    path,
+    file,
+  });
+  const { data: userData, error: userError } = await supabase.auth.getUser();
+  console.log("[DEBUG] Supabase user", userData, userError);
 
-  const { data: uploadData, error: uploadErr } = await supabase.storage
-    .from(IMAGES_BUCKET)
-    .upload(path, file, { cacheControl: "3600", upsert: false });
-
-  if (uploadErr) {
-    console.error("[uploadImageForSite] storage upload error:", uploadErr);
-    return null;
+  if (!userData) {
+    throw new Error("Not authenticated: cannot upload image!");
   }
+  // Upload to Supabase storage
+  const { data: uplData, error: uplError } = await supabase.storage
+    .from(STORAGE_BUCKET_TENANT)
+    .upload(path, file, { upsert: true, cacheControl: "3600" });
+  console.log("[DEBUG] Upload result", { uplData, uplError });
 
-  // Insert DB row referencing the storage path
-  const { data: inserted, error: insertErr } = await supabase
+  if (uplError || !uplData)
+    throw uplError ?? new Error("Failed to upload image");
+
+  // Insert into images table (always records bucket path in .url field)
+  const { data: inserted, error: dbError } = await supabase
     .from("images")
     .insert([
       {
-        site_id: siteId,
-        bucket: IMAGES_BUCKET,
-        path,
-        metadata: { size: file.size, mime: file.type },
+        section_id: sectionId, // uuid, from `sections` table
+        site_id: siteId, // uuid, from current site/user context
+        url: path, // file path in Supabase Storage bucket
+        caption: "", // optional caption, can be empty string or null
       },
     ])
-    .select("id, site_id, bucket, path, url, section, metadata, created_at")
+    .select()
     .maybeSingle();
 
-  if (insertErr) {
-    console.error("[uploadImageForSite] DB insert error:", insertErr);
-    return null;
-  }
-
-  return (inserted as ImageRow) ?? null;
+  if (dbError) throw dbError;
+  return inserted as ImageRow;
 }

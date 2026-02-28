@@ -21,7 +21,7 @@ export async function getSiteIdForDomain(
     .from("sites")
     .select("id")
     .contains("domains", [normalizedDomain])
-    .single();
+    .maybeSingle();
 
   console.log("🔍 [getSiteIdForDomain] Query result:", { data, error });
 

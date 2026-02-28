@@ -1,34 +1,22 @@
 import { createClient } from "@/4-shared/lib/supabase/client";
 import type { ImageRow } from "@/4-shared/types";
 
-/**
- * Update an image row by id. `updates` can include `section` to assign 'hero'|'contact' or null.
- * Returns the updated ImageRow or null on failure.
- */
+// This supports updating section and caption (metadata)
 export async function updateImage(
   id: string,
-  updates: Partial<Pick<ImageRow, "section" | "url" | "metadata">>,
+  updates: Partial<{ section: "hero" | "contact" | null; caption: string }>,
 ): Promise<ImageRow | null> {
-  if (!id) return null;
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("images")
+    .update({
+      section_id: updates.section ?? null,
+      caption: updates.caption,
+    })
+    .eq("id", id)
+    .select()
+    .maybeSingle();
 
-  try {
-    const supabase = await createClient();
-
-    const { data, error } = await supabase
-      .from("images")
-      .update(updates)
-      .eq("id", id)
-      .select("id, site_id, bucket, path, url, section, metadata, created_at")
-      .maybeSingle();
-
-    if (error) {
-      console.error("[updateImage] DB update error:", error);
-      return null;
-    }
-
-    return (data as ImageRow) ?? null;
-  } catch (err) {
-    console.error("[updateImage] unexpected error:", err);
-    return null;
-  }
+  if (error) throw error;
+  return data as ImageRow;
 }

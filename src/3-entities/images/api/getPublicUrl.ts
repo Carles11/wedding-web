@@ -1,13 +1,9 @@
 import { createClient } from "@/4-shared/lib/supabase/client";
-import type { ImageRow } from "@/4-shared/types";
+import { STORAGE_BUCKET_TENANT } from "@/4-shared/lib/supabase/buckets";
 
-/**
- * Returns a public URL for an image if available. For private buckets use signed URLs.
- */
-export function getPublicUrlForImage(image: ImageRow): string | null {
-  if (image.url) return image.url;
-  if (!image.bucket || !image.path) return null;
+export function getPublicUrlForImage(image: { url: string }): string | null {
+  if (!image?.url) return null;
   const supabase = createClient();
-  const { data } = supabase.storage.from(image.bucket).getPublicUrl(image.path);
-  return data?.publicUrl ?? null;
+  return supabase.storage.from(STORAGE_BUCKET_TENANT).getPublicUrl(image.url)
+    .data.publicUrl;
 }

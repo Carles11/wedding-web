@@ -1,36 +1,20 @@
 import { createClient } from "@/4-shared/lib/supabase/client";
 import type { ImageRow } from "@/4-shared/types";
+import { STORAGE_BUCKET_TENANT } from "@/4-shared/lib/supabase/buckets";
 
-/**
- * Deletes image storage object (if present) and DB row for the provided image.
- * Returns true on success, false on failure.
- */
 export async function deleteImage(image: ImageRow): Promise<boolean> {
-  try {
-    const supabase = await createClient();
+  const supabase = createClient();
+  if (!image.url) return false;
+  // Delete image file from bucket
+  const { error: storageError } = await supabase.storage
+    .from(STORAGE_BUCKET_TENANT)
+    .remove([image.url]);
+  if (storageError) return false;
 
-    if (image.bucket && image.path) {
-      const { error: delErr } = await supabase.storage
-        .from(image.bucket)
-        .remove([image.path]);
-      if (delErr) {
-        console.error("[deleteImage] storage delete error:", delErr);
-        return false;
-      }
-    }
-
-    const { error: dbErr } = await supabase
-      .from("images")
-      .delete()
-      .eq("id", image.id);
-    if (dbErr) {
-      console.error("[deleteImage] DB delete error:", dbErr);
-      return false;
-    }
-
-    return true;
-  } catch (err) {
-    console.error("[deleteImage] unexpected error:", err);
-    return false;
-  }
+  // Then delete DB row
+  const { error: dbError } = await supabase
+    .from("images")
+    .delete()
+    .eq("id", image.id);
+  return !dbError;
 }
