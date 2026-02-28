@@ -39,55 +39,80 @@ export default function GeneralSiteForm({
   const [success, setSuccess] = useState<string | null>(null);
   const [showUpgradeCTA, setShowUpgradeCTA] = useState(false);
 
-  useEffect(() => {
+  // Robust: absolutely refresh all relevant state from DB, including after save or site change
+  const fetchAndApplyGeneralContent = async () => {
+    console.log("APAPAPAPPAPAPAP_Fetching general content for site:", site);
     if (!site) return;
-    getSiteGeneralContent(site.id)
-      .then((res) => {
-        setLanguages(res.languages);
-        setDefaultLang(res.default_lang);
-        setSubdomain(res.subdomain);
-        setHeroId(res.heroId);
-        setContent(
-          res.languages.reduce(
-            (obj, lang) => {
-              obj[lang] = {
-                title: res.titles[lang] ?? "",
-                subtitle: res.subtitles[lang] ?? "",
-              };
-              return obj;
-            },
-            {} as Record<
-              SupportedLanguage,
-              { title: string; subtitle: string }
-            >,
-          ),
-        );
-        setActiveLang(res.default_lang);
-      })
-      .catch((err) => {
-        console.error("Error fetching general content:", err);
-        setError(err.message);
-      });
+    try {
+      const res = await getSiteGeneralContent(site.id);
+      setLanguages(res.languages);
+      setDefaultLang(res.default_lang);
+      setSubdomain(res.subdomain);
+      setHeroId(res.heroId);
+      setContent(
+        res.languages.reduce(
+          (obj, lang) => {
+            obj[lang] = {
+              title: res.titles[lang] ?? "",
+              subtitle: res.subtitles[lang] ?? "",
+            };
+            return obj;
+          },
+          {} as Record<SupportedLanguage, { title: string; subtitle: string }>,
+        ),
+      );
+      setActiveLang(res.default_lang);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    }
+  };
+
+  // Initial and whenever site changes, always fetch fresh
+  useEffect(() => {
+    const fetchData = async () => {
+      await fetchAndApplyGeneralContent();
+    };
+    fetchData();
+    // eslint-disable-next-line
   }, [site]);
 
+  // Add/remove language: update local state for instant UX
   const handleLangCheckbox = (lang: SupportedLanguage) => {
     setShowUpgradeCTA(false);
     setError(null);
     setSuccess(null);
+
     if (languages.includes(lang)) {
+      // REMOVING a language
       const updated = languages.filter((l) => l !== lang);
       setLanguages(updated);
+
+      setContent((curr) => {
+        const copy = { ...curr };
+        delete copy[lang];
+        return copy;
+      });
+
       if (activeLang === lang && updated.length > 0) setActiveLang(updated[0]);
+      else if (updated.length === 0) setActiveLang("en");
       return;
     }
+
     if (languages.length >= langLimit) {
       setShowUpgradeCTA(true);
       return;
     }
+
+    // ADDING a language
     setLanguages((prev) => [...prev, lang]);
+    setContent((curr) => ({
+      ...curr,
+      [lang]: { title: "", subtitle: "" },
+    }));
     setActiveLang(lang);
   };
 
+  // Save: after successful save, fully re-sync state from DB
   const handleSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault();
     setError(null);
@@ -125,7 +150,8 @@ export default function GeneralSiteForm({
         translations["builder.general.form.save_success"] ||
           "Saved successfully.",
       );
-      refresh();
+      await fetchAndApplyGeneralContent(); // full re-sync after save
+      refresh(); // optionally also notify parent to re-fetch site metadata
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);
