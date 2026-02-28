@@ -41,7 +41,6 @@ export default function GeneralSiteForm({
 
   // Robust: absolutely refresh all relevant state from DB, including after save or site change
   const fetchAndApplyGeneralContent = async () => {
-    console.log("APAPAPAPPAPAPAP_Fetching general content for site:", site);
     if (!site) return;
     try {
       const res = await getSiteGeneralContent(site.id);
@@ -165,12 +164,10 @@ export default function GeneralSiteForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {/* Language Selection Section */}
-      <div className="text-xs text-red-600">
-        DEBUG: planType={planType} langLimit={langLimit}
-      </div>
+
       <div>
         <label className="block text-sm font-medium text-gray-700">
-          {translations["builder.general.form.label.languages"] ?? "Languages"}
+          {translations["builder.general.form.label.languages"] ?? "LanguagesOOOOO"}
         </label>
         <p className="text-xs text-gray-500">
           {planType === "free"
@@ -238,7 +235,7 @@ export default function GeneralSiteForm({
       <div>
         <label className="block text-sm font-medium text-gray-700">
           {translations["builder.general.form.label.main_title"] ??
-            "Main title"}
+            "Main titleOOOOO"}
         </label>
         <input
           className="mt-1 block w-full rounded border px-3 py-2"
@@ -258,7 +255,7 @@ export default function GeneralSiteForm({
 
       <div>
         <label className="block text-sm font-medium text-gray-700">
-          {translations["builder.general.form.label.subtitle"] ?? "Subtitle"}
+          {translations["builder.general.form.label.subtitle"] ?? "SubtitleOOOOO"}
         </label>
         <textarea
           rows={3}
@@ -278,7 +275,8 @@ export default function GeneralSiteForm({
 
       <div>
         <label className="block text-sm font-medium text-gray-700">
-          {translations["builder.general.form.label.subdomain"] ?? "Subdomain"}
+          {translations["builder.general.form.label.subdomain"] ??
+            "SubdomainOOOOO"}
         </label>
         {site?.subdomain ? (
           <div className="mt-1 text-sm text-gray-700">{site.subdomain}</div>
@@ -302,8 +300,8 @@ export default function GeneralSiteForm({
           disabled={saving}
         >
           {saving
-            ? (translations["builder.general.form.saving"] ?? "Saving…")
-            : (translations["builder.general.form.save"] ?? "Save")}
+            ? (translations["builder.general.form.saving"] ?? "Saving…OOOOO")
+            : (translations["builder.general.form.save"] ?? "SaveOOOOO")}
         </button>
         <a
           className={`text-sm ${site?.subdomain ? "text-blue-600" : "text-gray-400"}`}
@@ -315,7 +313,7 @@ export default function GeneralSiteForm({
           target="_blank"
           rel="noreferrer"
         >
-          {translations["builder.general.form.preview"] ?? "Preview site"}
+          {translations["builder.general.form.preview"] ?? "Preview siteOOOOO"}
         </a>
         {success && <div className="text-sm text-green-600">{success}</div>}
         {error && <div className="text-sm text-red-600">{error}</div>}
