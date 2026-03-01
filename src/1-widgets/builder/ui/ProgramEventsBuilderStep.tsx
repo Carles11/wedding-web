@@ -9,6 +9,7 @@ import {
   deleteProgramEvent,
 } from "@/3-entities/program_events/api";
 import { FREE_EVENT_LIMIT } from "@/4-shared/config/limits/usage-limits";
+import { formatTime, timeToMinutes } from "@/4-shared/helpers/formatTime";
 
 type Props = {
   site: Site | null;
@@ -31,7 +32,11 @@ export default function ProgramEventsBuilderStep({ site, refresh }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-
+  const [openDays, setOpenDays] = useState<Record<string, boolean>>({
+    day_before: false,
+    wedding_day: true,
+    day_after: false,
+  });
   // form state for create/edit
   const [form, setForm] = useState<Partial<ProgramEvent>>({
     day_tag: "wedding_day",
@@ -68,6 +73,13 @@ export default function ProgramEventsBuilderStep({ site, refresh }: Props) {
     } finally {
       setLoading(false);
     }
+  }
+
+  function toggleDay(day: string) {
+    setOpenDays((s) => ({
+      ...s,
+      [day]: !s[day],
+    }));
   }
 
   function canAddMore() {
@@ -179,17 +191,24 @@ export default function ProgramEventsBuilderStep({ site, refresh }: Props) {
       wedding_day: [],
       day_after: [],
     };
+
     events.forEach((e) => {
       const k = e.day_tag ?? "wedding_day";
       if (!map[k]) map[k] = [];
       map[k].push(e);
     });
+
+    // ⭐ sort each day by time
+    Object.keys(map).forEach((day) => {
+      map[day].sort((a, b) => timeToMinutes(a.time) - timeToMinutes(b.time));
+    });
+
     return map;
   }, [events]);
 
   return (
     <div>
-      <div className="mb-3 flex items-center justify-between">
+      <div className="mb-3 flex items-center justify-between gap-2">
         <h3 className="text-lg font-medium">Program / Events</h3>
         <div>
           <button
@@ -214,53 +233,90 @@ export default function ProgramEventsBuilderStep({ site, refresh }: Props) {
         <div className="space-y-4">
           {DAY_TAGS.map((d) => (
             <div key={d.key as string} className="border rounded p-3">
-              <div className="font-medium">{d.label}</div>
-              <div className="mt-2 space-y-2">
-                {(grouped[d.key ?? "wedding_day"] ?? []).map((ev) => (
-                  <div
-                    key={ev.id}
-                    className="flex items-start justify-between gap-4"
-                  >
-                    <div>
-                      <div className="text-sm font-semibold">
-                        {(ev.title && ev.title[defaultLang]) ?? "(no title)"}
-                      </div>
-                      <div className="text-xs text-gray-600">
-                        {ev.time ?? ""}{" "}
-                        {ev.location && ev.location[defaultLang]
-                          ? "— " + ev.location[defaultLang]
-                          : ""}
-                      </div>
-                      <div className="text-xs text-gray-500 mt-1">
-                        {ev.description && ev.description[defaultLang]
-                          ? ev.description[defaultLang]
-                          : null}
-                      </div>
-                    </div>
-                    <div className="flex gap-2">
-                      <button
-                        className="text-sm text-blue-600"
-                        onClick={() => startEdit(ev)}
-                      >
-                        Edit
-                      </button>
-                      <button
-                        className="text-sm text-red-600"
-                        onClick={() => handleDelete(ev.id)}
-                        disabled={saving}
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </div>
-                ))}
+              <button
+                type="button"
+                onClick={() => toggleDay(d.key as string)}
+                className="
+    w-full
+    flex items-center justify-between
+    font-medium
+    text-left
+    group
+  "
+              >
+                <span>{d.label}</span>
 
-                {(grouped[d.key ?? "wedding_day"] ?? []).length === 0 && (
-                  <div className="text-sm text-gray-500">
-                    No events for this day.
-                  </div>
-                )}
-              </div>
+                <span
+                  className="
+      text-gray-400
+      text-sm
+      transition-transform
+      group-hover:text-gray-600
+    "
+                  style={{
+                    transform: openDays[d.key as string]
+                      ? "rotate(180deg)"
+                      : "rotate(0deg)",
+                  }}
+                >
+                  ▾
+                </span>
+              </button>
+              {openDays[d.key as string] && (
+                <div className="mt-2 space-y-2">
+                  {(grouped[d.key ?? "wedding_day"] ?? []).map((ev) => (
+                    <div
+                      key={ev.id}
+                      className="group border rounded-lg p-3 sm:p-0 sm:border-0 sm:rounded-none flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4 bg-white sm:bg-transparent"
+                    >
+                      <div>
+                        <div className="text-sm font-semibold truncate">
+                          {(ev.title && ev.title[defaultLang]) ?? "(no title)"}
+                        </div>
+                        <div className="text-xs text-gray-600 wrap-break-word ">
+                          {ev.time && (
+                            <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 font-medium text-gray-700 mr-2">
+                              {formatTime(ev.time)}
+                            </span>
+                          )}
+
+                          {ev.location && ev.location[defaultLang] && (
+                            <span className="wrap-break-word">
+                              {ev.location[defaultLang]}
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-xs text-gray-500 mt-1 line-clamp-3 sm:line-clamp-none">
+                          {ev.description && ev.description[defaultLang]
+                            ? ev.description[defaultLang]
+                            : null}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2.5 shrink-0">
+                        <button
+                          className="text-sm px-3 py-1.5 rounded-md border border-gray-400 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition"
+                          onClick={() => startEdit(ev)}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          className="text-sm px-3 py-1.5 rounded-md border border-red-200 bg-white text-red-600 hover:bg-red-50 hover:border-red-300 transition"
+                          onClick={() => handleDelete(ev.id)}
+                          disabled={saving}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+
+                  {(grouped[d.key ?? "wedding_day"] ?? []).length === 0 && (
+                    <div className="text-sm text-gray-500">
+                      No events for this day.
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -268,11 +324,11 @@ export default function ProgramEventsBuilderStep({ site, refresh }: Props) {
 
       {/* Edit / Create form */}
       {(editingId !== null || Object.keys(form ?? {}).length > 1) && (
-        <div className="mt-4 border rounded p-4 bg-gray-50">
+        <div className="mt-4 border rounded p-4 pb-24 sm:pb-4 bg-gray-50">
           <h4 className="font-medium">
             {editingId ? "Edit event" : "Create event"}
           </h4>
-          <div className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             <div>
               <label className="block text-xs text-gray-600">Day</label>
               <select
@@ -324,7 +380,7 @@ export default function ProgramEventsBuilderStep({ site, refresh }: Props) {
             </div>
 
             {languages.map((lang) => (
-              <div key={lang} className="mt-2 border rounded p-3">
+              <div key={lang} className="mt-2 border rounded p-3 min-w-0">
                 <div className="font-medium">Language: {lang}</div>
                 <div className="mt-2 grid grid-cols-1 gap-2">
                   <div>
@@ -382,21 +438,42 @@ export default function ProgramEventsBuilderStep({ site, refresh }: Props) {
 
           {error && <div className="text-red-600 mt-2">{error}</div>}
 
-          <div className="mt-4 flex gap-2">
-            <button
-              className="px-3 py-1 bg-green-600 text-white rounded"
-              onClick={handleSave}
-              disabled={saving}
-            >
-              {saving ? "Saving…" : "Save"}
-            </button>
-            <button
-              className="px-3 py-1 border rounded bg-white"
-              onClick={clearForm}
-              disabled={saving}
-            >
-              Cancel
-            </button>
+          <div className="mt-6">
+            {/* desktop buttons */}
+            <div className="hidden sm:flex gap-2">
+              <button
+                className="px-3 py-1 bg-green-600 text-white rounded"
+                onClick={handleSave}
+                disabled={saving}
+              >
+                {saving ? "Saving…" : "Save"}
+              </button>
+              <button
+                className="px-3 py-1 border rounded bg-white"
+                onClick={clearForm}
+                disabled={saving}
+              >
+                Cancel
+              </button>
+            </div>
+
+            {/* mobile sticky bar */}
+            <div className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t p-3 flex gap-2">
+              <button
+                className="flex-1 px-3 py-2 bg-green-600 text-white rounded"
+                onClick={handleSave}
+                disabled={saving}
+              >
+                {saving ? "Saving…" : "Save"}
+              </button>
+              <button
+                className="flex-1 px-3 py-2 border rounded bg-white"
+                onClick={clearForm}
+                disabled={saving}
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         </div>
       )}
