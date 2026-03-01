@@ -30,10 +30,6 @@ interface Props {
 function isGeneralComplete(site?: Site | null): boolean {
   return !!site?.title && !!site?.subdomain;
 }
-function isImagesComplete(site?: Site | null): boolean {
-  // TODO: Implement real images completeness logic
-  return false;
-}
 function isProgramComplete(site?: Site | null): boolean {
   // TODO: Implement real program completeness logic
   return false;
@@ -54,15 +50,6 @@ function isDomainBillingComplete(site?: Site | null): boolean {
   // Assume always true if not billing/connecting domain
   return true;
 }
-const STEP_COMPLETENESS: ((site?: Site | null) => boolean)[] = [
-  isGeneralComplete,
-  isImagesComplete,
-  isProgramComplete,
-  isAccommodationComplete,
-  isWhatToSeeComplete,
-  isContactComplete,
-  isDomainBillingComplete,
-];
 
 const STEP_KEYS = [
   "builder.nav.step.general",
@@ -92,10 +79,10 @@ export default function BuilderClient({
 
   const [active, setActive] = useState(0);
   const [currentLang, setCurrentLang] = useState(initialLang);
-
   const [planType, setPlanType] = useState<
     "free" | "monthly" | "yearly" | null
   >(null);
+  const [heroImageExists, setHeroImageExists] = useState(false);
 
   const langLimit =
     planType === "free" ? FREE_LANGUAGES_LIMIT : SUPPORTED_LANGUAGES.length;
@@ -111,7 +98,6 @@ export default function BuilderClient({
       });
       refresh();
     } catch (err) {
-      // Optionally, show error UI
       console.error("Failed to provision site:", err);
     }
   }, [user, refresh]);
@@ -138,6 +124,17 @@ export default function BuilderClient({
     params.set("lang", lang);
     router.push(`${pathname}?${params.toString()}`);
   };
+
+  // STEP_COMPLETENESS is now defined inside the functional component
+  const STEP_COMPLETENESS: ((site?: Site | null) => boolean)[] = [
+    isGeneralComplete,
+    () => heroImageExists, // Correctly closes over latest state!
+    isProgramComplete,
+    isAccommodationComplete,
+    isWhatToSeeComplete,
+    isContactComplete,
+    isDomainBillingComplete,
+  ];
 
   if (!site || !planType) return <div>Loading…</div>;
 
@@ -170,7 +167,6 @@ export default function BuilderClient({
             )}
             <LogoutButton />
           </div>
-          {/* Language Selector in top-right */}
           <div className=" top-4 right-4 z-50 bg-white/80 shadow-lg rounded-lg">
             <LanguageSelector
               currentLang={currentLang}
@@ -195,7 +191,7 @@ export default function BuilderClient({
                     <button
                       key={k}
                       onClick={() => setActive(i)}
-                      className={`flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded whitespace-nowrap border ${
+                      className={`shrink-0 flex items-center gap-2 px-3 py-2 rounded whitespace-nowrap border ${
                         i === active
                           ? "bg-blue-600 text-white border-blue-600"
                           : "bg-white hover:bg-gray-50"
@@ -235,7 +231,7 @@ export default function BuilderClient({
                   );
                 })}
               </ul>
-            </nav>{" "}
+            </nav>
           </div>
 
           {/* ✅ CONTENT */}
@@ -281,6 +277,7 @@ export default function BuilderClient({
                     refresh={refresh}
                     lang={currentLang}
                     translations={translations}
+                    setHeroImageExists={setHeroImageExists}
                   />
                 )}
                 {active === 2 && site && (

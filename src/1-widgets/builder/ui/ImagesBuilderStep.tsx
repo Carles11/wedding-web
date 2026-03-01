@@ -21,12 +21,14 @@ type Props = {
   refresh: () => void;
   lang: string;
   translations: Record<string, string>;
+  setHeroImageExists?: (exists: boolean) => void;
 };
 
 export default function ImagesBuilderStep({
   site,
   refresh,
   translations,
+  setHeroImageExists,
 }: Props) {
   const uploadRef = useRef<HTMLDivElement | null>(null);
 
@@ -46,6 +48,13 @@ export default function ImagesBuilderStep({
     () => images.find((img) => imageSection(img) === "contact") || null,
     [images],
   );
+
+  useEffect(() => {
+    console.log("Assigned hero image:", assignedHero);
+    if (setHeroImageExists) {
+      setHeroImageExists(!!assignedHero);
+    }
+  }, [assignedHero, setHeroImageExists]);
 
   function imageSection(img: ImageRow): string | null {
     return typeof img.section === "string"
