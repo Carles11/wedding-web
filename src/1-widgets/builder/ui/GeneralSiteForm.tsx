@@ -9,6 +9,7 @@ import {
   SUPPORTED_LANGUAGE_LABELS,
 } from "@/4-shared/config/i18n";
 import type { Site } from "@/4-shared/types";
+import { StepLayout } from "../step-layout";
 
 type Props = {
   site: Site | null;
@@ -39,7 +40,7 @@ export default function GeneralSiteForm({
   const [success, setSuccess] = useState<string | null>(null);
   const [showUpgradeCTA, setShowUpgradeCTA] = useState(false);
 
-  // Robust: absolutely refresh all relevant state from DB, including after save or site change
+  // 🔹 Fetch + sync
   const fetchAndApplyGeneralContent = async () => {
     if (!site) return;
     try {
@@ -48,6 +49,7 @@ export default function GeneralSiteForm({
       setDefaultLang(res.default_lang);
       setSubdomain(res.subdomain);
       setHeroId(res.heroId);
+
       setContent(
         res.languages.reduce(
           (obj, lang) => {
@@ -60,6 +62,7 @@ export default function GeneralSiteForm({
           {} as Record<SupportedLanguage, { title: string; subtitle: string }>,
         ),
       );
+
       setActiveLang(res.default_lang);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
@@ -75,14 +78,13 @@ export default function GeneralSiteForm({
     // eslint-disable-next-line
   }, [site]);
 
-  // Add/remove language: update local state for instant UX
+  // 🔹 Language toggle
   const handleLangCheckbox = (lang: SupportedLanguage) => {
     setShowUpgradeCTA(false);
     setError(null);
     setSuccess(null);
 
     if (languages.includes(lang)) {
-      // REMOVING a language
       const updated = languages.filter((l) => l !== lang);
       setLanguages(updated);
 
@@ -102,7 +104,6 @@ export default function GeneralSiteForm({
       return;
     }
 
-    // ADDING a language
     setLanguages((prev) => [...prev, lang]);
     setContent((curr) => ({
       ...curr,
@@ -111,7 +112,7 @@ export default function GeneralSiteForm({
     setActiveLang(lang);
   };
 
-  // Save: after successful save, fully re-sync state from DB
+  // 🔹 Save
   const handleSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault();
     setError(null);
@@ -124,8 +125,12 @@ export default function GeneralSiteForm({
       return;
     }
 
-    const val = content[activeLang] || { title: "", subtitle: "" };
-    if (!val.title || val.title.trim().length === 0) {
+    const val = content[activeLang] || {
+      title: "",
+      subtitle: "",
+    };
+
+    if (!val.title?.trim()) {
       setError(
         translations["builder.errors.missing_title"] ||
           "Please enter a site title.",
@@ -145,178 +150,165 @@ export default function GeneralSiteForm({
         languages,
         default_lang: defaultLang,
       });
+
       setSuccess(
         translations["builder.general.form.save_success"] ||
           "Saved successfully.",
       );
-      await fetchAndApplyGeneralContent(); // full re-sync after save
-      refresh(); // optionally also notify parent to re-fetch site metadata
+
+      await fetchAndApplyGeneralContent();
+      refresh();
     } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError("An unknown error occurred.");
-      }
+      if (err instanceof Error) setError(err.message);
+      else setError("An unknown error occurred.");
     }
     setSaving(false);
   };
 
   return (
-    <form onSubmit={handleSubmit} className="h-full space-y-4 min-w-0">
-      {/* Language Selection Section */}
+    <StepLayout nextLabel="Save" backLabel="Cancel">
+      <form onSubmit={handleSubmit} className="space-y-4 min-w-0 pb-24 md:pb-0">
+        {/* Languages */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
+            {translations["builder.general.form.label.languages"] ??
+              "Languages"}
+          </label>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700">
-          {translations["builder.general.form.label.languages"] ?? "Languages"}
-        </label>
-        <p className="text-xs text-gray-500">
-          {planType === "free"
-            ? translations["builder.general.form.language_limit"] ||
-              "Free plan: choose one language. Upgrade to add more."
-            : translations["builder.general.form.language_limit_pro"] ||
-              "You can enable all languages on your plan."}
-        </p>
-        <div className="flex flex-wrap gap-x-3 gap-y-2 my-2">
-          {SUPPORTED_LANGUAGES.map((lang) => (
-            <label key={lang} className="inline-flex items-center">
-              <input
-                type="checkbox"
-                value={lang}
-                checked={languages.includes(lang)}
-                onChange={() => handleLangCheckbox(lang)}
-                className="mr-2"
-                disabled={
-                  !languages.includes(lang) && languages.length >= langLimit
+          <p className="text-xs text-gray-500">
+            {planType === "free"
+              ? translations["builder.general.form.language_limit"] ||
+                "Free plan: choose one language. Upgrade to add more."
+              : translations["builder.general.form.language_limit_pro"] ||
+                "You can enable all languages on your plan."}
+          </p>
+
+          <div className="flex flex-wrap gap-x-3 gap-y-2 my-2">
+            {SUPPORTED_LANGUAGES.map((lang) => (
+              <label key={lang} className="inline-flex items-center">
+                <input
+                  type="checkbox"
+                  value={lang}
+                  checked={languages.includes(lang)}
+                  onChange={() => handleLangCheckbox(lang)}
+                  className="mr-2"
+                  disabled={
+                    !languages.includes(lang) && languages.length >= langLimit
+                  }
+                />
+                {SUPPORTED_LANGUAGE_LABELS[lang]}
+              </label>
+            ))}
+          </div>
+
+          {showUpgradeCTA && planType === "free" && (
+            <div className="mt-2 text-sm text-yellow-800">
+              {translations["builder.general.form.need_more_langs"] ||
+                "Need more languages?"}{" "}
+              <button
+                className="underline text-blue-600"
+                type="button"
+                onClick={() =>
+                  alert(
+                    translations["builder.general.form.upgrade"] ||
+                      "Upgrade to Pro to unlock more languages.",
+                  )
                 }
-              />
+              >
+                {translations["builder.general.form.upgrade"] ||
+                  "Upgrade to Pro"}
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Language tabs */}
+        <div className="flex flex-wrap gap-1 mb-2">
+          {languages.map((lang) => (
+            <button
+              type="button"
+              key={lang}
+              className={`px-3 py-1.5 rounded text-sm ${
+                activeLang === lang
+                  ? "bg-blue-700 text-white"
+                  : "bg-white text-gray-800 border"
+              }`}
+              onClick={() => setActiveLang(lang)}
+            >
               {SUPPORTED_LANGUAGE_LABELS[lang]}
-            </label>
+            </button>
           ))}
         </div>
-        {showUpgradeCTA && planType === "free" && (
-          <div className="mt-2 text-sm text-yellow-800">
-            {translations["builder.general.form.need_more_langs"] ||
-              "Need more languages?"}{" "}
-            <button
-              className="underline text-blue-600"
-              type="button"
-              onClick={() => {
-                alert(
-                  translations["builder.general.form.upgrade"] ||
-                    "Upgrade to Pro to unlock more languages.",
-                );
-              }}
-            >
-              {translations["builder.general.form.upgrade"] || "Upgrade to Pro"}
-            </button>
-          </div>
-        )}
-      </div>
 
-      {/* Language Switch Tabs */}
-      <div className="flex flex-wrap gap-1 mb-2">
-        {languages.map((lang) => (
-          <button
-            type="button"
-            key={lang}
-            className={`px-3 py-1.5 rounded text-sm ${
-              activeLang === lang
-                ? "bg-blue-700 text-white"
-                : "bg-white text-gray-800 border"
-            }`}
-            onClick={() => setActiveLang(lang)}
-            disabled={!languages.includes(lang)}
-          >
-            {SUPPORTED_LANGUAGE_LABELS[lang]}
-          </button>
-        ))}
-      </div>
+        {/* Title */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
+            {translations["builder.general.form.label.main_title"] ??
+              "Main title"}
+          </label>
+          <input
+            className="mt-1 block w-full rounded border px-3 py-2"
+            value={content[activeLang]?.title ?? ""}
+            onChange={(e) =>
+              setContent((c) => ({
+                ...c,
+                [activeLang]: {
+                  ...c[activeLang],
+                  title: e.target.value,
+                },
+              }))
+            }
+            required
+          />
+        </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700">
-          {translations["builder.general.form.label.main_title"] ??
-            "Main title"}
-        </label>
-        <input
-          className="mt-1 block w-full rounded border px-3 py-2"
-          value={content[activeLang]?.title ?? ""}
-          onChange={(e) =>
-            setContent((c) => ({
-              ...c,
-              [activeLang]: {
-                ...c[activeLang],
-                title: e.target.value,
-              },
-            }))
-          }
-          required
-        />
-      </div>
+        {/* Subtitle */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
+            {translations["builder.general.form.label.subtitle"] ?? "Subtitle"}
+          </label>
+          <textarea
+            rows={3}
+            className="mt-1 block w-full rounded border px-3 py-2"
+            value={content[activeLang]?.subtitle ?? ""}
+            onChange={(e) =>
+              setContent((c) => ({
+                ...c,
+                [activeLang]: {
+                  ...c[activeLang],
+                  subtitle: e.target.value,
+                },
+              }))
+            }
+          />
+        </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700">
-          {translations["builder.general.form.label.subtitle"] ?? "Subtitle"}
-        </label>
-        <textarea
-          rows={3}
-          className="mt-1 block w-full rounded border px-3 py-2"
-          value={content[activeLang]?.subtitle ?? ""}
-          onChange={(e) =>
-            setContent((c) => ({
-              ...c,
-              [activeLang]: {
-                ...c[activeLang],
-                subtitle: e.target.value,
-              },
-            }))
-          }
-        />
-      </div>
+        {/* Subdomain */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
+            {translations["builder.general.form.label.subdomain"] ??
+              "Subdomain"}
+          </label>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700">
-          {translations["builder.general.form.label.subdomain"] ?? "Subdomain"}
-        </label>
-        {site?.subdomain ? (
-          <div className="mt-1 text-sm text-gray-700">{site.subdomain}</div>
-        ) : (
-          <div className="mt-1 flex flex-col sm:flex-row gap-2 sm:items-center">
-            <input
-              value={subdomain}
-              onChange={(e) => setSubdomain(e.target.value)}
-              placeholder="your-name-2026"
-              className="w-full sm:w-auto min-w-0 rounded border px-3 py-2"
-            />
-            <span className="text-sm text-gray-500">.weddweb.com</span>
-          </div>
-        )}
-      </div>
+          {site?.subdomain ? (
+            <div className="mt-1 text-sm text-gray-700">{site.subdomain}</div>
+          ) : (
+            <div className="mt-1 flex flex-col sm:flex-row gap-2 sm:items-center">
+              <input
+                value={subdomain}
+                onChange={(e) => setSubdomain(e.target.value)}
+                placeholder="your-name-2026"
+                className="w-full sm:w-auto min-w-0 rounded border px-3 py-2"
+              />
+              <span className="text-sm text-gray-500">.weddweb.com</span>
+            </div>
+          )}
+        </div>
 
-      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-        <button
-          type="submit"
-          className="px-4 py-2 bg-blue-600 text-white rounded"
-          disabled={saving}
-        >
-          {saving
-            ? (translations["builder.general.form.saving"] ?? "Saving…")
-            : (translations["builder.general.form.save"] ?? "Save")}
-        </button>
-        <a
-          className={`text-sm ${site?.subdomain ? "text-blue-600" : "text-gray-400"}`}
-          href={
-            site?.subdomain
-              ? `https://${site.subdomain}.weddweb.com`
-              : undefined
-          }
-          target="_blank"
-          rel="noreferrer"
-        >
-          {translations["builder.general.form.preview"] ?? "Preview site"}
-        </a>
+        {/* Status */}
         {success && <div className="text-sm text-green-600">{success}</div>}
         {error && <div className="text-sm text-red-600">{error}</div>}
-      </div>
-    </form>
+      </form>
+    </StepLayout>
   );
 }
