@@ -214,9 +214,7 @@ export default function ImagesBuilderStep({
 
   function ImageCard({
     img,
-    selected,
     label,
-    onSelect,
     onDelete,
   }: {
     img: ImageRow;
@@ -228,41 +226,30 @@ export default function ImagesBuilderStep({
     const url = publicUrlFor(img);
 
     return (
-      <div className="relative group">
+      <div className="relative group w-full md:max-w-md">
         {/* SELECT BUTTON */}
-        <button
-          type="button"
-          onClick={onSelect}
-          disabled={assigning}
-          className={`w-full relative rounded-xl border overflow-hidden transition
-          ${
-            selected
-              ? "ring-2 ring-green-600 border-green-600"
-              : "hover:border-gray-400"
-          }
-        `}
-        >
+        <div className="border rounded-lg cursor-pointer hover:ring-2 hover:ring-blue-500 transition">
           {url ? (
             <Image
               src={url}
               alt={img.id}
               width={500}
               height={300}
-              className="w-full h-32 object-cover"
+              className="w-full h-48 md:h-56 object-cover rounded-lg"
               unoptimized
             />
           ) : (
-            <div className="h-32 bg-gray-100 flex items-center justify-center text-xs text-gray-500">
+            <div className="h-48 md:h-56 bg-gray-100 flex items-center justify-center text-xs text-gray-500">
               Preview unavailable
             </div>
           )}
 
           {label && (
-            <div className="absolute top-2 left-2 text-[10px] bg-black/70 text-white px-2 py-0.5 rounded">
+            <div className="absolute top-0 left-2 text-[10px] bg-black/70 text-white px-2 py-0.5 rounded">
               {label}
             </div>
           )}
-        </button>
+        </div>
 
         {/* 🗑 DELETE BADGE */}
         {onDelete && (
@@ -270,16 +257,7 @@ export default function ImagesBuilderStep({
             type="button"
             onClick={onDelete}
             disabled={assigning || uploading}
-            className="
-            absolute top-2 right-2
-            h-7 w-7 rounded-full
-            bg-white/95 border shadow-sm
-            flex items-center justify-center
-            text-red-600 text-sm font-bold
-            hover:bg-white
-            md:opacity-0 md:group-hover:opacity-100
-            transition
-          "
+            className="absolute top-0 right-2 mt-2 p-2 h-6 w-6 bg-white rounded-md border shadow-sm flex items-center justify-center text-red-600 text-sm font-bold hover:bg-white md:opacity-0 md:group-hover:opacity-100 transition"
             aria-label="Delete image"
           >
             ×
@@ -320,6 +298,7 @@ export default function ImagesBuilderStep({
               translations["builder.images.button.upload"] || "Upload image"
             }
             accept={{ "image/*": [] } as Accept}
+            className="h-48"
           />
         </div>
 
@@ -331,14 +310,9 @@ export default function ImagesBuilderStep({
         {error && <p className="text-red-600">{error}</p>}
 
         {!loading && !error && images.length > 0 && (
-          <>
+          <div className="flex flex-col gap-8">
             {/* HERO */}
             <div>
-              <div className="font-medium mb-2">
-                {translations["builder.images.label.hero"] ||
-                  "Hero Image (required)"}
-              </div>
-
               {assignedHero ? (
                 <ImageCard
                   img={assignedHero}
@@ -353,11 +327,6 @@ export default function ImagesBuilderStep({
 
             {/* CONTACT */}
             <div>
-              <div className="font-medium mb-2">
-                {translations["builder.images.label.contact"] ||
-                  "Contact Image (optional)"}
-              </div>
-
               {assignedContact ? (
                 <ImageCard
                   img={assignedContact}
@@ -369,7 +338,7 @@ export default function ImagesBuilderStep({
                 <EmptySlot label="No contact image yet" />
               )}
             </div>
-          </>
+          </div>
         )}
       </div>
     </StepLayout>
