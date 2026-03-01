@@ -9,6 +9,7 @@ import {
   deleteAccommodationEntry,
 } from "@/3-entities/accommodation/api";
 import { FREE_ACCOMMODATION_LIMIT } from "@/4-shared/config/limits/usage-limits";
+import { StepLayout } from "../step-layout";
 
 type Props = {
   site: Site | null;
@@ -137,6 +138,7 @@ export default function AccommodationBuilderStep({ site, refresh }: Props) {
       refresh();
       setEditingId(null);
       setForm({});
+      setIsListOpen(true);
     } catch (err: unknown) {
       setError((err as Error)?.message ?? String(err));
     } finally {
@@ -158,7 +160,25 @@ export default function AccommodationBuilderStep({ site, refresh }: Props) {
   }
 
   return (
-    <div>
+    <StepLayout
+      onNext={
+        editingId !== null || Object.keys(form).length > 0
+          ? handleSave
+          : undefined
+      }
+      nextLoading={saving}
+      nextDisabled={saving}
+      nextLabel="Save"
+      onBack={
+        editingId !== null || Object.keys(form).length > 0
+          ? () => {
+              setForm({});
+              setEditingId(null);
+            }
+          : undefined
+      }
+      backLabel="Cancel"
+    >
       <div className="mb-3 flex items-center justify-between">
         <h3 className="text-lg font-medium">Accommodation</h3>
         <div>
@@ -256,10 +276,7 @@ export default function AccommodationBuilderStep({ site, refresh }: Props) {
 
       {/* Form */}
       {(editingId !== null || Object.keys(form).length > 0) && (
-        <div
-          ref={formRef}
-          className="mt-4 border rounded p-4 pb-24 sm:pb-4 bg-gray-50"
-        >
+        <div ref={formRef} className="mt-4 border rounded p-4 bg-gray-50">
           <h4 className="font-medium">
             {editingId ? "Edit accommodation" : "Create accommodation"}
           </h4>
@@ -332,26 +349,6 @@ export default function AccommodationBuilderStep({ site, refresh }: Props) {
             </div>
 
             {error && <div className="text-red-600">{error}</div>}
-
-            <div className="mt-3 flex gap-2">
-              <button
-                className="px-3 py-1 bg-green-600 text-white rounded"
-                onClick={handleSave}
-                disabled={saving}
-              >
-                {saving ? "Saving…" : "Save"}
-              </button>
-              <button
-                className="px-3 py-1 border rounded bg-white"
-                onClick={() => {
-                  setForm({});
-                  setEditingId(null);
-                }}
-                disabled={saving}
-              >
-                Cancel
-              </button>
-            </div>
           </div>
         </div>
       )}
@@ -363,6 +360,6 @@ export default function AccommodationBuilderStep({ site, refresh }: Props) {
           more.
         </div>
       )}
-    </div>
+    </StepLayout>
   );
 }

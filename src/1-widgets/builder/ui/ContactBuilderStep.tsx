@@ -8,6 +8,7 @@ import {
   fetchImagesBySite,
   getPublicUrlForImage,
 } from "@/3-entities/images/api";
+import { StepLayout } from "@/1-widgets/builder/step-layout";
 
 type Props = {
   site: Site | null;
@@ -23,8 +24,6 @@ export default function ContactBuilderStep({ site, refresh }: Props) {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  // For static bride/groom contacts we don't need per-language strings.
 
   useEffect(() => {
     if (!site?.id) return;
@@ -55,11 +54,13 @@ export default function ContactBuilderStep({ site, refresh }: Props) {
   useEffect(() => {
     if (section?.content) setForm(section.content);
   }, [section]);
+
   type Partner = {
     name?: string | null;
     email?: string | null;
     phone?: string | null;
   };
+
   function updatePartner(
     partner: "bride" | "groom",
     field: keyof Partner,
@@ -82,21 +83,10 @@ export default function ContactBuilderStep({ site, refresh }: Props) {
     if (!site?.id) return;
     setError(null);
 
-    // Validate that at least one partner has name+valid email.
-    const bride =
-      (form?.bride as
-        | { name?: string | null; email?: string | null; phone?: string | null }
-        | undefined) ?? {};
-    const groom =
-      (form?.groom as
-        | { name?: string | null; email?: string | null; phone?: string | null }
-        | undefined) ?? {};
+    const bride = (form?.bride as Partner | undefined) ?? {};
+    const groom = (form?.groom as Partner | undefined) ?? {};
 
-    function validContact(pt: {
-      name?: string | null;
-      email?: string | null;
-      phone?: string | null;
-    }) {
+    function validContact(pt: Partner) {
       if (!pt?.name && !pt?.email) return false;
       if (!pt?.name || !pt?.email) return false;
       if (!EMAIL_RE.test(pt.email)) return false;
@@ -108,12 +98,12 @@ export default function ContactBuilderStep({ site, refresh }: Props) {
       return;
     }
 
-    // If phone present, do simple digit-length validation
     const phoneCheck = (p?: string | null) => {
       if (!p) return true;
       const digits = p.replace(/\D/g, "");
       return digits.length >= 7 && digits.length <= 15;
     };
+
     if (!phoneCheck(bride?.phone) || !phoneCheck(groom?.phone)) {
       setError("If provided, phone numbers must contain 7–15 digits");
       return;
@@ -132,7 +122,6 @@ export default function ContactBuilderStep({ site, refresh }: Props) {
     }
   }
 
-  // Optionally show a contact image if one exists (images API used elsewhere).
   const [contactImageUrl, setContactImageUrl] = useState<string | null>(null);
   useEffect(() => {
     async function loadImage() {
@@ -152,182 +141,216 @@ export default function ContactBuilderStep({ site, refresh }: Props) {
     loadImage();
   }, [site?.id, section?.content?.image_id]);
 
+  const inputCls =
+    "mt-1 w-full border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500";
+
   return (
-    <div>
-      <h3 className="text-lg font-medium mb-2">Contact</h3>
+    <StepLayout
+      onNext={handleSave}
+      nextLoading={saving}
+      nextDisabled={saving}
+      nextLabel="Save"
+      onBack={load}
+      backLabel="Reload"
+    >
+      <div className="space-y-4">
+        <div>
+          <h3 className="text-lg font-medium">Contact</h3>
+          <p className="text-sm text-gray-600 mt-1">
+            Provide the main contact details used for RSVP and site contact.
+          </p>
+        </div>
 
-      <div className="text-sm text-gray-600 mb-3">
-        Provide the main contact details used for RSVP and site contact.
-      </div>
+        {loading ? (
+          <p>Loading…</p>
+        ) : (
+          <div className="space-y-4">
+            {contactImageUrl && (
+              <div className="max-w-xs">
+                <div className="text-xs text-gray-600 mb-1">Contact image</div>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={contactImageUrl ?? undefined}
+                  alt="Contact"
+                  className="w-full h-32 object-cover rounded-lg"
+                />
+              </div>
+            )}
 
-      {loading ? (
-        <p>Loading…</p>
-      ) : (
-        <div className="space-y-4">
-          {contactImageUrl && (
-            <div>
-              <div className="text-xs text-gray-600 mb-1">Contact image</div>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={contactImageUrl ?? undefined}
-                alt="Contact"
-                className="w-48 h-32 object-cover rounded"
-              />
-            </div>
-          )}
+            <div className="border rounded-xl p-4 bg-gray-50">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {/* Bride */}
+                <div className="p-3 border rounded-xl bg-white">
+                  <div className="font-medium">Bride</div>
+                  <div className="mt-3 space-y-3">
+                    <div>
+                      <label className="block text-xs text-gray-600">
+                        Name
+                      </label>
+                      <input
+                        value={(form?.bride as Partner | undefined)?.name ?? ""}
+                        onChange={(e) =>
+                          updatePartner("bride", "name", e.target.value || null)
+                        }
+                        className={inputCls}
+                      />
+                    </div>
 
-          <div className="border rounded p-3 bg-gray-50">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="p-2 border rounded">
-                <div className="font-medium">Bride</div>
-                <div className="mt-2">
-                  <label className="block text-xs text-gray-600">Name</label>
-                  <input
-                    value={(form?.bride as Partner | undefined)?.name ?? ""}
-                    onChange={(e) =>
-                      updatePartner("bride", "name", e.target.value || null)
-                    }
-                    className="mt-1 w-full"
-                  />
+                    <div>
+                      <label className="block text-xs text-gray-600">
+                        Email
+                      </label>
+                      <input
+                        value={
+                          (form?.bride as Partner | undefined)?.email ?? ""
+                        }
+                        onChange={(e) =>
+                          updatePartner(
+                            "bride",
+                            "email",
+                            e.target.value || null,
+                          )
+                        }
+                        className={inputCls}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs text-gray-600">
+                        Phone (optional)
+                      </label>
+                      <input
+                        value={
+                          (form?.bride as Partner | undefined)?.phone ?? ""
+                        }
+                        onChange={(e) =>
+                          updatePartner(
+                            "bride",
+                            "phone",
+                            e.target.value || null,
+                          )
+                        }
+                        className={inputCls}
+                      />
+                    </div>
+                  </div>
                 </div>
-                <div className="mt-2">
-                  <label className="block text-xs text-gray-600">Email</label>
-                  <input
-                    value={(form?.bride as Partner | undefined)?.email ?? ""}
-                    onChange={(e) =>
-                      updatePartner("bride", "email", e.target.value || null)
-                    }
-                    className="mt-1 w-full"
-                  />
-                </div>
-                <div className="mt-2">
-                  <label className="block text-xs text-gray-600">
-                    Phone (optional)
-                  </label>
-                  <input
-                    value={(form?.bride as Partner | undefined)?.phone ?? ""}
-                    onChange={(e) =>
-                      updatePartner("bride", "phone", e.target.value || null)
-                    }
-                    className="mt-1 w-full"
-                  />
+
+                {/* Groom */}
+                <div className="p-3 border rounded-xl bg-white">
+                  <div className="font-medium">Groom</div>
+                  <div className="mt-3 space-y-3">
+                    <div>
+                      <label className="block text-xs text-gray-600">
+                        Name
+                      </label>
+                      <input
+                        value={(form?.groom as Partner | undefined)?.name ?? ""}
+                        onChange={(e) =>
+                          updatePartner("groom", "name", e.target.value || null)
+                        }
+                        className={inputCls}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs text-gray-600">
+                        Email
+                      </label>
+                      <input
+                        value={
+                          (form?.groom as Partner | undefined)?.email ?? ""
+                        }
+                        onChange={(e) =>
+                          updatePartner(
+                            "groom",
+                            "email",
+                            e.target.value || null,
+                          )
+                        }
+                        className={inputCls}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs text-gray-600">
+                        Phone (optional)
+                      </label>
+                      <input
+                        value={
+                          (form?.groom as Partner | undefined)?.phone ?? ""
+                        }
+                        onChange={(e) =>
+                          updatePartner(
+                            "groom",
+                            "phone",
+                            e.target.value || null,
+                          )
+                        }
+                        className={inputCls}
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <div className="p-2 border rounded">
-                <div className="font-medium">Groom</div>
-                <div className="mt-2">
-                  <label className="block text-xs text-gray-600">Name</label>
-                  <input
-                    value={(form?.groom as Partner | undefined)?.name ?? ""}
-                    onChange={(e) =>
-                      updatePartner("groom", "name", e.target.value || null)
-                    }
-                    className="mt-1 w-full"
-                  />
-                </div>
-                <div className="mt-2">
-                  <label className="block text-xs text-gray-600">Email</label>
-                  <input
-                    value={(form?.groom as Partner | undefined)?.email ?? ""}
-                    onChange={(e) =>
-                      updatePartner("groom", "email", e.target.value || null)
-                    }
-                    className="mt-1 w-full"
-                  />
-                </div>
-                <div className="mt-2">
-                  <label className="block text-xs text-gray-600">
-                    Phone (optional)
-                  </label>
-                  <input
-                    value={(form?.groom as Partner | undefined)?.phone ?? ""}
-                    onChange={(e) =>
-                      updatePartner("groom", "phone", e.target.value || null)
-                    }
-                    className="mt-1 w-full"
-                  />
-                </div>
-              </div>
-            </div>
+              {error && <div className="text-red-600 mt-4">{error}</div>}
 
-            <div className="mt-4">
-              {error && <div className="text-red-600 mt-2">{error}</div>}
-
-              <div className="mt-4 flex gap-2">
-                <button
-                  className="px-3 py-1 bg-green-600 text-white rounded"
-                  onClick={handleSave}
-                  disabled={saving}
-                >
-                  {saving ? "Saving…" : "Save"}
-                </button>
-                <button
-                  className="px-3 py-1 border rounded bg-white"
-                  onClick={() => {
-                    setSection(null);
-                    load();
-                  }}
-                  disabled={saving}
-                >
-                  Reload
-                </button>
-              </div>
-              {/* Preview of static contacts */}
-              <div className="mt-4">
-                <div className="font-medium mb-2">Preview</div>
-                <div className="space-y-2">
-                  {(form?.bride as Partner | undefined)?.name ? (
-                    <div className="p-2 border rounded">
+              {/* Preview */}
+              <div className="mt-6">
+                <div className="font-medium mb-2">Contact section preview</div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {(form?.bride as Partner | undefined)?.name && (
+                    <div className="p-3 border rounded-xl bg-white">
                       <div className="font-semibold">Bride</div>
                       <div className="text-sm">
                         {(form?.bride as Partner).name}
                       </div>
                       <div className="text-sm mt-1">
-                        {(form?.bride as Partner).email ? (
+                        {(form?.bride as Partner).email && (
                           <a href={`mailto:${(form?.bride as Partner).email}`}>
                             {(form?.bride as Partner).email}
                           </a>
-                        ) : null}
-                        {(form?.bride as Partner).phone ? (
+                        )}
+                        {(form?.bride as Partner).phone && (
                           <div>
                             <a href={`tel:${(form?.bride as Partner).phone}`}>
                               {(form?.bride as Partner).phone}
                             </a>
                           </div>
-                        ) : null}
+                        )}
                       </div>
                     </div>
-                  ) : null}
+                  )}
 
-                  {(form?.groom as Partner | undefined)?.name ? (
-                    <div className="p-2 border rounded">
+                  {(form?.groom as Partner | undefined)?.name && (
+                    <div className="p-3 border rounded-xl bg-white">
                       <div className="font-semibold">Groom</div>
                       <div className="text-sm">
                         {(form?.groom as Partner).name}
                       </div>
                       <div className="text-sm mt-1">
-                        {(form?.groom as Partner).email ? (
+                        {(form?.groom as Partner).email && (
                           <a href={`mailto:${(form?.groom as Partner).email}`}>
                             {(form?.groom as Partner).email}
                           </a>
-                        ) : null}
-                        {(form?.groom as Partner).phone ? (
+                        )}
+                        {(form?.groom as Partner).phone && (
                           <div>
                             <a href={`tel:${(form?.groom as Partner).phone}`}>
                               {(form?.groom as Partner).phone}
                             </a>
                           </div>
-                        ) : null}
+                        )}
                       </div>
                     </div>
-                  ) : null}
+                  )}
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+    </StepLayout>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { Site, ProgramEvent } from "@/4-shared/types";
 import {
   fetchProgramEventsBySite,
@@ -10,6 +10,7 @@ import {
 } from "@/3-entities/program_events/api";
 import { FREE_EVENT_LIMIT } from "@/4-shared/config/limits/usage-limits";
 import { formatTime, timeToMinutes } from "@/4-shared/helpers/formatTime";
+import { StepLayout } from "../step-layout";
 
 type Props = {
   site: Site | null;
@@ -27,6 +28,8 @@ const DAY_TAGS: { key: ProgramEvent["day_tag"]; label: string }[] = (
 ).map(([k, l]) => ({ key: k, label: l }));
 
 export default function ProgramEventsBuilderStep({ site, refresh }: Props) {
+  const formRef = useRef<HTMLDivElement | null>(null);
+
   const [events, setEvents] = useState<ProgramEvent[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -58,6 +61,22 @@ export default function ProgramEventsBuilderStep({ site, refresh }: Props) {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [site?.id]);
+
+  useEffect(() => {
+    const isOpen = editingId !== null || Object.keys(form ?? {}).length > 1;
+
+    if (!isOpen) return;
+
+    // small delay so layout settles
+    const t = setTimeout(() => {
+      formRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 120);
+
+    return () => clearTimeout(t);
+  }, [editingId, form]);
 
   async function load() {
     if (!site?.id) return;
@@ -207,7 +226,22 @@ export default function ProgramEventsBuilderStep({ site, refresh }: Props) {
   }, [events]);
 
   return (
-    <div>
+    <StepLayout
+      onNext={
+        editingId !== null || Object.keys(form ?? {}).length > 1
+          ? handleSave
+          : undefined
+      }
+      nextLoading={saving}
+      nextDisabled={saving}
+      onBack={
+        editingId !== null || Object.keys(form ?? {}).length > 1
+          ? clearForm
+          : undefined
+      }
+      nextLabel="Save"
+      backLabel="Cancel"
+    >
       <div className="mb-3 flex items-center justify-between gap-2">
         <h3 className="text-lg font-medium">Program / Events</h3>
         <div>
@@ -324,7 +358,7 @@ export default function ProgramEventsBuilderStep({ site, refresh }: Props) {
 
       {/* Edit / Create form */}
       {(editingId !== null || Object.keys(form ?? {}).length > 1) && (
-        <div className="mt-4 border rounded p-4 pb-24 sm:pb-4 bg-gray-50">
+        <div ref={formRef} className="mt-4 border rounded p-4 bg-gray-50">
           <h4 className="font-medium">
             {editingId ? "Edit event" : "Create event"}
           </h4>
@@ -353,7 +387,40 @@ export default function ProgramEventsBuilderStep({ site, refresh }: Props) {
               <label className="block text-xs text-gray-600">Time</label>
               <input
                 value={form.time ?? ""}
-                onChange={(e) => updateFormField("time", e.target.value)}
+                placeholder="18:00"
+                inputMode="numeric"
+                onChange={(e) => {
+                  const raw = e.target.value;
+
+                  // allow user typing freely but normalize simple patterns
+                  if (/^\d{1,2}$/.test(raw)) {
+                    // allow typing hour first (e.g., "18")
+                    updateFormField("time", raw);
+                    return;
+                  }
+
+                  if (/^\d{1,2}:\d{0,2}$/.test(raw)) {
+                    updateFormField("time", raw);
+                    return;
+                  }
+
+                  // fallback — ignore weird input
+                }}
+                onBlur={(e) => {
+                  const val = e.target.value.trim();
+
+                  if (!val) return;
+
+                  // normalize to HH:mm using existing helper logic
+                  const minutes = timeToMinutes(val);
+                  if (!isNaN(minutes)) {
+                    const hh = Math.floor(minutes / 60)
+                      .toString()
+                      .padStart(2, "0");
+                    const mm = (minutes % 60).toString().padStart(2, "0");
+                    updateFormField("time", `${hh}:${mm}`);
+                  }
+                }}
                 className="mt-1 w-full"
               />
             </div>
@@ -437,44 +504,6 @@ export default function ProgramEventsBuilderStep({ site, refresh }: Props) {
           </div>
 
           {error && <div className="text-red-600 mt-2">{error}</div>}
-
-          <div className="mt-6">
-            {/* desktop buttons */}
-            <div className="hidden sm:flex gap-2">
-              <button
-                className="px-3 py-1 bg-green-600 text-white rounded"
-                onClick={handleSave}
-                disabled={saving}
-              >
-                {saving ? "Saving…" : "Save"}
-              </button>
-              <button
-                className="px-3 py-1 border rounded bg-white"
-                onClick={clearForm}
-                disabled={saving}
-              >
-                Cancel
-              </button>
-            </div>
-
-            {/* mobile sticky bar */}
-            <div className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t p-3 flex gap-2">
-              <button
-                className="flex-1 px-3 py-2 bg-green-600 text-white rounded"
-                onClick={handleSave}
-                disabled={saving}
-              >
-                {saving ? "Saving…" : "Save"}
-              </button>
-              <button
-                className="flex-1 px-3 py-2 border rounded bg-white"
-                onClick={clearForm}
-                disabled={saving}
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
         </div>
       )}
 
@@ -487,6 +516,6 @@ export default function ProgramEventsBuilderStep({ site, refresh }: Props) {
       )}
 
       {/* TODO: Add server-side plan enforcement and stricter multi-language validation on the server to ensure default language presence. */}
-    </div>
+    </StepLayout>
   );
 }
