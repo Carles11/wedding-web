@@ -24,5 +24,9 @@ export default async function BuilderPage({
   const lang = isValidLanguage(requested) ? requested : "en";
   const translations = await fetchBuilderTranslations(lang, "en");
 
-  return <BuilderClient initialLang={lang} translations={translations} />;
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <BuilderClient initialLang={lang} translations={translations} />
+    </div>
+  );
 }

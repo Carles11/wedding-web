@@ -162,12 +162,12 @@ export default function GeneralSiteForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="h-full space-y-4 min-w-0">
       {/* Language Selection Section */}
 
       <div>
         <label className="block text-sm font-medium text-gray-700">
-          {translations["builder.general.form.label.languages"] ?? "LanguagesOOOOO"}
+          {translations["builder.general.form.label.languages"] ?? "Languages"}
         </label>
         <p className="text-xs text-gray-500">
           {planType === "free"
@@ -176,7 +176,7 @@ export default function GeneralSiteForm({
             : translations["builder.general.form.language_limit_pro"] ||
               "You can enable all languages on your plan."}
         </p>
-        <div className="flex flex-wrap gap-2 my-2">
+        <div className="flex flex-wrap gap-x-3 gap-y-2 my-2">
           {SUPPORTED_LANGUAGES.map((lang) => (
             <label key={lang} className="inline-flex items-center">
               <input
@@ -214,12 +214,12 @@ export default function GeneralSiteForm({
       </div>
 
       {/* Language Switch Tabs */}
-      <div className="flex gap-1 mb-2">
+      <div className="flex flex-wrap gap-1 mb-2">
         {languages.map((lang) => (
           <button
             type="button"
             key={lang}
-            className={`px-2 py-1 rounded ${
+            className={`px-3 py-1.5 rounded text-sm ${
               activeLang === lang
                 ? "bg-blue-700 text-white"
                 : "bg-white text-gray-800 border"
@@ -235,7 +235,7 @@ export default function GeneralSiteForm({
       <div>
         <label className="block text-sm font-medium text-gray-700">
           {translations["builder.general.form.label.main_title"] ??
-            "Main titleOOOOO"}
+            "Main title"}
         </label>
         <input
           className="mt-1 block w-full rounded border px-3 py-2"
@@ -255,7 +255,7 @@ export default function GeneralSiteForm({
 
       <div>
         <label className="block text-sm font-medium text-gray-700">
-          {translations["builder.general.form.label.subtitle"] ?? "SubtitleOOOOO"}
+          {translations["builder.general.form.label.subtitle"] ?? "Subtitle"}
         </label>
         <textarea
           rows={3}
@@ -275,33 +275,32 @@ export default function GeneralSiteForm({
 
       <div>
         <label className="block text-sm font-medium text-gray-700">
-          {translations["builder.general.form.label.subdomain"] ??
-            "SubdomainOOOOO"}
+          {translations["builder.general.form.label.subdomain"] ?? "Subdomain"}
         </label>
         {site?.subdomain ? (
           <div className="mt-1 text-sm text-gray-700">{site.subdomain}</div>
         ) : (
-          <div className="mt-1 flex gap-2 items-center">
+          <div className="mt-1 flex flex-col sm:flex-row gap-2 sm:items-center">
             <input
               value={subdomain}
               onChange={(e) => setSubdomain(e.target.value)}
               placeholder="your-name-2026"
-              className="rounded border px-3 py-2"
+              className="w-full sm:w-auto min-w-0 rounded border px-3 py-2"
             />
             <span className="text-sm text-gray-500">.weddweb.com</span>
           </div>
         )}
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
         <button
           type="submit"
           className="px-4 py-2 bg-blue-600 text-white rounded"
           disabled={saving}
         >
           {saving
-            ? (translations["builder.general.form.saving"] ?? "Saving…OOOOO")
-            : (translations["builder.general.form.save"] ?? "SaveOOOOO")}
+            ? (translations["builder.general.form.saving"] ?? "Saving…")
+            : (translations["builder.general.form.save"] ?? "Save")}
         </button>
         <a
           className={`text-sm ${site?.subdomain ? "text-blue-600" : "text-gray-400"}`}
@@ -313,7 +312,7 @@ export default function GeneralSiteForm({
           target="_blank"
           rel="noreferrer"
         >
-          {translations["builder.general.form.preview"] ?? "Preview siteOOOOO"}
+          {translations["builder.general.form.preview"] ?? "Preview site"}
         </a>
         {success && <div className="text-sm text-green-600">{success}</div>}
         {error && <div className="text-sm text-red-600">{error}</div>}

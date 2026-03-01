@@ -233,8 +233,8 @@ export default function ImagesBuilderStep({
   );
 
   return (
-    <div>
-      <div className="mb-3">
+    <div className="min-w-0">
+      <div className="mb-4">
         <h3 className="text-lg font-medium">
           {translations["builder.images.label.title"] || "Images"}
         </h3>
@@ -261,9 +261,9 @@ export default function ImagesBuilderStep({
         <p className="text-red-600">{error}</p>
       ) : (
         <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {/* HERO IMAGE SELECTION */}
-            <div className="border p-3 rounded">
+            <div className="border p-3 rounded min-w-0">
               <div className="font-medium">
                 {translations["builder.images.label.hero"] ||
                   "Hero Image (required)"}
@@ -283,7 +283,7 @@ export default function ImagesBuilderStep({
                   {assignedHero && (
                     <label
                       key={assignedHero.id}
-                      className="flex items-center gap-2"
+                      className="flex items-start sm:items-center gap-2 flex-wrap"
                     >
                       <input
                         type="radio"
@@ -293,7 +293,7 @@ export default function ImagesBuilderStep({
                         disabled={assigning}
                         onChange={() => {}} // Already assigned
                       />
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-start sm:items-center gap-2 flex-wrap">
                         {renderImageThumb(
                           publicUrlFor(assignedHero) ?? "",
                           assignedHero.id,
@@ -311,7 +311,10 @@ export default function ImagesBuilderStep({
                   {/* Unassigned images as assignment options */}
                   {unassignedImages.length > 0 &&
                     unassignedImages.map((img) => (
-                      <label key={img.id} className="flex items-center gap-2">
+                      <label
+                        key={img.id}
+                        className="flex items-start sm:items-center gap-2 flex-wrap"
+                      >
                         <input
                           type="radio"
                           name="hero-slot"
@@ -320,7 +323,7 @@ export default function ImagesBuilderStep({
                           disabled={assigning}
                           onChange={() => handleAssignment(img.id, "hero")}
                         />
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-start sm:items-center gap-2 flex-wrap">
                           {renderImageThumb(
                             publicUrlFor(img) ?? "",
                             img.id,
@@ -335,7 +338,7 @@ export default function ImagesBuilderStep({
             </div>
 
             {/* CONTACT IMAGE SELECTION */}
-            <div className="border p-3 rounded">
+            <div className="border p-3 rounded min-w-0">
               <div className="font-medium">
                 {translations["builder.images.label.contact"] ||
                   "Contact Image (optional)"}
@@ -352,7 +355,7 @@ export default function ImagesBuilderStep({
               ) : (
                 <div className="space-y-2">
                   {/* Unassign contact */}
-                  <label className="flex items-center gap-2">
+                  <label className="flex items-start sm:items-center gap-2 flex-wrap">
                     <input
                       type="radio"
                       name="contact-slot"
@@ -370,7 +373,7 @@ export default function ImagesBuilderStep({
                   {assignedContact && (
                     <label
                       key={assignedContact.id}
-                      className="flex items-center gap-2"
+                      className="flex items-start sm:items-center gap-2 flex-wrap"
                     >
                       <input
                         type="radio"
@@ -386,7 +389,7 @@ export default function ImagesBuilderStep({
                         }
                         onChange={() => {}} // Already assigned
                       />
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-start sm:items-center gap-2 flex-wrap">
                         {renderImageThumb(
                           publicUrlFor(assignedContact) ?? "",
                           assignedContact.id,
@@ -407,7 +410,10 @@ export default function ImagesBuilderStep({
                       (img) => !(assignedHero && assignedHero.id === img.id),
                     )
                     .map((img) => (
-                      <label key={img.id} className="flex items-center gap-2">
+                      <label
+                        key={img.id}
+                        className="flex items-start sm:items-center gap-2 flex-wrap"
+                      >
                         <input
                           type="radio"
                           name="contact-slot"
@@ -416,13 +422,15 @@ export default function ImagesBuilderStep({
                           disabled={assigning}
                           onChange={() => handleAssignment(img.id, "contact")}
                         />
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-start sm:items-center gap-2 flex-wrap">
                           {renderImageThumb(
                             publicUrlFor(img) ?? "",
                             img.id,
                             "w-16 h-10",
                           )}
-                          <div className="text-xs text-gray-700">{img.id}</div>
+                          <div className="text-xs text-gray-700 break-all">
+                            {img.id}
+                          </div>
                         </div>
                       </label>
                     ))}
@@ -432,9 +440,9 @@ export default function ImagesBuilderStep({
           </div>
 
           {/* IMAGES THUMBNAIL GRID */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mt-4">
             {images.map((img) => (
-              <div key={img.id} className="border p-2 rounded">
+              <div key={img.id} className="border p-2 rounded min-w-0">
                 {renderImageThumb(
                   publicUrlFor(img) ?? "",
                   img.id,

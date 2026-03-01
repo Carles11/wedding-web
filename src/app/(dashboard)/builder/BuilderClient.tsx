@@ -142,71 +142,104 @@ export default function BuilderClient({
   if (!site || !planType) return <div>Loading…</div>;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Language Selector in top-right */}
-      <div className="fixed top-4 right-4 z-50 bg-white/80 shadow-lg rounded-lg">
-        <LanguageSelector
-          currentLang={currentLang}
-          label={translations["marketing.lang_selector.label"] ?? "Language"}
-          onLanguageChange={handleLanguageChange}
-        />
-      </div>
-
+    <div className="min-h-screen bg-gray-100">
       <header className="border-b bg-white p-4 flex items-center justify-between">
         <div>
-          <h1 className="text-lg font-semibold">
+          <h2 className="text-blue-600 font-semibold">
             {translations["builder.header.title"]}
-          </h1>
+          </h2>
           <p className="text-sm text-gray-600">
             {translations["builder.header.subtitle"]}
           </p>
         </div>
-        <div className="flex items-center gap-4">
-          {site ? (
-            <a
-              className="text-sm text-blue-600"
-              href={`https://${site.subdomain}.weddweb.com`}
-              target="_blank"
-              rel="noreferrer"
-            >
-              {translations["builder.header.site_preview"]}
-            </a>
-          ) : (
-            <span className="text-sm text-gray-500">
-              {translations["builder.header.no_site_yet"]}
-            </span>
-          )}
-          <LogoutButton />
+        <div className="flex flex-col md:flex-row items-end-safe gap-4">
+          <div className="flex items-center gap-4">
+            {site ? (
+              <a
+                className="text-sm text-blue-600"
+                href={`https://${site.subdomain}.weddweb.com`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {translations["builder.header.site_preview"]}
+              </a>
+            ) : (
+              <span className="text-sm text-gray-500">
+                {translations["builder.header.no_site_yet"]}
+              </span>
+            )}
+            <LogoutButton />
+          </div>
+          {/* Language Selector in top-right */}
+          <div className=" top-4 right-4 z-50 bg-white/80 shadow-lg rounded-lg">
+            <LanguageSelector
+              currentLang={currentLang}
+              label={
+                translations["marketing.lang_selector.label"] ?? "Language"
+              }
+              onLanguageChange={handleLanguageChange}
+            />
+          </div>
         </div>
       </header>
 
-      <main className="p-6">
-        <div className="max-w-6xl mx-auto bg-white shadow rounded flex">
-          <nav className="w-64 border-r p-4">
-            <h3 className="font-medium">
-              {translations["builder.nav.steps_title"]}
-            </h3>
-            <ul className="mt-4 space-y-2">
-              {STEP_KEYS.map((k, i) => {
-                const isComplete = STEP_COMPLETENESS[i](site);
-                return (
-                  <li key={k}>
+      <main className="p-4 sm:p-6 overflow-x-hidden">
+        <div className="md:max-w-[95vw] mx-auto bg-white shadow rounded flex flex-col lg:flex-row">
+          <div className="lg:flex">
+            {/* ✅ MOBILE STEP SCROLLER */}
+            <div className="lg:hidden border-b bg-white">
+              <div className="flex overflow-x-auto gap-2 p-3">
+                {STEP_KEYS.map((k, i) => {
+                  const isComplete = STEP_COMPLETENESS[i](site);
+                  return (
                     <button
-                      className={`w-full text-left flex items-center px-3 py-2 rounded ${i === active ? "bg-blue-50 font-semibold" : "hover:bg-gray-50"}`}
+                      key={k}
                       onClick={() => setActive(i)}
+                      className={`flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded whitespace-nowrap border ${
+                        i === active
+                          ? "bg-blue-600 text-white border-blue-600"
+                          : "bg-white hover:bg-gray-50"
+                      }`}
                     >
-                      <span className="w-6 flex justify-center items-center">
-                        {isComplete ? <GreenCheckIcon /> : <RedDotIcon />}
-                      </span>
-                      {translations[k]}
+                      {isComplete ? <GreenCheckIcon /> : <RedDotIcon />}
+                      <span className="text-sm">{translations[k]}</span>
                     </button>
-                  </li>
-                );
-              })}
-            </ul>
-          </nav>
+                  );
+                })}
+              </div>
+            </div>
+            {/* ✅ DESKTOP SIDEBAR */}
+            <nav className="hidden lg:block w-64 border-r p-4">
+              <h3 className="font-semibold text-gray-700 text-2xl">
+                {translations["builder.nav.steps_title"]}
+              </h3>
+              <ul className="mt-4 flex md:block gap-2 md:gap-0 space-y-0 md:space-y-2 min-w-max md:min-w-0">
+                {STEP_KEYS.map((k, i) => {
+                  const isComplete = STEP_COMPLETENESS[i](site);
+                  return (
+                    <li key={k}>
+                      <button
+                        className={`flex items-center px-3 py-2 rounded whitespace-nowrap md:w-full md:text-left ${
+                          i === active
+                            ? "bg-blue-50 font-semibold"
+                            : "hover:bg-gray-50"
+                        }`}
+                        onClick={() => setActive(i)}
+                      >
+                        <span className="w-6 flex justify-center items-center">
+                          {isComplete ? <GreenCheckIcon /> : <RedDotIcon />}
+                        </span>
+                        {translations[k]}
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            </nav>{" "}
+          </div>
 
-          <section className="flex-1 p-6">
+          {/* ✅ CONTENT */}
+          <section className="flex-1 min-w-0 p-4 sm:p-6">
             <h2 className="text-xl font-semibold">
               {translations[STEP_KEYS[active]]}
             </h2>

@@ -140,7 +140,10 @@ export default function ContactBuilderStep({ site, refresh }: Props) {
       try {
         const imgs = await fetchImagesBySite(site.id);
         const contactImg = imgs.find((i) => i.section === "contact");
-        if (contactImg) setContactImageUrl(getPublicUrlForImage(contactImg));
+        if (contactImg)
+          setContactImageUrl(
+            getPublicUrlForImage({ url: contactImg.url || "" }),
+          );
         else setContactImageUrl(null);
       } catch {
         setContactImageUrl(null);
