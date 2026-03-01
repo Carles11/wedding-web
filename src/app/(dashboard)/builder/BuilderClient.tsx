@@ -19,6 +19,7 @@ import {
   GreenCheckIcon,
   RedDotIcon,
 } from "@/4-shared/ui/icons/completenessIcons";
+import { FREE_LANGUAGES_LIMIT } from "@/4-shared/config/limits/usage-limits";
 
 interface Props {
   initialLang?: string;
@@ -96,7 +97,8 @@ export default function BuilderClient({
     "free" | "monthly" | "yearly" | null
   >(null);
 
-  const langLimit = planType === "free" ? 1 : SUPPORTED_LANGUAGES.length;
+  const langLimit =
+    planType === "free" ? FREE_LANGUAGES_LIMIT : SUPPORTED_LANGUAGES.length;
 
   // Provision the site if it doesn't exist
   const provisionSite = useCallback(async () => {

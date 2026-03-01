@@ -8,6 +8,7 @@ import {
   updateProgramEvent,
   deleteProgramEvent,
 } from "@/3-entities/program_events/api";
+import { FREE_EVENT_LIMIT } from "@/4-shared/config/limits/usage-limits";
 
 type Props = {
   site: Site | null;
@@ -15,8 +16,6 @@ type Props = {
   lang: string;
   translations: Record<string, string>;
 };
-
-const FREE_EVENT_LIMIT = 2;
 
 const DAY_TAGS: { key: ProgramEvent["day_tag"]; label: string }[] = (
   [

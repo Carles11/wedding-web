@@ -8,6 +8,7 @@ import {
   updateAccommodationEntry,
   deleteAccommodationEntry,
 } from "@/3-entities/accommodation/api";
+import { FREE_ACCOMMODATION_LIMIT } from "@/4-shared/config/limits/usage-limits";
 
 type Props = {
   site: Site | null;
@@ -15,8 +16,6 @@ type Props = {
   lang: string;
   translations: Record<string, string>;
 };
-
-const FREE_ACCOMMODATION_LIMIT = 2;
 
 export default function AccommodationBuilderStep({ site, refresh }: Props) {
   const [items, setItems] = useState<AccommodationEntry[]>([]);

@@ -8,6 +8,7 @@ import {
   updateWhatToSeeEntry,
   deleteWhatToSeeEntry,
 } from "@/3-entities/what_to_see/api";
+import { FREE_WHATTOSEE_LIMIT } from "@/4-shared/config/limits/usage-limits";
 
 type Props = {
   site: Site | null;
@@ -15,8 +16,6 @@ type Props = {
   lang: string;
   translations: Record<string, string>;
 };
-
-const FREE_LIMIT = 2;
 
 export default function WhatToSeeBuilderStep({ site, refresh }: Props) {
   const [items, setItems] = useState<WhatToSeeEntry[]>([]);
@@ -54,7 +53,7 @@ export default function WhatToSeeBuilderStep({ site, refresh }: Props) {
   }
 
   function canAddMore() {
-    return items.length < FREE_LIMIT;
+    return items.length < FREE_WHATTOSEE_LIMIT;
   }
 
   const [form, setForm] = useState<Partial<WhatToSeeEntry>>({});
@@ -160,8 +159,8 @@ export default function WhatToSeeBuilderStep({ site, refresh }: Props) {
       </div>
 
       <div className="text-sm text-gray-600 mb-3">
-        Add up to {FREE_LIMIT} recommended places for your guests (eat, see,
-        relax, etc.).
+        Add up to {FREE_WHATTOSEE_LIMIT} recommended places for your guests
+        (eat, see, relax, etc.).
       </div>
 
       {loading ? (
@@ -314,7 +313,7 @@ export default function WhatToSeeBuilderStep({ site, refresh }: Props) {
 
       {!canAddMore() && (
         <div className="mt-3 text-sm text-gray-600">
-          Free plan limit reached ({FREE_LIMIT}).{" "}
+          Free plan limit reached ({FREE_WHATTOSEE_LIMIT}).{" "}
           <button className="underline text-blue-600">Upgrade</button> to add
           more. {/* TODO: server-side enforcement and billing flow */}
         </div>

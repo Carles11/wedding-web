@@ -13,6 +13,7 @@ import {
 import Image from "next/image";
 import FileUploader from "@/4-shared/ui/fileUploader/FileUploader";
 import type { Accept } from "react-dropzone";
+import { FREE_IMAGE_LIMIT } from "@/4-shared/config/limits/usage-limits";
 
 type Props = {
   site: Site | null;
@@ -20,8 +21,6 @@ type Props = {
   lang: string;
   translations: Record<string, string>;
 };
-
-const FREE_IMAGE_LIMIT = 2;
 
 export default function ImagesBuilderStep({
   site,
@@ -33,34 +32,45 @@ export default function ImagesBuilderStep({
   const [error, setError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [assigning, setAssigning] = useState(false);
-  const [heroId, setHeroId] = useState<string | null>(null);
-  const [contactId, setContactId] = useState<string | null>(null);
+
+  // Track current assignments
+  const [assignedHero, setAssignedHero] = useState<ImageRow | null>(null);
+  const [assignedContact, setAssignedContact] = useState<ImageRow | null>(null);
+
+  // Helper: What is this image's section?
+  function imageSection(img: ImageRow): string | null {
+    return typeof img.section === "string"
+      ? img.section
+      : img.section?.type || null;
+  }
 
   useEffect(() => {
-    if (!site?.id) return;
-    fetchImages();
-    // eslint-disable-next-line
+    if (site?.id) fetchImages();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [site?.id]);
 
   useEffect(() => {
-    const hero = images.find((i) => i.section === "hero");
-    const contact = images.find((i) => i.section === "contact");
-    setHeroId(hero?.id ?? null);
-    setContactId(contact?.id ?? null);
+    setAssignedHero(images.find((img) => imageSection(img) === "hero") || null);
+    setAssignedContact(
+      images.find((img) => imageSection(img) === "contact") || null,
+    );
   }, [images]);
 
   async function fetchImages() {
     if (!site?.id) return;
     setLoading(true);
     setError(null);
+
     try {
       const rows = await fetchImagesBySite(site.id);
       setImages(rows);
-      // ensure a hero exists if there's at least one image
-      if (rows.length > 0 && !rows.find((r) => r.section === "hero")) {
-        const first = rows[0];
+      // Ensure a hero exists if at least one image present
+      if (
+        rows.length > 0 &&
+        !rows.some((img) => imageSection(img) === "hero")
+      ) {
         setAssigning(true);
-        await updateImage(first.id, { section: "hero" });
+        await updateImage(rows[0].id, { section: "hero" });
         setAssigning(false);
         const refreshed = await fetchImagesBySite(site.id);
         setImages(refreshed);
@@ -75,7 +85,7 @@ export default function ImagesBuilderStep({
     }
   }
 
-  function canUploadMore() {
+  function canUploadMore(): boolean {
     return images.length < FREE_IMAGE_LIMIT;
   }
 
@@ -93,38 +103,32 @@ export default function ImagesBuilderStep({
 
     setUploading(true);
     setError(null);
+
+    // Determine assignment slot
+    let assignSection: "hero" | "contact" = "hero";
+    if (assignedHero && !assignedContact) assignSection = "contact";
+    else if (assignedHero && assignedContact) {
+      setError(
+        translations["builder.images.error.free_limit"] ||
+          "Free limit reached. Upgrade to upload more images.",
+      );
+      setUploading(false);
+      return;
+    }
+
     try {
-      // Determine slot and section
-      let slot = "0"; // Always string!
-      let section: "hero" | "contact" = "hero";
-      if (heroId && !contactId) {
-        section = "contact";
-        slot = "0";
-      } else if (heroId && contactId) {
-        setError(
-          translations["builder.images.error.free_limit"] ||
-            "Free limit reached. Upgrade to upload more images.",
-        );
-        setUploading(false);
-        return;
-      }
+      // Get section UUID for current assign
+      const sectionId = await fetchSectionId(site.id, assignSection);
+      if (!sectionId)
+        throw new Error("Failed to find section UUID for " + assignSection);
 
-      // 🔥 Fetch correct sectionId as UUID
-      const sectionId = await fetchSectionId(site.id, section);
-      if (!sectionId) {
-        setError("Failed to find section UUID for " + section);
-        setUploading(false);
-        return;
-      }
-
-      // Now call the upload with a valid sectionId UUID!
       const inserted = await uploadImageForSite(
         site.id,
         file,
-        section,
+        assignSection,
         sectionId,
         site.subdomain,
-        slot,
+        "0",
       );
       if (!inserted)
         throw new Error(
@@ -145,21 +149,56 @@ export default function ImagesBuilderStep({
     }
   }
 
+  async function handleAssignment(id: string, section: "hero" | "contact") {
+    if (assigning) return;
+    setAssigning(true);
+    try {
+      // Unset this section for all other images
+      const others = images.filter(
+        (img) => imageSection(img) === section && img.id !== id,
+      );
+      for (const img of others) {
+        await updateImage(img.id, { section: null });
+      }
+      // Set new assigned image
+      await updateImage(id, { section });
+      await fetchImages();
+      refresh();
+    } finally {
+      setAssigning(false);
+    }
+  }
+
+  async function handleUnassignContact() {
+    if (assigning) return;
+    setAssigning(true);
+    try {
+      if (assignedContact)
+        await updateImage(assignedContact.id, { section: null });
+      await fetchImages();
+      refresh();
+    } catch (err: unknown) {
+      setError("Failed to unassign contact image.");
+    } finally {
+      setAssigning(false);
+    }
+  }
+
   async function handleDelete(image: ImageRow) {
     if (assigning || uploading) return;
     setAssigning(true);
-    const ok = await deleteImage(image);
-    if (!ok) {
+    try {
+      const ok = await deleteImage(image);
+      if (!ok) {
+        setError("Failed to delete image");
+        console.error("Image deletion failed", image);
+        return;
+      }
+      await fetchImages();
+      refresh();
+    } finally {
       setAssigning(false);
-      setError(
-        translations["builder.images.error.delete_failed"] ||
-          "Failed to delete image",
-      );
-      return;
     }
-    await fetchImages();
-    setAssigning(false);
-    refresh();
   }
 
   function publicUrlFor(image: ImageRow): string | null {
@@ -187,6 +226,11 @@ export default function ImagesBuilderStep({
       />
     );
   }
+
+  // Unassigned images for possible assignment
+  const unassignedImages = images.filter(
+    (img) => !["hero", "contact"].includes(imageSection(img) || ""),
+  );
 
   return (
     <div>
@@ -218,6 +262,7 @@ export default function ImagesBuilderStep({
       ) : (
         <div className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* HERO IMAGE SELECTION */}
             <div className="border p-3 rounded">
               <div className="font-medium">
                 {translations["builder.images.label.hero"] ||
@@ -234,41 +279,62 @@ export default function ImagesBuilderStep({
                 </div>
               ) : (
                 <div className="space-y-2">
-                  {images.map((img) => (
-                    <label key={img.id} className="flex items-center gap-2">
+                  {/* Assigned Hero */}
+                  {assignedHero && (
+                    <label
+                      key={assignedHero.id}
+                      className="flex items-center gap-2"
+                    >
                       <input
                         type="radio"
                         name="hero-slot"
-                        value={img.id}
-                        checked={heroId === img.id}
+                        value={assignedHero.id}
+                        checked={true}
                         disabled={assigning}
-                        onChange={async () => {
-                          if (assigning || heroId === img.id) return;
-                          setAssigning(true);
-                          const prevHero = heroId;
-                          await updateImage(img.id, { section: "hero" });
-                          if (prevHero && prevHero !== img.id) {
-                            await updateImage(prevHero, { section: null });
-                          }
-                          await fetchImages();
-                          setAssigning(false);
-                          refresh();
-                        }}
+                        onChange={() => {}} // Already assigned
                       />
                       <div className="flex items-center gap-2">
                         {renderImageThumb(
-                          publicUrlFor(img) ?? "",
-                          img.id,
+                          publicUrlFor(assignedHero) ?? "",
+                          assignedHero.id,
                           "w-16 h-10",
                         )}
-                        <div className="text-xs text-gray-700">{img.id}</div>
+                        <div className="text-xs text-gray-700">
+                          {assignedHero.id}
+                        </div>
+                        <span className="text-xs text-green-600 ml-2">
+                          Assigned
+                        </span>
                       </div>
                     </label>
-                  ))}
+                  )}
+                  {/* Unassigned images as assignment options */}
+                  {unassignedImages.length > 0 &&
+                    unassignedImages.map((img) => (
+                      <label key={img.id} className="flex items-center gap-2">
+                        <input
+                          type="radio"
+                          name="hero-slot"
+                          value={img.id}
+                          checked={false}
+                          disabled={assigning}
+                          onChange={() => handleAssignment(img.id, "hero")}
+                        />
+                        <div className="flex items-center gap-2">
+                          {renderImageThumb(
+                            publicUrlFor(img) ?? "",
+                            img.id,
+                            "w-16 h-10",
+                          )}
+                          <div className="text-xs text-gray-700">{img.id}</div>
+                        </div>
+                      </label>
+                    ))}
                 </div>
               )}
             </div>
 
+            {/* CONTACT IMAGE SELECTION */}
             <div className="border p-3 rounded">
               <div className="font-medium">
                 {translations["builder.images.label.contact"] ||
@@ -285,66 +351,88 @@ export default function ImagesBuilderStep({
                 </div>
               ) : (
                 <div className="space-y-2">
+                  {/* Unassign contact */}
                   <label className="flex items-center gap-2">
                     <input
                       type="radio"
                       name="contact-slot"
                       value="none"
-                      checked={contactId === null}
+                      checked={!assignedContact}
                       disabled={assigning}
-                      onChange={async () => {
-                        if (assigning) return;
-                        setAssigning(true);
-                        const prev = contactId;
-                        if (prev) await updateImage(prev, { section: null });
-                        await fetchImages();
-                        setAssigning(false);
-                        refresh();
-                      }}
+                      onChange={handleUnassignContact}
                     />
                     <div className="text-sm">
                       {translations["builder.images.label.no_contact"] ||
                         "No contact image"}
                     </div>
                   </label>
-
-                  {images.map((img) => (
-                    <label key={img.id} className="flex items-center gap-2">
+                  {/* Assigned Contact */}
+                  {assignedContact && (
+                    <label
+                      key={assignedContact.id}
+                      className="flex items-center gap-2"
+                    >
                       <input
                         type="radio"
                         name="contact-slot"
-                        value={img.id}
-                        checked={contactId === img.id}
-                        disabled={assigning || heroId === img.id}
-                        onChange={async () => {
-                          if (assigning || contactId === img.id) return;
-                          if (heroId === img.id) return;
-                          setAssigning(true);
-                          const prev = contactId;
-                          await updateImage(img.id, { section: "contact" });
-                          if (prev && prev !== img.id)
-                            await updateImage(prev, { section: null });
-                          await fetchImages();
-                          setAssigning(false);
-                          refresh();
-                        }}
+                        value={assignedContact.id}
+                        checked={true}
+                        disabled={
+                          Boolean(assigning) ||
+                          Boolean(
+                            assignedHero &&
+                            assignedHero.id === assignedContact.id,
+                          )
+                        }
+                        onChange={() => {}} // Already assigned
                       />
                       <div className="flex items-center gap-2">
                         {renderImageThumb(
-                          publicUrlFor(img) ?? "",
-                          img.id,
+                          publicUrlFor(assignedContact) ?? "",
+                          assignedContact.id,
                           "w-16 h-10",
                         )}
-                        <div className="text-xs text-gray-700">{img.id}</div>
+                        <div className="text-xs text-gray-700">
+                          {assignedContact.id}
+                        </div>
+                        <span className="text-xs text-green-600 ml-2">
+                          Assigned
+                        </span>
                       </div>
                     </label>
-                  ))}
+                  )}
+                  {/* Unassigned images as assignment options */}
+                  {unassignedImages
+                    .filter(
+                      (img) => !(assignedHero && assignedHero.id === img.id),
+                    )
+                    .map((img) => (
+                      <label key={img.id} className="flex items-center gap-2">
+                        <input
+                          type="radio"
+                          name="contact-slot"
+                          value={img.id}
+                          checked={false}
+                          disabled={assigning}
+                          onChange={() => handleAssignment(img.id, "contact")}
+                        />
+                        <div className="flex items-center gap-2">
+                          {renderImageThumb(
+                            publicUrlFor(img) ?? "",
+                            img.id,
+                            "w-16 h-10",
+                          )}
+                          <div className="text-xs text-gray-700">{img.id}</div>
+                        </div>
+                      </label>
+                    ))}
                 </div>
               )}
             </div>
           </div>
 
-          <div className="grid grid-cols-4 gap-3">
+          {/* IMAGES THUMBNAIL GRID */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4">
             {images.map((img) => (
               <div key={img.id} className="border p-2 rounded">
                 {renderImageThumb(
@@ -353,17 +441,19 @@ export default function ImagesBuilderStep({
                   "w-full h-32",
                 )}
                 <div className="mt-2 flex items-center justify-between">
-                  <div className="text-xs text-gray-700">
-                    {typeof img.section === "string"
-                      ? img.section
-                      : (img.section?.type ?? "—")}{" "}
+                  <div className="text-xs font-semibold text-blue-600">
+                    {imageSection(img) === "hero"
+                      ? "Hero"
+                      : imageSection(img) === "contact"
+                        ? "Contact"
+                        : "Unassigned"}
                   </div>
                   <button
                     className="text-xs text-red-600"
                     onClick={() => handleDelete(img)}
                     disabled={assigning || uploading}
                   >
-                    {translations["builder.images.button.delete"] || "Delete"}
+                    Delete
                   </button>
                 </div>
               </div>

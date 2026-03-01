@@ -11,5 +11,6 @@ export async function fetchImagesBySite(
     .eq("site_id", siteId);
 
   if (error) throw error;
+  console.log("Fetched images for site", siteId, ":", data);
   return (data as Array<ImageRow & { section: string }>) ?? [];
 }
