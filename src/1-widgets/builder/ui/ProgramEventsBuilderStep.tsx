@@ -17,6 +17,7 @@ type Props = {
   refresh: () => void;
   lang: string;
   translations: Record<string, string>;
+  setHasProgramEvents?: (hasEvents: boolean) => void;
 };
 
 const DAY_TAGS: { key: ProgramEvent["day_tag"]; label: string }[] = (
@@ -27,7 +28,13 @@ const DAY_TAGS: { key: ProgramEvent["day_tag"]; label: string }[] = (
   ] as [ProgramEvent["day_tag"], string][]
 ).map(([k, l]) => ({ key: k, label: l }));
 
-export default function ProgramEventsBuilderStep({ site, refresh }: Props) {
+export default function ProgramEventsBuilderStep({
+  site,
+  refresh,
+  lang,
+  translations,
+  setHasProgramEvents,
+}: Props) {
   const formRef = useRef<HTMLDivElement | null>(null);
 
   const [events, setEvents] = useState<ProgramEvent[]>([]);
@@ -62,6 +69,11 @@ export default function ProgramEventsBuilderStep({ site, refresh }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [site?.id]);
 
+  // ✅ Reactively update parent with completeness!
+  useEffect(() => {
+    if (setHasProgramEvents) setHasProgramEvents(events.length > 0);
+  }, [events, setHasProgramEvents]);
+
   useEffect(() => {
     const isOpen = editingId !== null || Object.keys(form ?? {}).length > 1;
 
@@ -84,7 +96,6 @@ export default function ProgramEventsBuilderStep({ site, refresh }: Props) {
     setError(null);
     try {
       const rows = await fetchProgramEventsBySite(site.id);
-      console.log("Loaded events:", rows);
       setEvents(rows);
     } catch (err: unknown) {
       console.error(err);
@@ -217,7 +228,6 @@ export default function ProgramEventsBuilderStep({ site, refresh }: Props) {
       map[k].push(e);
     });
 
-    // ⭐ sort each day by time
     Object.keys(map).forEach((day) => {
       map[day].sort((a, b) => timeToMinutes(a.time) - timeToMinutes(b.time));
     });
@@ -270,23 +280,11 @@ export default function ProgramEventsBuilderStep({ site, refresh }: Props) {
               <button
                 type="button"
                 onClick={() => toggleDay(d.key as string)}
-                className="
-    w-full
-    flex items-center justify-between
-    font-medium
-    text-left
-    group
-  "
+                className="w-full flex items-center justify-between font-medium text-left group"
               >
                 <span>{d.label}</span>
-
                 <span
-                  className="
-      text-gray-400
-      text-sm
-      transition-transform
-      group-hover:text-gray-600
-    "
+                  className="text-gray-400 text-sm transition-transform group-hover:text-gray-600"
                   style={{
                     transform: openDays[d.key as string]
                       ? "rotate(180deg)"
@@ -313,7 +311,6 @@ export default function ProgramEventsBuilderStep({ site, refresh }: Props) {
                               {formatTime(ev.time)}
                             </span>
                           )}
-
                           {ev.location && ev.location[defaultLang] && (
                             <span className="wrap-break-word">
                               {ev.location[defaultLang]}
@@ -356,7 +353,6 @@ export default function ProgramEventsBuilderStep({ site, refresh }: Props) {
         </div>
       )}
 
-      {/* Edit / Create form */}
       {(editingId !== null || Object.keys(form ?? {}).length > 1) && (
         <div ref={formRef} className="mt-4 border rounded p-4 bg-gray-50">
           <h4 className="font-medium">
@@ -391,27 +387,18 @@ export default function ProgramEventsBuilderStep({ site, refresh }: Props) {
                 inputMode="numeric"
                 onChange={(e) => {
                   const raw = e.target.value;
-
-                  // allow user typing freely but normalize simple patterns
                   if (/^\d{1,2}$/.test(raw)) {
-                    // allow typing hour first (e.g., "18")
                     updateFormField("time", raw);
                     return;
                   }
-
                   if (/^\d{1,2}:\d{0,2}$/.test(raw)) {
                     updateFormField("time", raw);
                     return;
                   }
-
-                  // fallback — ignore weird input
                 }}
                 onBlur={(e) => {
                   const val = e.target.value.trim();
-
                   if (!val) return;
-
-                  // normalize to HH:mm using existing helper logic
                   const minutes = timeToMinutes(val);
                   if (!isNaN(minutes)) {
                     const hh = Math.floor(minutes / 60)
@@ -421,7 +408,7 @@ export default function ProgramEventsBuilderStep({ site, refresh }: Props) {
                     updateFormField("time", `${hh}:${mm}`);
                   }
                 }}
-                className="mt-1 w-full"
+                className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
 
@@ -434,7 +421,7 @@ export default function ProgramEventsBuilderStep({ site, refresh }: Props) {
                 onChange={(e) =>
                   updateFormField("location_url", e.target.value)
                 }
-                className="mt-1 w-full"
+                className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
           </div>
@@ -463,7 +450,7 @@ export default function ProgramEventsBuilderStep({ site, refresh }: Props) {
                       onChange={(e) =>
                         updateI18nField("title", lang, e.target.value)
                       }
-                      className="mt-1 w-full"
+                      className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
                   <div>
@@ -479,7 +466,7 @@ export default function ProgramEventsBuilderStep({ site, refresh }: Props) {
                       onChange={(e) =>
                         updateI18nField("location", lang, e.target.value)
                       }
-                      className="mt-1 w-full"
+                      className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
                   <div>
@@ -495,7 +482,7 @@ export default function ProgramEventsBuilderStep({ site, refresh }: Props) {
                       onChange={(e) =>
                         updateI18nField("description", lang, e.target.value)
                       }
-                      className="mt-1 w-full"
+                      className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
                 </div>
@@ -511,11 +498,9 @@ export default function ProgramEventsBuilderStep({ site, refresh }: Props) {
         <div className="mt-3 text-sm text-gray-600">
           Free plan limit reached ({FREE_EVENT_LIMIT} events).{" "}
           <button className="underline text-blue-600">Upgrade</button> to add
-          more. {/* TODO: integrate billing */}
+          more.
         </div>
       )}
-
-      {/* TODO: Add server-side plan enforcement and stricter multi-language validation on the server to ensure default language presence. */}
     </StepLayout>
   );
 }

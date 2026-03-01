@@ -9,17 +9,21 @@ import {
   getPublicUrlForImage,
 } from "@/3-entities/images/api";
 import { StepLayout } from "@/1-widgets/builder/step-layout";
+import { EMAIL_RE } from "@/4-shared/utils/validations";
 
 type Props = {
   site: Site | null;
   refresh: () => void;
   lang: string;
   translations: Record<string, string>;
+  setHasContact?: (hasContact: boolean) => void;
 };
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-export default function ContactBuilderStep({ site, refresh }: Props) {
+export default function ContactBuilderStep({
+  site,
+  refresh,
+  setHasContact,
+}: Props) {
   const [section, setSection] = useState<ContactSection | null>(null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -79,19 +83,29 @@ export default function ContactBuilderStep({ site, refresh }: Props) {
     });
   }
 
+  // Contact completeness logic
+  function validContact(pt: Partner) {
+    if (!pt?.name && !pt?.email) return false;
+    if (!pt?.name || !pt?.email) return false;
+    if (!EMAIL_RE.test(pt.email || "")) return false;
+    return true;
+  }
+
+  // Run completeness detection/propagate to parent on changes
+  useEffect(() => {
+    if (setHasContact) {
+      const bride = (form?.bride as Partner | undefined) ?? {};
+      const groom = (form?.groom as Partner | undefined) ?? {};
+      setHasContact(validContact(bride) || validContact(groom));
+    }
+  }, [form, setHasContact]);
+
   async function handleSave() {
     if (!site?.id) return;
     setError(null);
 
     const bride = (form?.bride as Partner | undefined) ?? {};
     const groom = (form?.groom as Partner | undefined) ?? {};
-
-    function validContact(pt: Partner) {
-      if (!pt?.name && !pt?.email) return false;
-      if (!pt?.name || !pt?.email) return false;
-      if (!EMAIL_RE.test(pt.email)) return false;
-      return true;
-    }
 
     if (!validContact(bride) && !validContact(groom)) {
       setError("At least one partner must have a name and a valid email");

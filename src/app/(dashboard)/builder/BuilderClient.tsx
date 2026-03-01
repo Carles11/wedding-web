@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useSupabaseAuth } from "@/4-shared/hooks/useSupabaseAuth";
 import { useSite } from "@/4-shared/hooks/useSite";
-import LanguageSelector from "@/4-shared/ui/LanguageSelector";
 import { getCurrentUserSubscription } from "@/4-shared/api/builder/getCurrentUserSubscription";
 import { SUPPORTED_LANGUAGES } from "@/4-shared/config/i18n";
 import GeneralSiteForm from "@/1-widgets/builder/ui/GeneralSiteForm";
@@ -13,13 +12,22 @@ import ProgramEventsBuilderStep from "@/1-widgets/builder/ui/ProgramEventsBuilde
 import AccommodationBuilderStep from "@/1-widgets/builder/ui/AccommodationBuilderStep";
 import ContactBuilderStep from "@/1-widgets/builder/ui/ContactBuilderStep";
 import WhatToSeeBuilderStep from "@/1-widgets/builder/ui/WhatToSeeBuilderStep";
-import LogoutButton from "@/2-features/auth/ui/LogoutButton";
 import type { Site } from "@/4-shared/types";
 import {
   GreenCheckIcon,
   RedDotIcon,
 } from "@/4-shared/ui/icons/completenessIcons";
 import { FREE_LANGUAGES_LIMIT } from "@/4-shared/config/limits/usage-limits";
+import { fetchImagesBySite } from "@/3-entities/images/api";
+import { fetchProgramEventsBySite } from "@/3-entities/program_events/api";
+import { fetchContactSection } from "@/3-entities/sections/api/fetchContactSection";
+import { EMAIL_RE } from "@/4-shared/utils/validations";
+import { BuilderHeader } from "@/4-shared/ui/header/builder";
+
+interface ImageSection {
+  type: string;
+  [key: string]: unknown;
+}
 
 interface Props {
   initialLang?: string;
@@ -30,22 +38,16 @@ interface Props {
 function isGeneralComplete(site?: Site | null): boolean {
   return !!site?.title && !!site?.subdomain;
 }
-function isProgramComplete(site?: Site | null): boolean {
-  // TODO: Implement real program completeness logic
-  return false;
-}
+
 function isAccommodationComplete(site?: Site | null): boolean {
   // TODO: Implement real accommodations completeness logic
-  return false;
+  return true;
 }
 function isWhatToSeeComplete(site?: Site | null): boolean {
   // TODO: Implement real what-to-see completeness logic
-  return false;
+  return true;
 }
-function isContactComplete(site?: Site | null): boolean {
-  // TODO: Implement real contact completeness logic
-  return false;
-}
+
 function isDomainBillingComplete(site?: Site | null): boolean {
   // Assume always true if not billing/connecting domain
   return true;
@@ -83,6 +85,8 @@ export default function BuilderClient({
     "free" | "monthly" | "yearly" | null
   >(null);
   const [heroImageExists, setHeroImageExists] = useState(false);
+  const [hasProgramEvents, setHasProgramEvents] = useState(false);
+  const [hasContact, setHasContact] = useState(false);
 
   const langLimit =
     planType === "free" ? FREE_LANGUAGES_LIMIT : SUPPORTED_LANGUAGES.length;
@@ -118,6 +122,40 @@ export default function BuilderClient({
     }
   }, [user]);
 
+  useEffect(() => {
+    if (site?.id) {
+      // Images completeness
+      fetchImagesBySite(site.id).then((images) => {
+        console.log("Checking hero image existence among images:", images);
+        setHeroImageExists(
+          images.some(
+            (img) =>
+              img.section &&
+              typeof img.section === "object" &&
+              (img.section as ImageSection).type === "hero",
+          ),
+        );
+      });
+      // Program events completeness
+      fetchProgramEventsBySite(site.id).then((events) => {
+        setHasProgramEvents(events.length > 0);
+      });
+      // Contact completeness
+      fetchContactSection(site.id).then((section) => {
+        const f = section?.content ?? {};
+        const bride = f.bride ?? {};
+        const groom = f.groom ?? {};
+        interface ContactPerson {
+          name?: string;
+          email?: string;
+        }
+        const validContact = (pt: ContactPerson) =>
+          pt?.name && pt?.email && EMAIL_RE.test(pt.email);
+        setHasContact(!!(validContact(bride) || validContact(groom)));
+      });
+    }
+  }, [site?.id]);
+
   const handleLanguageChange = (lang: string) => {
     setCurrentLang(lang);
     const params = new URLSearchParams(searchParams.toString());
@@ -128,11 +166,11 @@ export default function BuilderClient({
   // STEP_COMPLETENESS is now defined inside the functional component
   const STEP_COMPLETENESS: ((site?: Site | null) => boolean)[] = [
     isGeneralComplete,
-    () => heroImageExists, // Correctly closes over latest state!
-    isProgramComplete,
+    () => heroImageExists,
+    () => hasProgramEvents,
     isAccommodationComplete,
     isWhatToSeeComplete,
-    isContactComplete,
+    () => hasContact,
     isDomainBillingComplete,
   ];
 
@@ -140,44 +178,12 @@ export default function BuilderClient({
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <header className="border-b bg-white p-4 flex items-center justify-between">
-        <div>
-          <h2 className="text-blue-600 font-semibold">
-            {translations["builder.header.title"]}
-          </h2>
-          <p className="text-sm text-gray-600">
-            {translations["builder.header.subtitle"]}
-          </p>
-        </div>
-        <div className="flex flex-col md:flex-row items-end-safe gap-4">
-          <div className="flex items-center gap-4">
-            {site ? (
-              <a
-                className="text-sm text-blue-600"
-                href={`https://${site.subdomain}.weddweb.com`}
-                target="_blank"
-                rel="noreferrer"
-              >
-                {translations["builder.header.site_preview"]}
-              </a>
-            ) : (
-              <span className="text-sm text-gray-500">
-                {translations["builder.header.no_site_yet"]}
-              </span>
-            )}
-            <LogoutButton />
-          </div>
-          <div className=" top-4 right-4 z-50 bg-white/80 shadow-lg rounded-lg">
-            <LanguageSelector
-              currentLang={currentLang}
-              label={
-                translations["marketing.lang_selector.label"] ?? "Language"
-              }
-              onLanguageChange={handleLanguageChange}
-            />
-          </div>
-        </div>
-      </header>
+      <BuilderHeader
+        translations={translations}
+        site={site}
+        currentLang={currentLang}
+        handleLanguageChange={handleLanguageChange}
+      />
 
       <main className="p-4 sm:p-6 overflow-x-hidden">
         <div className="md:max-w-[95vw] mx-auto bg-white shadow rounded flex flex-col lg:flex-row">
@@ -286,6 +292,7 @@ export default function BuilderClient({
                     refresh={refresh}
                     lang={currentLang}
                     translations={translations}
+                    setHasProgramEvents={setHasProgramEvents}
                   />
                 )}
                 {active === 3 && site && (
@@ -310,6 +317,7 @@ export default function BuilderClient({
                     refresh={refresh}
                     lang={currentLang}
                     translations={translations}
+                    setHasContact={setHasContact}
                   />
                 )}
                 {active === 6 && (
