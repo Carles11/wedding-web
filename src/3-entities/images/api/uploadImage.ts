@@ -2,6 +2,7 @@ import { createClient } from "@/4-shared/lib/supabase/client";
 import type { ImageRow } from "@/4-shared/types";
 import { STORAGE_BUCKET_TENANT } from "@/4-shared/lib/supabase/buckets";
 import { v4 as uuidv4 } from "uuid";
+import { notify } from "@/4-shared/lib/toast/toast";
 
 export async function uploadImageForSite(
   siteId: string,
@@ -51,6 +52,6 @@ export async function uploadImageForSite(
 
   if (dbError) throw dbError;
   if (userError) throw userError;
-
+  notify.success("Image uploaded successfully!");
   return inserted as ImageRow;
 }

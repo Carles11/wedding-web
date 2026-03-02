@@ -15,6 +15,7 @@ import FileUploader from "@/4-shared/ui/fileUploader/FileUploader";
 import type { Accept } from "react-dropzone";
 import { FREE_IMAGE_LIMIT } from "@/4-shared/config/limits/usage-limits";
 import { StepLayout } from "../step-layout";
+import { notify } from "@/4-shared/lib/toast/toast";
 
 type Props = {
   site: Site | null;
@@ -50,7 +51,6 @@ export default function ImagesBuilderStep({
   );
 
   useEffect(() => {
-    console.log("Assigned hero image:", assignedHero);
     if (setHeroImageExists) {
       setHeroImageExists(!!assignedHero);
     }
@@ -162,7 +162,10 @@ export default function ImagesBuilderStep({
 
       if (!inserted) throw new Error("Upload failed");
 
-      await fetchImages();
+      // 🔥 optimistic add
+      setImages((prev) => [...prev, inserted]);
+
+      await fetchImages(); // keep for safety
       refresh();
 
       // 🔥 scroll back to uploader
@@ -203,13 +206,22 @@ export default function ImagesBuilderStep({
     if (assigning || uploading) return;
 
     setAssigning(true);
+
+    // 🔥 optimistic update FIRST
+    setImages((prev) => prev.filter((img) => img.id !== image.id));
+
     try {
       const ok = await deleteImage(image);
-      if (!ok) throw new Error("Delete failed");
+      if (!ok) {
+        // rollback if failed
+        await fetchImages();
+        setError("Failed to delete image");
+        return;
+      }
 
-      await fetchImages();
       refresh();
     } catch (err) {
+      await fetchImages();
       setError("Failed to delete image");
     } finally {
       setAssigning(false);
@@ -218,7 +230,12 @@ export default function ImagesBuilderStep({
 
   function publicUrlFor(image: ImageRow): string | null {
     if (!image?.url) return null;
-    return getPublicUrlForImage({ url: image.url || "" });
+
+    const base = getPublicUrlForImage({ url: image.url });
+    if (!base) return null;
+
+    // 🔥 cache buster so Next/Image refetches immediately
+    return `${base}?t=${image.created_at ?? Date.now()}`;
   }
 
   function ImageCard({
@@ -236,12 +253,12 @@ export default function ImagesBuilderStep({
 
     return (
       <div className="relative group w-full md:max-w-md">
-        {/* SELECT BUTTON */}
-        <div className="border rounded-lg cursor-pointer hover:ring-2 hover:ring-blue-500 transition">
+        <div className="border rounded-lg hover:ring-2 hover:ring-blue-500 transition">
           {url ? (
             <Image
               src={url}
-              alt={img.id}
+              alt={label ?? "uploaded image"}
+              key={img.id} // 🔥 IMPORTANT for React reconciliation
               width={500}
               height={300}
               className="w-full h-48 md:h-56 object-cover rounded-lg"
@@ -266,7 +283,7 @@ export default function ImagesBuilderStep({
             type="button"
             onClick={onDelete}
             disabled={assigning || uploading}
-            className="absolute top-0 right-2 mt-2 p-2 h-6 w-6 bg-white rounded-md border shadow-sm flex items-center justify-center text-red-600 text-sm font-bold hover:bg-white md:opacity-0 md:group-hover:opacity-100 transition"
+            className="absolute top-0 right-2 cursor-pointer mt-2 p-2 h-6 w-6 bg-white rounded-md border shadow-sm flex items-center justify-center text-red-600 text-sm font-bold hover:bg-white md:opacity-0 md:group-hover:opacity-100 transition "
             aria-label="Delete image"
           >
             ×

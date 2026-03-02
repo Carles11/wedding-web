@@ -1,25 +1,40 @@
 import { createClient } from "@/4-shared/lib/supabase/client";
 import type { ImageRow } from "@/4-shared/types";
 import { STORAGE_BUCKET_TENANT } from "@/4-shared/lib/supabase/buckets";
+import { notify } from "@/4-shared/lib/toast/toast";
 
 export async function deleteImage(image: ImageRow): Promise<boolean> {
   const supabase = createClient();
   if (!image.url) return false;
-  console.log("Deleting DB row for image with id:", image.id);
 
-  // Delete image file from bucket
+  // 1️⃣ remove from storage
   const { error: storageError } = await supabase.storage
     .from(STORAGE_BUCKET_TENANT)
     .remove([image.url]);
-  if (storageError) console.error("Storage removal error:", storageError);
-  else console.log("Storage file removed:", image.url);
 
-  const { error: dbError } = await supabase
+  if (storageError) {
+    notify.error("Failed to remove file from storage");
+    return false;
+  }
+
+  // 2️⃣ remove DB row AND VERIFY
+  const { data, error: dbError } = await supabase
     .from("images")
     .delete()
-    .eq("id", image.id);
-  if (dbError) console.error("DB row delete error:", dbError);
-  else console.log("Image DB row deleted:", image.id);
+    .eq("id", image.id)
+    .select("id"); // 🔥 CRITICAL: forces returning rows
 
-  return !dbError;
+  if (dbError) {
+    notify.error("Failed to delete image record");
+    return false;
+  }
+
+  if (!data || data.length === 0) {
+    notify.error("Image record was not deleted (RLS?)");
+    return false;
+  }
+  console.log("Deleted rows:", data);
+  notify.success("Image deleted");
+
+  return true;
 }

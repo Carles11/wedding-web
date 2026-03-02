@@ -1,5 +1,6 @@
 import { createClient } from "@/4-shared/lib/supabase/client";
 import type { ImageRow } from "@/4-shared/types";
+import { notify } from "@/4-shared/lib/toast/toast";
 
 export async function fetchImagesBySite(
   siteId: string,
@@ -10,7 +11,10 @@ export async function fetchImagesBySite(
     .select("*, section:sections(type)")
     .eq("site_id", siteId);
 
-  if (error) throw error;
+  if (error) {
+    notify.error("Failed to fetch images");
+    throw error;
+  }
   console.log("Fetched images for site", siteId, ":", data);
   return (data as Array<ImageRow & { section: string }>) ?? [];
 }
