@@ -31,8 +31,6 @@ const DAY_TAGS: { key: ProgramEvent["day_tag"]; label: string }[] = (
 export default function ProgramEventsBuilderStep({
   site,
   refresh,
-  lang,
-  translations,
   setHasProgramEvents,
 }: Props) {
   const formRef = useRef<HTMLDivElement | null>(null);

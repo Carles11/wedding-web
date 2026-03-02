@@ -86,10 +86,7 @@ export default function ImagesBuilderStep({
         setImages(refreshed);
       }
     } catch (err) {
-      console.error(err);
-      setError(
-        translations["builder.images.error.fetch"] || "Failed to fetch images.",
-      );
+      notify.error(translations["builder.images.error.fetch"]);
     } finally {
       setLoading(false);
     }
@@ -130,10 +127,8 @@ export default function ImagesBuilderStep({
     if (!file) return;
 
     if (!canUploadMore()) {
-      setError(
-        translations["builder.images.error.free_limit"] ||
-          "Free limit reached.",
-      );
+      notify.error(translations["builder.images.error.free_limit"]);
+
       return;
     }
 
@@ -171,11 +166,7 @@ export default function ImagesBuilderStep({
       // 🔥 scroll back to uploader
       uploadRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     } catch (err) {
-      console.error(err);
-      setError(
-        translations["builder.images.error.upload_failed"] ||
-          "Failed to upload image",
-      );
+      notify.error(translations["builder.images.error.upload_failed"]);
     } finally {
       setUploading(false);
     }
@@ -194,14 +185,14 @@ export default function ImagesBuilderStep({
       if (!ok) {
         // rollback if failed
         await fetchImages();
-        setError("Failed to delete image");
+        notify.error(translations["builder.images.error.delete_failed"]);
         return;
       }
 
       refresh();
     } catch (err) {
       await fetchImages();
-      setError("Failed to delete image");
+      notify.error(translations["builder.images.error.delete_failed"]);
     } finally {
       setAssigning(false);
     }
@@ -245,7 +236,8 @@ export default function ImagesBuilderStep({
             />
           ) : (
             <div className="h-48 md:h-56 bg-gray-100 flex items-center justify-center text-xs text-gray-500">
-              Preview unavailable
+              {translations["builder.images.label.preview_unavailable"] ||
+                "No preview available"}
             </div>
           )}
 
@@ -312,8 +304,6 @@ export default function ImagesBuilderStep({
         {loading && (
           <p>{translations["builder.images.label.loading"] || "Loading…"}</p>
         )}
-
-        {error && <p className="text-red-600">{error}</p>}
 
         {!loading && !error && images.length > 0 && (
           <div className="flex flex-col gap-8">
