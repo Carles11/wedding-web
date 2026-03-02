@@ -3,6 +3,7 @@ import { getTextForLang } from "@/4-shared/lib/getTextForLang";
 import SectionContainer from "@/4-shared/ui/section/SectionContainer";
 import type { TranslationDictionary } from "@/4-shared/types";
 import UnderlinedLink from "@/4-shared/ui/link/UnderlinedLink";
+import { getPublicUrlForTenantBucketImage } from "@/4-shared/helpers/getPublicUrlForTenantBucketImage";
 
 interface ContactPerson {
   name: string;
@@ -29,6 +30,7 @@ type ContactSectionProps = {
   data: ContactSectionData | null;
   lang: string;
   translations?: TranslationDictionary | null;
+  backgroundImage?: string; // Public URL already fetched outside
 };
 
 function normalizeBackground(raw?: ContactSectionData["background"]) {
@@ -47,6 +49,7 @@ export default function ContactSection({
   data,
   lang,
   translations,
+  backgroundImage,
 }: ContactSectionProps) {
   const headline =
     getTextForLang(
@@ -72,7 +75,6 @@ export default function ContactSection({
 
   // Defensive parse of background
   const bg = normalizeBackground(data?.background);
-  const bgUrl = bg?.url;
   const bgAlt = bg?.alt ?? "";
 
   const underlineConfig = {
@@ -85,7 +87,7 @@ export default function ContactSection({
     // Outer wrapper for full-bleed background + centered content
     <div className="relative">
       {/* Background area: mobile = full-width; md+ = anchored to the right (vertical image) */}
-      {bgUrl ? (
+      {backgroundImage && (
         <div
           aria-hidden="true"
           className="absolute inset-0 pointer-events-none z-0"
@@ -96,7 +98,7 @@ export default function ContactSection({
           */}
           <div className="absolute inset-0 w-screen h-full left-1/2 -translate-x-1/2 md:w-2/5 md:left-auto md:right-0 md:translate-x-0">
             <Image
-              src={bgUrl}
+              src={getPublicUrlForTenantBucketImage(backgroundImage)}
               alt={bgAlt}
               fill
               sizes="100vw"
@@ -108,7 +110,7 @@ export default function ContactSection({
             <div className="absolute inset-0 bg-white/75 md:bg-white/44" />
           </div>
         </div>
-      ) : null}
+      )}
 
       {/* SectionContainer remains the same and centers content */}
       <SectionContainer

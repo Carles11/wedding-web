@@ -109,6 +109,7 @@ export default async function HomePage(props: {
   // Fetch hero for bakcground image
   const images = await fetchImagesForTenantSite(siteId, "hero");
   const heroImage = images[0]?.url ?? "";
+  const contactImage = images[1]?.url ?? "";
 
   const availableLangs =
     Array.isArray(site?.languages) && site.languages.length > 0
@@ -230,6 +231,7 @@ export default async function HomePage(props: {
           data={contact}
           lang={lang}
           translations={translations}
+          backgroundImage={contactImage}
         />
       </main>
     </>
