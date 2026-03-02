@@ -15,6 +15,7 @@ import FileUploader from "@/4-shared/ui/fileUploader/FileUploader";
 import type { Accept } from "react-dropzone";
 import { FREE_IMAGE_LIMIT } from "@/4-shared/config/limits/usage-limits";
 import { StepLayout } from "../step-layout";
+import { notify } from "@/4-shared/lib/toast/toast";
 
 type Props = {
   site: Site | null;
@@ -272,7 +273,7 @@ export default function ImagesBuilderStep({
   }
 
   return (
-    <StepLayout nextLabel="Save" backLabel="Cancel">
+    <StepLayout nextLabel="Save" backLabel="Cancel" translations={translations}>
       <div className="space-y-6 min-w-0">
         {/* HEADER */}
         <div>

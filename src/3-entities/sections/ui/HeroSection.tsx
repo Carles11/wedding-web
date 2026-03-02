@@ -30,7 +30,7 @@ export default function HeroSection({
   const whenLabel = translations?.["when"] ?? "When";
   const whereLabel = translations?.["where"] ?? "Where";
   const dresscodeLabel = translations?.["dresscode"] ?? "Dress code";
-  console.log("Rendering HeroSection with backgroundImage:", backgroundImage);
+
   return (
     <section
       className="relative w-full h-screen min-h-[340px] overflow-hidden flex items-center justify-center shadow-lg"
