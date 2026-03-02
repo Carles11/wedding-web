@@ -4,7 +4,8 @@ import { useDropzone, Accept } from "react-dropzone";
 interface FileUploaderProps {
   onFile: (file: File) => void;
   disabled?: boolean;
-  label?: string;
+  label?: string; // fallback default label
+  translations?: Record<string, string>;
   accept?: Accept;
   multiple?: boolean;
   className?: string;
@@ -14,6 +15,7 @@ export function FileUploader({
   onFile,
   disabled = false,
   label = "Upload file",
+  translations = {},
   accept = { "image/*": [] },
   multiple = false,
   className = "",
@@ -26,7 +28,6 @@ export function FileUploader({
     (acceptedFiles: File[]) => {
       if (!acceptedFiles.length) return;
       setSelectedFileNames(acceptedFiles.map((f) => f.name));
-      // For your builder: only pass first file if multiple==false
       if (multiple) {
         acceptedFiles.forEach((f) => onFile(f));
       } else {
@@ -43,6 +44,15 @@ export function FileUploader({
     multiple,
   });
 
+  const labelText =
+    translations["builder.images.upload_label"] || label || "Upload file";
+  const dropText =
+    translations["builder.images.drop_here"] || "Drop file here…";
+  const clickOrDragText =
+    translations["builder.images.click_or_drag"] || "Click or drag & drop.";
+  const selectedFilesText =
+    translations["builder.images.selected_files"] || "Selected files:";
+
   return (
     <div
       {...getRootProps()}
@@ -54,17 +64,14 @@ export function FileUploader({
     >
       <input {...getInputProps()} />
       <div id="file-uploader-label" className="text-sm font-medium mb-2">
-        {label}
+        {labelText}
       </div>
       <div className="text-xs text-gray-500 mb-2">
-        {isDragActive
-          ? "Drop file here…" // If you have translation: translations["builder.images.drop_here"]
-          : "Click or drag & drop."}{" "}
-        {/* translations["builder.images.click_or_drag"] */}
+        {isDragActive ? dropText : clickOrDragText}
       </div>
       {selectedFileNames.length > 0 && (
         <div className="text-xs text-blue-700 mt-2">
-          {selectedFileNames.join(", ")}
+          {selectedFilesText} {selectedFileNames.join(", ")}
         </div>
       )}
     </div>

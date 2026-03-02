@@ -11,6 +11,7 @@ import { fetchAccommodationSection } from "@/3-entities/sections/api/fetchAccomm
 import { fetchWhatElseSection } from "@/3-entities/sections/api/fetchWhatElseSection";
 import { fetchContactSection } from "@/3-entities/sections/api/fetchContactSection";
 import { fetchBankDataSection } from "@/3-entities/sections/api/fetchBankDataSection";
+import { fetchImagesForTenantSite } from "@/3-entities/images/api/fetchImagesForTenantSite";
 
 import HeroSection from "@/3-entities/sections/ui/HeroSection";
 import ProgramSectionComponent from "@/3-entities/sections/ui/ProgramSection";
@@ -105,6 +106,9 @@ export default async function HomePage(props: {
   const host = ((await headers()).get("host") ?? "").toLowerCase().trim();
   const site = await getSiteByDomain(host);
   const siteId = site?.id ?? null;
+  // Fetch hero for bakcground image
+  const images = await fetchImagesForTenantSite(siteId, "hero");
+  const heroImage = images[0]?.url ?? "";
 
   const availableLangs =
     Array.isArray(site?.languages) && site.languages.length > 0
@@ -172,7 +176,11 @@ export default async function HomePage(props: {
         {/* Hero */}
         {hero && (
           <>
-            <HeroSection hero={hero} translations={translations} />
+            <HeroSection
+              hero={hero}
+              translations={translations}
+              backgroundImage={heroImage}
+            />
           </>
         )}
       </div>

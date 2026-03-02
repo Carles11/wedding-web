@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
+    domains: ["eaahwakvnwqjlkulqnyz.supabase.co"],
     // Use remotePatterns to support more robust media hosting and future-proof config
     remotePatterns: [
       {

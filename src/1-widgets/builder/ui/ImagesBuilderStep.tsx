@@ -15,7 +15,6 @@ import FileUploader from "@/4-shared/ui/fileUploader/FileUploader";
 import type { Accept } from "react-dropzone";
 import { FREE_IMAGE_LIMIT } from "@/4-shared/config/limits/usage-limits";
 import { StepLayout } from "../step-layout";
-import { notify } from "@/4-shared/lib/toast/toast";
 
 type Props = {
   site: Site | null;
@@ -181,27 +180,6 @@ export default function ImagesBuilderStep({
     }
   }
 
-  async function handleAssignment(id: string, section: "hero" | "contact") {
-    if (assigning) return;
-    setAssigning(true);
-
-    try {
-      const others = images.filter(
-        (img) => imageSection(img) === section && img.id !== id,
-      );
-
-      for (const img of others) {
-        await updateImage(img.id, { section: null });
-      }
-
-      await updateImage(id, { section });
-      await fetchImages();
-      refresh();
-    } finally {
-      setAssigning(false);
-    }
-  }
-
   async function handleDelete(image: ImageRow) {
     if (assigning || uploading) return;
 
@@ -325,6 +303,7 @@ export default function ImagesBuilderStep({
             }
             accept={{ "image/*": [] } as Accept}
             className="h-48"
+            translations={translations}
           />
         </div>
 

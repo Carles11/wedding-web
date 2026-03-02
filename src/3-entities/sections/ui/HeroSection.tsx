@@ -2,27 +2,27 @@ import type { HeroSectionType } from "@/4-shared/types";
 import Image from "next/image";
 import Heading from "@/4-shared/ui/typography/Heading";
 import type { TranslationDictionary } from "@/4-shared/types";
+import { getPublicUrlForTenantBucketImage } from "@/4-shared/helpers/getPublicUrlForTenantBucketImage";
 
 type HeroSectionProps = {
   hero: HeroSectionType;
+  backgroundImage: string; // Public URL already fetched outside
   translations?: TranslationDictionary | null;
 };
 
 /**
  * HeroSection
- * - Renders hero image + title + description (from per-site sections JSONB)
- * - Optionally shows small info row with labels (When / Where / Dress code) using translations
- *
- * Notes:
- * - translations is passed from server via getMergedTranslations(siteId, lang)
- * - All content text uses getTextForLang to prefer the requested lang with a fallback (site defaults)
+ * - Renders hero image + title + description
+ * - Info labels (When/Where/Dress code) use translations
  */
-export default function HeroSection({ hero, translations }: HeroSectionProps) {
+export default function HeroSection({
+  hero,
+  backgroundImage,
+  translations,
+}: HeroSectionProps) {
   const title = hero.title ?? "";
   const description = hero.description ?? "";
-  const backgroundImage = hero.backgroundImage ?? "";
 
-  // Optional structured info (keep for future migratable fields)
   const heroDate: string = hero.date ?? "";
   const heroLocation: string = hero.location ?? "";
   const heroDresscode: string = hero.dresscode ?? "";
@@ -30,15 +30,15 @@ export default function HeroSection({ hero, translations }: HeroSectionProps) {
   const whenLabel = translations?.["when"] ?? "When";
   const whereLabel = translations?.["where"] ?? "Where";
   const dresscodeLabel = translations?.["dresscode"] ?? "Dress code";
-
+  console.log("Rendering HeroSection with backgroundImage:", backgroundImage);
   return (
     <section
-      className="relative w-full h-[100vh] min-h-[340px] overflow-hidden flex items-center justify-center shadow-lg"
+      className="relative w-full h-screen min-h-[340px] overflow-hidden flex items-center justify-center shadow-lg"
       aria-labelledby="hero-title"
     >
       {backgroundImage && (
         <Image
-          src={backgroundImage}
+          src={getPublicUrlForTenantBucketImage(backgroundImage)}
           alt={title || "Hero image for event"}
           fill
           loading="eager"
@@ -51,10 +51,8 @@ export default function HeroSection({ hero, translations }: HeroSectionProps) {
         />
       )}
 
-      {/* Overlay */}
       <div className="absolute inset-0 bg-black/30" />
 
-      {/* Content */}
       <div className="relative z-10 flex flex-col items-center justify-center w-full h-full px-4 text-center">
         <Heading
           id="hero-title"
@@ -70,7 +68,6 @@ export default function HeroSection({ hero, translations }: HeroSectionProps) {
           </p>
         )}
 
-        {/* Info row, as before */}
         {(heroDate || heroLocation || heroDresscode) && (
           <div className="mt-6 flex flex-col sm:flex-row items-center gap-3 text-white/95 text-sm md:text-base">
             {heroDate && (
