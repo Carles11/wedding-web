@@ -1,35 +1,23 @@
 import type { HeroSectionType } from "@/4-shared/types";
 import Image from "next/image";
 import Heading from "@/4-shared/ui/typography/Heading";
-import type { TranslationDictionary } from "@/4-shared/types";
 import { getPublicUrlForTenantBucketImage } from "@/4-shared/helpers/getPublicUrlForTenantBucketImage";
 
 type HeroSectionProps = {
   hero: HeroSectionType;
   backgroundImage: string; // Public URL already fetched outside
-  translations?: TranslationDictionary | null;
 };
 
 /**
  * HeroSection
  * - Renders hero image + title + description
- * - Info labels (When/Where/Dress code) use translations
  */
 export default function HeroSection({
   hero,
   backgroundImage,
-  translations,
 }: HeroSectionProps) {
   const title = hero.title ?? "";
   const description = hero.description ?? "";
-
-  const heroDate: string = hero.date ?? "";
-  const heroLocation: string = hero.location ?? "";
-  const heroDresscode: string = hero.dresscode ?? "";
-
-  const whenLabel = translations?.["when"] ?? "When";
-  const whereLabel = translations?.["where"] ?? "Where";
-  const dresscodeLabel = translations?.["dresscode"] ?? "Dress code";
 
   return (
     <section
@@ -66,31 +54,6 @@ export default function HeroSection({
           <p className="mt-4 font-sans text-lg md:text-xl text-white text-center drop-shadow max-w-[85%] md:max-w-2xl">
             {description}
           </p>
-        )}
-
-        {(heroDate || heroLocation || heroDresscode) && (
-          <div className="mt-6 flex flex-col sm:flex-row items-center gap-3 text-white/95 text-sm md:text-base">
-            {heroDate && (
-              <div className="flex items-center gap-2 px-3 py-1 bg-black/40 rounded">
-                <span className="font-semibold">{whenLabel}:</span>
-                <span className="whitespace-nowrap">{heroDate}</span>
-              </div>
-            )}
-
-            {heroLocation && (
-              <div className="flex items-center gap-2 px-3 py-1 bg-black/40 rounded">
-                <span className="font-semibold">{whereLabel}:</span>
-                <span className="whitespace-nowrap">{heroLocation}</span>
-              </div>
-            )}
-
-            {heroDresscode && (
-              <div className="flex items-center gap-2 px-3 py-1 bg-black/40 rounded">
-                <span className="font-semibold">{dresscodeLabel}:</span>
-                <span className="whitespace-nowrap">{heroDresscode}</span>
-              </div>
-            )}
-          </div>
         )}
       </div>
     </section>

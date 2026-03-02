@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Site, ProgramEvent } from "@/4-shared/types";
+import type { SupportedLanguage } from "@/4-shared/config/i18n";
+
 import {
   fetchProgramEventsBySite,
   createProgramEvent,
@@ -10,28 +12,55 @@ import {
 } from "@/3-entities/program_events/api";
 import { FREE_EVENT_LIMIT } from "@/4-shared/config/limits/usage-limits";
 import { formatTime, timeToMinutes } from "@/4-shared/helpers/formatTime";
+import { interpolate } from "@/4-shared/helpers/interpolateVars";
 import { StepLayout } from "../step-layout";
+import { notify } from "@/4-shared/lib/toast/toast";
+
+// Import your reusable inputs
+import { DateInput } from "@/4-shared/ui/inputs/DateInput";
+import { TimeInput } from "@/4-shared/ui/inputs/TimeInput";
+
+function t(
+  translations: Record<string, string>,
+  key: string,
+  fallback: string,
+): string {
+  return translations[key] || fallback;
+}
 
 type Props = {
   site: Site | null;
   refresh: () => void;
   lang: string;
   translations: Record<string, string>;
-  setHasProgramEvents?: (hasEvents: boolean) => void;
 };
 
-const DAY_TAGS: { key: ProgramEvent["day_tag"]; label: string }[] = (
-  [
-    ["day_before", "Day Before"],
-    ["wedding_day", "Wedding Day"],
-    ["day_after", "Day After"],
-  ] as [ProgramEvent["day_tag"], string][]
-).map(([k, l]) => ({ key: k, label: l }));
+// Day keys and labels, sourced from translations
+function getDayTags(translations: Record<string, string>) {
+  return [
+    {
+      key: "day_before",
+      label: t(translations, "builder.program_events.day_before", "Day Before"),
+    },
+    {
+      key: "wedding_day",
+      label: t(
+        translations,
+        "builder.program_events.wedding_day",
+        "Wedding Day",
+      ),
+    },
+    {
+      key: "day_after",
+      label: t(translations, "builder.program_events.day_after", "Day After"),
+    },
+  ] as { key: ProgramEvent["day_tag"]; label: string }[];
+}
 
 export default function ProgramEventsBuilderStep({
   site,
   refresh,
-  setHasProgramEvents,
+  translations,
 }: Props) {
   const formRef = useRef<HTMLDivElement | null>(null);
 
@@ -50,7 +79,7 @@ export default function ProgramEventsBuilderStep({
     day_tag: "wedding_day",
   });
 
-  const isProUser = false; // stub — do not check subscription in this MVP
+  const isProUser = true; // stub — do not check subscription in this MVP
 
   const languages = useMemo(() => {
     if (!site) return ["en"];
@@ -61,47 +90,47 @@ export default function ProgramEventsBuilderStep({
 
   const defaultLang = site?.default_lang ?? languages[0] ?? "en";
 
+  // 🔹 Fetch translated events
+  async function load() {
+    if (!site?.id) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const rows = await fetchProgramEventsBySite(
+        site.id,
+        languages as SupportedLanguage[],
+      );
+      setEvents(rows);
+    } catch (err) {
+      notify.error(
+        t(
+          translations,
+          "builder.program_events.error.fetch",
+          "Failed to fetch program events",
+        ),
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
   useEffect(() => {
     if (!site?.id) return;
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [site?.id]);
 
-  // ✅ Reactively update parent with completeness!
-  useEffect(() => {
-    if (setHasProgramEvents) setHasProgramEvents(events.length > 0);
-  }, [events, setHasProgramEvents]);
-
   useEffect(() => {
     const isOpen = editingId !== null || Object.keys(form ?? {}).length > 1;
-
     if (!isOpen) return;
-
-    // small delay so layout settles
-    const t = setTimeout(() => {
+    const tmo = setTimeout(() => {
       formRef.current?.scrollIntoView({
         behavior: "smooth",
         block: "start",
       });
     }, 120);
-
-    return () => clearTimeout(t);
+    return () => clearTimeout(tmo);
   }, [editingId, form]);
-
-  async function load() {
-    if (!site?.id) return;
-    setLoading(true);
-    setError(null);
-    try {
-      const rows = await fetchProgramEventsBySite(site.id);
-      setEvents(rows);
-    } catch (err: unknown) {
-      console.error(err);
-      setError((err as Error)?.message ?? String(err));
-    } finally {
-      setLoading(false);
-    }
-  }
 
   function toggleDay(day: string) {
     setOpenDays((s) => ({
@@ -118,8 +147,11 @@ export default function ProgramEventsBuilderStep({
   function startCreate() {
     setForm({
       day_tag: "wedding_day",
+      date: undefined,
+      time: "",
       title: {},
       location: {},
+      location_url: "",
       description: {},
     });
     setEditingId(null);
@@ -163,12 +195,42 @@ export default function ProgramEventsBuilderStep({
     const location =
       (form.location as Record<string, string> | undefined) ?? {};
     if (!title[defaultLang] || !location[defaultLang]) {
-      setError(`Title and location are required in ${defaultLang}`);
+      setError(
+        interpolate(
+          t(
+            translations,
+            "builder.program_events.error.missing_fields",
+            "Title and location are required in {defaultLang}",
+          ),
+          { defaultLang },
+        ),
+      );
       return;
     }
-
+    if (!form.date) {
+      setError(
+        t(translations, "builder.program_events.field.day", "Date is required"),
+      );
+      return;
+    }
+    if (!form.time) {
+      setError(
+        t(
+          translations,
+          "builder.program_events.field.time",
+          "Time is required",
+        ),
+      );
+      return;
+    }
     if (!canAddMore() && !editingId) {
-      setError("Free limit reached. Upgrade to add more events.");
+      setError(
+        t(
+          translations,
+          "builder.program_events.error.free_limit",
+          "Free limit reached. Upgrade to add more events.",
+        ),
+      );
       return;
     }
 
@@ -179,14 +241,28 @@ export default function ProgramEventsBuilderStep({
         const updated = await updateProgramEvent(editingId, {
           ...(form as ProgramEvent),
         });
-        if (!updated) throw new Error("Update failed");
+        if (!updated)
+          throw new Error(
+            t(
+              translations,
+              "builder.program_events.error.update_failed",
+              "Update failed",
+            ),
+          );
       } else {
         const payload: Partial<ProgramEvent> & { site_id: string } = {
           ...(form as ProgramEvent),
           site_id: site.id,
         };
         const created = await createProgramEvent(payload);
-        if (!created) throw new Error("Create failed");
+        if (!created)
+          throw new Error(
+            t(
+              translations,
+              "builder.program_events.error.create_failed",
+              "Create failed",
+            ),
+          );
       }
 
       await load();
@@ -201,17 +277,34 @@ export default function ProgramEventsBuilderStep({
   }
 
   async function handleDelete(id: string) {
-    if (!confirm("Delete this event?")) return;
+    if (
+      !confirm(
+        t(
+          translations,
+          "builder.program_events.confirm.delete",
+          "Delete this event?",
+        ),
+      )
+    )
+      return;
     setSaving(true);
     const ok = await deleteProgramEvent(id);
     setSaving(false);
     if (!ok) {
-      setError("Failed to delete event");
+      setError(
+        t(
+          translations,
+          "builder.program_events.error.delete_failed",
+          "Failed to delete event",
+        ),
+      );
       return;
     }
     await load();
     refresh();
   }
+
+  const DAY_TAGS = getDayTags(translations);
 
   const grouped = useMemo(() => {
     const map: Record<string, ProgramEvent[]> = {
@@ -219,22 +312,20 @@ export default function ProgramEventsBuilderStep({
       wedding_day: [],
       day_after: [],
     };
-
     events.forEach((e) => {
       const k = e.day_tag ?? "wedding_day";
       if (!map[k]) map[k] = [];
       map[k].push(e);
     });
-
     Object.keys(map).forEach((day) => {
       map[day].sort((a, b) => timeToMinutes(a.time) - timeToMinutes(b.time));
     });
-
     return map;
   }, [events]);
 
   return (
     <StepLayout
+      translations={translations}
       onNext={
         editingId !== null || Object.keys(form ?? {}).length > 1
           ? handleSave
@@ -247,30 +338,51 @@ export default function ProgramEventsBuilderStep({
           ? clearForm
           : undefined
       }
-      nextLabel="Save"
-      backLabel="Cancel"
+      nextLabel={t(translations, "builder.program_events.button.save", "Save")}
+      backLabel={t(
+        translations,
+        "builder.program_events.button.cancel",
+        "Cancel",
+      )}
     >
       <div className="mb-3 flex items-center justify-between gap-2">
-        <h3 className="text-lg font-medium">Program / Events</h3>
+        <h3 className="text-lg font-medium">
+          {t(
+            translations,
+            "builder.program_events.heading",
+            "Program / Events",
+          )}
+        </h3>
         <div>
           <button
             className="px-3 py-1 bg-blue-600 text-white rounded disabled:opacity-50"
             onClick={() => startCreate()}
             disabled={!canAddMore()}
           >
-            + Add event
+            {t(
+              translations,
+              "builder.program_events.button.add",
+              "+ Add event",
+            )}
           </button>
         </div>
       </div>
 
       <div className="text-sm text-gray-600 mb-3">
-        Events are grouped by Day Before, Wedding Day, and Day After. Free plan
-        supports up to {FREE_EVENT_LIMIT} events total. Title and location are
-        required in the site default language ({defaultLang}).
+        {interpolate(
+          t(
+            translations,
+            "builder.program_events.info",
+            "Events are grouped by Day Before, Wedding Day, and Day After. Free plan supports up to {FREE_EVENT_LIMIT} events total. Title and location are required in the site default language ({defaultLang}).",
+          ),
+          { FREE_EVENT_LIMIT, defaultLang },
+        )}
       </div>
 
       {loading ? (
-        <p>Loading events…</p>
+        <p>
+          {t(translations, "builder.program_events.loading", "Loading events…")}
+        </p>
       ) : (
         <div className="space-y-4">
           {DAY_TAGS.map((d) => (
@@ -320,20 +432,44 @@ export default function ProgramEventsBuilderStep({
                             ? ev.description[defaultLang]
                             : null}
                         </div>
+                        {ev.location_url && (
+                          <div className="text-xs mt-2">
+                            <a
+                              href={ev.location_url}
+                              target="_blank"
+                              rel="noopener"
+                              className="underline text-blue-700 hover:text-blue-600"
+                            >
+                              {t(
+                                translations,
+                                "builder.program_events.field.location_url",
+                                "Location URL (optional)",
+                              )}
+                            </a>
+                          </div>
+                        )}
                       </div>
                       <div className="flex items-center gap-2.5 shrink-0">
                         <button
                           className="text-sm px-3 py-1.5 rounded-md border border-gray-400 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition"
                           onClick={() => startEdit(ev)}
                         >
-                          Edit
+                          {t(
+                            translations,
+                            "builder.program_events.button.edit",
+                            "Edit",
+                          )}
                         </button>
                         <button
                           className="text-sm px-3 py-1.5 rounded-md border border-red-200 bg-white text-red-600 hover:bg-red-50 hover:border-red-300 transition"
                           onClick={() => handleDelete(ev.id)}
                           disabled={saving}
                         >
-                          Delete
+                          {t(
+                            translations,
+                            "builder.program_events.button.delete",
+                            "Delete",
+                          )}
                         </button>
                       </div>
                     </div>
@@ -341,7 +477,11 @@ export default function ProgramEventsBuilderStep({
 
                   {(grouped[d.key ?? "wedding_day"] ?? []).length === 0 && (
                     <div className="text-sm text-gray-500">
-                      No events for this day.
+                      {t(
+                        translations,
+                        "builder.program_events.no_events",
+                        "No events for this day.",
+                      )}
                     </div>
                   )}
                 </div>
@@ -354,11 +494,23 @@ export default function ProgramEventsBuilderStep({
       {(editingId !== null || Object.keys(form ?? {}).length > 1) && (
         <div ref={formRef} className="mt-4 border rounded p-4 bg-gray-50">
           <h4 className="font-medium">
-            {editingId ? "Edit event" : "Create event"}
+            {editingId
+              ? t(
+                  translations,
+                  "builder.program_events.form.edit",
+                  "Edit event",
+                )
+              : t(
+                  translations,
+                  "builder.program_events.form.create",
+                  "Create event",
+                )}
           </h4>
           <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             <div>
-              <label className="block text-xs text-gray-600">Day</label>
+              <label className="block text-xs text-gray-600">
+                {t(translations, "builder.program_events.field.day", "Day")}
+              </label>
               <select
                 value={form.day_tag ?? "wedding_day"}
                 onChange={(e) =>
@@ -377,42 +529,35 @@ export default function ProgramEventsBuilderStep({
               </select>
             </div>
 
-            <div>
-              <label className="block text-xs text-gray-600">Time</label>
-              <input
-                value={form.time ?? ""}
-                placeholder="18:00"
-                inputMode="numeric"
-                onChange={(e) => {
-                  const raw = e.target.value;
-                  if (/^\d{1,2}$/.test(raw)) {
-                    updateFormField("time", raw);
-                    return;
-                  }
-                  if (/^\d{1,2}:\d{0,2}$/.test(raw)) {
-                    updateFormField("time", raw);
-                    return;
-                  }
-                }}
-                onBlur={(e) => {
-                  const val = e.target.value.trim();
-                  if (!val) return;
-                  const minutes = timeToMinutes(val);
-                  if (!isNaN(minutes)) {
-                    const hh = Math.floor(minutes / 60)
-                      .toString()
-                      .padStart(2, "0");
-                    const mm = (minutes % 60).toString().padStart(2, "0");
-                    updateFormField("time", `${hh}:${mm}`);
-                  }
-                }}
-                className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
+            <DateInput
+              value={form.date ?? ""}
+              onChange={(newDate: string) => updateFormField("date", newDate)}
+              label={t(
+                translations,
+                "builder.program_events.field.day",
+                "Date",
+              )}
+              required
+            />
+
+            <TimeInput
+              value={form.time ?? ""}
+              onChange={(newTime: string) => updateFormField("time", newTime)}
+              label={t(
+                translations,
+                "builder.program_events.field.time",
+                "Time",
+              )}
+              required
+            />
 
             <div>
               <label className="block text-xs text-gray-600">
-                Location URL (optional)
+                {t(
+                  translations,
+                  "builder.program_events.field.location_url",
+                  "Location URL (optional)",
+                )}
               </label>
               <input
                 value={form.location_url ?? ""}
@@ -425,19 +570,37 @@ export default function ProgramEventsBuilderStep({
           </div>
 
           <div className="mt-4">
-            <div className="font-medium">Multi-language fields</div>
-            <div className="text-sm text-gray-600 mb-2">
-              Fill fields for each site language. Default language (
-              {defaultLang}) is required for Title and Location.
+            <div className="font-medium">
+              {t(
+                translations,
+                "builder.program_events.form.multi_language",
+                "Multi-language fields",
+              )}
             </div>
-
+            <div className="text-sm text-gray-600 mb-2">
+              {interpolate(
+                t(
+                  translations,
+                  "builder.program_events.form.languages.info",
+                  "Fill fields for each site language. Default language ({defaultLang}) is required for Title and Location.",
+                ),
+                { defaultLang },
+              )}
+            </div>
             {languages.map((lang) => (
               <div key={lang} className="mt-2 border rounded p-3 min-w-0">
                 <div className="font-medium">Language: {lang}</div>
                 <div className="mt-2 grid grid-cols-1 gap-2">
                   <div>
                     <label className="block text-xs text-gray-600">
-                      Title {lang === defaultLang ? "(required)" : ""}
+                      {t(
+                        translations,
+                        "builder.program_events.field.title",
+                        "Title",
+                      )}
+                      {lang === defaultLang
+                        ? ` ${t(translations, "builder.form.required", "(required)")}`
+                        : ""}
                     </label>
                     <input
                       value={
@@ -453,7 +616,14 @@ export default function ProgramEventsBuilderStep({
                   </div>
                   <div>
                     <label className="block text-xs text-gray-600">
-                      Location {lang === defaultLang ? "(required)" : ""}
+                      {t(
+                        translations,
+                        "builder.program_events.field.location",
+                        "Location",
+                      )}
+                      {lang === defaultLang
+                        ? ` ${t(translations, "builder.form.required", "(required)")}`
+                        : ""}
                     </label>
                     <input
                       value={
@@ -469,7 +639,11 @@ export default function ProgramEventsBuilderStep({
                   </div>
                   <div>
                     <label className="block text-xs text-gray-600">
-                      Description (optional)
+                      {t(
+                        translations,
+                        "builder.program_events.field.description",
+                        "Description (optional)",
+                      )}
                     </label>
                     <textarea
                       value={
@@ -487,16 +661,27 @@ export default function ProgramEventsBuilderStep({
               </div>
             ))}
           </div>
-
           {error && <div className="text-red-600 mt-2">{error}</div>}
         </div>
       )}
 
       {!canAddMore() && !isProUser && (
         <div className="mt-3 text-sm text-gray-600">
-          Free plan limit reached ({FREE_EVENT_LIMIT} events).{" "}
-          <button className="underline text-blue-600">Upgrade</button> to add
-          more.
+          {interpolate(
+            t(
+              translations,
+              "builder.program_events.limit_reached",
+              "Free plan limit reached ({FREE_EVENT_LIMIT} events). Upgrade to add more.",
+            ),
+            { FREE_EVENT_LIMIT },
+          )}
+          <button className="underline text-blue-600">
+            {t(
+              translations,
+              "builder.program_events.button.upgrade",
+              "Upgrade",
+            )}
+          </button>
         </div>
       )}
     </StepLayout>

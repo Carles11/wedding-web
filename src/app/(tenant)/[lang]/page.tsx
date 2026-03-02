@@ -5,7 +5,6 @@ import { headers } from "next/headers";
 import type { Metadata } from "next";
 import { getSiteByDomain } from "@/4-shared/lib/getSiteByDomain";
 import { fetchHeroSection } from "@/3-entities/sections/api/fetchHeroSection";
-import { fetchProgramSection } from "@/3-entities/sections/api/fetchProgramSection";
 import { fetchDetailsSection } from "@/3-entities/sections/api/fetchDetailsSection";
 import { fetchAccommodationSection } from "@/3-entities/sections/api/fetchAccommodationSection";
 import { fetchWhatElseSection } from "@/3-entities/sections/api/fetchWhatElseSection";
@@ -26,6 +25,7 @@ import { LanguageToggle } from "@/2-features/language-toggle/ui/LanguageToggle";
 import TopMenu from "@/2-features/top-menu/ui/TopMenu";
 
 import { getMergedTranslations } from "@/4-shared/lib/i18n";
+import { fetchProgramDataForTenant } from "@/3-entities/sections/api/fetchProgramDataForTenant";
 
 export const dynamic = "force-dynamic";
 
@@ -104,12 +104,13 @@ export default async function HomePage(props: {
   const lang = realParams.lang ?? "ca";
 
   const host = ((await headers()).get("host") ?? "").toLowerCase().trim();
+  console.log("Host header:", { host });
   const site = await getSiteByDomain(host);
   const siteId = site?.id ?? null;
   // Fetch hero for bakcground image
-  const images = await fetchImagesForTenantSite(siteId, "hero");
-  const heroImage = images[0]?.url ?? "";
-  const contactImage = images[1]?.url ?? "";
+  const images = await fetchImagesForTenantSite(siteId);
+  const heroImage = images[0]?.url ?? ""; // first image for hero section
+  const contactImage = images[1]?.url ?? ""; // second image for contact section
 
   const availableLangs =
     Array.isArray(site?.languages) && site.languages.length > 0
@@ -139,7 +140,7 @@ export default async function HomePage(props: {
   const [hero, program, details, accommodation, whatelse, bankData, contact] =
     await Promise.all([
       fetchHeroSection(siteId, lang),
-      fetchProgramSection(siteId),
+      fetchProgramDataForTenant(siteId, lang),
       fetchDetailsSection(siteId),
       fetchAccommodationSection(siteId),
       fetchWhatElseSection(siteId),
@@ -150,6 +151,15 @@ export default async function HomePage(props: {
   // Generate structured data for SEO
   const baseUrl = `https://${host}/${lang}`;
   const eventSchema = generateEventSchema({ hero, program, lang, baseUrl });
+
+  if (
+    !program?.id ||
+    !program?.site_id ||
+    !program?.title ||
+    typeof program?.type !== "string"
+  ) {
+    throw new Error("ProgramSection missing required properties");
+  }
 
   return (
     <>
@@ -198,7 +208,7 @@ export default async function HomePage(props: {
 
         {/* Details / Program timeline */}
         <DetailsSection
-          data={details}
+          data={program.content.days}
           lang={lang}
           translations={translations}
         />

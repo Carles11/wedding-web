@@ -18,7 +18,11 @@ type Props = {
   translations: Record<string, string>;
 };
 
-export default function WhatToSeeBuilderStep({ site, refresh }: Props) {
+export default function WhatToSeeBuilderStep({
+  site,
+  refresh,
+  translations,
+}: Props) {
   const [items, setItems] = useState<WhatToSeeEntry[]>([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -169,6 +173,7 @@ export default function WhatToSeeBuilderStep({ site, refresh }: Props) {
 
   return (
     <StepLayout
+      translations={translations}
       onNext={
         editingId !== null || Object.keys(form).length > 0
           ? handleSave

@@ -23,6 +23,7 @@ export default function ContactBuilderStep({
   site,
   refresh,
   setHasContact,
+  translations,
 }: Props) {
   const [section, setSection] = useState<ContactSection | null>(null);
   const [loading, setLoading] = useState(false);
@@ -166,6 +167,7 @@ export default function ContactBuilderStep({
       nextLabel="Save"
       onBack={load}
       backLabel="Reload"
+      translations={translations}
     >
       <div className="space-y-4">
         <div>

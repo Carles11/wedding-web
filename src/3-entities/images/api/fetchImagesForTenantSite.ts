@@ -3,21 +3,16 @@ import type { ImageRow } from "@/4-shared/types";
 
 export async function fetchImagesForTenantSite(
   siteId: string,
-  sectionType?: string, // e.g., "hero"
 ): Promise<Array<ImageRow & { section: string }>> {
   const supabase = await createSupabaseSSRClient();
 
-  let query = supabase
+  const query = supabase
     .from("images")
     .select("id, url, caption, site_id, section_id, section:sections(type)")
     .eq("site_id", siteId);
 
-  if (sectionType) {
-    query = query.eq("sections.type", sectionType);
-  }
-
   const { data, error } = await query;
-
+  console.log("Fetched images data:", { data });
   if (error) {
     throw error;
   }

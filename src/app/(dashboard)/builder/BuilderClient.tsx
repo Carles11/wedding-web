@@ -19,7 +19,7 @@ import {
 } from "@/4-shared/ui/icons/completenessIcons";
 import { FREE_LANGUAGES_LIMIT } from "@/4-shared/config/limits/usage-limits";
 import { fetchImagesBySite } from "@/3-entities/images/api";
-import { fetchProgramEventsBySite } from "@/3-entities/program_events/api";
+import { fetchHasProgramEvents } from "@/3-entities/program_events/api";
 import { fetchContactSection } from "@/3-entities/sections/api/fetchContactSection";
 import { EMAIL_RE } from "@/4-shared/utils/validations";
 import { BuilderHeader } from "@/4-shared/ui/header/builder";
@@ -136,10 +136,7 @@ export default function BuilderClient({
           ),
         );
       });
-      // Program events completeness
-      fetchProgramEventsBySite(site.id).then((events) => {
-        setHasProgramEvents(events.length > 0);
-      });
+
       // Contact completeness
       fetchContactSection(site.id).then((section) => {
         const f = section?.content ?? {};
@@ -155,6 +152,11 @@ export default function BuilderClient({
       });
     }
   }, [site?.id]);
+
+  useEffect(() => {
+    if (!site?.id) return;
+    fetchHasProgramEvents(site.id).then(setHasProgramEvents);
+  }, [site]);
 
   const handleLanguageChange = (lang: string) => {
     setCurrentLang(lang);
@@ -292,7 +294,6 @@ export default function BuilderClient({
                     refresh={refresh}
                     lang={currentLang}
                     translations={translations}
-                    setHasProgramEvents={setHasProgramEvents}
                   />
                 )}
                 {active === 3 && site && (

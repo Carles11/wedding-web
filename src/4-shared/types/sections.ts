@@ -1,35 +1,31 @@
 // Shared type for the Hero section, scalable for multilingual/SaaS structures
 export type HeroSectionType = {
-  id: string;
-  site_id: string;
-  type: string;
   title: string; // now always a string!
   description: string; // now always a string!
-  backgroundImage?: string;
-  date?: string;
-  location?: string;
-  dresscode?: string;
-  sort_order?: number;
-  // remove or refactor any fields that used to be objects
 };
 
-// ProgramSection type matches your content JSON shape in DB
 export type ProgramSection = {
   id: string;
   site_id: string;
   type: "program";
-  title: Record<string, string>;
+  title: Record<string, string>; // should always exist
   content: {
-    headline: Record<string, string>;
-    when: Record<string, string>;
-    where: {
-      wedding: Record<string, string>;
-      banquet: Record<string, string>;
+    headline?: Record<string, string>;
+    when?: Record<string, string>;
+    where?: {
+      wedding?: Record<string, string>;
+      banquet?: Record<string, string>;
+      [key: string]: Record<string, string> | undefined;
     };
-    wear: Record<string, string>;
-    [key: string]: unknown; // Future extensibility
+    wear?: Record<string, string>;
+    days?: Array<{
+      slug: string;
+      label: string;
+      events: Record<string, unknown>[];
+    }>;
+    [key: string]: unknown;
   };
   sort_order?: number;
   created_at?: string;
-  [key: string]: unknown; // For SaaS expansion
+  [key: string]: unknown;
 };

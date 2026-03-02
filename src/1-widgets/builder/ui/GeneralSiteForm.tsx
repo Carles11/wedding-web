@@ -166,7 +166,16 @@ export default function GeneralSiteForm({
   };
 
   return (
-    <StepLayout nextLabel="Save" backLabel="Cancel">
+    <StepLayout
+      nextLabel="Save"
+      backLabel="Cancel"
+      onNext={handleSubmit}
+      onBack={() => {
+        /* optional: handle cancel/exit here */
+      }}
+      translations={translations}
+    >
+      {" "}
       <form onSubmit={handleSubmit} className="space-y-4 min-w-0 pb-24 md:pb-0">
         {/* Languages */}
         <div>

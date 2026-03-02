@@ -18,7 +18,11 @@ type Props = {
   translations: Record<string, string>;
 };
 
-export default function AccommodationBuilderStep({ site, refresh }: Props) {
+export default function AccommodationBuilderStep({
+  site,
+  refresh,
+  translations,
+}: Props) {
   const [items, setItems] = useState<AccommodationEntry[]>([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -178,6 +182,7 @@ export default function AccommodationBuilderStep({ site, refresh }: Props) {
           : undefined
       }
       backLabel="Cancel"
+      translations={translations}
     >
       <div className="mb-3 flex items-center justify-between">
         <h3 className="text-lg font-medium">Accommodation</h3>
