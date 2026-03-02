@@ -4,7 +4,6 @@ import { generateEventSchema } from "@/4-shared/lib/seo/generateEventSchema";
 import { headers } from "next/headers";
 import type { Metadata } from "next";
 import { getSiteByDomain } from "@/4-shared/lib/getSiteByDomain";
-import { fetchHeroSection } from "@/3-entities/sections/api/fetchHeroSection";
 import { fetchDetailsSection } from "@/3-entities/sections/api/fetchDetailsSection";
 import { fetchAccommodationSection } from "@/3-entities/sections/api/fetchAccommodationSection";
 import { fetchWhatElseSection } from "@/3-entities/sections/api/fetchWhatElseSection";
@@ -43,6 +42,9 @@ export async function generateMetadata({
   const { lang } = await params;
   const host = ((await headers()).get("host") ?? "").toLowerCase().trim();
   const site = await getSiteByDomain(host);
+  const siteId = site?.id ?? null;
+
+  const translations = await getMergedTranslations(siteId, lang, "en");
 
   if (!site) {
     return {
@@ -51,12 +53,12 @@ export async function generateMetadata({
     };
   }
 
-  // Fetch hero for title/description
-  const hero = await fetchHeroSection(site.id, lang);
-
-  const siteTitle = hero?.title || "Wedding";
-  const siteDescription = hero?.description || "";
   const baseUrl = `https://${host}`;
+
+  const heroFromi18n = {
+    title: translations["sections.hero.title"] ?? "",
+    description: translations["sections.hero.description"] ?? "",
+  };
 
   // Get available languages from site
   const availableLangs =
@@ -71,20 +73,20 @@ export async function generateMetadata({
   });
 
   return {
-    title: siteTitle,
-    description: siteDescription,
+    title: heroFromi18n.title,
+    description: heroFromi18n.description,
     openGraph: {
-      title: siteTitle,
-      description: siteDescription,
+      title: heroFromi18n.title,
+      description: heroFromi18n.description,
       type: "website",
       locale: lang === "ca" ? "ca_ES" : lang === "es" ? "es_ES" : "en_US",
       url: `${baseUrl}/${lang}`,
-      siteName: siteTitle,
+      siteName: heroFromi18n.title,
     },
     twitter: {
       card: "summary_large_image",
-      title: siteTitle,
-      description: siteDescription,
+      title: heroFromi18n.title,
+      description: heroFromi18n.description,
     },
     alternates: {
       canonical: `${baseUrl}/${lang}`,
@@ -104,10 +106,11 @@ export default async function HomePage(props: {
   const lang = realParams.lang ?? "ca";
 
   const host = ((await headers()).get("host") ?? "").toLowerCase().trim();
-  console.log("Host header:", { host });
+
   const site = await getSiteByDomain(host);
   const siteId = site?.id ?? null;
-  // Fetch hero for bakcground image
+
+  // Fetch hero-images for background images in hero and contact sections
   const images = await fetchImagesForTenantSite(siteId);
   const heroImage = images[0]?.url ?? ""; // first image for hero section
   const contactImage = images[1]?.url ?? ""; // second image for contact section
@@ -121,6 +124,13 @@ export default async function HomePage(props: {
 
   const translations = await getMergedTranslations(siteId, lang, "en");
 
+  // for hero-section we just need the title/description keys, so we can get them directly from i18n
+  const heroFromi18n = {
+    title: translations["sections.hero.title"] ?? "",
+    description: translations["sections.hero.description"] ?? "",
+  };
+
+  console.log("heroFromi18n:", heroFromi18n);
   if (!siteId) {
     return (
       <div className="w-full flex flex-col items-center justify-center min-h-[60vh] p-8">
@@ -137,9 +147,8 @@ export default async function HomePage(props: {
   }
 
   // SSR fetch hero/program and the new sections in parallel, scoped by site
-  const [hero, program, details, accommodation, whatelse, bankData, contact] =
+  const [program, details, accommodation, whatelse, bankData, contact] =
     await Promise.all([
-      fetchHeroSection(siteId, lang),
       fetchProgramDataForTenant(siteId, lang),
       fetchDetailsSection(siteId),
       fetchAccommodationSection(siteId),
@@ -150,7 +159,13 @@ export default async function HomePage(props: {
 
   // Generate structured data for SEO
   const baseUrl = `https://${host}/${lang}`;
-  const eventSchema = generateEventSchema({ hero, program, lang, baseUrl });
+  const eventSchema = generateEventSchema({
+    hero: heroFromi18n,
+    program,
+    lang,
+    baseUrl,
+    backgroundImage: heroImage,
+  });
 
   if (
     !program?.id ||
@@ -185,13 +200,9 @@ export default async function HomePage(props: {
         </header>
 
         {/* Hero */}
-        {hero && (
+        {heroFromi18n && (
           <>
-            <HeroSection
-              hero={hero}
-              translations={translations}
-              backgroundImage={heroImage}
-            />
+            <HeroSection hero={heroFromi18n} backgroundImage={heroImage} />
           </>
         )}
       </div>

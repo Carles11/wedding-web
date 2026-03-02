@@ -10,8 +10,9 @@ export function generateEventSchema(params: {
   program: ProgramSection | null;
   lang: string;
   baseUrl: string;
+  backgroundImage?: string;
 }) {
-  const { hero, program, lang, baseUrl } = params;
+  const { hero, program, lang, baseUrl, backgroundImage } = params;
 
   if (!hero) return null;
 
@@ -45,8 +46,8 @@ export function generateEventSchema(params: {
     eventStatus: "https://schema.org/EventScheduled",
     url: baseUrl,
     // NEW: Use hero.backgroundImage if present
-    ...(hero.backgroundImage && {
-      image: hero.backgroundImage,
+    ...(backgroundImage && {
+      image: backgroundImage,
     }),
   };
 
