@@ -15,3 +15,23 @@ export type ProgramEvent = {
   sort_order?: number | null;
   created_at?: string | null;
 };
+
+/**
+ * Translation entry for an event field, per language.
+ */
+export type ProgramEventTranslation = {
+  key: "title" | "location" | "description";
+  locale: string;
+  value: string;
+};
+
+/**
+ * `CreateProgramEventPayload` should NOT contain any translatable fields (title, location, description).
+ * Instead, pass an array of translations to be created in site_translations.
+ */
+export type CreateProgramEventPayload = Omit<
+  ProgramEvent,
+  "id" | "created_at" | "title" | "location" | "description"
+> & {
+  site_id: string;
+};

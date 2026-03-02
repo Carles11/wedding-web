@@ -1,35 +1,44 @@
-import type { ProgramSection } from "@/4-shared/types";
-import { getTextForLang } from "@/4-shared/lib/getTextForLang";
-import type { TranslationDictionary } from "@/4-shared/types";
+import { formatEventDate } from "@/4-shared/helpers/formatEventDate";
+import { formatWhereWedding } from "@/4-shared/helpers/formatWhereWedding";
+import { ProgramEvent } from "@/4-shared/types";
 
-type ProgramSectionProps = {
-  program: ProgramSection;
+type Props = {
+  mainEvent: ProgramEvent | null;
   lang: string;
-  translations?: TranslationDictionary | null;
+  translations: Record<string, string>;
 };
 
 export default function ProgramSectionComponent({
-  program,
-  lang,
+  mainEvent,
   translations,
-}: ProgramSectionProps) {
-  const headline = getTextForLang(program.content?.headline, lang, "ca");
-  const when = getTextForLang(program.content?.when, lang, "ca");
-  const whereWedding = getTextForLang(
-    program.content?.where?.wedding,
-    lang,
-    "ca",
-  );
-  // const whereBanquet = getTextForLang(
-  //   program.content?.where?.banquet,
-  //   lang,
-  //   "ca"
-  // );
-  // const wear = getTextForLang(program.content?.wear, lang, "ca");
+  lang,
+}: Props) {
+  // Title from translations table (not per event)
+  const mainTitle = translations["program.event.main-title"] ?? "Main event";
+  const whenLabel = translations["when"] ?? "When";
+  const whereLabel = translations["where"] ?? "Where";
 
-  const whenLabel = translations?.["when"] ?? "When";
-  const whereLabel = translations?.["where"] ?? "Where";
-  // const dresscodeLabel = translations?.["dresscode"] ?? "Dresscode";
+  // WHEN: format from mainEvent's date + time
+  const when =
+    mainEvent && mainEvent.date
+      ? formatEventDate(
+          mainEvent.date ?? undefined,
+          mainEvent.time ?? undefined,
+          lang,
+        )
+      : "";
+
+  // WHERE: translation from program.event.location.{mainEvent.id}
+  const whereWedding =
+    mainEvent && mainEvent.id
+      ? formatWhereWedding(mainEvent.id, translations)
+      : "";
+
+  // Optional: description (if you want to show it here as well)
+  // const description =
+  //   mainEvent && mainEvent.id
+  //     ? translations[`program.event.description.${mainEvent.id}`] ?? ""
+  //     : "";
 
   return (
     <section
@@ -53,7 +62,7 @@ export default function ProgramSectionComponent({
           letter-spacing-wide
         "
         >
-          <h2>{headline}</h2>
+          <h2>{mainTitle}</h2>
         </span>
 
         <div
@@ -67,7 +76,7 @@ export default function ProgramSectionComponent({
             <div className="text-xs uppercase mb-2 tracking-wider text-neutral-600 font-bold">
               {whenLabel}
             </div>
-            <div className=" text-lg font-light">{when}</div>
+            <div className="text-lg font-light">{when}</div>
           </div>
 
           <div className="py-6 md:py-0 md:px-8">
@@ -78,14 +87,14 @@ export default function ProgramSectionComponent({
               {whereWedding}
             </div>
           </div>
-
-          {/* <div className="pt-6 md:pt-0 md:pl-8">
-            <div className="text-xs uppercase mb-2 tracking-wider text-neutral-600 font-bold">
-              {dresscodeLabel}
-            </div>
-            <div className=" text-lg font-light">{wear}</div>
-          </div> */}
         </div>
+
+        {/* Uncomment if you wish to show the event description here */}
+        {/* {description && (
+          <div className="mt-2 text-base text-neutral-600 text-center">
+            {description}
+          </div>
+        )} */}
       </div>
     </section>
   );

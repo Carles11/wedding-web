@@ -173,6 +173,7 @@ export default function GeneralSiteForm({
       onBack={() => {
         /* optional: handle cancel/exit here */
       }}
+      backDisabled
       translations={translations}
     >
       {" "}

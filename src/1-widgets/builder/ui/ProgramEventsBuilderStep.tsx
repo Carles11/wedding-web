@@ -1,7 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { Site, ProgramEvent } from "@/4-shared/types";
+import type {
+  Site,
+  ProgramEvent,
+  ProgramEventTranslation,
+} from "@/4-shared/types";
 import type { SupportedLanguage } from "@/4-shared/config/i18n";
 
 import {
@@ -190,10 +194,10 @@ export default function ProgramEventsBuilderStep({
 
   async function handleSave() {
     if (!site?.id) return;
-    // validation: title & location required in default language
     const title = (form.title as Record<string, string> | undefined) ?? {};
     const location =
       (form.location as Record<string, string> | undefined) ?? {};
+
     if (!title[defaultLang] || !location[defaultLang]) {
       setError(
         interpolate(
@@ -236,11 +240,35 @@ export default function ProgramEventsBuilderStep({
 
     setSaving(true);
     setError(null);
+
+    // STRUCTURAL FIELDS ONLY
+    const {
+      title: _,
+      location: __,
+      description: ___,
+      ...structuralFields
+    } = form;
+
+    // TRANSLATION ARRAY
+    const i18nFields = ["title", "location", "description"] as const;
+    const translationArr: ProgramEventTranslation[] = i18nFields.flatMap(
+      (field) =>
+        Object.entries(
+          (form[field] as Record<string, string> | undefined) ?? {},
+        ).map(([locale, value]) => ({
+          key: field,
+          locale,
+          value,
+        })),
+    );
+
     try {
       if (editingId) {
-        const updated = await updateProgramEvent(editingId, {
-          ...(form as ProgramEvent),
-        });
+        const updated = await updateProgramEvent(
+          editingId,
+          { site_id: site.id, ...structuralFields },
+          translationArr,
+        );
         if (!updated)
           throw new Error(
             t(
@@ -250,11 +278,10 @@ export default function ProgramEventsBuilderStep({
             ),
           );
       } else {
-        const payload: Partial<ProgramEvent> & { site_id: string } = {
-          ...(form as ProgramEvent),
-          site_id: site.id,
-        };
-        const created = await createProgramEvent(payload);
+        const created = await createProgramEvent(
+          { site_id: site.id, ...structuralFields },
+          translationArr,
+        );
         if (!created)
           throw new Error(
             t(

@@ -1,3 +1,5 @@
+import { TranslationDictionary } from "./translations";
+
 // Shared type for the Hero section, scalable for multilingual/SaaS structures
 export type HeroSectionType = {
   title: string; // now always a string!
@@ -28,4 +30,10 @@ export type ProgramSection = {
   sort_order?: number;
   created_at?: string;
   [key: string]: unknown;
+};
+
+export type ProgramSectionProps = {
+  program: ProgramSection;
+  lang: string;
+  translations?: TranslationDictionary | null;
 };

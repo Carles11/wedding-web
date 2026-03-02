@@ -1,6 +1,5 @@
 import { JsonLd } from "@/4-shared/ui/seo/JsonLd";
 import { generateEventSchema } from "@/4-shared/lib/seo/generateEventSchema";
-
 import { headers } from "next/headers";
 import type { Metadata } from "next";
 import { getSiteByDomain } from "@/4-shared/lib/getSiteByDomain";
@@ -24,7 +23,8 @@ import { LanguageToggle } from "@/2-features/language-toggle/ui/LanguageToggle";
 import TopMenu from "@/2-features/top-menu/ui/TopMenu";
 
 import { getMergedTranslations } from "@/4-shared/lib/i18n";
-import { fetchProgramDataForTenant } from "@/3-entities/sections/api/fetchProgramDataForTenant";
+import { fetchProgramSectionData } from "@/3-entities/sections/api/fetchProgramDataForTenant";
+import { ProgramSection } from "@/4-shared/types";
 
 export const dynamic = "force-dynamic";
 
@@ -130,7 +130,6 @@ export default async function HomePage(props: {
     description: translations["sections.hero.description"] ?? "",
   };
 
-  console.log("heroFromi18n:", heroFromi18n);
   if (!siteId) {
     return (
       <div className="w-full flex flex-col items-center justify-center min-h-[60vh] p-8">
@@ -146,10 +145,47 @@ export default async function HomePage(props: {
     );
   }
 
-  // SSR fetch hero/program and the new sections in parallel, scoped by site
-  const [program, details, accommodation, whatelse, bankData, contact] =
+  // Fetch events (timeline) and mainEvent for Program/Details sections!
+  const { mainEvent, events } = await fetchProgramSectionData(siteId);
+  console.log("MainEvent in HOOOOOOOOOOOOOOOOOOME:", { mainEvent, events });
+
+  // Build a minimal compatible object for the schema
+  const programSectionForSEO: ProgramSection | null = mainEvent
+    ? {
+        id: mainEvent.id,
+        site_id: mainEvent.site_id,
+        type: "program",
+        title: {
+          [lang]: translations["program.event.main-title"] ?? "Main event",
+        },
+        content: {
+          headline: {
+            [lang]: translations["program.event.main-title"] ?? "Main event",
+          },
+          when: {
+            [lang]: mainEvent.time
+              ? `${mainEvent.date} ${mainEvent.time}`
+              : (mainEvent.date ?? ""),
+          },
+          where: {
+            wedding: {
+              [lang]:
+                translations[`program.event.location.${mainEvent.id}`] ?? "",
+            },
+          },
+          description: {
+            [lang]:
+              translations[`program.event.description.${mainEvent.id}`] ?? "",
+          },
+        },
+        sort_order: mainEvent.sort_order ?? 0,
+        created_at: mainEvent.created_at ?? undefined,
+      }
+    : null;
+
+  // Fetch rest in parallel
+  const [details, accommodation, whatelse, bankData, contact] =
     await Promise.all([
-      fetchProgramDataForTenant(siteId, lang),
       fetchDetailsSection(siteId),
       fetchAccommodationSection(siteId),
       fetchWhatElseSection(siteId),
@@ -159,22 +195,21 @@ export default async function HomePage(props: {
 
   // Generate structured data for SEO
   const baseUrl = `https://${host}/${lang}`;
+
   const eventSchema = generateEventSchema({
     hero: heroFromi18n,
-    program,
+    program: programSectionForSEO,
     lang,
     baseUrl,
     backgroundImage: heroImage,
   });
 
-  if (
-    !program?.id ||
-    !program?.site_id ||
-    !program?.title ||
-    typeof program?.type !== "string"
-  ) {
-    throw new Error("ProgramSection missing required properties");
-  }
+  const normalizedEvents = events.map((ev) => ({
+    ...ev,
+    title: ev.title ?? undefined,
+    location: ev.location ?? undefined,
+    description: ev.description ?? undefined,
+  }));
 
   return (
     <>
@@ -201,28 +236,19 @@ export default async function HomePage(props: {
 
         {/* Hero */}
         {heroFromi18n && (
-          <>
-            <HeroSection hero={heroFromi18n} backgroundImage={heroImage} />
-          </>
+          <HeroSection hero={heroFromi18n} backgroundImage={heroImage} />
         )}
       </div>
 
       <main className="flex flex-col gap-0">
-        {/* Program */}
-        {program && (
-          <ProgramSectionComponent
-            program={program}
-            lang={lang}
-            translations={translations}
-          />
-        )}
-
-        {/* Details / Program timeline */}
-        <DetailsSection
-          data={program.content.days}
+        {/* Program Main */}
+        <ProgramSectionComponent
+          mainEvent={mainEvent}
           lang={lang}
           translations={translations}
         />
+        {/* Details - Full timeline all events */}
+        <DetailsSection events={normalizedEvents} translations={translations} />
 
         {/* Accommodation */}
         <AccommodationSection
@@ -231,7 +257,7 @@ export default async function HomePage(props: {
           translations={translations}
         />
 
-        {/* What else to see & do */}
+        {/* What else */}
         <WhatElseSection
           data={whatelse}
           lang={lang}

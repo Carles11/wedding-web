@@ -2,6 +2,10 @@ import { createClient } from "@/4-shared/lib/supabase/client";
 import type { ProgramEvent } from "@/4-shared/types";
 import type { SupportedLanguage } from "@/4-shared/config/i18n";
 
+/**
+ * Fetches all program events for a site, with translations from site_translations.
+ * All returned ProgramEvent fields `title`, `location`, `description` are JSON objects keyed by language.
+ */
 export async function fetchProgramEventsBySite(
   siteId: string,
   enabledLangs: SupportedLanguage[], // e.g. ["es", "ca", "en"]
@@ -9,11 +13,11 @@ export async function fetchProgramEventsBySite(
   if (!siteId) return [];
   const supabase = await createClient();
 
-  // Fetch events
+  // Fetch events without i18n fields (those are now only in site_translations)
   const { data: events, error: eventsErr } = await supabase
     .from("program_events")
     .select(
-      `id, site_id, day_tag, date, time, title, location, location_url, description, sort_order, created_at`,
+      `id, site_id, day_tag, date, time, location_url, sort_order, created_at`,
     )
     .eq("site_id", siteId)
     .order("sort_order", { ascending: true });
@@ -26,17 +30,15 @@ export async function fetchProgramEventsBySite(
     return [];
   }
 
-  // Build query keys for all events
+  // Generate all possible translation keys for these events
   const allKeys: string[] = [];
   for (const ev of events) {
     for (const field of ["title", "location", "description"] as const) {
-      for (const lang of enabledLangs) {
-        allKeys.push(`program.event.${field}.${ev.id}`);
-      }
+      allKeys.push(`program.event.${field}.${ev.id}`);
     }
   }
 
-  // Fetch all translations for these keys & langs
+  // Fetch all translations for needed keys and langs
   const { data: translations, error: trErr } = await supabase
     .from("site_translations")
     .select("key, locale, value")
@@ -48,28 +50,38 @@ export async function fetchProgramEventsBySite(
     console.error("[fetchProgramEventsBySite] Translation error:", trErr);
   }
 
-  // For each event, override string fields as needed
+  // Build a convenient lookup map: { [key]: { [locale]: value } }
+  const trMap: Record<string, Partial<Record<SupportedLanguage, string>>> = {};
+  (translations ?? []).forEach((tr) => {
+    if (!trMap[tr.key]) trMap[tr.key] = {};
+    trMap[tr.key][tr.locale as SupportedLanguage] = tr.value;
+  });
+
+  // For each event, attach i18n objects from trMap (all enabled languages)
   const eventsWithTranslations: ProgramEvent[] = events.map((event) => {
-    // Fields: title, location, description (each is JSON object by lang)
-    const newEvent = { ...event };
+    const filled: Record<
+      "title" | "location" | "description",
+      Record<SupportedLanguage, string>
+    > = {
+      title: {} as Record<SupportedLanguage, string>,
+      location: {} as Record<SupportedLanguage, string>,
+      description: {} as Record<SupportedLanguage, string>,
+    };
 
-    for (const field of ["title", "location", "description"] as const) {
-      const origObj = (event[field] ?? {}) as Record<SupportedLanguage, string>;
-      const merged: Record<SupportedLanguage, string> = { ...origObj };
+    (["title", "location", "description"] as const).forEach((field) => {
+      enabledLangs.forEach((lang) => {
+        const key = `program.event.${field}.${event.id}`;
+        const value = trMap[key]?.[lang];
+        if (value) filled[field][lang] = value;
+      });
+    });
 
-      for (const lang of enabledLangs) {
-        const trValue = translations?.find(
-          (t) =>
-            t.key === `program.event.${field}.${event.id}` && t.locale === lang,
-        )?.value;
-        if (trValue !== undefined && trValue !== null) {
-          merged[lang] = trValue;
-        }
-      }
-      newEvent[field] = merged;
-    }
-
-    return newEvent;
+    return {
+      ...event,
+      title: filled.title,
+      location: filled.location,
+      description: filled.description,
+    };
   });
 
   return eventsWithTranslations;

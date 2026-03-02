@@ -28,12 +28,15 @@ export function StepLayout({
 }: StepLayoutProps) {
   // Resolve labels using translations first, then prop, then fallback
   const resolvedNext =
-    translations["builder.actions.next"] ||
     translations["builder.actions.save"] ||
+    translations["builder.actions.next"] ||
     nextLabel ||
     "Next";
   const resolvedBack =
-    translations["builder.actions.back"] || backLabel || "Back";
+    translations["builder.actions.discard"] ||
+    translations["builder.actions.back"] ||
+    backLabel ||
+    "Back";
   const resolvedSave =
     translations["builder.actions.save"] || nextLabel || "Save";
 
