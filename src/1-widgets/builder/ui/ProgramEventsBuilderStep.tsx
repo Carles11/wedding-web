@@ -219,7 +219,11 @@ export default function ProgramEventsBuilderStep({
     }
     if (!form.date) {
       setError(
-        t(translations, "builder.program_events.field.day", "Date is required"),
+        t(
+          translations,
+          "builder.program_events.error.missing_date",
+          "Date is required",
+        ),
       );
       return;
     }
@@ -227,7 +231,7 @@ export default function ProgramEventsBuilderStep({
       setError(
         t(
           translations,
-          "builder.program_events.field.time",
+          "builder.program_events.error.missing_time",
           "Time is required",
         ),
       );
@@ -468,8 +472,8 @@ export default function ProgramEventsBuilderStep({
                             <span className="ml-2 inline-block px-2 py-0.5 bg-yellow-100 text-yellow-700 rounded text-xs">
                               {t(
                                 translations,
-                                "builder.program_events.main",
-                                "Main event",
+                                "builder.program_events.main_event.label",
+                                "Main eventaaaa",
                               )}
                             </span>
                           )}
@@ -707,8 +711,8 @@ export default function ProgramEventsBuilderStep({
                 checked={!!form.is_main_event}
                 label={t(
                   translations,
-                  "builder.program_events.main",
-                  "Main event",
+                  "builder.program_events.main_event.label",
+                  "Main event000",
                 )}
                 id="main-event-toggle-form"
                 disabled={saving}
