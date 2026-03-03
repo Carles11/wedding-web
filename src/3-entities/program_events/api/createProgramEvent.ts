@@ -21,7 +21,7 @@ export async function createProgramEvent(
     .from("program_events")
     .insert([payload])
     .select(
-      "id, site_id, day_tag, date, time, location_url, sort_order, created_at",
+      "id, site_id, day_tag, date, time, location_url, sort_order, is_main_event, created_at",
     ) // no more title/location/description
     .maybeSingle();
 
@@ -32,7 +32,6 @@ export async function createProgramEvent(
 
   // 2. Insert translations into site_translations
   const translationsToInsert = translations.map((t) => ({
-    id: undefined, // let DB default/gen_random_uuid()
     site_id: payload.site_id,
     key: `program.event.${t.key}.${eventData.id}`,
     locale: t.locale,

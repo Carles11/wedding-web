@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import { useState } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import LanguageSelector from "@/4-shared/ui/LanguageSelector";
 import HeroMarketing, {

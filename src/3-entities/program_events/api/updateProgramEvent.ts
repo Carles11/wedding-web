@@ -19,7 +19,7 @@ export async function updateProgramEvent(
     .update(updates)
     .eq("id", id)
     .select(
-      "id, site_id, day_tag, date, time, location_url, sort_order, created_at",
+      "id, site_id, day_tag, date, time, location_url, sort_order, is_main_event, created_at",
     )
     .maybeSingle();
 

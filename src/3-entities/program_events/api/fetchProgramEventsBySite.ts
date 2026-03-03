@@ -17,7 +17,7 @@ export async function fetchProgramEventsBySite(
   const { data: events, error: eventsErr } = await supabase
     .from("program_events")
     .select(
-      `id, site_id, day_tag, date, time, location_url, sort_order, created_at`,
+      `id, site_id, day_tag, date, time, location_url, sort_order, created_at, is_main_event`,
     )
     .eq("site_id", siteId)
     .order("sort_order", { ascending: true });

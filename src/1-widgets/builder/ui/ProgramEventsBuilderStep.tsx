@@ -7,7 +7,6 @@ import type {
   ProgramEventTranslation,
 } from "@/4-shared/types";
 import type { SupportedLanguage } from "@/4-shared/config/i18n";
-
 import {
   fetchProgramEventsBySite,
   createProgramEvent,
@@ -23,6 +22,8 @@ import { notify } from "@/4-shared/lib/toast/toast";
 // Import your reusable inputs
 import { DateInput } from "@/4-shared/ui/inputs/DateInput";
 import { TimeInput } from "@/4-shared/ui/inputs/TimeInput";
+// Import the Toggle Button
+import { Toggle } from "@/4-shared/ui/buttons/Toggle";
 
 function t(
   translations: Record<string, string>,
@@ -124,18 +125,6 @@ export default function ProgramEventsBuilderStep({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [site?.id]);
 
-  useEffect(() => {
-    const isOpen = editingId !== null || Object.keys(form ?? {}).length > 1;
-    if (!isOpen) return;
-    const tmo = setTimeout(() => {
-      formRef.current?.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
-    }, 120);
-    return () => clearTimeout(tmo);
-  }, [editingId, form]);
-
   function toggleDay(day: string) {
     setOpenDays((s) => ({
       ...s,
@@ -157,13 +146,30 @@ export default function ProgramEventsBuilderStep({
       location: {},
       location_url: "",
       description: {},
+      is_main_event: false,
     });
     setEditingId(null);
+
+    // add smooth scroll to form when clicking "Add event"
+    setTimeout(() => {
+      formRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 120);
   }
 
   function startEdit(ev: ProgramEvent) {
     setEditingId(ev.id);
     setForm({ ...ev });
+
+    // add smooth scroll to form when clicking "Edit event"
+    setTimeout(() => {
+      formRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 120);
   }
 
   function clearForm() {
@@ -263,6 +269,20 @@ export default function ProgramEventsBuilderStep({
     );
 
     try {
+      // If this event is marked as main, make sure to unset others first
+      if (form.is_main_event && form.day_tag === "wedding_day") {
+        await Promise.all(
+          events
+            .filter(
+              (e) =>
+                e.day_tag === "wedding_day" &&
+                e.id !== editingId &&
+                e.is_main_event,
+            )
+            .map((e) => updateProgramEvent(e.id, { is_main_event: false })),
+        );
+      }
+
       if (editingId) {
         const updated = await updateProgramEvent(
           editingId,
@@ -327,7 +347,7 @@ export default function ProgramEventsBuilderStep({
       );
       return;
     }
-    await load();
+    setEvents((prev) => prev.filter((e) => e.id !== id));
     refresh();
   }
 
@@ -350,6 +370,8 @@ export default function ProgramEventsBuilderStep({
     return map;
   }, [events]);
 
+  // --- All rendering below ---
+  console.log("Rendering ProgramEventsBuilderStep with events:", events);
   return (
     <StepLayout
       translations={translations}
@@ -438,11 +460,93 @@ export default function ProgramEventsBuilderStep({
                       key={ev.id}
                       className="group border rounded-lg p-3 sm:p-0 sm:border-0 sm:rounded-none flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4 bg-white sm:bg-transparent"
                     >
-                      <div>
-                        <div className="text-sm font-semibold truncate">
+                      <div className="flex items-center gap-2">
+                        <div className="text-sm font-semibold truncate flex items-center gap-2">
                           {(ev.title && ev.title[defaultLang]) ?? "(no title)"}
+                          {/* Move the "Main event" label to the right of the title */}
+                          {d.key === "wedding_day" && ev.is_main_event && (
+                            <span className="ml-2 inline-block px-2 py-0.5 bg-yellow-100 text-yellow-700 rounded text-xs">
+                              {t(
+                                translations,
+                                "builder.program_events.main",
+                                "Main event",
+                              )}
+                            </span>
+                          )}
                         </div>
-                        <div className="text-xs text-gray-600 wrap-break-word ">
+                        {/* Main event toggle only for wedding_day */}
+                        {d.key === "wedding_day" && (
+                          <Toggle
+                            checked={!!ev.is_main_event}
+                            disabled={saving}
+                            label={undefined}
+                            id={`main-event-toggle-${ev.id}`}
+                            onChange={async (makeMain) => {
+                              if (saving) return;
+
+                              if (!makeMain) {
+                                notify.error(
+                                  translations[
+                                    "builder.toggle.error.empty-main-not-allowed"
+                                  ] ||
+                                    "At least one main event must be set for Wedding Day.",
+                                );
+                                return;
+                              }
+                              setSaving(true);
+
+                              // Optimistically update local state
+                              setEvents((oldEvents) =>
+                                oldEvents.map((event) =>
+                                  event.day_tag === "wedding_day"
+                                    ? {
+                                        ...event,
+                                        is_main_event: event.id === ev.id,
+                                      }
+                                    : event,
+                                ),
+                              );
+
+                              try {
+                                // Backend update: set ON for this, OFF for others
+                                await Promise.all(
+                                  (grouped["wedding_day"] ?? []).map(
+                                    async (event) => {
+                                      if (
+                                        event.id === ev.id &&
+                                        !event.is_main_event
+                                      ) {
+                                        await updateProgramEvent(event.id, {
+                                          is_main_event: true,
+                                        });
+                                      } else if (
+                                        event.id !== ev.id &&
+                                        event.is_main_event
+                                      ) {
+                                        await updateProgramEvent(event.id, {
+                                          is_main_event: false,
+                                        });
+                                      }
+                                    },
+                                  ),
+                                );
+                              } catch (err) {
+                                notify.error(
+                                  t(
+                                    translations,
+                                    "builder.program_events.error.update_failed",
+                                    "Failed to set main event",
+                                  ),
+                                );
+                              } finally {
+                                setSaving(false);
+                              }
+                            }}
+                          />
+                        )}
+                      </div>
+                      <div>
+                        <div className="text-xs text-gray-600 wrap-break-word">
                           {ev.time && (
                             <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 font-medium text-gray-700 mr-2">
                               {formatTime(ev.time)}
@@ -595,6 +699,60 @@ export default function ProgramEventsBuilderStep({
               />
             </div>
           </div>
+
+          {/* Main event toggle for edit/create, only for wedding_day */}
+          {form.day_tag === "wedding_day" && (
+            <div className="mt-4">
+              <Toggle
+                checked={!!form.is_main_event}
+                label={t(
+                  translations,
+                  "builder.program_events.main",
+                  "Main event",
+                )}
+                id="main-event-toggle-form"
+                disabled={saving}
+                onChange={(checked) => {
+                  if (
+                    form.day_tag === "wedding_day" &&
+                    form.is_main_event && // currently true
+                    !checked // trying to unset
+                  ) {
+                    const otherMainExists = events.some(
+                      (e) =>
+                        e.day_tag === "wedding_day" &&
+                        e.id !== editingId &&
+                        e.is_main_event,
+                    );
+
+                    if (!otherMainExists) {
+                      notify.error(
+                        translations[
+                          "builder.toggle.error.empty-main-not-allowed"
+                        ] ||
+                          "At least one main event must be set for Wedding Day.",
+                      );
+                      return; // 🚫 block change
+                    }
+                  }
+
+                  updateFormField("is_main_event", checked);
+                }}
+                aria-label={t(
+                  translations,
+                  "builder.program_events.main_aria",
+                  "Mark as main event",
+                )}
+              />
+              <div className="text-xs text-gray-500 mt-1">
+                {t(
+                  translations,
+                  "builder.program_events.main.info",
+                  "Only one main event can be set for Wedding Day.",
+                )}
+              </div>
+            </div>
+          )}
 
           <div className="mt-4">
             <div className="font-medium">

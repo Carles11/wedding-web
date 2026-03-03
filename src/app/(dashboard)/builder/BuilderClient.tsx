@@ -126,7 +126,6 @@ export default function BuilderClient({
     if (site?.id) {
       // Images completeness
       fetchImagesBySite(site.id).then((images) => {
-        console.log("Checking hero image existence among images:", images);
         setHeroImageExists(
           images.some(
             (img) =>

@@ -31,12 +31,13 @@ export async function deleteProgramEvent(
     `${eventKeyPrefix}description.${id}`,
   ];
 
-  const translationQuery = supabase.from("site_translations").delete();
+  let translationQuery = supabase
+    .from("site_translations")
+    .delete()
+    .in("key", keysToDelete);
 
   if (site_id) {
-    translationQuery.eq("site_id", site_id).in("key", keysToDelete);
-  } else {
-    translationQuery.in("key", keysToDelete);
+    translationQuery = translationQuery.eq("site_id", site_id);
   }
 
   const { error: trError } = await translationQuery;

@@ -14,6 +14,7 @@ export type ProgramEvent = {
   description?: Record<string, string> | null;
   sort_order?: number | null;
   created_at?: string | null;
+  is_main_event?: boolean | null;
 };
 
 /**
