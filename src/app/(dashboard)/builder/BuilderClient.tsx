@@ -298,7 +298,6 @@ export default function BuilderClient({
                 {active === 3 && site && (
                   <AccommodationBuilderStep
                     site={site}
-                    refresh={refresh}
                     lang={currentLang}
                     translations={translations}
                   />

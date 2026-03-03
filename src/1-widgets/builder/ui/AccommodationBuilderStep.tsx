@@ -17,14 +17,12 @@ import { StepLayout } from "../step-layout";
 
 type Props = {
   site: Site | null;
-  refresh: () => void;
   lang: string;
   translations: Record<string, string>;
 };
 
 export default function AccommodationBuilderStep({
   site,
-  refresh,
   translations,
 }: Props) {
   const [items, setItems] = useState<AccommodationEntry[]>([]);
@@ -36,16 +34,13 @@ export default function AccommodationBuilderStep({
 
   const formRef = useRef<HTMLDivElement | null>(null);
   const isProUser = true; // TODO stub — do not check subscription in this MVP
-  useEffect(() => {
-    console.log("AccommodationBuilderStep mounted");
-  }, []);
+
   const load = useCallback(async () => {
     if (!site?.id) return;
     setLoading(true);
     setError(null);
     try {
       const rows = await fetchAccommodationEntries(site.id);
-      console.log("Accommodation rows after mutation:", rows);
       setItems(rows ?? []);
     } catch (err: unknown) {
       setError((err as Error)?.message ?? String(err));
@@ -129,8 +124,6 @@ export default function AccommodationBuilderStep({
     setError(null);
     try {
       if (editingId) {
-        console.log("'''''''''''''''Updating accommodation:", editingId, form);
-
         const updated = await updateAccommodationEntry(
           site.id,
           editingId,
@@ -162,8 +155,6 @@ export default function AccommodationBuilderStep({
   }
 
   async function handleDelete(id: string) {
-    console.log("Deleting accommodation:", id, site?.id);
-
     if (!confirm("Delete this accommodation entry?")) return;
     setSaving(true);
     const ok = await deleteAccommodationEntry(site?.id ?? "", id);
