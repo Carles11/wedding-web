@@ -306,9 +306,31 @@ export default function ProgramEventsBuilderStep({
           { site_id: site.id, ...structuralFields },
           translationArr,
         );
-        if (created) {
-          setEvents((prev) => [...prev, created]);
-        } else {
+
+        if (
+          structuralFields.is_main_event &&
+          structuralFields.day_tag === "wedding_day"
+        ) {
+          // 1. Turn off other main events in DB
+          const otherWeddingEvents = events.filter(
+            (e) => e.day_tag === "wedding_day" && e.is_main_event,
+          );
+
+          await Promise.all(
+            otherWeddingEvents.map((e) =>
+              updateProgramEvent(e.id, { is_main_event: false }),
+            ),
+          );
+
+          // 2. Update local state to reflect uniqueness
+          setEvents((prev) =>
+            prev.map((e) =>
+              e.day_tag === "wedding_day" ? { ...e, is_main_event: false } : e,
+            ),
+          );
+        }
+
+        if (!created) {
           throw new Error(
             t(
               translations,
@@ -317,9 +339,18 @@ export default function ProgramEventsBuilderStep({
             ),
           );
         }
+        // Hydrate locally using form translations
+        setEvents((prev) => [
+          ...prev,
+          {
+            ...created,
+            title: form.title ?? {},
+            location: form.location ?? {},
+            description: form.description ?? {},
+          } as ProgramEvent,
+        ]);
       }
 
-      await load();
       clearForm();
       refresh();
     } catch (err: unknown) {
@@ -331,6 +362,18 @@ export default function ProgramEventsBuilderStep({
   }
 
   async function handleDelete(id: string) {
+    const ev = events.find((e) => e.id === id);
+    if (ev?.day_tag === "wedding_day" && ev?.is_main_event) {
+      notify.error(
+        t(
+          translations,
+          "builder.program_events.error.delete_main_event",
+          "Cannot delete the main event. Set another as main before deleting.",
+        ),
+      );
+      return;
+    }
+
     if (
       !confirm(
         t(
