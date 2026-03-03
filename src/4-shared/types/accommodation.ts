@@ -1,3 +1,5 @@
+import type { TranslationDictionary } from "@/4-shared/types";
+
 /**
  * Accommodation entry used in the `sections` table under type='accommodation'.
  * Name/address/notes are multilingual maps (lang -> text).
@@ -39,6 +41,28 @@ export type AccommodationFormValues = {
   phone?: string;
   email?: string;
   sort_order?: number;
+};
+
+export type AccommodationSectionProps = {
+  hotels: AccommodationEntry[];
+  translations?: TranslationDictionary | null;
+};
+
+export type Hotel = {
+  name?: string | Record<string, string>;
+  address?: string | Record<string, string>;
+  phone?: string;
+  email?: string;
+  website?: string;
+};
+
+export type AccommodationData = {
+  title?: string | Record<string, string>;
+  subtitle?: string | Record<string, string>;
+  content?: {
+    headline?: string | Record<string, string>;
+    hotels?: Hotel[];
+  };
 };
 
 // TODO: Consider a dedicated `accommodations` table for per-entry rows with

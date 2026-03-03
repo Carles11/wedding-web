@@ -10,16 +10,19 @@ export async function deleteAccommodationEntry(
 ): Promise<boolean> {
   if (!siteId || !id) return false;
 
-  const supabase = await createClient();
-  const { error } = await supabase
+  const supabase = createClient();
+
+  const { data, error } = await supabase
     .from("accommodations")
     .delete()
     .eq("id", id)
-    .eq("site_id", siteId);
+    .eq("site_id", siteId)
+    .select("id"); // 👈 FORCE returning deleted row
 
   if (error) {
     console.error("[deleteAccommodationEntry] supabase delete error:", error);
     return false;
   }
-  return true;
+
+  return (data?.length ?? 0) > 0;
 }

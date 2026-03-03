@@ -27,6 +27,7 @@ export function StepLayout({
   translations = {},
 }: StepLayoutProps) {
   // Resolve labels using translations first, then prop, then fallback
+
   const resolvedNext =
     translations["builder.actions.save"] ||
     translations["builder.actions.next"] ||

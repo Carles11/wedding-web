@@ -3,12 +3,13 @@ import { generateEventSchema } from "@/4-shared/lib/seo/generateEventSchema";
 import { headers } from "next/headers";
 import type { Metadata } from "next";
 import { getSiteByDomain } from "@/4-shared/lib/getSiteByDomain";
-import { fetchDetailsSection } from "@/3-entities/sections/api/fetchDetailsSection";
-import { fetchAccommodationSection } from "@/3-entities/sections/api/fetchAccommodationSection";
+
 import { fetchWhatElseSection } from "@/3-entities/sections/api/fetchWhatElseSection";
 import { fetchContactSection } from "@/3-entities/sections/api/fetchContactSection";
 import { fetchBankDataSection } from "@/3-entities/sections/api/fetchBankDataSection";
 import { fetchImagesForTenantSite } from "@/3-entities/images/api/fetchImagesForTenantSite";
+import { fetchAccommodationEntriesForTenant } from "@/3-entities/accommodation/api/fetchAccommodationEntriesForTenant";
+import { fetchProgramSectionData } from "@/3-entities/sections/api/fetchProgramDataForTenant";
 
 import HeroSection from "@/3-entities/sections/ui/HeroSection";
 import ProgramSectionComponent from "@/3-entities/sections/ui/ProgramSection";
@@ -23,7 +24,6 @@ import { LanguageToggle } from "@/2-features/language-toggle/ui/LanguageToggle";
 import TopMenu from "@/2-features/top-menu/ui/TopMenu";
 
 import { getMergedTranslations } from "@/4-shared/lib/i18n";
-import { fetchProgramSectionData } from "@/3-entities/sections/api/fetchProgramDataForTenant";
 import { ProgramSection } from "@/4-shared/types";
 
 export const dynamic = "force-dynamic";
@@ -182,15 +182,15 @@ export default async function HomePage(props: {
       }
     : null;
 
+  // Fetch accommodations from new table
+  const accommodations = await fetchAccommodationEntriesForTenant(siteId);
+
   // Fetch rest in parallel
-  const [details, accommodation, whatelse, bankData, contact] =
-    await Promise.all([
-      fetchDetailsSection(siteId),
-      fetchAccommodationSection(siteId),
-      fetchWhatElseSection(siteId),
-      fetchBankDataSection(siteId),
-      fetchContactSection(siteId),
-    ]);
+  const [whatelse, bankData, contact] = await Promise.all([
+    fetchWhatElseSection(siteId),
+    fetchBankDataSection(siteId),
+    fetchContactSection(siteId),
+  ]);
 
   // Generate structured data for SEO
   const baseUrl = `https://${host}/${lang}`;
@@ -251,8 +251,7 @@ export default async function HomePage(props: {
 
         {/* Accommodation */}
         <AccommodationSection
-          data={accommodation}
-          lang={lang}
+          hotels={accommodations}
           translations={translations}
         />
 

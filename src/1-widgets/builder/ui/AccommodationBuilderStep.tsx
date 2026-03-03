@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type {
   Site,
   AccommodationEntry,
@@ -36,26 +36,27 @@ export default function AccommodationBuilderStep({
 
   const formRef = useRef<HTMLDivElement | null>(null);
   const isProUser = true; // TODO stub — do not check subscription in this MVP
-
   useEffect(() => {
-    if (!site?.id) return;
-    load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [site?.id]);
-
-  async function load() {
+    console.log("AccommodationBuilderStep mounted");
+  }, []);
+  const load = useCallback(async () => {
     if (!site?.id) return;
     setLoading(true);
     setError(null);
     try {
       const rows = await fetchAccommodationEntries(site.id);
+      console.log("Accommodation rows after mutation:", rows);
       setItems(rows ?? []);
     } catch (err: unknown) {
       setError((err as Error)?.message ?? String(err));
     } finally {
       setLoading(false);
     }
-  }
+  }, [site?.id]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
 
   function canAddMore() {
     if (isProUser) return true;
@@ -136,12 +137,13 @@ export default function AccommodationBuilderStep({
           form,
         );
         if (!updated) throw new Error("Update failed");
+        setItems((prev) => prev.map((i) => (i.id === editingId ? updated : i)));
       } else {
         const created = await createAccommodationEntry(site.id, form);
         if (!created) throw new Error("Create failed");
+        setItems((prev) => [...prev, created]);
       }
-      await load();
-      refresh();
+
       setEditingId(null);
       setForm({
         name: "",
@@ -170,8 +172,7 @@ export default function AccommodationBuilderStep({
       setError("Failed to delete");
       return;
     }
-    await load();
-    refresh();
+    setItems((prev) => prev.filter((item) => item.id !== id));
   }
 
   return (

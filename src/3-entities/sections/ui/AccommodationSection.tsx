@@ -1,30 +1,6 @@
-import { getTextForLang } from "@/4-shared/lib/getTextForLang";
 import SectionContainer from "@/4-shared/ui/section/SectionContainer";
-import type { TranslationDictionary } from "@/4-shared/types";
 import UnderlinedLink from "@/4-shared/ui/link/UnderlinedLink";
-
-type Hotel = {
-  name?: string | Record<string, string>;
-  address?: string | Record<string, string>;
-  phone?: string;
-  email?: string;
-  website?: string;
-};
-
-type AccommodationData = {
-  title?: string | Record<string, string>;
-  subtitle?: string | Record<string, string>;
-  content?: {
-    headline?: string | Record<string, string>;
-    hotels?: Hotel[];
-  };
-};
-
-type AccommodationSectionProps = {
-  data: AccommodationData | null;
-  lang: string;
-  translations?: TranslationDictionary | null;
-};
+import { AccommodationSectionProps } from "@/4-shared/types";
 
 function IconPhone() {
   return (
@@ -100,33 +76,15 @@ function IconLink() {
  * - Anchor: id="accommodation"
  */
 export default function AccommodationSection({
-  data,
-  lang,
+  hotels,
   translations,
 }: AccommodationSectionProps) {
   const headline =
-    getTextForLang(
-      data?.title as Record<string, string> | undefined,
-      lang,
-      "",
-    ) ||
-    getTextForLang(
-      data?.content?.headline as Record<string, string> | undefined,
-      lang,
-      "",
-    ) ||
     translations?.["menu.accommodation"] ||
+    translations?.["sections.accommodation.title"] ||
     "Accommodation";
 
-  const subtitle = getTextForLang(
-    data?.subtitle as Record<string, string> | undefined,
-    lang,
-    "",
-  );
-
-  const hotels: Hotel[] = data?.content?.hotels ?? [];
-
-  // Reusable underline settings (consistent site-wide)
+  // Reusable underline settings
   const underlineConfig = {
     initialHeightClass: "max-h-[2px]",
     expandedHeightClass: "group-hover:max-h-[10px] group-focus:max-h-[10px]",
@@ -138,7 +96,6 @@ export default function AccommodationSection({
       id="accommodation"
       heading={headline}
       headingId="accommodation-heading"
-      subtitle={subtitle}
       variant="muted"
       withDivider
       dividerMotive="flower1"
@@ -147,96 +104,76 @@ export default function AccommodationSection({
       dividerOpacity={0.055}
     >
       <div className="grid gap-4 md:grid-cols-2">
-        {hotels.map((h: Hotel, i: number) => {
-          const nameText = getTextForLang(
-            h.name as Record<string, string> | undefined,
-            lang,
-            "",
-          );
-          const addressText = getTextForLang(
-            h.address as Record<string, string> | undefined,
-            lang,
-            "",
-          );
-
-          const phoneAria = `Call ${nameText || "hotel"}`;
-          const emailAria = `Email ${nameText || "hotel"}`;
-          const websiteAria = `Visit website of ${nameText || "hotel"}`;
-
-          return (
-            <article
-              key={i}
-              className="relative p-4 bg-white rounded-lg shadow-sm border border-neutral-100 overflow-hidden"
-            >
-              <div
-                className="absolute left-0 top-0 h-full w-1 bg-gradient-to-b from-indigo-200 to-indigo-100 opacity-60"
-                aria-hidden
-              />
-              <div className="pl-3">
-                <h3 className="font-semibold text-2xl text-neutral-800">
-                  {nameText}
-                </h3>
-                <address className="not-italic text-sm text-neutral-600 mt-1">
-                  {addressText}
-                </address>
-
-                <div className="mt-3 text-sm space-y-1">
-                  {h.phone && (
-                    <div>
-                      <IconPhone />
-                      <UnderlinedLink
-                        href={`tel:${h.phone}`}
-                        external // render plain anchor for tel:
-                        className="text-neutral-700 inline-flex items-center"
-                        ariaLabel={phoneAria}
-                        thicknessClass="h-0.5"
-                        {...underlineConfig}
-                      >
-                        <span>{h.phone}</span>
-                      </UnderlinedLink>
-                    </div>
-                  )}
-                  {h.email && (
-                    <div>
-                      <IconMail />
-                      <UnderlinedLink
-                        href={`mailto:${h.email}`}
-                        external // render plain anchor for mailto:
-                        className="text-neutral-700 inline-flex items-center"
-                        ariaLabel={emailAria}
-                        thicknessClass="h-0.5"
-                        {...underlineConfig}
-                      >
-                        <span>{h.email}</span>
-                      </UnderlinedLink>
-                    </div>
-                  )}
-                  {h.website && (
-                    <div>
-                      <IconLink />
-                      <UnderlinedLink
-                        href={h.website}
-                        external
-                        className="text-neutral-700" /* DON'T put display classes here */
-                        ariaLabel={websiteAria}
-                        thicknessClass="h-0.5"
-                        {...underlineConfig}
-                      >
-                        {/* Inner wrapper keeps inline-flex for icon+text, but anchor remains inline-block */}
-                        <span className="inline-flex items-center gap-2 max-w-[220px]">
-                          {/* Truncate the text inside a block-level span with a constrained max-width */}
-                          <span className="truncate block max-w-[250px]">
-                            {h.website}
-                          </span>
+        {hotels.map((h, i) => (
+          <article
+            key={h.id ?? i}
+            className="relative p-4 bg-white rounded-lg shadow-sm border border-neutral-100 overflow-hidden"
+          >
+            <div
+              className="absolute left-0 top-0 h-full w-1 bg-gradient-to-b from-indigo-200 to-indigo-100 opacity-60"
+              aria-hidden
+            />
+            <div className="pl-3">
+              <h3 className="font-semibold text-2xl text-neutral-800">
+                {h.name}
+              </h3>
+              <address className="not-italic text-sm text-neutral-600 mt-1">
+                {h.address}
+              </address>
+              <div className="mt-3 text-sm space-y-1">
+                {h.phone && (
+                  <div>
+                    <IconPhone />
+                    <UnderlinedLink
+                      href={`tel:${h.phone}`}
+                      external
+                      className="text-neutral-700 inline-flex items-center"
+                      ariaLabel={`Call ${h.name || "hotel"}`}
+                      thicknessClass="h-0.5"
+                      {...underlineConfig}
+                    >
+                      <span>{h.phone}</span>
+                    </UnderlinedLink>
+                  </div>
+                )}
+                {h.email && (
+                  <div>
+                    <IconMail />
+                    <UnderlinedLink
+                      href={`mailto:${h.email}`}
+                      external
+                      className="text-neutral-700 inline-flex items-center"
+                      ariaLabel={`Email ${h.name || "hotel"}`}
+                      thicknessClass="h-0.5"
+                      {...underlineConfig}
+                    >
+                      <span>{h.email}</span>
+                    </UnderlinedLink>
+                  </div>
+                )}
+                {h.website && (
+                  <div>
+                    <IconLink />
+                    <UnderlinedLink
+                      href={h.website}
+                      external
+                      className="text-neutral-700"
+                      ariaLabel={`Visit website of ${h.name || "hotel"}`}
+                      thicknessClass="h-0.5"
+                      {...underlineConfig}
+                    >
+                      <span className="inline-flex items-center gap-2 max-w-[220px]">
+                        <span className="truncate block max-w-[250px]">
+                          {h.website}
                         </span>
-                      </UnderlinedLink>
-                    </div>
-                  )}
-                </div>
+                      </span>
+                    </UnderlinedLink>
+                  </div>
+                )}
               </div>
-            </article>
-          );
-        })}
+            </div>
+          </article>
+        ))}
       </div>
     </SectionContainer>
   );
