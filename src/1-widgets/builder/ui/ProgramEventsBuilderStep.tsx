@@ -306,7 +306,9 @@ export default function ProgramEventsBuilderStep({
           { site_id: site.id, ...structuralFields },
           translationArr,
         );
-        if (!created)
+        if (created) {
+          setEvents((prev) => [...prev, created]);
+        } else {
           throw new Error(
             t(
               translations,
@@ -314,6 +316,7 @@ export default function ProgramEventsBuilderStep({
               "Create failed",
             ),
           );
+        }
       }
 
       await load();
@@ -375,7 +378,6 @@ export default function ProgramEventsBuilderStep({
   }, [events]);
 
   // --- All rendering below ---
-  console.log("Rendering ProgramEventsBuilderStep with events:", events);
   return (
     <StepLayout
       translations={translations}
@@ -462,131 +464,144 @@ export default function ProgramEventsBuilderStep({
                   {(grouped[d.key ?? "wedding_day"] ?? []).map((ev) => (
                     <div
                       key={ev.id}
-                      className="group border rounded-lg p-3 sm:p-0 sm:border-0 sm:rounded-none flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4 bg-white sm:bg-transparent"
+                      className="border rounded-lg p-4 bg-gray-50 flex justify-between items-start gap-6"
                     >
-                      <div className="flex items-center gap-2">
-                        <div className="text-sm font-semibold truncate flex items-center gap-2">
-                          {(ev.title && ev.title[defaultLang]) ?? "(no title)"}
-                          {/* Move the "Main event" label to the right of the title */}
-                          {d.key === "wedding_day" && ev.is_main_event && (
-                            <span className="ml-2 inline-block px-2 py-0.5 bg-yellow-100 text-yellow-700 rounded text-xs">
-                              {t(
-                                translations,
-                                "builder.program_events.main_event.label",
-                                "Main eventaaaa",
-                              )}
-                            </span>
-                          )}
-                        </div>
-                        {/* Main event toggle only for wedding_day */}
-                        {d.key === "wedding_day" && (
-                          <Toggle
-                            checked={!!ev.is_main_event}
-                            disabled={saving}
-                            label={undefined}
-                            id={`main-event-toggle-${ev.id}`}
-                            onChange={async (makeMain) => {
-                              if (saving) return;
+                      {/* LEFT SIDE */}
+                      <div className="flex-1 space-y-2 min-w-0">
+                        {/* Title + Toggle */}
+                        <div className="flex items-center gap-3 flex-wrap">
+                          <strong className="text-base break-words">
+                            {ev.title?.[defaultLang] ?? "(no title)"}
+                          </strong>
 
-                              if (!makeMain) {
-                                notify.error(
-                                  translations[
-                                    "builder.toggle.error.empty-main-not-allowed"
-                                  ] ||
-                                    "At least one main event must be set for Wedding Day.",
-                                );
-                                return;
-                              }
-                              setSaving(true);
+                          {d.key === "wedding_day" && (
+                            <>
+                              <Toggle
+                                checked={!!ev.is_main_event}
+                                disabled={saving}
+                                onChange={async (makeMain) => {
+                                  if (saving) return;
 
-                              // Optimistically update local state
-                              setEvents((oldEvents) =>
-                                oldEvents.map((event) =>
-                                  event.day_tag === "wedding_day"
-                                    ? {
-                                        ...event,
-                                        is_main_event: event.id === ev.id,
-                                      }
-                                    : event,
-                                ),
-                              );
+                                  // If trying to turn OFF
+                                  if (!makeMain) {
+                                    const otherMainExists = events.some(
+                                      (e) =>
+                                        e.day_tag === "wedding_day" &&
+                                        e.id !== ev.id &&
+                                        e.is_main_event,
+                                    );
 
-                              try {
-                                // Backend update: set ON for this, OFF for others
-                                await Promise.all(
-                                  (grouped["wedding_day"] ?? []).map(
-                                    async (event) => {
-                                      if (
-                                        event.id === ev.id &&
-                                        !event.is_main_event
-                                      ) {
-                                        await updateProgramEvent(event.id, {
-                                          is_main_event: true,
-                                        });
-                                      } else if (
-                                        event.id !== ev.id &&
-                                        event.is_main_event
-                                      ) {
-                                        await updateProgramEvent(event.id, {
-                                          is_main_event: false,
-                                        });
-                                      }
-                                    },
-                                  ),
-                                );
-                              } catch (err) {
-                                notify.error(
-                                  t(
+                                    if (!otherMainExists) {
+                                      notify.error(
+                                        translations[
+                                          "builder.toggle.error.empty-main-not-allowed"
+                                        ] ||
+                                          "At least one main event must be set for Wedding Day.",
+                                      );
+                                      return;
+                                    }
+
+                                    // Allow turning off (another main exists)
+                                    await updateProgramEvent(ev.id, {
+                                      is_main_event: false,
+                                    });
+
+                                    setEvents((prev) =>
+                                      prev.map((e) =>
+                                        e.id === ev.id
+                                          ? { ...e, is_main_event: false }
+                                          : e,
+                                      ),
+                                    );
+
+                                    return;
+                                  }
+
+                                  // If turning ON → make it the only main
+                                  setSaving(true);
+
+                                  setEvents((old) =>
+                                    old.map((e) =>
+                                      e.day_tag === "wedding_day"
+                                        ? {
+                                            ...e,
+                                            is_main_event: e.id === ev.id,
+                                          }
+                                        : e,
+                                    ),
+                                  );
+
+                                  await Promise.all(
+                                    events
+                                      .filter(
+                                        (e) => e.day_tag === "wedding_day",
+                                      )
+                                      .map((event) =>
+                                        updateProgramEvent(event.id, {
+                                          is_main_event: event.id === ev.id,
+                                        }),
+                                      ),
+                                  );
+
+                                  setSaving(false);
+                                }}
+                              />
+
+                              {ev.is_main_event && (
+                                <span className="px-2 py-0.5 text-xs rounded bg-yellow-100 text-yellow-800 whitespace-nowrap">
+                                  {t(
                                     translations,
-                                    "builder.program_events.error.update_failed",
-                                    "Failed to set main event",
-                                  ),
-                                );
-                              } finally {
-                                setSaving(false);
-                              }
-                            }}
-                          />
-                        )}
-                      </div>
-                      <div>
-                        <div className="text-xs text-gray-600 wrap-break-word">
-                          {ev.time && (
-                            <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 font-medium text-gray-700 mr-2">
-                              {formatTime(ev.time)}
-                            </span>
-                          )}
-                          {ev.location && ev.location[defaultLang] && (
-                            <span className="wrap-break-word">
-                              {ev.location[defaultLang]}
-                            </span>
-                          )}
-                        </div>
-                        <div className="text-xs text-gray-500 mt-1 line-clamp-3 sm:line-clamp-none">
-                          {ev.description && ev.description[defaultLang]
-                            ? ev.description[defaultLang]
-                            : null}
-                        </div>
-                        {ev.location_url && (
-                          <div className="text-xs mt-2">
-                            <a
-                              href={ev.location_url}
-                              target="_blank"
-                              rel="noopener"
-                              className="underline text-blue-700 hover:text-blue-600"
-                            >
-                              {t(
-                                translations,
-                                "builder.program_events.field.location_url",
-                                "Location URL (optional)",
+                                    "builder.program_events.main_event.label",
+                                    "Main event",
+                                  )}
+                                </span>
                               )}
-                            </a>
+                            </>
+                          )}
+                        </div>
+
+                        {/* Time */}
+                        {ev.time && (
+                          <div className="inline-flex items-center rounded-full bg-gray-200 px-2 py-0.5 text-sm font-medium">
+                            {formatTime(ev.time)}
                           </div>
                         )}
+
+                        {/* Location */}
+                        {ev.location?.[defaultLang] && (
+                          <div className="text-sm text-gray-700 break-words">
+                            {ev.location[defaultLang]}
+                          </div>
+                        )}
+
+                        {/* Description */}
+                        {ev.description?.[defaultLang] && (
+                          <div className="text-sm text-gray-500 break-words">
+                            {ev.description[defaultLang]}
+                          </div>
+                        )}
+
+                        {/* URL */}
+                        {ev.location_url && (
+                          <a
+                            href={ev.location_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm text-blue-600 underline break-all"
+                          >
+                            {t(
+                              translations,
+                              "builder.program_events.field.location_url",
+                              "Location URL (optional)",
+                            )}
+                          </a>
+                        )}
                       </div>
-                      <div className="flex items-center gap-2.5 shrink-0">
+
+                      {/* RIGHT SIDE */}
+                      <div className="flex flex-col gap-2 shrink-0">
                         <button
-                          className="text-sm px-3 py-1.5 rounded-md border border-gray-400 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition"
+                          className="px-3 py-1.5 rounded-md border bg-white hover:bg-gray-100"
                           onClick={() => startEdit(ev)}
                         >
                           {t(
@@ -595,16 +610,12 @@ export default function ProgramEventsBuilderStep({
                             "Edit",
                           )}
                         </button>
+
                         <button
-                          className="text-sm px-3 py-1.5 rounded-md border border-red-200 bg-white text-red-600 hover:bg-red-50 hover:border-red-300 transition"
+                          className="px-3 py-1.5 rounded-md border border-red-200 text-red-600 hover:bg-red-50"
                           onClick={() => handleDelete(ev.id)}
-                          disabled={saving}
                         >
-                          {t(
-                            translations,
-                            "builder.program_events.button.delete",
-                            "Delete",
-                          )}
+                          {t(translations, "builder.actions.delete", "Delete")}
                         </button>
                       </div>
                     </div>
