@@ -14,6 +14,7 @@ import {
 } from "@/3-entities/accommodation/api";
 import { FREE_ACCOMMODATION_LIMIT } from "@/4-shared/config/limits/usage-limits";
 import { StepLayout } from "../step-layout";
+import { interpolate } from "@/4-shared/helpers/interpolateVars";
 
 type Props = {
   site: Site | null;
@@ -33,7 +34,7 @@ export default function AccommodationBuilderStep({
   const [isListOpen, setIsListOpen] = useState(true);
 
   const formRef = useRef<HTMLDivElement | null>(null);
-  const isProUser = true; // TODO stub — do not check subscription in this MVP
+  const isProUser = true;
 
   const load = useCallback(async () => {
     if (!site?.id) return;
@@ -111,17 +112,29 @@ export default function AccommodationBuilderStep({
 
   async function handleSave() {
     if (!site?.id) return;
+
     if (!form.name || form.name.trim() === "") {
-      setError("Name is required.");
+      setError(
+        translations["builder.accommodation.error.name_required"] ||
+          "Name is required.",
+      );
       return;
     }
+
     if (!canAddMore() && !editingId) {
-      setError("Free limit reached. Upgrade to add more accommodations.");
+      setError(
+        interpolate(
+          translations["builder.accommodation.error.limit_reached"] ||
+            "Free limit reached. Upgrade to add more accommodations.",
+          { FREE_ACCOMMODATION_LIMIT },
+        ),
+      );
       return;
     }
 
     setSaving(true);
     setError(null);
+
     try {
       if (editingId) {
         const updated = await updateAccommodationEntry(
@@ -155,14 +168,26 @@ export default function AccommodationBuilderStep({
   }
 
   async function handleDelete(id: string) {
-    if (!confirm("Delete this accommodation entry?")) return;
+    if (
+      !confirm(
+        translations["builder.accommodation.confirm_delete"] ||
+          "Delete this accommodation entry?",
+      )
+    )
+      return;
+
     setSaving(true);
     const ok = await deleteAccommodationEntry(site?.id ?? "", id);
     setSaving(false);
+
     if (!ok) {
-      setError("Failed to delete");
+      setError(
+        translations["builder.accommodation.error.delete_failed"] ||
+          "Failed to delete",
+      );
       return;
     }
+
     setItems((prev) => prev.filter((item) => item.id !== id));
   }
 
@@ -173,7 +198,7 @@ export default function AccommodationBuilderStep({
       }
       nextLoading={saving}
       nextDisabled={saving}
-      nextLabel="Save"
+      nextLabel={translations["builder.actions.save"] || "Save"}
       onBack={
         !isListOpen
           ? () => {
@@ -186,51 +211,60 @@ export default function AccommodationBuilderStep({
                 email: "",
               });
               setEditingId(null);
-              setIsListOpen(true); // <-- make sure to reset list open
+              setIsListOpen(true);
             }
           : undefined
       }
-      backLabel="Cancel"
+      backLabel={translations["builder.actions.cancel"] || "Cancel"}
       translations={translations}
     >
       <div className="mb-3 flex items-center justify-between">
-        <h3 className="text-lg font-medium">Accommodation</h3>
+        <h3 className="text-lg font-medium">
+          {translations["builder.accommodation.title"] || "Accommodation"}
+        </h3>
         <div>
           <button
             className="px-1 py-1 bg-blue-600 text-white rounded disabled:opacity-50"
             onClick={() => startCreate()}
             disabled={!canAddMore()}
           >
-            + Add accommodation
+            {translations["builder.accommodation.add"] || "+ Add accommodation"}
           </button>
         </div>
       </div>
 
       <div className="text-sm text-gray-600 mb-3">
-        Add hotels or places to stay. Free plan allows up to{" "}
-        {FREE_ACCOMMODATION_LIMIT} entries.
+        {interpolate(
+          translations["builder.accommodation.description"] ||
+            "Add hotels or places to stay. Free plan allows up to {FREE_ACCOMMODATION_LIMIT} entries.",
+          { FREE_ACCOMMODATION_LIMIT },
+        )}
       </div>
 
-      {/* Collapsible list */}
       <div className="mb-2">
         <button
           className="text-sm font-medium text-gray-700 hover:text-gray-900 flex items-center gap-2"
           onClick={() => setIsListOpen((s) => !s)}
         >
           <span>{isListOpen ? "▼" : "▶"}</span>
-          <span>Existing accommodations ({items.length})</span>
+          <span>
+            {translations["builder.accommodation.existing"] ||
+              "Existing accommodations"}{" "}
+            ({items.length})
+          </span>
         </button>
       </div>
 
       {isListOpen && (
         <>
           {loading ? (
-            <p>Loading…</p>
+            <p>{translations["common.loading"] || "Loading…"}</p>
           ) : (
             <div className="space-y-3">
               {items.length === 0 ? (
                 <div className="text-sm text-gray-500">
-                  No accommodations yet.
+                  {translations["builder.accommodation.empty"] ||
+                    "No accommodations yet."}
                 </div>
               ) : (
                 <div className="space-y-2">
@@ -241,7 +275,9 @@ export default function AccommodationBuilderStep({
                     >
                       <div className="min-w-0">
                         <div className="font-medium text-sm truncate">
-                          {it.name ?? "(no name)"}
+                          {it.name ??
+                            (translations["builder.accommodation.no_name"] ||
+                              "(no name)")}
                         </div>
                         <div className="text-xs text-gray-600 break-words">
                           {it.address ?? ""}
@@ -262,12 +298,20 @@ export default function AccommodationBuilderStep({
                         )}
                         {it.phone && (
                           <div className="text-xs text-gray-600 mt-0.5">
-                            <span>Phone: {it.phone}</span>
+                            <span>
+                              {translations["builder.accommodation.phone"] ||
+                                "Phone"}
+                              : {it.phone}
+                            </span>
                           </div>
                         )}
                         {it.email && (
                           <div className="text-xs text-gray-600 mt-0.5 break-all">
-                            <span>Email: {it.email}</span>
+                            <span>
+                              {translations["builder.accommodation.email"] ||
+                                "Email"}
+                              : {it.email}
+                            </span>
                           </div>
                         )}
                       </div>
@@ -276,14 +320,14 @@ export default function AccommodationBuilderStep({
                           className="text-xs font-medium px-3 py-1.5 rounded-md border border-gray-200 bg-white hover:bg-gray-50 active:scale-[0.98] transition"
                           onClick={() => startEdit(it)}
                         >
-                          Edit
+                          {translations["builder.actions.edit"] || "Edit"}
                         </button>
                         <button
                           className="text-xs font-medium px-3 py-1.5 rounded-md border border-red-200 text-red-600 bg-white hover:bg-red-50 active:scale-[0.98] transition"
                           onClick={() => handleDelete(it.id)}
                           disabled={saving}
                         >
-                          Delete
+                          {translations["builder.actions.delete"] || "Delete"}
                         </button>
                       </div>
                     </div>
@@ -295,16 +339,21 @@ export default function AccommodationBuilderStep({
         </>
       )}
 
-      {/* Form */}
       {!isListOpen && (
         <div ref={formRef} className="mt-4 border rounded p-4 bg-gray-50">
           <h4 className="font-medium">
-            {editingId ? "Edit accommodation" : "Create accommodation"}
+            {editingId
+              ? translations["builder.accommodation.edit"] ||
+                "Edit accommodation"
+              : translations["builder.accommodation.create"] ||
+                "Create accommodation"}
           </h4>
+
           <div className="mt-3 space-y-3">
             <div>
               <label className="block text-xs text-gray-600">
-                Name <span className="text-red-500">*</span>
+                {translations["builder.accommodation.field.name"] || "Name"}{" "}
+                <span className="text-red-500">*</span>
               </label>
               <input
                 value={form.name}
@@ -313,9 +362,11 @@ export default function AccommodationBuilderStep({
                 required
               />
             </div>
+
             <div>
               <label className="block text-xs text-gray-600">
-                Address (optional)
+                {translations["builder.accommodation.field.address"] ||
+                  "Address (optional)"}
               </label>
               <input
                 value={form.address ?? ""}
@@ -323,9 +374,11 @@ export default function AccommodationBuilderStep({
                 className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
+
             <div>
               <label className="block text-xs text-gray-600">
-                Notes (optional)
+                {translations["builder.accommodation.field.notes"] ||
+                  "Notes (optional)"}
               </label>
               <textarea
                 value={form.notes ?? ""}
@@ -333,9 +386,11 @@ export default function AccommodationBuilderStep({
                 className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
+
             <div>
               <label className="block text-xs text-gray-600">
-                Website (optional)
+                {translations["builder.accommodation.field.website"] ||
+                  "Website (optional)"}
               </label>
               <input
                 value={form.website ?? ""}
@@ -343,9 +398,11 @@ export default function AccommodationBuilderStep({
                 className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
+
             <div>
               <label className="block text-xs text-gray-600">
-                Phone (optional)
+                {translations["builder.accommodation.field.phone"] ||
+                  "Phone (optional)"}
               </label>
               <input
                 value={form.phone ?? ""}
@@ -353,9 +410,11 @@ export default function AccommodationBuilderStep({
                 className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
+
             <div>
               <label className="block text-xs text-gray-600">
-                Email (optional)
+                {translations["builder.accommodation.field.email"] ||
+                  "Email (optional)"}
               </label>
               <input
                 value={form.email ?? ""}
@@ -363,6 +422,7 @@ export default function AccommodationBuilderStep({
                 className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
+
             {error && <div className="text-red-600 mt-2">{error}</div>}
           </div>
         </div>
@@ -370,9 +430,15 @@ export default function AccommodationBuilderStep({
 
       {!canAddMore() && (
         <div className="mt-3 text-sm text-gray-600">
-          Free plan limit reached ({FREE_ACCOMMODATION_LIMIT}).{" "}
-          <button className="underline text-blue-600">Upgrade</button> to add
-          more.
+          {interpolate(
+            translations["builder.accommodation.limit_reached_notice"] ||
+              "Free plan limit reached ({FREE_ACCOMMODATION_LIMIT}).",
+            { FREE_ACCOMMODATION_LIMIT },
+          )}{" "}
+          <button className="underline text-blue-600">
+            {translations["builder.accommodation.upgrade"] || "Upgrade"}
+          </button>{" "}
+          {translations["builder.accommodation.to_add_more"] || "to add more."}
         </div>
       )}
     </StepLayout>
