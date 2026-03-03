@@ -1,7 +1,10 @@
+import { createClient } from "@/4-shared/lib/supabase/client";
 import type { AccommodationEntry } from "@/4-shared/types";
-import { fetchAccommodationSection } from "@/3-entities/sections/api/fetchAccommodationSection";
-import { upsertAccommodationSection } from "./upsertAccommodationSection";
 
+/**
+ * Updates an existing accommodation entry in the accommodations table.
+ * Returns the updated row, or null on error or if not found.
+ */
 export async function updateAccommodationEntry(
   siteId: string,
   id: string,
@@ -9,18 +12,20 @@ export async function updateAccommodationEntry(
 ): Promise<AccommodationEntry | null> {
   if (!siteId || !id) return null;
 
-  const section = await fetchAccommodationSection(siteId);
-  const hotels = (section?.content?.hotels ?? []) as AccommodationEntry[];
-  const idx = hotels.findIndex((h) => h.id === id);
-  if (idx === -1) return null;
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("accommodations")
+    .update({ ...updates, updated_at: new Date().toISOString() })
+    .eq("id", id)
+    .eq("site_id", siteId)
+    .select(
+      "id, site_id, name, address, notes, website, phone, email, sort_order, created_at, updated_at",
+    )
+    .single();
 
-  const merged = { ...hotels[idx], ...updates };
-  const newHotels = [...hotels];
-  newHotels[idx] = merged;
-
-  const updatedSection = await upsertAccommodationSection(siteId, {
-    ...(section?.content ?? {}),
-    hotels: newHotels,
-  });
-  return updatedSection ? merged : null;
+  if (error) {
+    console.error("[updateAccommodationEntry] supabase update error:", error);
+    return null;
+  }
+  return data as AccommodationEntry;
 }

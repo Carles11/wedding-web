@@ -12,7 +12,7 @@ export async function fetchImagesForTenantSite(
     .eq("site_id", siteId);
 
   const { data, error } = await query;
-  console.log("Fetched images data:", { data });
+
   if (error) {
     throw error;
   }

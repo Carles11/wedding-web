@@ -1,24 +1,25 @@
-import { fetchAccommodationSection } from "@/3-entities/sections/api/fetchAccommodationSection";
-import { upsertAccommodationSection } from "./upsertAccommodationSection";
+import { createClient } from "@/4-shared/lib/supabase/client";
 
-interface Hotel {
-  id: string;
-  // add other hotel properties here if needed
-}
-
+/**
+ * Deletes an accommodation entry by ID from the accommodations table.
+ * Returns true if deleted, false otherwise.
+ */
 export async function deleteAccommodationEntry(
   siteId: string,
   id: string,
 ): Promise<boolean> {
   if (!siteId || !id) return false;
 
-  const section = await fetchAccommodationSection(siteId);
-  const hotels = (section?.content?.hotels ?? []) as Hotel[];
-  const newHotels = hotels.filter((h) => h.id !== id);
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("accommodations")
+    .delete()
+    .eq("id", id)
+    .eq("site_id", siteId);
 
-  const updated = await upsertAccommodationSection(siteId, {
-    ...(section?.content ?? {}),
-    hotels: newHotels,
-  });
-  return updated !== null;
+  if (error) {
+    console.error("[deleteAccommodationEntry] supabase delete error:", error);
+    return false;
+  }
+  return true;
 }

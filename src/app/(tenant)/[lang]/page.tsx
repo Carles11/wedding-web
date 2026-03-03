@@ -147,7 +147,6 @@ export default async function HomePage(props: {
 
   // Fetch events (timeline) and mainEvent for Program/Details sections!
   const { mainEvent, events } = await fetchProgramSectionData(siteId);
-  console.log("MainEvent in HOOOOOOOOOOOOOOOOOOME:", { mainEvent, events });
 
   // Build a minimal compatible object for the schema
   const programSectionForSEO: ProgramSection | null = mainEvent

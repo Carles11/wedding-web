@@ -1,7 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import type { Site, AccommodationEntry } from "@/4-shared/types";
+import { useEffect, useRef, useState } from "react";
+import type {
+  Site,
+  AccommodationEntry,
+  AccommodationFormValues,
+} from "@/4-shared/types";
 import {
   fetchAccommodationEntries,
   createAccommodationEntry,
@@ -31,14 +35,7 @@ export default function AccommodationBuilderStep({
   const [isListOpen, setIsListOpen] = useState(true);
 
   const formRef = useRef<HTMLDivElement | null>(null);
-
-  const languages = useMemo(() => {
-    if (!site) return ["en"];
-    return site.languages && site.languages.length > 0
-      ? site.languages
-      : [site.default_lang ?? "en"];
-  }, [site]);
-  const defaultLang = site?.default_lang ?? languages[0] ?? "en";
+  const isProUser = true; // TODO stub — do not check subscription in this MVP
 
   useEffect(() => {
     if (!site?.id) return;
@@ -61,6 +58,7 @@ export default function AccommodationBuilderStep({
   }
 
   function canAddMore() {
+    if (isProUser) return true;
     return items.length < FREE_ACCOMMODATION_LIMIT;
   }
 
@@ -72,50 +70,55 @@ export default function AccommodationBuilderStep({
 
   function startCreate() {
     setEditingId(null);
-    setForm({ name: {}, address: {}, notes: {}, website: "" });
+    setForm({
+      name: "",
+      address: "",
+      notes: "",
+      website: "",
+      phone: "",
+      email: "",
+    });
     setIsListOpen(false);
     scrollToForm();
   }
 
   function startEdit(item: AccommodationEntry) {
     setEditingId(item.id);
-    setForm({ ...item });
+    setForm({
+      name: item.name ?? "",
+      address: item.address ?? "",
+      notes: item.notes ?? "",
+      website: item.website ?? "",
+      phone: item.phone ?? "",
+      email: item.email ?? "",
+    });
     setIsListOpen(false);
     scrollToForm();
   }
 
-  const [form, setForm] = useState<Partial<AccommodationEntry>>({});
+  const [form, setForm] = useState<AccommodationFormValues>({
+    name: "",
+    address: "",
+    notes: "",
+    website: "",
+    phone: "",
+    email: "",
+    sort_order: undefined,
+  });
 
-  function updateI18nField(
-    field: keyof AccommodationEntry,
-    lang: string,
-    value: string,
+  function updateField<K extends keyof AccommodationFormValues>(
+    field: K,
+    value: AccommodationFormValues[K],
   ) {
-    setForm((s) => {
-      const prev = (s?.[field] as Record<string, string> | undefined) ?? {};
-      return {
-        ...(s ?? {}),
-        [field]: { ...prev, [lang]: value },
-      } as Partial<AccommodationEntry>;
-    });
-  }
-
-  function updateField(
-    field: keyof AccommodationEntry,
-    value: string | Record<string, string> | undefined,
-  ) {
-    setForm((s) => ({ ...(s ?? {}), [field]: value }));
+    setForm({ ...form, [field]: value });
   }
 
   async function handleSave() {
     if (!site?.id) return;
-
-    const name = (form.name as Record<string, string> | undefined) ?? {};
-    if (!name[defaultLang]) {
-      setError(`Name is required in ${defaultLang}`);
+    if (!form.name || form.name.trim() === "") {
+      setError("Name is required.");
       return;
     }
-
     if (!canAddMore() && !editingId) {
       setError("Free limit reached. Upgrade to add more accommodations.");
       return;
@@ -125,23 +128,29 @@ export default function AccommodationBuilderStep({
     setError(null);
     try {
       if (editingId) {
+        console.log("'''''''''''''''Updating accommodation:", editingId, form);
+
         const updated = await updateAccommodationEntry(
           site.id,
           editingId,
-          form as Partial<AccommodationEntry>,
+          form,
         );
         if (!updated) throw new Error("Update failed");
       } else {
-        const created = await createAccommodationEntry(
-          site.id,
-          form as Omit<AccommodationEntry, "id">,
-        );
+        const created = await createAccommodationEntry(site.id, form);
         if (!created) throw new Error("Create failed");
       }
       await load();
       refresh();
       setEditingId(null);
-      setForm({});
+      setForm({
+        name: "",
+        address: "",
+        notes: "",
+        website: "",
+        phone: "",
+        email: "",
+      });
       setIsListOpen(true);
     } catch (err: unknown) {
       setError((err as Error)?.message ?? String(err));
@@ -151,6 +160,8 @@ export default function AccommodationBuilderStep({
   }
 
   async function handleDelete(id: string) {
+    console.log("Deleting accommodation:", id, site?.id);
+
     if (!confirm("Delete this accommodation entry?")) return;
     setSaving(true);
     const ok = await deleteAccommodationEntry(site?.id ?? "", id);
@@ -166,18 +177,24 @@ export default function AccommodationBuilderStep({
   return (
     <StepLayout
       onNext={
-        editingId !== null || Object.keys(form).length > 0
-          ? handleSave
-          : undefined
+        editingId !== null || form.name.length > 0 ? handleSave : undefined
       }
       nextLoading={saving}
       nextDisabled={saving}
       nextLabel="Save"
       onBack={
-        editingId !== null || Object.keys(form).length > 0
+        !isListOpen
           ? () => {
-              setForm({});
+              setForm({
+                name: "",
+                address: "",
+                notes: "",
+                website: "",
+                phone: "",
+                email: "",
+              });
               setEditingId(null);
+              setIsListOpen(true); // <-- make sure to reset list open
             }
           : undefined
       }
@@ -232,17 +249,14 @@ export default function AccommodationBuilderStep({
                     >
                       <div className="min-w-0">
                         <div className="font-medium text-sm truncate">
-                          {(typeof it.name === "string"
-                            ? it.name
-                            : it.name?.[defaultLang]) ?? "(no name)"}
+                          {it.name ?? "(no name)"}
                         </div>
-
                         <div className="text-xs text-gray-600 break-words">
-                          {(typeof it.address === "string"
-                            ? it.address
-                            : it.address?.[defaultLang]) ?? ""}
+                          {it.address ?? ""}
                         </div>
-
+                        <div className="text-xs text-gray-600 break-words">
+                          {it.notes ?? ""}
+                        </div>
                         {it.website && (
                           <div className="text-xs text-blue-600 break-all mt-1">
                             <a
@@ -252,6 +266,16 @@ export default function AccommodationBuilderStep({
                             >
                               {it.website}
                             </a>
+                          </div>
+                        )}
+                        {it.phone && (
+                          <div className="text-xs text-gray-600 mt-0.5">
+                            <span>Phone: {it.phone}</span>
+                          </div>
+                        )}
+                        {it.email && (
+                          <div className="text-xs text-gray-600 mt-0.5 break-all">
+                            <span>Email: {it.email}</span>
                           </div>
                         )}
                       </div>
@@ -280,68 +304,43 @@ export default function AccommodationBuilderStep({
       )}
 
       {/* Form */}
-      {(editingId !== null || Object.keys(form).length > 0) && (
+      {!isListOpen && (
         <div ref={formRef} className="mt-4 border rounded p-4 bg-gray-50">
           <h4 className="font-medium">
             {editingId ? "Edit accommodation" : "Create accommodation"}
           </h4>
           <div className="mt-3 space-y-3">
-            {languages.map((lang) => (
-              <div key={lang} className="border rounded p-3">
-                <div className="font-medium">Language: {lang}</div>
-                <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  <div>
-                    <label className="block text-xs text-gray-600">
-                      Name {lang === defaultLang ? "(required)" : ""}
-                    </label>
-                    <input
-                      value={
-                        (form.name as Record<string, string> | undefined)?.[
-                          lang
-                        ] ?? ""
-                      }
-                      onChange={(e) =>
-                        updateI18nField("name", lang, e.target.value)
-                      }
-                      className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs text-gray-600">
-                      Address (optional)
-                    </label>
-                    <input
-                      value={
-                        (form.address as Record<string, string> | undefined)?.[
-                          lang
-                        ] ?? ""
-                      }
-                      onChange={(e) =>
-                        updateI18nField("address", lang, e.target.value)
-                      }
-                      className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs text-gray-600">
-                      Notes (optional)
-                    </label>
-                    <textarea
-                      value={
-                        (form.notes as Record<string, string> | undefined)?.[
-                          lang
-                        ] ?? ""
-                      }
-                      onChange={(e) =>
-                        updateI18nField("notes", lang, e.target.value)
-                      }
-                      className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                </div>
-              </div>
-            ))}
-
+            <div>
+              <label className="block text-xs text-gray-600">
+                Name <span className="text-red-500">*</span>
+              </label>
+              <input
+                value={form.name}
+                onChange={(e) => updateField("name", e.target.value)}
+                className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-gray-600">
+                Address (optional)
+              </label>
+              <input
+                value={form.address ?? ""}
+                onChange={(e) => updateField("address", e.target.value)}
+                className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-gray-600">
+                Notes (optional)
+              </label>
+              <textarea
+                value={form.notes ?? ""}
+                onChange={(e) => updateField("notes", e.target.value)}
+                className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
             <div>
               <label className="block text-xs text-gray-600">
                 Website (optional)
@@ -352,8 +351,27 @@ export default function AccommodationBuilderStep({
                 className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
-
-            {error && <div className="text-red-600">{error}</div>}
+            <div>
+              <label className="block text-xs text-gray-600">
+                Phone (optional)
+              </label>
+              <input
+                value={form.phone ?? ""}
+                onChange={(e) => updateField("phone", e.target.value)}
+                className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-gray-600">
+                Email (optional)
+              </label>
+              <input
+                value={form.email ?? ""}
+                onChange={(e) => updateField("email", e.target.value)}
+                className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+            {error && <div className="text-red-600 mt-2">{error}</div>}
           </div>
         </div>
       )}

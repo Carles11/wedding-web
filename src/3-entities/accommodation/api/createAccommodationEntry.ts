@@ -1,43 +1,48 @@
 import type { AccommodationEntry } from "@/4-shared/types";
-import { upsertAccommodationSection } from "./upsertAccommodationSection";
-import { fetchAccommodationSection } from "@/3-entities/sections/api/fetchAccommodationSection";
+import type { AccommodationFormValues } from "@/4-shared/types";
+import { createClient } from "@/4-shared/lib/supabase/client";
+import { FREE_ACCOMMODATION_LIMIT } from "@/4-shared/config/limits/usage-limits";
 
+// Update signature: form values type, not AccommodationEntry!
 export async function createAccommodationEntry(
   siteId: string,
-  entry: Omit<AccommodationEntry, "id">,
+  entry: AccommodationFormValues,
 ): Promise<AccommodationEntry | null> {
+  const isProUser = true; // TODO stub — do not check subscription in this MVP
+
   if (!siteId) return null;
+  console.log("Creating accommodation entry for site:", siteId, entry);
+  // Check plan limit
+  const supabase = await createClient();
+  const { data: existingRows, error: fetchError } = await supabase
+    .from("accommodations")
+    .select("id")
+    .eq("site_id", siteId);
 
-  const section = await fetchAccommodationSection(siteId);
-  const hotels = (section?.content?.hotels ?? []) as AccommodationEntry[];
-
-  // Free plan enforcement expected in UI; TODO: enforce server-side later.
-  if (hotels.length >= 2) {
+  if (fetchError) {
+    console.error(
+      "[createAccommodationEntry] supabase fetch error:",
+      fetchError,
+    );
     return null;
   }
 
-  const generateId = (): string => {
-    try {
-      // browser-native UUID where available
-      if (
-        typeof crypto !== "undefined" &&
-        typeof (crypto as Crypto).randomUUID === "function"
-      ) {
-        return (crypto as Crypto).randomUUID();
-      }
-    } catch (e) {
-      // ignore and fallback
-    }
-    // fallback for older environments
-    return Math.random().toString(36).slice(2) + Date.now().toString(36);
-  };
+  if (!isProUser && (existingRows?.length ?? 0) >= FREE_ACCOMMODATION_LIMIT) {
+    return null;
+  }
 
-  const newEntry: AccommodationEntry = { id: generateId(), ...entry };
-  const newHotels = [newEntry, ...hotels];
+  // Insert new accommodation, adding site_id (not in form values!)
+  const { data, error } = await supabase
+    .from("accommodations")
+    .insert([{ site_id: siteId, ...entry }])
+    .select(
+      "id, site_id, name, address, notes, website, phone, email, sort_order, created_at, updated_at",
+    )
+    .single();
 
-  const updated = await upsertAccommodationSection(siteId, {
-    ...(section?.content ?? {}),
-    hotels: newHotels,
-  });
-  return updated ? newEntry : null;
+  if (error) {
+    console.error("[createAccommodationEntry] supabase insert error:", error);
+    return null;
+  }
+  return data as AccommodationEntry;
 }

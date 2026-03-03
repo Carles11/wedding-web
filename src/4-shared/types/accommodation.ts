@@ -4,10 +4,16 @@
  */
 export type AccommodationEntry = {
   id: string;
-  name?: Record<string, string> | string | null;
-  address?: Record<string, string> | string | null;
-  website?: string | null;
-  notes?: Record<string, string> | null;
+  site_id: string;
+  name: string;
+  address?: string;
+  notes?: string;
+  website?: string;
+  phone?: string;
+  email?: string;
+  sort_order?: number;
+  created_at?: string;
+  updated_at?: string;
 };
 
 export type AccommodationSection = {
@@ -22,6 +28,17 @@ export type AccommodationSection = {
     [key: string]: unknown;
   } | null;
   created_at?: string | null;
+};
+
+// New plain-text fields—no i18n/translation per entry!
+export type AccommodationFormValues = {
+  name: string;
+  address?: string;
+  notes?: string;
+  website?: string;
+  phone?: string;
+  email?: string;
+  sort_order?: number;
 };
 
 // TODO: Consider a dedicated `accommodations` table for per-entry rows with

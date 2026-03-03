@@ -84,7 +84,7 @@ export default function ProgramEventsBuilderStep({
     day_tag: "wedding_day",
   });
 
-  const isProUser = true; // stub — do not check subscription in this MVP
+  const isProUser = true; // TODO stub — do not check subscription in this MVP
 
   const languages = useMemo(() => {
     if (!site) return ["en"];
