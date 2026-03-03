@@ -76,7 +76,7 @@ export default function GeneralSiteForm({
     };
     fetchData();
     // eslint-disable-next-line
-  }, [site]);
+  }, [site?.id]);
 
   // 🔹 Language toggle
   const handleLangCheckbox = (lang: SupportedLanguage) => {
@@ -156,7 +156,6 @@ export default function GeneralSiteForm({
           "Saved successfully.",
       );
 
-      await fetchAndApplyGeneralContent();
       refresh();
     } catch (err: unknown) {
       if (err instanceof Error) setError(err.message);
