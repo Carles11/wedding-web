@@ -12,6 +12,8 @@ import ProgramEventsBuilderStep from "@/1-widgets/builder/ui/ProgramEventsBuilde
 import AccommodationBuilderStep from "@/1-widgets/builder/ui/AccommodationBuilderStep";
 import ContactBuilderStep from "@/1-widgets/builder/ui/ContactBuilderStep";
 import WhatToSeeBuilderStep from "@/1-widgets/builder/ui/WhatToSeeBuilderStep";
+import WeddingGiftBuilderStep from "@/1-widgets/builder/ui/WeddingGiftBuilderStep";
+
 import type { Site } from "@/4-shared/types";
 import {
   GreenCheckIcon,
@@ -48,6 +50,11 @@ function isWhatToSeeComplete(site?: Site | null): boolean {
   return true;
 }
 
+function isBankDataComplete(site?: Site | null): boolean {
+  // TODO: Implement real bank data completeness logic
+  return true;
+}
+
 function isDomainBillingComplete(site?: Site | null): boolean {
   // Assume always true if not billing/connecting domain
   return true;
@@ -59,6 +66,7 @@ const STEP_KEYS = [
   "builder.nav.step.program",
   "builder.nav.step.accommodation",
   "builder.nav.step.what_to_see",
+  "builder.nav.step.wedding_gift",
   "builder.nav.step.contact",
   "builder.nav.step.domain_billing",
 ];
@@ -171,6 +179,7 @@ export default function BuilderClient({
     () => hasProgramEvents,
     isAccommodationComplete,
     isWhatToSeeComplete,
+    isBankDataComplete,
     () => hasContact,
     isDomainBillingComplete,
   ];
@@ -311,6 +320,14 @@ export default function BuilderClient({
                   />
                 )}
                 {active === 5 && site && (
+                  <WeddingGiftBuilderStep
+                    site={site}
+                    refresh={refresh}
+                    lang={currentLang}
+                    translations={translations}
+                  />
+                )}
+                {active === 6 && site && (
                   <ContactBuilderStep
                     site={site}
                     refresh={refresh}
@@ -319,7 +336,7 @@ export default function BuilderClient({
                     setHasContact={setHasContact}
                   />
                 )}
-                {active === 6 && (
+                {active === 7 && (
                   <div>
                     <p className="text-gray-700">
                       {translations["builder.step.domain_billing_desc"]}

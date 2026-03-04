@@ -9,3 +9,4 @@ export * from "./programEvents";
 export * from "./accommodation";
 export * from "./whatToSee";
 export * from "./contact";
+export * from "./wedding_gift";
