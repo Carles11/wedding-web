@@ -143,9 +143,7 @@ export default function GeneralSiteForm({
       await saveSiteGeneralContent({
         site_id: site.id,
         heroId,
-        lang: activeLang,
-        title: val.title.trim(),
-        subtitle: val.subtitle.trim(),
+        content,
         subdomain: !site.subdomain ? subdomain.trim().toLowerCase() : undefined,
         languages,
         default_lang: defaultLang,

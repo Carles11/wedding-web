@@ -22,17 +22,17 @@ const DAY_GROUPS = [
   {
     slug: "day_before",
     labelKey: "program.day_before.label",
-    defaultLabel: "El dia abans",
+    defaultLabel: "The day before",
   },
   {
     slug: "wedding_day",
     labelKey: "program.wedding_day.label",
-    defaultLabel: "El gran dia",
+    defaultLabel: "The wedding day",
   },
   {
     slug: "day_after",
     labelKey: "program.day_after.label",
-    defaultLabel: "L'endemà",
+    defaultLabel: "The day after",
   },
 ];
 
@@ -59,7 +59,7 @@ export default function DetailsSection({
   if (unknownEvents.length > 0) {
     grouped.push({
       slug: "other",
-      label: translations?.["program.other_days.label"] ?? "Altres dies",
+      label: translations?.["program.other_days.label"] ?? "Other days",
       events: unknownEvents,
     });
   }
@@ -70,7 +70,7 @@ export default function DetailsSection({
     durationMs: 300,
   };
 
-  const locationLinkLabel = translations?.["localize"] ?? "Com arribar-hi";
+  const locationLinkLabel = translations?.["localize"] ?? "How to get there";
 
   const headline =
     translations?.["menu.details"] ??

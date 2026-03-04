@@ -9,7 +9,7 @@ import { fetchContactSection } from "@/3-entities/sections/api/fetchContactSecti
 import { fetchBankDataSection } from "@/3-entities/sections/api/fetchBankDataSection";
 import { fetchImagesForTenantSite } from "@/3-entities/images/api/fetchImagesForTenantSite";
 import { fetchAccommodationEntriesForTenant } from "@/3-entities/accommodation/api/fetchAccommodationEntriesForTenant";
-import { fetchProgramSectionData } from "@/3-entities/sections/api/fetchProgramDataForTenant";
+import { fetchProgramSectionDataForTenant } from "@/3-entities/sections/api/fetchProgramDataForTenant";
 
 import HeroSection from "@/3-entities/sections/ui/HeroSection";
 import ProgramSectionComponent from "@/3-entities/sections/ui/ProgramSection";
@@ -110,11 +110,6 @@ export default async function HomePage(props: {
   const site = await getSiteByDomain(host);
   const siteId = site?.id ?? null;
 
-  // Fetch hero-images for background images in hero and contact sections
-  const images = await fetchImagesForTenantSite(siteId);
-  const heroImage = images[0]?.url ?? ""; // first image for hero section
-  const contactImage = images[1]?.url ?? ""; // second image for contact section
-
   const availableLangs =
     Array.isArray(site?.languages) && site.languages.length > 0
       ? site.languages
@@ -123,12 +118,6 @@ export default async function HomePage(props: {
         : ["en"];
 
   const translations = await getMergedTranslations(siteId, lang, "en");
-
-  // for hero-section we just need the title/description keys, so we can get them directly from i18n
-  const heroFromi18n = {
-    title: translations["sections.hero.title"] ?? "",
-    description: translations["sections.hero.description"] ?? "",
-  };
 
   if (!siteId) {
     return (
@@ -145,8 +134,29 @@ export default async function HomePage(props: {
     );
   }
 
-  // Fetch events (timeline) and mainEvent for Program/Details sections!
-  const { mainEvent, events } = await fetchProgramSectionData(siteId);
+  // Fetch hero-images for background images in hero and contact sections
+  const images = await fetchImagesForTenantSite(siteId);
+  const heroImage = images[0]?.url ?? ""; // first image for hero section
+  const contactImage = images[1]?.url ?? ""; // second image for contact section
+  console.log("################SITE-ID", siteId);
+  // for hero-section we just need the title/description keys, so we can get them directly from i18n
+  const heroFromi18n = {
+    title: translations[`hero.title.${siteId}`] ?? "",
+    description: translations[`hero.description.${siteId}`] ?? "",
+  };
+  console.log("Hero section content from i18n:", siteId, heroFromi18n);
+  // Fetch events (program_events table) and mainEvent for Program/Details sections!
+  const { mainEvent, events } = await fetchProgramSectionDataForTenant(siteId);
+
+  // Fetch accommodations from new table accommodations
+  const accommodations = await fetchAccommodationEntriesForTenant(siteId);
+
+  // Fetch rest in parallel
+  const [whatelse, bankData, contact] = await Promise.all([
+    fetchWhatElseSection(siteId),
+    fetchBankDataSection(siteId),
+    fetchContactSection(siteId),
+  ]);
 
   // Build a minimal compatible object for the schema
   const programSectionForSEO: ProgramSection | null = mainEvent
@@ -181,16 +191,6 @@ export default async function HomePage(props: {
         created_at: mainEvent.created_at ?? undefined,
       }
     : null;
-
-  // Fetch accommodations from new table
-  const accommodations = await fetchAccommodationEntriesForTenant(siteId);
-
-  // Fetch rest in parallel
-  const [whatelse, bankData, contact] = await Promise.all([
-    fetchWhatElseSection(siteId),
-    fetchBankDataSection(siteId),
-    fetchContactSection(siteId),
-  ]);
 
   // Generate structured data for SEO
   const baseUrl = `https://${host}/${lang}`;

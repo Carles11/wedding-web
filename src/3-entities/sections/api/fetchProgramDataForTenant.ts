@@ -5,7 +5,7 @@ import type { ProgramEvent } from "@/4-shared/types";
  * Fetch program events and return the main event and full list for details section.
  * All translations are fetched in the parent and passed down via `translations`.
  */
-export async function fetchProgramSectionData(
+export async function fetchProgramSectionDataForTenant(
   siteId: string,
 ): Promise<{ mainEvent: ProgramEvent | null; events: ProgramEvent[] }> {
   const supabase = await createSupabaseSSRClient();

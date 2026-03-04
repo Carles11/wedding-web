@@ -33,10 +33,11 @@ export async function getSiteGeneralContent(
     allLangs.includes(lang as SupportedLanguage),
   ) as SupportedLanguage[];
 
-  // Get hero section row just for id & image (not for title/description)
+  // Get hero section row just for id (not for title/description or image,
+  // those are now in site_translations and images respectively for better i18n support)
   const { data: hero, error: heroErr } = await supabase
     .from("sections")
-    .select("id, content")
+    .select("id, site_id,content")
     .eq("site_id", site_id)
     .eq("type", "hero")
     .maybeSingle();
@@ -48,7 +49,10 @@ export async function getSiteGeneralContent(
     .select("key, locale, value")
     .eq("site_id", site_id)
     .in("locale", enabledLangs)
-    .in("key", ["sections.hero.title", "sections.hero.description"]);
+    .in("key", [
+      `hero.title.${hero?.site_id}`,
+      `hero.description.${hero?.site_id}`,
+    ]);
   if (trErr) throw trErr;
   // Build title/subtitle objects per language
   const titles: Record<SupportedLanguage, string> = {} as Record<
@@ -62,11 +66,12 @@ export async function getSiteGeneralContent(
   for (const lang of enabledLangs) {
     titles[lang] =
       translations?.find(
-        (t) => t.key === "sections.hero.title" && t.locale === lang,
+        (t) => t.key === `hero.title.${hero?.site_id}` && t.locale === lang,
       )?.value ?? "";
     subtitles[lang] =
       translations?.find(
-        (t) => t.key === "sections.hero.description" && t.locale === lang,
+        (t) =>
+          t.key === `hero.description.${hero?.site_id}` && t.locale === lang,
       )?.value ?? "";
   }
 
@@ -74,7 +79,7 @@ export async function getSiteGeneralContent(
     languages: enabledLangs,
     default_lang: site.default_lang ?? "en",
     subdomain: site.subdomain ?? "",
-    heroId: hero?.id ?? null,
+    heroId: hero?.site_id ?? null,
     titles,
     subtitles,
   };
