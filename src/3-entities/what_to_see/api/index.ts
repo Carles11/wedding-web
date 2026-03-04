@@ -1,5 +1,5 @@
-export * from "./fetchWhatToSeeSection";
 export * from "./fetchWhatToSeeEntries";
+export * from "./fetchWhatToSeeDataForTenant";
 export * from "./upsertWhatToSeeSection";
 export * from "./createWhatToSeeEntry";
 export * from "./updateWhatToSeeEntry";

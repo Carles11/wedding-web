@@ -1,56 +1,32 @@
-import React from "react";
-import { getTextForLang } from "@/4-shared/lib/getTextForLang";
 import SectionContainer from "@/4-shared/ui/section/SectionContainer";
-import type { TranslationDictionary } from "@/4-shared/types";
 import UnderlinedLink from "@/4-shared/ui/link/UnderlinedLink";
+import type {
+  WhatToSeeEntryFull,
+  TranslationDictionary,
+} from "@/4-shared/types";
 
-interface WhatElseItem {
-  title: Record<string, string>;
-  description?: Record<string, string>;
-  url?: string;
-}
-
-interface WhatElseData {
-  title?: Record<string, string>;
-  content?: {
-    headline?: Record<string, string>;
-    items?: WhatElseItem[];
-  };
-}
-
-/**
- * WhatElseSection: attractions and activities.
- * - Anchor: id="whatelse"
- */
 type WhatElseSectionProps = {
-  data: WhatElseData | null;
+  items: WhatToSeeEntryFull[];
+  translations: TranslationDictionary;
   lang: string;
-  translations?: TranslationDictionary | null;
 };
 
 function getLearnMoreLabel(
   lang: string,
-  translations?: TranslationDictionary | null,
-) {
-  const dbLabel = translations?.["common.learn_more"];
-  if (dbLabel) return dbLabel;
-
-  switch (lang) {
-    case "es":
-      return "Conoce más";
-    case "ca":
-      return "Coneix més";
-    default:
-      return "Learn more";
-  }
+  translations: TranslationDictionary,
+): string {
+  return (
+    translations["common.learn_more"] ||
+    (lang === "es" ? "Conoce más" : lang === "ca" ? "Coneix més" : "Learn more")
+  );
 }
 
 function getLearnMoreAria(
   lang: string,
   titleText: string,
-  translations?: TranslationDictionary | null,
-) {
-  const dbAria = translations?.["common.learn_more_aria"];
+  translations: TranslationDictionary,
+): string {
+  const dbAria = translations["common.learn_more_aria"];
   if (dbAria)
     return (
       dbAria.replace("{title}", titleText) ||
@@ -59,24 +35,42 @@ function getLearnMoreAria(
   return `${getLearnMoreLabel(lang, translations)} - ${titleText}`;
 }
 
-export default function WhatElseSection({
-  data,
-  lang,
-  translations,
-}: WhatElseSectionProps) {
-  const headline =
-    getTextForLang(data?.title, lang, "") ||
-    getTextForLang(data?.content?.headline, lang, "") ||
-    translations?.["menu.what_else"] ||
-    "What else to see?";
+function getTitleFallback(it: WhatToSeeEntryFull, lang: string): string {
+  // Try exact language, then English, then any available, then empty string
+  if (typeof it.name === "string") return it.name;
+  if (!it.name) return "";
+  return it.name[lang] || it.name["en"] || Object.values(it.name)[0] || "";
+}
 
-  const items: WhatElseItem[] = data?.content?.items ?? [];
+function getDescFallback(it: WhatToSeeEntryFull, lang: string): string {
+  if (!it.description) return "";
+  return (
+    it.description[lang] ||
+    it.description["en"] ||
+    Object.values(it.description)[0] ||
+    ""
+  );
+}
+
+export default function WhatElseSection({
+  items,
+  translations,
+  lang,
+}: WhatElseSectionProps) {
+  const heading =
+    translations["menu.what_else"] ||
+    (lang === "es"
+      ? "¿Qué más ver?"
+      : lang === "ca"
+        ? "Què més veure?"
+        : "What else to see?");
+
   const learnMoreLabel = getLearnMoreLabel(lang, translations);
 
   return (
     <SectionContainer
       id="whatelse"
-      heading={headline}
+      heading={heading}
       headingId="whatelse-heading"
       variant="white"
       withDivider
@@ -86,27 +80,34 @@ export default function WhatElseSection({
       dividerOpacity={0.06}
     >
       <div className="grid gap-6 md:grid-cols-2">
-        {items.map((it: WhatElseItem, idx: number) => {
-          const titleText = getTextForLang(it.title, lang, "");
-          const descText = it.description
-            ? getTextForLang(it.description, lang, "")
-            : null;
+        {items.map((it) => {
+          const titleKey = `what_to_see.title.${it.id}`;
+          const descKey = `what_to_see.description.${it.id}`;
+
+          // Fallback strategy: translation, then language key, then "en", then any
+          const titleText =
+            translations[titleKey] || getTitleFallback(it, lang) || "";
+
+          const descText =
+            translations[descKey] || getDescFallback(it, lang) || "";
+
           const ariaLabel = getLearnMoreAria(lang, titleText, translations);
 
           return (
-            <article key={idx} className="p-4 border rounded-lg bg-neutral-50">
+            <article
+              key={it.id}
+              className="p-4 border rounded-lg bg-neutral-50"
+            >
               <h3 className="font-semibold text-2xl text-neutral-800">
                 {titleText}
               </h3>
-
               {descText && (
                 <p className="text-sm text-neutral-600 mt-2">{descText}</p>
               )}
-
-              {it.url && (
+              {it.location_url && (
                 <div className="mt-3">
                   <UnderlinedLink
-                    href={it.url}
+                    href={it.location_url}
                     thicknessClass="h-0.5"
                     durationMs={350}
                     ariaLabel={ariaLabel}

@@ -1,3 +1,5 @@
+"use server";
+
 import { createSupabaseSSRClient } from "@/4-shared/lib/supabase/server";
 import type { ProgramEvent } from "@/4-shared/types";
 

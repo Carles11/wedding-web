@@ -101,8 +101,7 @@ export default function ContactSection({
               src={getPublicUrlForTenantBucketImage(backgroundImage)}
               alt={bgAlt}
               fill
-              sizes="100vw"
-              // object position: center on mobile, align to right on md+ so the vertical image sits to the right
+              sizes="(max-width: 768px) 100vw, 40vw"
               className="object-cover object-center md:object-right"
               priority={false}
             />

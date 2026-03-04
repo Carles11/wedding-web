@@ -1,4 +1,6 @@
-import { createClient } from "@/4-shared/lib/supabase/client";
+"use server";
+
+import { createSupabaseSSRClient } from "@/4-shared/lib/supabase/server";
 import type { AccommodationEntry } from "@/4-shared/types";
 
 /**
@@ -8,7 +10,7 @@ export async function fetchAccommodationEntriesForTenant(
   siteId: string,
 ): Promise<AccommodationEntry[]> {
   if (!siteId) return [];
-  const supabase = await createClient();
+  const supabase = await createSupabaseSSRClient();
   const { data, error } = await supabase
     .from("accommodations")
     .select(

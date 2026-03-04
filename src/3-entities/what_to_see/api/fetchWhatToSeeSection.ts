@@ -1,25 +1,25 @@
-import { createClient } from "@/4-shared/lib/supabase/client";
-import type { WhatToSeeSection } from "@/4-shared/types";
+// import { createClient } from "@/4-shared/lib/supabase/client";
+// import type { WhatToSeeSection } from "@/4-shared/types";
 
-export async function fetchWhatToSeeSection(
-  siteId: string,
-): Promise<WhatToSeeSection | null> {
-  if (!siteId) return null;
+// export async function fetchWhatToSeeSection(
+//   siteId: string,
+// ): Promise<WhatToSeeSection | null> {
+//   if (!siteId) return null;
 
-  const supabase = await createClient();
+//   const supabase = await createClient();
 
-  const { data, error } = await supabase
-    .from("sections")
-    .select("id, site_id, type, title, subtitle, content, created_at")
-    .eq("site_id", siteId)
-    .eq("type", "what_to_see")
-    .limit(1)
-    .maybeSingle();
+//   const { data, error } = await supabase
+//     .from("sections")
+//     .select("id, site_id, type, title, subtitle, content, created_at")
+//     .eq("site_id", siteId)
+//     .eq("type", "what_to_see")
+//     .limit(1)
+//     .maybeSingle();
 
-  if (error) {
-    console.error("[fetchWhatToSeeSection] Supabase error:", error);
-    return null;
-  }
+//   if (error) {
+//     console.error("[fetchWhatToSeeSection] Supabase error:", error);
+//     return null;
+//   }
 
-  return (data as WhatToSeeSection) ?? null;
-}
+//   return (data as WhatToSeeSection) ?? null;
+// }

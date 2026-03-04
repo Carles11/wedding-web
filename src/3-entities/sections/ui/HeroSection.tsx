@@ -18,12 +18,7 @@ export default function HeroSection({
 }: HeroSectionProps) {
   const title = hero.title ?? "";
   const description = hero.description ?? "";
-  console.log(
-    "Rendering HeroSection with title:",
-    title,
-    "and description:",
-    description,
-  );
+
   return (
     <section
       className="relative w-full h-screen min-h-[340px] overflow-hidden flex items-center justify-center shadow-lg"
