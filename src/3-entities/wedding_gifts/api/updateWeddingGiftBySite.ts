@@ -34,11 +34,32 @@ export async function updateWeddingGiftBySite(
 
   const giftId = data.id;
 
+  const ALLOWED_COLUMNS = [
+    "paypal_url",
+    "bank_account_iban",
+    "bank_account_swift",
+    "bank_account_holder",
+    "bank_name",
+    "bizum_phone",
+    "venmo_username",
+    "giftlist_url",
+    "honeymoon_fund_url",
+    "other_method_url",
+    "other_method_desc",
+    "sort_order",
+  ];
+
+  const filteredData = Object.fromEntries(
+    Object.entries(opts.data ?? {}).filter(([k]) =>
+      ALLOWED_COLUMNS.includes(k),
+    ),
+  );
+
   // 1. Update main record
-  if (opts.data && Object.keys(opts.data).length > 0) {
+  if (filteredData && Object.keys(filteredData).length > 0) {
     const { error: upError } = await supabase
       .from("wedding_gift")
-      .update(opts.data)
+      .update(filteredData)
       .eq("id", giftId);
     if (upError) throw new Error(upError.message);
   }

@@ -6,8 +6,12 @@ import type {
   WeddingGift,
   TranslationDictionary,
 } from "@/4-shared/types";
-import { fetchWeddingGiftBySite } from "@/3-entities/wedding_gifts/api/fetchWeddingGiftBySite";
-import { updateWeddingGiftBySite } from "@/3-entities/wedding_gifts/api/updateWeddingGiftBySite";
+import {
+  fetchWeddingGiftBySite,
+  updateWeddingGiftBySite,
+  createWeddingGiftBySite,
+  deleteWeddingGiftBySite,
+} from "@/3-entities/wedding_gifts/api/";
 
 type Props = {
   site: Site;
@@ -22,6 +26,7 @@ function t(
 ): string {
   return translations[key] || fallback;
 }
+
 export default function WeddingGiftBuilderStep({
   site,
   refresh,
@@ -58,10 +63,41 @@ export default function WeddingGiftBuilderStep({
     setSuccess(false);
 
     try {
-      await updateWeddingGiftBySite(site.id, { data: gift ?? {} });
+      if (gift?.id) {
+        // Update existing
+        await updateWeddingGiftBySite(site.id, { data: gift ?? {} });
+        setGift({ ...gift }); // Keep the updated object
+      } else {
+        // Create new
+        const created = await createWeddingGiftBySite(site.id, gift ?? {});
+        setGift(created); // Set the new object
+      }
       setSuccess(true);
-      refresh();
       setTimeout(() => setSuccess(false), 1800);
+    } catch (err) {
+      setError((err as Error)?.message ?? String(err));
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleDelete() {
+    if (!site?.id) return;
+    const ok = window.confirm(
+      t(
+        translations,
+        "builder.gift.delete_confirm",
+        "Delete wedding gift information for this site? This action cannot be undone.",
+      ),
+    );
+    if (!ok) return;
+
+    setSaving(true);
+    setError(null);
+    try {
+      await deleteWeddingGiftBySite(site.id);
+      setGift(null); // Clear the UI
+      setSuccess(false);
     } catch (err) {
       setError((err as Error)?.message ?? String(err));
     } finally {
@@ -139,7 +175,11 @@ export default function WeddingGiftBuilderStep({
                   onChange={(e) =>
                     updateField("bank_account_holder", e.target.value)
                   }
-                  placeholder="Account holder name"
+                  placeholder={t(
+                    translations,
+                    "builder.gift.holder",
+                    "Account holder name",
+                  )}
                   autoComplete="off"
                 />
               </div>
@@ -151,7 +191,11 @@ export default function WeddingGiftBuilderStep({
                   className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
                   value={gift?.bank_name ?? ""}
                   onChange={(e) => updateField("bank_name", e.target.value)}
-                  placeholder="Deutsche Kreditbank"
+                  placeholder={t(
+                    translations,
+                    "builder.gift.bankname",
+                    "Deutsche Kreditbank",
+                  )}
                   autoComplete="off"
                 />
               </div>
@@ -170,7 +214,7 @@ export default function WeddingGiftBuilderStep({
               )}
             </div>
             <label className="block text-xs font-semibold text-gray-700 mb-1">
-              PayPal URL
+              {t(translations, "builder.gift.paypal.url", "PayPal URL")}
             </label>
             <input
               className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
@@ -196,7 +240,7 @@ export default function WeddingGiftBuilderStep({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-semibold text-gray-700 mb-1">
-                  Bizum Phone
+                  {t(translations, "builder.gift.bizum_phone", "Bizum Phone")}
                 </label>
                 <input
                   className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
@@ -208,7 +252,11 @@ export default function WeddingGiftBuilderStep({
               </div>
               <div>
                 <label className="block text-xs font-semibold text-gray-700 mb-1">
-                  Venmo Username
+                  {t(
+                    translations,
+                    "builder.gift.venmo_username",
+                    "Venmo Username",
+                  )}
                 </label>
                 <input
                   className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
@@ -225,8 +273,7 @@ export default function WeddingGiftBuilderStep({
           {/* ---- GIFTLIST/REGISTRY ---- */}
           <div className="bg-white border p-4 rounded-xl shadow-xs mb-5">
             <div className="font-semibold text-blue-900 mb-2 flex items-center gap-2">
-              🎁{" "}
-              {t(translations, "builder.gift.giftlist", "Gift Registry/List")}
+              🎁{t(translations, "builder.gift.giftlist", "Gift Registry/List")}
             </div>
             <div className="text-xs text-gray-500 mb-4">
               {t(
@@ -236,7 +283,11 @@ export default function WeddingGiftBuilderStep({
               )}
             </div>
             <label className="block text-xs font-semibold text-gray-700 mb-1">
-              Giftlist/Registry URL
+              {t(
+                translations,
+                "builder.gift.giftlist.url",
+                "Giftlist/Registry URL",
+              )}
             </label>
             <input
               className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
@@ -260,7 +311,11 @@ export default function WeddingGiftBuilderStep({
               )}
             </div>
             <label className="block text-xs font-semibold text-gray-700 mb-1">
-              Honeymoon Fund URL
+              {t(
+                translations,
+                "builder.gift.honeymoon.url",
+                "Honeymoon Fund URL",
+              )}
             </label>
             <input
               className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
@@ -288,7 +343,7 @@ export default function WeddingGiftBuilderStep({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-semibold text-gray-700 mb-1">
-                  Option URL
+                  {t(translations, "builder.gift.other.url", "Option URL")}
                 </label>
                 <input
                   className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
@@ -303,7 +358,11 @@ export default function WeddingGiftBuilderStep({
               </div>
               <div>
                 <label className="block text-xs font-semibold text-gray-700 mb-1">
-                  Option Description
+                  {t(
+                    translations,
+                    "builder.gift.other.descfield",
+                    "Option Description",
+                  )}
                 </label>
                 <input
                   className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
@@ -337,6 +396,28 @@ export default function WeddingGiftBuilderStep({
               {saving
                 ? t(translations, "builder.common.saving", "Saving…")
                 : t(translations, "builder.common.save", "Save")}
+            </button>
+            <button
+              type="button"
+              disabled={saving}
+              className={`px-4 py-2 rounded bg-red-100 text-red-700 text-sm font-semibold border border-red-300 ${
+                saving ? "opacity-50 cursor-wait" : "hover:bg-red-200"
+              }`}
+              onClick={() => {
+                if (
+                  window.confirm(
+                    t(
+                      translations,
+                      "builder.gift.delete_confirm",
+                      "Delete wedding gift information for this site? This action cannot be undone.",
+                    ),
+                  )
+                ) {
+                  handleDelete();
+                }
+              }}
+            >
+              {t(translations, "builder.gift.clear_all", "Clear all data")}
             </button>
           </div>
         </form>

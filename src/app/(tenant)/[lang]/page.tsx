@@ -6,10 +6,10 @@ import { getSiteByDomain } from "@/4-shared/lib/getSiteByDomain";
 
 import { fetchWhatToSeeDataForTenant } from "@/3-entities/what_to_see/api/fetchWhatToSeeDataForTenant";
 import { fetchContactSection } from "@/3-entities/sections/api/fetchContactSection";
-import { fetchBankDataSection } from "@/3-entities/sections/api/fetchBankDataSection";
 import { fetchImagesForTenantSite } from "@/3-entities/images/api/fetchImagesForTenantSite";
 import { fetchAccommodationEntriesForTenant } from "@/3-entities/accommodation/api/fetchAccommodationEntriesForTenant";
 import { fetchProgramSectionDataForTenant } from "@/3-entities/program_events/api/fetchProgramDataForTenant";
+import { fetchWeddingGiftSectionDataForTenant } from "@/3-entities/wedding_gifts/api/fetchWeddingGiftSectionDataForTenant";
 
 import HeroSection from "@/3-entities/sections/ui/HeroSection";
 import ProgramSectionComponent from "@/3-entities/sections/ui/ProgramSection";
@@ -17,7 +17,7 @@ import DetailsSection from "@/3-entities/sections/ui/DetailsSection";
 import AccommodationSection from "@/3-entities/sections/ui/AccommodationSection";
 import WhatElseSection from "@/3-entities/sections/ui/WhatElseSection";
 import ContactSection from "@/3-entities/sections/ui/ContactSection";
-import BankDataSection from "@/3-entities/sections/ui/BankDataSection";
+import WeddingGiftSection from "@/3-entities/sections/ui/WeddingGiftSection";
 
 import Heading from "@/4-shared/ui/typography/Heading";
 import { LanguageToggle } from "@/2-features/language-toggle/ui/LanguageToggle";
@@ -141,18 +141,16 @@ export default async function HomePage(props: {
   };
 
   // Fetch rest in parallel
-  const [images, programData, accommodations, whatelse, bankData, contact] =
+  const [images, programData, accommodations, whatelse, weddingGift, contact] =
     await Promise.all([
-      // Fetch hero-images for background images in hero and contact sections
       fetchImagesForTenantSite(siteId),
-      // Fetch events (program_events table) and mainEvent for Program/Details sections!
       fetchProgramSectionDataForTenant(siteId),
-      // Fetch accommodations from new table accommodations
       fetchAccommodationEntriesForTenant(siteId),
       fetchWhatToSeeDataForTenant(siteId),
-      fetchBankDataSection(siteId),
+      fetchWeddingGiftSectionDataForTenant(siteId),
       fetchContactSection(siteId),
     ]);
+
   // Fetch hero-images for background images in hero and contact sections
   const heroImage = images[0]?.url ?? ""; // first image for hero section
   const contactImage = images[1]?.url ?? ""; // second image for contact section
@@ -210,7 +208,6 @@ export default async function HomePage(props: {
     location: ev.location ?? undefined,
     description: ev.description ?? undefined,
   }));
-
   return (
     <>
       {/* JSON-LD Structured Data */}
@@ -248,37 +245,44 @@ export default async function HomePage(props: {
           translations={translations}
         />
         {/* Details - Full timeline all events */}
-        <DetailsSection events={normalizedEvents} translations={translations} />
-
-        {/* Accommodation */}
-        <AccommodationSection
-          hotels={accommodations}
-          translations={translations}
-        />
-
-        {/* What else */}
-        <WhatElseSection
-          items={whatelse}
-          lang={lang}
-          translations={translations}
-        />
-
-        {/* Bank Data */}
-        {bankData && (
-          <BankDataSection
-            data={bankData}
-            lang={lang}
+        {normalizedEvents && (
+          <DetailsSection
+            events={normalizedEvents}
             translations={translations}
           />
         )}
 
+        {/* Accommodation */}
+        {accommodations && (
+          <AccommodationSection
+            hotels={accommodations}
+            translations={translations}
+          />
+        )}
+
+        {/* What else */}
+
+        {whatelse && (
+          <WhatElseSection
+            items={whatelse}
+            lang={lang}
+            translations={translations}
+          />
+        )}
+        {/* Wedding Gift */}
+        {weddingGift && (
+          <WeddingGiftSection data={weddingGift} translations={translations} />
+        )}
+
         {/* Contact */}
-        <ContactSection
-          data={contact}
-          lang={lang}
-          translations={translations}
-          backgroundImage={contactImage}
-        />
+        {contact && (
+          <ContactSection
+            data={contact}
+            lang={lang}
+            translations={translations}
+            backgroundImage={contactImage}
+          />
+        )}
       </main>
     </>
   );

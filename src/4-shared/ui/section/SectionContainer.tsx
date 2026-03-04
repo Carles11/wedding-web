@@ -68,12 +68,16 @@ export default function SectionContainer({
               {heading && (
                 <h2
                   id={headingId}
-                  className="text-2xl md:text-3xl font-extrabold leading-tight text-neutral-800"
+                  className="text-2xl md:text-3xl font-extrabold leading-tight text-neutral-800 drop-shadow-[0_2px_8px_rgba(0,0,0,0.18)]"
                 >
                   {heading}
                 </h2>
               )}
-              {subtitle && <p className="mt-2 text-neutral-600">{subtitle}</p>}
+              {subtitle && (
+                <p className="bg-white/60 min-w-fit w-fit leading-tight text-neutral-800 px-2 py-1">
+                  {subtitle}
+                </p>
+              )}
             </header>
           )}
 
