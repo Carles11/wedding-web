@@ -1,7 +1,13 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { Site, WhatToSeeEntry } from "@/4-shared/types";
+import type {
+  CreateWhatToSeePayload,
+  Site,
+  WhatToSeeEntryFull,
+  WhatToSeeTranslation,
+} from "@/4-shared/types";
+
 import {
   fetchWhatToSeeEntries,
   createWhatToSeeEntry,
@@ -23,7 +29,7 @@ export default function WhatToSeeBuilderStep({
   refresh,
   translations,
 }: Props) {
-  const [items, setItems] = useState<WhatToSeeEntry[]>([]);
+  const [items, setItems] = useState<WhatToSeeEntryFull[]>([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -31,6 +37,7 @@ export default function WhatToSeeBuilderStep({
   const [collapsed, setCollapsed] = useState(false);
 
   const formRef = useRef<HTMLDivElement | null>(null);
+  const isProUser = true; // TODO stub — do not check subscription in this MVP
 
   const languages = useMemo(() => {
     if (!site) return ["en"];
@@ -62,10 +69,11 @@ export default function WhatToSeeBuilderStep({
   }
 
   function canAddMore() {
-    return items.length < FREE_WHATTOSEE_LIMIT;
+    return isProUser || items.length < FREE_WHATTOSEE_LIMIT;
   }
 
-  const [form, setForm] = useState<Partial<WhatToSeeEntry>>({});
+  // Form state for the currently editing/creating item
+  const [form, setForm] = useState<Partial<WhatToSeeEntryFull>>({});
 
   function scrollToForm() {
     setTimeout(() => {
@@ -78,12 +86,12 @@ export default function WhatToSeeBuilderStep({
 
   function startCreate() {
     setEditingId(null);
-    setForm({ name: {}, description: {}, notes: {}, website: "" });
+    setForm({ name: {}, description: {}, notes: {}, location_url: "" });
     setCollapsed(true);
     scrollToForm();
   }
 
-  function startEdit(it: WhatToSeeEntry) {
+  function startEdit(it: WhatToSeeEntryFull) {
     setEditingId(it.id);
     setForm({ ...it });
     setCollapsed(true);
@@ -91,7 +99,7 @@ export default function WhatToSeeBuilderStep({
   }
 
   function updateI18n(
-    field: keyof WhatToSeeEntry,
+    field: keyof WhatToSeeEntryFull,
     lang: string,
     value: string,
   ) {
@@ -100,13 +108,13 @@ export default function WhatToSeeBuilderStep({
       return {
         ...(s ?? {}),
         [field]: { ...prev, [lang]: value },
-      } as Partial<WhatToSeeEntry>;
+      } as Partial<WhatToSeeEntryFull>;
     });
   }
 
   function updateField(
-    field: keyof WhatToSeeEntry,
-    value: WhatToSeeEntry[keyof WhatToSeeEntry],
+    field: keyof WhatToSeeEntryFull,
+    value: WhatToSeeEntryFull[keyof WhatToSeeEntryFull],
   ) {
     setForm((s) => ({ ...(s ?? {}), [field]: value }));
   }
@@ -128,23 +136,77 @@ export default function WhatToSeeBuilderStep({
     setSaving(true);
     setError(null);
 
+    const payload: CreateWhatToSeePayload = {
+      site_id: site.id,
+      location_url: form.location_url ?? null,
+      sort_order: form.sort_order ?? null,
+      // ...any other non-i18n fields
+    };
+
+    // Build translations ONCE, as a pure flat array—never use .push() in several blocks!
+    const i18nFields = [
+      { formKey: "name", dbKey: "title" },
+      { formKey: "description", dbKey: "description" },
+      { formKey: "notes", dbKey: "notes" },
+    ] as const;
+
+    const translations: WhatToSeeTranslation[] = i18nFields.flatMap(
+      ({ formKey, dbKey }) =>
+        Object.entries(
+          (form[formKey] as Record<string, string> | undefined) ?? {},
+        ).map(([locale, value]) => ({
+          key: dbKey,
+          locale,
+          value,
+        })),
+    );
+
+    // UPDATE: For update, just use the same logic!
+    const updates = {
+      location_url: form.location_url,
+      sort_order: form.sort_order,
+      // ...any other non-i18n fields
+    };
+
     try {
       if (editingId) {
         const updated = await updateWhatToSeeEntry(
           site.id,
           editingId,
-          form as Partial<WhatToSeeEntry>,
+          updates,
+          translations,
         );
         if (!updated) throw new Error("Update failed");
-      } else {
-        const created = await createWhatToSeeEntry(
-          site.id,
-          form as Omit<WhatToSeeEntry, "id">,
+
+        // Hydrate locally — no extra fetch needed
+        setItems((prev) =>
+          prev.map((item) =>
+            item.id === updated.id
+              ? {
+                  ...updated,
+                  name: form.name ?? {},
+                  description: form.description ?? {},
+                  notes: form.notes ?? {},
+                }
+              : item,
+          ),
         );
+      } else {
+        const created = await createWhatToSeeEntry(payload, translations);
         if (!created) throw new Error("Create failed");
+
+        // Hydrate locally immediately, just like the working component does
+        setItems((prev) => [
+          ...prev,
+          {
+            ...created,
+            name: form.name ?? {},
+            description: form.description ?? {},
+            notes: form.notes ?? {},
+          },
+        ]);
       }
 
-      await load();
       setForm({});
       setEditingId(null);
       setCollapsed(false);
@@ -167,8 +229,9 @@ export default function WhatToSeeBuilderStep({
       return;
     }
 
-    await load();
-    refresh();
+    setItems((prev) => prev.filter((item) => item.id !== id));
+    // Don't call refresh() here — local state is already correct,
+    // and refresh() causes a re-render that re-triggers load()
   }
 
   return (
@@ -251,10 +314,14 @@ export default function WhatToSeeBuilderStep({
                       {(it.description && it.description[defaultLang]) ?? ""}
                     </div>
 
-                    {it.website && (
+                    {it.location_url && (
                       <div className="text-xs text-blue-600 break-all mt-1">
-                        <a href={it.website} target="_blank" rel="noreferrer">
-                          {it.website}
+                        <a
+                          href={it.location_url}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          {it.location_url}
                         </a>
                       </div>
                     )}
@@ -291,13 +358,30 @@ export default function WhatToSeeBuilderStep({
 
           <div className="mt-3 space-y-3">
             {languages.map((lang) => (
-              <div key={lang} className="border rounded p-3">
-                <div className="font-medium">Language: {lang}</div>
-
-                <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div
+                key={lang}
+                className={`
+      rounded-xl shadow-sm border bg-white mb-5 p-6 transition
+      ${lang === defaultLang ? "ring-2 ring-blue-600/10" : "hover:shadow-md"}
+    `}
+              >
+                <div className="flex items-center mb-3">
+                  <span className="uppercase text-xs tracking-widest text-blue-500 mr-2">
+                    {lang.toUpperCase()}
+                  </span>
+                  {lang === defaultLang && (
+                    <span className="ml-2 bg-blue-100 text-blue-700 text-xxs rounded px-2 py-0.5 font-semibold">
+                      Default
+                    </span>
+                  )}
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs text-gray-600">
-                      Name {lang === defaultLang ? "(required)" : ""}
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">
+                      Name{" "}
+                      {lang === defaultLang && (
+                        <span className="text-pink-500">*</span>
+                      )}
                     </label>
                     <input
                       value={
@@ -306,13 +390,13 @@ export default function WhatToSeeBuilderStep({
                         ] ?? ""
                       }
                       onChange={(e) => updateI18n("name", lang, e.target.value)}
-                      className="mt-1 w-full border border-gray-300 rounded px-2 py-1"
+                      className="w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
+                      autoComplete="off"
                     />
                   </div>
-
                   <div>
-                    <label className="block text-xs text-gray-600">
-                      Description (optional)
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">
+                      Description
                     </label>
                     <textarea
                       value={
@@ -323,13 +407,13 @@ export default function WhatToSeeBuilderStep({
                       onChange={(e) =>
                         updateI18n("description", lang, e.target.value)
                       }
-                      className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
+                      rows={2}
                     />
                   </div>
-
                   <div className="sm:col-span-2">
-                    <label className="block text-xs text-gray-600">
-                      Notes (optional)
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">
+                      Notes
                     </label>
                     <textarea
                       value={
@@ -340,25 +424,31 @@ export default function WhatToSeeBuilderStep({
                       onChange={(e) =>
                         updateI18n("notes", lang, e.target.value)
                       }
-                      className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
+                      rows={2}
                     />
                   </div>
                 </div>
               </div>
             ))}
 
-            <div>
-              <label className="block text-xs text-gray-600">
-                Website (optional)
+            {/* Single Location URL input, after language blocks */}
+            <div className="mb-5">
+              <label className="block text-xs font-semibold text-gray-700 mb-1">
+                Location URL (Google Maps, etc)
               </label>
               <input
-                value={form.website ?? ""}
-                onChange={(e) => updateField("website", e.target.value)}
-                className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                value={form.location_url ?? ""}
+                onChange={(e) => updateField("location_url", e.target.value)}
+                className="w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
+                placeholder="https://maps.example.com/location"
+                autoComplete="off"
               />
             </div>
 
-            {error && <div className="text-red-600">{error}</div>}
+            {error && (
+              <div className="text-red-600 py-2 italic text-sm">{error}</div>
+            )}
           </div>
         </div>
       )}
