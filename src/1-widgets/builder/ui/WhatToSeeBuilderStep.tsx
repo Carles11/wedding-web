@@ -7,6 +7,7 @@ import type {
   WhatToSeeEntryFull,
   WhatToSeeTranslation,
 } from "@/4-shared/types";
+import { interpolate } from "@/4-shared/helpers/interpolateVars";
 
 import {
   fetchWhatToSeeEntries,
@@ -24,6 +25,14 @@ type Props = {
   translations: Record<string, string>;
 };
 
+function t(
+  translations: Record<string, string>,
+  key: string,
+  fallback: string,
+): string {
+  return translations[key] || fallback;
+}
+
 export default function WhatToSeeBuilderStep({
   site,
   refresh,
@@ -37,7 +46,7 @@ export default function WhatToSeeBuilderStep({
   const [collapsed, setCollapsed] = useState(false);
 
   const formRef = useRef<HTMLDivElement | null>(null);
-  const isProUser = true; // TODO stub — do not check subscription in this MVP
+  const isProUser = true;
 
   const languages = useMemo(() => {
     if (!site) return ["en"];
@@ -124,12 +133,24 @@ export default function WhatToSeeBuilderStep({
 
     const name = (form.name as Record<string, string> | undefined) ?? {};
     if (!name[defaultLang]) {
-      setError(`Name is required in ${defaultLang}`);
+      setError(
+        t(
+          translations,
+          "builder.what_to_see.error.required_name",
+          `Name is required in ${defaultLang}`,
+        ),
+      );
       return;
     }
 
     if (!canAddMore() && !editingId) {
-      setError("Free limit reached. Upgrade to add more entries.");
+      setError(
+        t(
+          translations,
+          "builder.what_to_see.error.limit",
+          "Free limit reached. Upgrade to add more entries.",
+        ),
+      );
       return;
     }
 
@@ -140,17 +161,15 @@ export default function WhatToSeeBuilderStep({
       site_id: site.id,
       location_url: form.location_url ?? null,
       sort_order: form.sort_order ?? null,
-      // ...any other non-i18n fields
     };
 
-    // Build translations ONCE, as a pure flat array—never use .push() in several blocks!
     const i18nFields = [
       { formKey: "name", dbKey: "title" },
       { formKey: "description", dbKey: "description" },
       { formKey: "notes", dbKey: "notes" },
     ] as const;
 
-    const translations: WhatToSeeTranslation[] = i18nFields.flatMap(
+    const translationsDB: WhatToSeeTranslation[] = i18nFields.flatMap(
       ({ formKey, dbKey }) =>
         Object.entries(
           (form[formKey] as Record<string, string> | undefined) ?? {},
@@ -161,11 +180,9 @@ export default function WhatToSeeBuilderStep({
         })),
     );
 
-    // UPDATE: For update, just use the same logic!
     const updates = {
       location_url: form.location_url,
       sort_order: form.sort_order,
-      // ...any other non-i18n fields
     };
 
     try {
@@ -174,11 +191,17 @@ export default function WhatToSeeBuilderStep({
           site.id,
           editingId,
           updates,
-          translations,
+          translationsDB,
         );
-        if (!updated) throw new Error("Update failed");
+        if (!updated)
+          throw new Error(
+            t(
+              translations,
+              "builder.what_to_see.error.update_failed",
+              "Update failed",
+            ),
+          );
 
-        // Hydrate locally — no extra fetch needed
         setItems((prev) =>
           prev.map((item) =>
             item.id === updated.id
@@ -192,10 +215,16 @@ export default function WhatToSeeBuilderStep({
           ),
         );
       } else {
-        const created = await createWhatToSeeEntry(payload, translations);
-        if (!created) throw new Error("Create failed");
+        const created = await createWhatToSeeEntry(payload, translationsDB);
+        if (!created)
+          throw new Error(
+            t(
+              translations,
+              "builder.what_to_see.error.create_failed",
+              "Create failed",
+            ),
+          );
 
-        // Hydrate locally immediately, just like the working component does
         setItems((prev) => [
           ...prev,
           {
@@ -219,19 +248,33 @@ export default function WhatToSeeBuilderStep({
   }
 
   async function handleDelete(id: string) {
-    if (!confirm("Delete this entry?")) return;
+    if (
+      !confirm(
+        t(
+          translations,
+          "builder.what_to_see.confirm.delete",
+          "Delete this entry?",
+        ),
+      )
+    )
+      return;
     setSaving(true);
     const ok = await deleteWhatToSeeEntry(site?.id ?? "", id);
     setSaving(false);
 
     if (!ok) {
-      setError("Failed to delete entry");
+      setError(
+        t(
+          translations,
+          "builder.what_to_see.error.delete_failed",
+          "Failed to delete entry",
+        ),
+      );
       return;
     }
 
     setItems((prev) => prev.filter((item) => item.id !== id));
-    // Don't call refresh() here — local state is already correct,
-    // and refresh() causes a re-render that re-triggers load()
+    // (no refresh, it's immediate)
   }
 
   return (
@@ -244,7 +287,7 @@ export default function WhatToSeeBuilderStep({
       }
       nextLoading={saving}
       nextDisabled={saving}
-      nextLabel="Save"
+      nextLabel={t(translations, "builder.what_to_see.save_button", "Save")}
       onBack={
         editingId !== null || Object.keys(form).length > 0
           ? () => {
@@ -254,22 +297,31 @@ export default function WhatToSeeBuilderStep({
             }
           : undefined
       }
-      backLabel="Cancel"
+      backLabel={t(translations, "builder.what_to_see.cancel_button", "Cancel")}
     >
       {/* Header */}
       <div className="mb-3 flex items-center justify-between">
-        <h3 className="text-lg font-medium">What to see / do</h3>
+        <h3 className="text-lg font-medium">
+          {t(translations, "builder.what_to_see.title", "What to see / do")}
+        </h3>
         <button
           className="px-3 py-1 bg-blue-600 text-white rounded"
           onClick={startCreate}
           disabled={!canAddMore()}
         >
-          + Add place
+          {t(translations, "builder.what_to_see.add_button", "+ Add place")}
         </button>
       </div>
 
       <div className="text-sm text-gray-600 mb-3">
-        Add up to {FREE_WHATTOSEE_LIMIT} recommended places.
+        {interpolate(
+          t(
+            translations,
+            "builder.what_to_see.limit_info",
+            `Add up to ${FREE_WHATTOSEE_LIMIT} recommended places.`,
+          ),
+          { FREE_WHATTOSEE_LIMIT: String(FREE_WHATTOSEE_LIMIT) },
+        )}
       </div>
 
       {/* Collapsible list */}
@@ -278,16 +330,20 @@ export default function WhatToSeeBuilderStep({
           onClick={() => setCollapsed((v) => !v)}
           className="text-xs text-gray-500 hover:text-gray-700"
         >
-          {collapsed ? "Show places" : "Hide places"}
+          {collapsed
+            ? t(translations, "builder.what_to_see.show_button", "Show places")
+            : t(translations, "builder.what_to_see.hide_button", "Hide places")}
         </button>
       </div>
 
       {!collapsed && (
         <>
           {loading ? (
-            <p>Loading…</p>
+            <p>{t(translations, "builder.what_to_see.loading", "Loading…")}</p>
           ) : items.length === 0 ? (
-            <div className="text-sm text-gray-500">No entries yet.</div>
+            <div className="text-sm text-gray-500">
+              {t(translations, "builder.what_to_see.empty", "No entries yet.")}
+            </div>
           ) : (
             <div className="space-y-2">
               {items.map((it) => (
@@ -307,11 +363,16 @@ export default function WhatToSeeBuilderStep({
                     <div className="font-medium text-sm truncate">
                       {(typeof it.name === "string"
                         ? it.name
-                        : it.name?.[defaultLang]) ?? "(no name)"}
+                        : it.name?.[defaultLang]) ??
+                        t(
+                          translations,
+                          "builder.what_to_see.empty",
+                          "(no name)",
+                        )}
                     </div>
 
                     <div className="text-xs text-gray-600 line-clamp-2">
-                      {(it.description && it.description[defaultLang]) ?? ""}
+                      {(it.description && it.description[defaultLang]) || ""}
                     </div>
 
                     {it.location_url && (
@@ -332,14 +393,18 @@ export default function WhatToSeeBuilderStep({
                       className="text-xs font-medium px-3 py-1.5 rounded-md border border-gray-200 bg-white hover:bg-gray-50 transition"
                       onClick={() => startEdit(it)}
                     >
-                      Edit
+                      {t(translations, "builder.what_to_see.edit_edit", "Edit")}
                     </button>
                     <button
                       className="text-xs font-medium px-3 py-1.5 rounded-md border border-red-200 text-red-600 bg-white hover:bg-red-50 transition"
                       onClick={() => handleDelete(it.id)}
                       disabled={saving}
                     >
-                      Delete
+                      {t(
+                        translations,
+                        "builder.what_to_see.delete_button",
+                        "Delete",
+                      )}
                     </button>
                   </div>
                 </div>
@@ -353,7 +418,13 @@ export default function WhatToSeeBuilderStep({
       {(editingId !== null || Object.keys(form).length > 0) && (
         <div ref={formRef} className="mt-4 border rounded p-4 bg-gray-50">
           <h4 className="font-medium">
-            {editingId ? "Edit place" : "Create place"}
+            {editingId
+              ? t(translations, "builder.what_to_see.form.edit", "Edit place")
+              : t(
+                  translations,
+                  "builder.what_to_see.form.create",
+                  "Create place",
+                )}
           </h4>
 
           <div className="mt-3 space-y-3">
@@ -371,16 +442,30 @@ export default function WhatToSeeBuilderStep({
                   </span>
                   {lang === defaultLang && (
                     <span className="ml-2 bg-blue-100 text-blue-700 text-xxs rounded px-2 py-0.5 font-semibold">
-                      Default
+                      {t(
+                        translations,
+                        "builder.what_to_see.badge.default",
+                        "Default",
+                      )}
                     </span>
                   )}
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-semibold text-gray-700 mb-1">
-                      Name{" "}
+                      {t(
+                        translations,
+                        "builder.what_to_see.field.name",
+                        "Name",
+                      )}{" "}
                       {lang === defaultLang && (
-                        <span className="text-pink-500">*</span>
+                        <span className="text-pink-500">
+                          {t(
+                            translations,
+                            "builder.what_to_see.field.name.required",
+                            "*",
+                          )}
+                        </span>
                       )}
                     </label>
                     <input
@@ -396,7 +481,11 @@ export default function WhatToSeeBuilderStep({
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-gray-700 mb-1">
-                      Description
+                      {t(
+                        translations,
+                        "builder.what_to_see.field.description",
+                        "Description",
+                      )}
                     </label>
                     <textarea
                       value={
@@ -413,7 +502,11 @@ export default function WhatToSeeBuilderStep({
                   </div>
                   <div className="sm:col-span-2">
                     <label className="block text-xs font-semibold text-gray-700 mb-1">
-                      Notes
+                      {t(
+                        translations,
+                        "builder.what_to_see.field.notes",
+                        "Notes",
+                      )}
                     </label>
                     <textarea
                       value={
@@ -435,7 +528,11 @@ export default function WhatToSeeBuilderStep({
             {/* Single Location URL input, after language blocks */}
             <div className="mb-5">
               <label className="block text-xs font-semibold text-gray-700 mb-1">
-                Location URL (Google Maps, etc)
+                {t(
+                  translations,
+                  "builder.what_to_see.field.location_url",
+                  "Location URL (Google Maps, etc)",
+                )}
               </label>
               <input
                 value={form.location_url ?? ""}
@@ -455,8 +552,17 @@ export default function WhatToSeeBuilderStep({
 
       {!canAddMore() && (
         <div className="mt-3 text-sm text-gray-600">
-          Free plan limit reached ({FREE_WHATTOSEE_LIMIT}).{" "}
-          <button className="underline text-blue-600">Upgrade</button>
+          {interpolate(
+            t(
+              translations,
+              "builder.what_to_see.limit_reached",
+              `Free plan limit reached (${FREE_WHATTOSEE_LIMIT}).`,
+            ),
+            { FREE_WHATTOSEE_LIMIT: String(FREE_WHATTOSEE_LIMIT) },
+          )}{" "}
+          <button className="underline text-blue-600">
+            {t(translations, "builder.what_to_see.button.upgrade", "Upgrade")}
+          </button>
         </div>
       )}
     </StepLayout>
