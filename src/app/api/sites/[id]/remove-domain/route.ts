@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { removeCustomDomain } from "@/2-features/custom-domain/api/removeCustomDomain";
+import { RouteContext, getParams } from "@/4-shared/lib/route-context";
 
 export async function POST(
   req: NextRequest,
-  context: { params: { id: string } } | { params: Promise<{ id: string }> },
+  context: RouteContext<{ id: string }>,
 ) {
   try {
-    const params =
-      context.params instanceof Promise ? await context.params : context.params;
-    const { id } = params;
+    const { id } = await getParams(context);
+
     const { domain } = await req.json();
 
     if (!domain || typeof domain !== "string")

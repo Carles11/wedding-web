@@ -1,11 +1,13 @@
 import { updateSubdomain } from "@/3-entities/sites/api/updateSubdomain";
+import { RouteContext, getParams } from "@/4-shared/lib/route-context";
 
-export async function PATCH(req: Request, context: { params: { id: string } }) {
+export async function PATCH(
+  req: Request,
+  context: RouteContext<{ id: string }>,
+) {
   try {
-    // Some Next.js runtimes: context.params might be a promise!
-    const params =
-      context.params instanceof Promise ? await context.params : context.params;
-    const { id } = params;
+    const { id } = await getParams(context);
+
     const body = await req.json();
     const { subdomain } = body;
     if (!subdomain) {

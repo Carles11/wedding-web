@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getVercelDomainStatus } from "@/4-shared/lib/vercel/vercel-domains";
 import { verifyCustomDomain } from "@/2-features/custom-domain/api/verifyCustomDomain";
 import type { VercelDomainStatusResult } from "@/4-shared/lib/vercel/vercel-domains";
+import { RouteContext, getParams } from "@/4-shared/lib/route-context";
 
 interface ParseVercelStatusResult {
   status: "pending" | "verified" | "error";
@@ -36,10 +37,10 @@ function parseVercelStatus(
 
 export async function POST(
   req: NextRequest,
-  context: { params: { id: string } },
+  context: RouteContext<{ id: string }>,
 ) {
   try {
-    const { id } = await context.params;
+    const { id } = await getParams(context);
     const { domain } = (await req.json()) as { domain: string };
     if (!domain || typeof domain !== "string") {
       return NextResponse.json({ error: "Invalid domain" }, { status: 400 });
