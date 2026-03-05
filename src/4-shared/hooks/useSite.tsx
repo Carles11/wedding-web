@@ -57,7 +57,7 @@ export function useSite(user: User | null) {
         }
       }
 
-      setSite((data as Site) ?? null);
+      setSite(data ? { ...data } : null);
     } catch (err: unknown) {
       if (err instanceof Error) setError(err.message);
       else setError(String(err));

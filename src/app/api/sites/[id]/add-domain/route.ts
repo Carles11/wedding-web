@@ -6,7 +6,9 @@ export async function POST(
   context: { params: { id: string } },
 ) {
   try {
-    const { id } = await context.params;
+    const params =
+      context.params instanceof Promise ? await context.params : context.params;
+    const { id } = params;
     const { domain } = await req.json();
 
     if (!domain || typeof domain !== "string") {

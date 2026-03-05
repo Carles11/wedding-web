@@ -130,7 +130,7 @@ export const CustomDomainSection: React.FC<Props> = ({
       setLocalStatus("success");
       setLocalMsg(
         translations["builder.domain.custom_domain_checked"] ||
-          "Status checked.",
+          "Status checked. Refresh the page now.",
       );
       await refetchDomains();
     } catch (err) {
