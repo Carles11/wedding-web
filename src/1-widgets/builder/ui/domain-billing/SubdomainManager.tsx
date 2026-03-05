@@ -1,0 +1,167 @@
+"use client";
+
+import { useState } from "react";
+import { copyToClipboard } from "@/4-shared/utils/copyToClipboard";
+import type { Site } from "@/4-shared/types";
+import { isValidSubdomain } from "@/4-shared/utils/validations";
+
+interface Props {
+  site: Site;
+  refresh: () => void;
+  translations: Record<string, string>;
+  domainSuffix?: string; // "weddweb.com"
+  planType: "free" | "monthly" | "yearly";
+  canEdit?: boolean;
+}
+
+const RESERVED = ["www", "admin", "api"];
+
+export default function SubdomainManager({
+  site,
+  refresh,
+  translations,
+  domainSuffix = "weddweb.com",
+  planType,
+  canEdit = true,
+}: Props) {
+  const [subdomain, setSubdomain] = useState(site.subdomain || "");
+  const [editing, setEditing] = useState(false);
+  const [status, setStatus] = useState<
+    | "idle"
+    | "saving"
+    | "success"
+    | "error"
+    | "error_taken"
+    | "error_reserved"
+    | "error_invalid"
+  >("idle");
+  const [helpText, setHelpText] = useState<string>("");
+
+  // Validate the subdomain (client-side)
+
+  async function handleSave() {
+    if (!isValidSubdomain(subdomain)) {
+      setStatus("error_invalid");
+      setHelpText(translations["builder.domain.error_invalid"]);
+      return;
+    }
+    setStatus("saving");
+    // Uniqueness check
+    try {
+      const check = await fetch(
+        `/api/sites/validate-subdomain?subdomain=${subdomain}`,
+      );
+      const { valid, reason } = await check.json();
+
+      if (!valid) {
+        setStatus(
+          reason === "taken"
+            ? "error_taken"
+            : reason === "reserved"
+              ? "error_reserved"
+              : "error",
+        );
+        setHelpText(
+          translations[`builder.domain.error_${reason}`] ||
+            translations["builder.domain.error_generic"],
+        );
+        return;
+      }
+      // Save subdomain via PATCH/POST
+      const res = await fetch(`/api/sites/${site.id}/subdomain`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ subdomain }),
+      });
+      if (!res.ok) throw new Error();
+
+      setStatus("success");
+      setHelpText(translations["builder.domain.success_saved"]);
+      // Update the displayed site.subdomain value so other parts of your UI see it
+      site.subdomain = subdomain; // This mutates the prop, which is not recommended in React
+      setSubdomain(subdomain); // But this updates local input—they are already in sync, so should be fine
+      setEditing(false);
+    } catch {
+      setStatus("error");
+      setHelpText(translations["builder.domain.error_generic"]);
+    }
+  }
+
+  return (
+    <div className="space-y-4 max-w-xl">
+      <div>
+        <label>
+          <h4 className="font-semibold mb-2">
+            {translations["builder.domain.current_subdomain_label"]}
+          </h4>
+        </label>
+        <div className="flex items-center gap-2 mt-1">
+          <input
+            readOnly
+            value={site.subdomain || ""}
+            className="bg-gray-100 border rounded px-2 py-1 text-sm w-fit font-mono"
+            tabIndex={-1}
+            aria-label={translations["builder.domain.current_subdomain_label"]}
+          />
+          <button
+            type="button"
+            className="px-2 py-1 text-xs bg-blue-50 border border-blue-100 rounded"
+            onClick={() => copyToClipboard(`${site.subdomain}.${domainSuffix}`)}
+          >
+            {translations["builder.domain.copy_url"]}
+          </button>
+        </div>
+        <div className="mt-1 text-xs text-gray-500">
+          {translations["builder.domain.example_url"]}:{" "}
+          <span className="font-mono">{`https://${site.subdomain}.${domainSuffix}`}</span>
+        </div>
+      </div>
+
+      {/* Edit */}
+      {canEdit && (
+        <div className="space-y-1">
+          <label className="block text-sm font-medium text-gray-700">
+            {translations["builder.domain.subdomain_label"]}
+          </label>
+          <input
+            value={subdomain}
+            onChange={(e) => {
+              setSubdomain(e.target.value.toLowerCase());
+              setStatus("idle");
+              setHelpText("");
+            }}
+            className="border px-2 py-1 rounded w-48 font-mono"
+            pattern="^[a-z0-9]([a-z0-9\-]{1,61}[a-z0-9])?$"
+            minLength={3}
+            maxLength={63}
+            disabled={status === "saving"}
+            spellCheck={false}
+          />
+          <p className="text-xs text-gray-500">
+            {translations["builder.domain.subdomain_desc"]}
+          </p>
+          {status !== "idle" && (
+            <p
+              className={`text-xs mt-1 ${status.startsWith("error") ? "text-red-600" : "text-green-700"}`}
+            >
+              {helpText}
+            </p>
+          )}
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={
+              !subdomain ||
+              subdomain === site.subdomain ||
+              status === "saving" ||
+              !isValidSubdomain(subdomain)
+            }
+            className="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-200 disabled:text-gray-500"
+          >
+            {translations["builder.domain.save_btn"]}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}

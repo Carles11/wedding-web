@@ -1,46 +1,29 @@
 import { supabaseAdmin } from "@/4-shared/lib/supabase/supabaseServer"; // ← CHANGED!
 
-/**
- * SSR-safe tenant lookup by domain (host).
- * Searches Supabase "sites" for a row where `domains` contains the incoming host.
- * Always lowercase/trim the domain for consistent matching.
- */
-export async function getSiteIdForDomain(
+export async function getSiteIdForDomainOrSubdomain(
   domain: string,
 ): Promise<string | null> {
-  console.log("🔍 [getSiteIdForDomain] Input domain:", domain);
-
-  if (!domain) return null;
-
-  // Host normalization for lowercase, no whitespace
+  // Try in domains array first (for custom domains)
   const normalizedDomain = domain.toLowerCase().trim();
-  console.log("🔍 [getSiteIdForDomain] Normalized:", normalizedDomain);
-
-  // Query for any row where `domains` array contains the normalized host
-  const { data, error } = await supabaseAdmin
+  const { data: domainsRow } = await supabaseAdmin
     .from("sites")
     .select("id")
     .contains("domains", [normalizedDomain])
     .maybeSingle();
 
-  console.log("🔍 [getSiteIdForDomain] Query result:", { data, error });
+  if (domainsRow?.id) return domainsRow.id;
 
-  if (error) {
-    console.error(
-      "[getSiteIdForDomain] Supabase site lookup error:",
-      error,
-      normalizedDomain,
-    );
-    return null;
-  }
+  // If not found, try as subdomain
+  const parts = domain.split(".");
+  let subdomain = parts[0];
+  if (subdomain === "www") subdomain = parts[1];
+  subdomain = subdomain.toLowerCase().trim();
 
-  if (!data?.id) {
-    console.warn(
-      "[getSiteIdForDomain] No site found for domain:",
-      normalizedDomain,
-    );
-  }
+  const { data: subdomainRow } = await supabaseAdmin
+    .from("sites")
+    .select("id")
+    .eq("subdomain", subdomain)
+    .maybeSingle();
 
-  console.log("✅ [getSiteIdForDomain] Returning site ID:", data?.id ?? null);
-  return data?.id ?? null;
+  return subdomainRow?.id ?? null;
 }

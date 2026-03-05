@@ -26,7 +26,6 @@ export async function fetchWeddingGiftBySite(
     .order("sort_order", { ascending: true }) // optional: pick lowest sort_order if multiple
     .limit(1)
     .maybeSingle();
-  console.log("fetchWeddingGiftBySite - gift row data:", data, "error:", error);
   if (error || !data) {
     // Not a hard error: treat as "not set up yet"
     return null;

@@ -9,7 +9,6 @@ import type { WeddingGift } from "@/4-shared/types";
 export async function fetchWeddingGiftSectionDataForTenant(
   siteId: string,
 ): Promise<WeddingGift | null> {
-  console.log(`Fetching wedding gift data for siteId: ${siteId}`);
   if (!siteId) return null;
   const supabase = await createSupabaseSSRClient();
   const { data, error } = await supabase
@@ -26,9 +25,6 @@ export async function fetchWeddingGiftSectionDataForTenant(
     );
     return null;
   }
-  console.log(
-    "weddingGift data in fetchWeddingGiftSectionDataForTenant:",
-    data,
-  );
+
   return data as WeddingGift | null;
 }

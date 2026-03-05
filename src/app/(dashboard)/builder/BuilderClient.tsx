@@ -13,6 +13,7 @@ import AccommodationBuilderStep from "@/1-widgets/builder/ui/AccommodationBuilde
 import ContactBuilderStep from "@/1-widgets/builder/ui/ContactBuilderStep";
 import WhatToSeeBuilderStep from "@/1-widgets/builder/ui/WhatToSeeBuilderStep";
 import WeddingGiftBuilderStep from "@/1-widgets/builder/ui/WeddingGiftBuilderStep";
+import DomainAndBillingBuilderStep from "@/1-widgets/builder/ui/domain-billing/DomainAndBillingBuilderStep";
 
 import type { Site } from "@/4-shared/types";
 import {
@@ -336,12 +337,14 @@ export default function BuilderClient({
                     setHasContact={setHasContact}
                   />
                 )}
-                {active === 7 && (
-                  <div>
-                    <p className="text-gray-700">
-                      {translations["builder.step.domain_billing_desc"]}
-                    </p>
-                  </div>
+                {active === 7 && site && (
+                  <DomainAndBillingBuilderStep
+                    site={site}
+                    refresh={refresh}
+                    lang={currentLang}
+                    translations={translations}
+                    planType={planType}
+                  />
                 )}
               </div>
 

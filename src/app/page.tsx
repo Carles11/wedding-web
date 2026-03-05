@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
-import { getSiteIdForDomain } from "@/4-shared/lib/getSiteIdForDomain";
+import { getSiteIdForDomainOrSubdomain } from "@/4-shared/lib/getSiteIdForDomain";
 import { getSiteDefaultLang } from "@/4-shared/lib/getSiteDefaultLang";
 
 export const dynamic = "force-dynamic";
@@ -26,7 +26,7 @@ export default async function RootPage() {
   }
 
   // Tenant domain → lookup and redirect to their default language (dynamic)
-  const siteId = await getSiteIdForDomain(host);
+  const siteId = await getSiteIdForDomainOrSubdomain(host);
   if (siteId) {
     const defaultLang = await getSiteDefaultLang(siteId);
     redirect(`/${defaultLang}${querySuffix}`);
