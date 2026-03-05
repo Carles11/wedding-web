@@ -23,9 +23,9 @@ export const CustomDomainSection: React.FC<Props> = ({
   planType,
   translations,
   siteId,
-  verifiedDomains,
-  pendingDomains,
-  domainStatuses,
+  verifiedDomains: verifiedDomainsProp,
+  pendingDomains: pendingDomainsProp,
+  domainStatuses: domainStatusesProp,
   onUpgradeClick,
   refetchDomains,
   loading = false,
@@ -43,18 +43,36 @@ export const CustomDomainSection: React.FC<Props> = ({
   >({});
   const [dnsModalDomain, setDnsModalDomain] = useState<string | null>(null);
 
+  // Local state for optimistic UI
+  const [verifiedDomains, setVerifiedDomains] =
+    useState<string[]>(verifiedDomainsProp);
+  const [pendingDomains, setPendingDomains] =
+    useState<string[]>(pendingDomainsProp);
+  const [domainStatuses, setDomainStatuses] =
+    useState<Record<string, string>>(domainStatusesProp);
+
+  // Sync local state with props after backend update
+  React.useEffect(() => {
+    setVerifiedDomains(verifiedDomainsProp);
+    setPendingDomains(pendingDomainsProp);
+    setDomainStatuses(domainStatusesProp);
+  }, [verifiedDomainsProp, pendingDomainsProp, domainStatusesProp]);
+
   const isPaid = planType !== "free";
+  const allDomains = [...verifiedDomains, ...pendingDomains];
 
   const handleAddDomain = async (e: React.FormEvent) => {
     e.preventDefault();
     setLocalStatus("saving");
     setLocalMsg(null);
+    // Optimistically update UI
+    setPendingDomains((prev) => [...prev, inputDomain]);
+    setDomainStatuses((prev) => ({ ...prev, [inputDomain]: "pending" }));
     try {
       await addCustomDomainClient(siteId, inputDomain);
       setLocalStatus("success");
       setLocalMsg(translations["builder.domain.custom_domain_success"]);
       setInputDomain("");
-      await refetchDomains();
     } catch (err) {
       setLocalStatus("error");
       setLocalMsg(
@@ -62,6 +80,38 @@ export const CustomDomainSection: React.FC<Props> = ({
           ? err.message
           : translations["builder.domain.error_generic"],
       );
+    } finally {
+      await refetchDomains();
+    }
+  };
+
+  const handleRemove = async (domain: string) => {
+    if (!domain || loading) return;
+    setLocalStatus("saving");
+    setLocalMsg(null);
+    // Optimistically update UI
+    setVerifiedDomains((prev) => prev.filter((d) => d !== domain));
+    setPendingDomains((prev) => prev.filter((d) => d !== domain));
+    setDomainStatuses((prev) => {
+      const copy = { ...prev };
+      delete copy[domain];
+      return copy;
+    });
+    try {
+      await removeCustomDomainClient(siteId, domain);
+      setLocalStatus("success");
+      setLocalMsg(
+        translations["builder.domain.custom_domain_removed"] || "Removed!",
+      );
+    } catch (err) {
+      setLocalStatus("error");
+      setLocalMsg(
+        err instanceof Error
+          ? err.message
+          : translations["builder.domain.error_generic"],
+      );
+    } finally {
+      await refetchDomains();
     }
   };
 
@@ -81,27 +131,6 @@ export const CustomDomainSection: React.FC<Props> = ({
       setLocalMsg(
         translations["builder.domain.custom_domain_checked"] ||
           "Status checked.",
-      );
-      await refetchDomains();
-    } catch (err) {
-      setLocalStatus("error");
-      setLocalMsg(
-        err instanceof Error
-          ? err.message
-          : translations["builder.domain.error_generic"],
-      );
-    }
-  };
-
-  const handleRemove = async (domain: string) => {
-    if (!domain || loading) return;
-    setLocalStatus("saving");
-    setLocalMsg(null);
-    try {
-      await removeCustomDomainClient(siteId, domain);
-      setLocalStatus("success");
-      setLocalMsg(
-        translations["builder.domain.custom_domain_removed"] || "Removed!",
       );
       await refetchDomains();
     } catch (err) {
@@ -175,7 +204,6 @@ export const CustomDomainSection: React.FC<Props> = ({
                 {localMsg}
               </div>
             )}
-
             <button
               className="mt-1 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-200 disabled:text-gray-500"
               type="submit"
@@ -185,14 +213,14 @@ export const CustomDomainSection: React.FC<Props> = ({
             </button>
           </form>
 
-          {(verifiedDomains.length > 0 || pendingDomains.length > 0) && (
+          {allDomains.length > 0 && (
             <div className="mt-6">
               <h5 className="font-semibold mb-1">
                 {translations["builder.domain.custom_domain_list_title"] ||
                   "Your domains"}
               </h5>
               <ul className="divide-y border rounded bg-gray-50">
-                {[...verifiedDomains, ...pendingDomains].map((domain) => (
+                {allDomains.map((domain) => (
                   <React.Fragment key={domain}>
                     <li className="flex items-center px-3 py-2 justify-between">
                       <span>
@@ -236,7 +264,7 @@ export const CustomDomainSection: React.FC<Props> = ({
                       </button>
                     </li>
 
-                    {/* UX improvement: For verified domains show the question & modal! */}
+                    {/* Verified domain: onboarding UX */}
                     {domainStatuses[domain] === "verified" && (
                       <div className="px-6 pb-2 pt-2 text-xs rounded-b bg-green-50 border-b border-green-200 flex flex-col gap-2">
                         <span className="text-green-700 font-semibold">
@@ -276,7 +304,6 @@ export const CustomDomainSection: React.FC<Props> = ({
                           }
                           onClose={() => setDnsModalDomain(null)}
                         >
-                          {/* <<< This single line does it all! >>> */}
                           <DnsModalContent domain={domain} />
                         </MainModal>
                       </div>

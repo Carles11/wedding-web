@@ -43,7 +43,7 @@ export default function DomainAndBillingBuilderStep({
 
   const refetchDomains = async () => {
     setDomainLoading(true);
-    await refresh();
+    // await refresh();
     setDomainLoading(false);
   };
 
