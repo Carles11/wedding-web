@@ -6,6 +6,7 @@ import { removeCustomDomainClient } from "@/2-features/custom-domain/api/removeC
 import { verifyCustomDomainClient } from "@/2-features/custom-domain/api/verifyCustomDomain.client";
 import MainModal from "@/4-shared/ui/modals/MainModal";
 import DnsModalContent from "@/2-features/custom-domain/components/DnsModalContent";
+import { notify } from "@/4-shared/lib/toast/toast";
 
 interface Props {
   planType: "free" | "monthly" | "yearly";
@@ -68,18 +69,95 @@ export const CustomDomainSection: React.FC<Props> = ({
     // Optimistically update UI
     setPendingDomains((prev) => [...prev, inputDomain]);
     setDomainStatuses((prev) => ({ ...prev, [inputDomain]: "pending" }));
+
+    const normalizedDomain = inputDomain.replace(/^www\./, "");
+    const variants = new Set([
+      normalizedDomain, // non-www
+      `www.${normalizedDomain}`, // www
+    ]);
+
     try {
-      await addCustomDomainClient(siteId, inputDomain);
-      setLocalStatus("success");
-      setLocalMsg(translations["builder.domain.custom_domain_success"]);
-      setInputDomain("");
-    } catch (err) {
+      let anySuccess = false;
+      let showableError: unknown = null;
+
+      for (const domain of variants) {
+        try {
+          await addCustomDomainClient(siteId, domain);
+          anySuccess = true;
+        } catch (err: unknown) {
+          // Narrow unknown to string (message property or as string)
+          let msg: string = "";
+          if (
+            err &&
+            typeof err === "object" &&
+            "message" in err &&
+            typeof (err as { message?: unknown }).message === "string"
+          ) {
+            msg = (err as { message: string }).message;
+          } else if (typeof err === "string") {
+            msg = err;
+          } else {
+            msg =
+              translations["builder.domain.error_generic"] || "Server error";
+          }
+          // Only ignore "already" or "exists" or "duplicate" errors
+          const check = msg.toLowerCase();
+          if (
+            check.includes("already") ||
+            check.includes("exists") ||
+            check.includes("duplicate")
+          ) {
+            // Not a real error, ignore
+            continue;
+          }
+          // Store the first showable error
+          showableError = err;
+          // Optionally: break here if you want to abort on first "real" error
+        }
+      }
+      if (anySuccess) {
+        setLocalStatus("success");
+        setInputDomain("");
+        notify.success(translations["builder.domain.custom_domain_success"]);
+      } else if (showableError) {
+        // Derive the message, type-safely
+        let msg = "";
+        if (
+          showableError &&
+          typeof showableError === "object" &&
+          "message" in showableError &&
+          typeof (showableError as { message?: unknown }).message === "string"
+        ) {
+          msg = (showableError as { message: string }).message;
+        } else if (typeof showableError === "string") {
+          msg = showableError;
+        } else {
+          msg = translations["builder.domain.error_generic"] || "Server error";
+        }
+        setLocalStatus("error");
+        notify.error(msg);
+      } else {
+        setLocalStatus("error");
+        notify.error(
+          translations["builder.domain.error_generic"] || "Server error",
+        );
+      }
+    } catch (err: unknown) {
+      let msg = "";
+      if (
+        err &&
+        typeof err === "object" &&
+        "message" in err &&
+        typeof (err as { message?: unknown }).message === "string"
+      ) {
+        msg = (err as { message: string }).message;
+      } else if (typeof err === "string") {
+        msg = err;
+      } else {
+        msg = translations["builder.domain.error_generic"] || "Server error";
+      }
       setLocalStatus("error");
-      setLocalMsg(
-        err instanceof Error
-          ? err.message
-          : translations["builder.domain.error_generic"],
-      );
+      notify.error(msg);
     } finally {
       await refetchDomains();
     }
@@ -100,12 +178,12 @@ export const CustomDomainSection: React.FC<Props> = ({
     try {
       await removeCustomDomainClient(siteId, domain);
       setLocalStatus("success");
-      setLocalMsg(
-        translations["builder.domain.custom_domain_removed"] || "Removed!",
-      );
+
+      notify.success(translations["builder.domain.custom_domain_removed"]);
     } catch (err) {
       setLocalStatus("error");
-      setLocalMsg(
+
+      notify.error(
         err instanceof Error
           ? err.message
           : translations["builder.domain.error_generic"],
@@ -129,6 +207,10 @@ export const CustomDomainSection: React.FC<Props> = ({
       }));
       setLocalStatus("success");
       setLocalMsg(
+        translations["builder.domain.custom_domain_checked"] ||
+          "Status checked. Refresh the page now.",
+      );
+      notify.success(
         translations["builder.domain.custom_domain_checked"] ||
           "Status checked. Refresh the page now.",
       );

@@ -59,8 +59,8 @@ export default function DnsModalContent({ domain }: { domain: string }) {
           border: "border-red-300/25",
           text: "text-red-400",
         }}
-        name={domain}
-        value="76.76.21.21"
+        name="@"
+        value="216.198.79.1"
         copyLabel="IP"
       />
       <DnsRecord
@@ -71,7 +71,7 @@ export default function DnsModalContent({ domain }: { domain: string }) {
           border: "border-blue-300/25",
           text: "text-blue-300",
         }}
-        name={`www.${domain}`}
+        name="www"
         value="cname.vercel-dns.com"
         copyLabel="CNAME"
       />
