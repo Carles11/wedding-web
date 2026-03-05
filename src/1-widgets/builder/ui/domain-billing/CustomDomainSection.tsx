@@ -4,15 +4,16 @@ import React, { useState } from "react";
 import { addCustomDomainClient } from "@/2-features/custom-domain/api/addCustomDomain.client";
 import { removeCustomDomainClient } from "@/2-features/custom-domain/api/removeCustomDomain.client";
 import { verifyCustomDomainClient } from "@/2-features/custom-domain/api/verifyCustomDomain.client";
+import MainModal from "@/4-shared/ui/modals/MainModal";
+import DnsModalContent from "@/2-features/custom-domain/components/DnsModalContent";
 
 interface Props {
   planType: "free" | "monthly" | "yearly";
   translations: Record<string, string>;
   siteId: string;
-  // These come from your page's loader/server and should be passed as props!
   verifiedDomains: string[];
   pendingDomains: string[];
-  domainStatuses: Record<string, string>; // { domain: "pending" | "verified" | "error" }
+  domainStatuses: Record<string, string>;
   onUpgradeClick: () => void;
   refetchDomains: () => Promise<void>;
   loading?: boolean;
@@ -40,6 +41,7 @@ export const CustomDomainSection: React.FC<Props> = ({
       { status?: string; dnsInstructions?: string; error?: string }
     >
   >({});
+  const [dnsModalDomain, setDnsModalDomain] = useState<string | null>(null);
 
   const isPaid = planType !== "free";
 
@@ -183,7 +185,6 @@ export const CustomDomainSection: React.FC<Props> = ({
             </button>
           </form>
 
-          {/* List current domains */}
           {(verifiedDomains.length > 0 || pendingDomains.length > 0) && (
             <div className="mt-6">
               <h5 className="font-semibold mb-1">
@@ -199,13 +200,13 @@ export const CustomDomainSection: React.FC<Props> = ({
                         {domainStatuses[domain] && (
                           <span
                             className={`ml-2 text-xs px-2 py-0.5 rounded
-            ${
-              domainStatuses[domain] === "verified"
-                ? "bg-green-100 text-green-800"
-                : domainStatuses[domain] === "pending"
-                  ? "bg-yellow-100 text-yellow-800"
-                  : "bg-red-100 text-red-800"
-            }`}
+                              ${
+                                domainStatuses[domain] === "verified"
+                                  ? "bg-green-100 text-green-800"
+                                  : domainStatuses[domain] === "pending"
+                                    ? "bg-yellow-100 text-yellow-800"
+                                    : "bg-red-100 text-red-800"
+                              }`}
                           >
                             {translations[
                               `builder.domain.status_${domainStatuses[domain]}`
@@ -235,44 +236,76 @@ export const CustomDomainSection: React.FC<Props> = ({
                       </button>
                     </li>
 
-                    {/* Only for NOT verified domains: show DNS instructions/error after Check status */}
+                    {/* UX improvement: For verified domains show the question & modal! */}
                     {domainStatuses[domain] === "verified" && (
                       <div className="px-6 pb-2 pt-2 text-xs rounded-b bg-green-50 border-b border-green-200 flex flex-col gap-2">
                         <span className="text-green-700 font-semibold">
                           {translations["builder.domain.verified_message"] ||
                             "Domain is live and connected!"}
                         </span>
-                        <a
-                          href={`https://${domain}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-600 underline"
-                        >
-                          {translations["builder.domain.go_to_domain"] ||
-                            "Visit domain"}
-                        </a>
-                        <div className="mt-2 text-gray-700 bg-yellow-50 rounded px-2 py-1 text-xs">
-                          {translations["builder.domain.missing_dns_help"] ||
-                            "If your domain does not resolve, please make sure you have added the correct DNS records. For example:"}
-                          <pre>
-                            {
-                              "A    @     76.76.21.21\nCNAME    www    cname.vercel-dns.com"
-                            }
-                          </pre>
-                          <div>
+                        <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:gap-6 items-center">
+                          <span>
+                            {translations["builder.domain.did_you_add_dns"] ||
+                              "Did you already add the correct DNS records at your provider?"}
+                          </span>
+                          <div className="flex gap-2 mt-2 sm:mt-0">
                             <a
-                              href="https://vercel.com/docs/concepts/projects/custom-domains#step-2--add-your-domain-to-vercel"
+                              href={`https://${domain}`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-blue-600 underline"
+                              className="px-4 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
                             >
-                              {translations["builder.domain.vercel_dns_help"] ||
-                                "View Vercel DNS setup guide"}
+                              {translations["builder.domain.go_to_domain"] ||
+                                "Yes, Visit my website"}
                             </a>
+                            <button
+                              type="button"
+                              className="px-4 py-1 bg-gray-100 border rounded hover:bg-gray-200"
+                              onClick={() => setDnsModalDomain(domain)}
+                            >
+                              {translations["builder.domain.no_show_how"] ||
+                                "No, show me how"}
+                            </button>
                           </div>
                         </div>
+                        <MainModal
+                          open={dnsModalDomain === domain}
+                          title={
+                            translations["builder.domain.dns_modal_title"] ||
+                            "How to connect your domain"
+                          }
+                          onClose={() => setDnsModalDomain(null)}
+                        >
+                          {/* <<< This single line does it all! >>> */}
+                          <DnsModalContent domain={domain} />
+                        </MainModal>
                       </div>
                     )}
+
+                    {/* Show DNS instructions + error for PENDING/ERROR */}
+                    {domainStatuses[domain] !== "verified" &&
+                      domainInfo[domain]?.dnsInstructions && (
+                        <div className="px-6 pb-2 pt-2 text-xs whitespace-pre-wrap bg-blue-50 border-b border-blue-200 rounded-b">
+                          <strong>
+                            {translations[
+                              "builder.domain.dns_instructions_label"
+                            ] || "DNS Instructions:"}
+                          </strong>
+                          <br />
+                          {domainInfo[domain].dnsInstructions
+                            .split("\n")
+                            .map((line, idx) => (
+                              <div key={idx}>{line}</div>
+                            ))}
+                          {domainInfo[domain]?.error && (
+                            <div className="text-red-600 mt-2">
+                              {translations["builder.domain.dns_error"] ||
+                                "Error:"}{" "}
+                              {domainInfo[domain].error}
+                            </div>
+                          )}
+                        </div>
+                      )}
                   </React.Fragment>
                 ))}
               </ul>
