@@ -3,7 +3,7 @@ import { removeCustomDomain } from "@/2-features/custom-domain/api/removeCustomD
 
 export async function POST(
   req: NextRequest,
-  context: { params: { id: string } },
+  context: { params: { id: string } } | { params: Promise<{ id: string }> },
 ) {
   try {
     const params =
