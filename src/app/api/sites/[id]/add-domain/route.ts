@@ -1,14 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { addCustomDomain } from "@/2-features/custom-domain/api/addCustomDomain";
 
+type RouteContext<T extends Record<string, string>> = {
+  params: T | Promise<T>;
+};
+
 export async function POST(
   req: NextRequest,
-  context: { params: { id: string } } | { params: Promise<{ id: string }> },
+  context: RouteContext<{ id: string }>,
 ) {
   try {
-    const params =
-      context.params instanceof Promise ? await context.params : context.params;
-    const { id } = params;
+    const { id } = await context.params;
     const { domain } = await req.json();
 
     if (!domain || typeof domain !== "string") {
