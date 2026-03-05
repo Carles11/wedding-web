@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import SubdomainManager from "./SubdomainManager";
 import CustomDomainSection from "./CustomDomainSection";
 import type { Site, TranslationDictionary } from "@/4-shared/types";
 import MembershipSection from "./MembershipSection";
+import { useState } from "react";
 
 interface DomainAndBillingBuilderStepProps {
   site: Site;
@@ -24,58 +24,27 @@ export default function DomainAndBillingBuilderStep({
 }: DomainAndBillingBuilderStepProps) {
   const router = useRouter();
 
-  // Only non-weddweb domains are considered "custom"
-  const initialCustomDomain =
-    site.domains?.find(
-      (d) => !d.endsWith(".weddweb.com") && !d.endsWith(".localhost:3000"),
-    ) || "";
-
-  const [customDomainValue, setCustomDomainValue] =
-    useState<string>(initialCustomDomain);
-  const [customDomainSaveLoading, setCustomDomainSaveLoading] = useState(false);
-  const [saveStatus, setSaveStatus] = useState<
-    "idle" | "saving" | "success" | "error" | "pending" | "verified"
-  >("idle");
-  const [saveMessage, setSaveMessage] = useState<string>("");
-  const [dnsInstructions, setDnsInstructions] = useState<string | null>(null);
-
   const handleUpgradeClick = () => router.push("/upgrade");
 
-  // Handle domain save: contact your backend, update UI
-  const handleCustomDomainSave = async (domain: string) => {
-    setCustomDomainSaveLoading(true);
-    setSaveStatus("saving");
-    setSaveMessage("");
-    setDnsInstructions(null);
+  // 1. All "real" custom domains (not platform test/production domains)
+  const verifiedDomains =
+    site.domains?.filter(
+      (d) => !d.endsWith(".weddweb.com") && !d.endsWith(".localhost:3000"),
+    ) || [];
 
-    try {
-      const res = await fetch(`/api/sites/${site.id}/custom-domain`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ domain }),
-      });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(
-          data.message || translations["builder.domain.error_generic"],
-        );
-      }
-      const data = await res.json();
-      setSaveStatus("success");
-      setSaveMessage(translations["builder.domain.success_saved"]);
-      if (data.dns_instructions) setDnsInstructions(data.dns_instructions);
-      setCustomDomainValue(domain);
-      refresh();
-    } catch (err: unknown) {
-      setSaveStatus("error");
-      setSaveMessage(
-        (err instanceof Error ? err.message : String(err)) ||
-          translations["builder.domain.error_generic"],
-      );
-    } finally {
-      setCustomDomainSaveLoading(false);
-      setTimeout(() => setSaveStatus("idle"), 4000);
-    }
+  // 2. Pending domains list
+  const pendingDomains = site.pending_custom_domains || [];
+
+  // 3. Status map for all domains
+  const domainStatuses = site.domain_statuses || {};
+
+  // 4. Loader refresh after add/remove
+  const [domainLoading, setDomainLoading] = useState(false);
+
+  const refetchDomains = async () => {
+    setDomainLoading(true);
+    await refresh();
+    setDomainLoading(false);
   };
 
   return (
@@ -90,15 +59,15 @@ export default function DomainAndBillingBuilderStep({
         planType={planType}
       />
       <CustomDomainSection
+        siteId={site.id}
         planType={planType}
         translations={translations}
-        customDomain={customDomainValue}
+        verifiedDomains={verifiedDomains}
+        pendingDomains={pendingDomains}
+        domainStatuses={domainStatuses}
         onUpgradeClick={handleUpgradeClick}
-        onSave={planType !== "free" ? handleCustomDomainSave : undefined}
-        loading={customDomainSaveLoading}
-        status={saveStatus}
-        statusMessage={saveMessage}
-        dnsInstructions={dnsInstructions}
+        refetchDomains={refetchDomains}
+        loading={domainLoading}
       />
       <MembershipSection planType={planType} translations={translations} />
     </div>

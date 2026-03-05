@@ -1,5 +1,3 @@
-"use client";
-
 import { useEffect, useState } from "react";
 import { createClient } from "@/4-shared/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
@@ -7,9 +5,6 @@ import type { Site } from "@/4-shared/types";
 
 /**
  * Hook to fetch (but NOT create) a `site` row for the authenticated user.
- *
- * If no site exists for this user, the consuming component can display a message,
- * call a server action to provision a new site, or redirect.
  */
 export function useSite(user: User | null) {
   const [site, setSite] = useState<Site | null>(null);
@@ -33,12 +28,36 @@ export function useSite(user: User | null) {
       try {
         const { data, error: fetchErr } = await supabase
           .from("sites")
-          .select("id, title, subdomain, default_lang, languages, domains")
+          .select(
+            `
+            id,
+            title,
+            subdomain,
+            default_lang,
+            languages,
+            domains,
+            pending_custom_domains,
+            domain_statuses
+          `,
+          )
           .eq("owner_user_id", user?.id)
           .limit(1)
           .maybeSingle();
 
         if (fetchErr) throw fetchErr;
+
+        // ✨ Parse JSON fields if needed
+        if (data) {
+          if (typeof data.domain_statuses === "string") {
+            try {
+              data.domain_statuses = JSON.parse(data.domain_statuses);
+            } catch {}
+          }
+          if (!Array.isArray(data.pending_custom_domains)) {
+            data.pending_custom_domains = [];
+          }
+        }
+
         if (mounted) setSite((data as Site) ?? null);
       } catch (err: unknown) {
         if (err instanceof Error) setError(err.message);

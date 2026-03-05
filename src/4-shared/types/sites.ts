@@ -11,6 +11,11 @@ export type Site = {
   languages?: string[] | null;
   domains?: string[] | null;
   created_at?: string | null;
+  pending_custom_domains?: string[] | null;
+  domain_statuses?: Record<
+    string,
+    "idle" | "saving" | "success" | "error" | "pending" | "verified"
+  > | null;
   // Add other fields present in the `sites` table as needed.
 };
 

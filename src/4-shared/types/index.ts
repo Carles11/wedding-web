@@ -9,4 +9,5 @@ export * from "./programEvents";
 export * from "./accommodation";
 export * from "./whatToSee";
 export * from "./contact";
+export * from "./vercel";
 export * from "./wedding_gift";
