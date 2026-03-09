@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { addCustomDomain } from "@/2-features/custom-domain/api/addCustomDomain";
 import { RouteContext, getParams } from "@/4-shared/lib/route-context";
 import { fetchBuilderTranslations } from "@/4-shared/api/builder/getTranslations";
+import { addCustomDomainWithRedirectVariants } from "@/4-shared/lib/vercel/addCustomDomainWithRedirectVariants";
 
 // Helper to select the language (default fallback 'en' if not specified/requested)
 function getLang(req: NextRequest): string {
@@ -40,7 +40,7 @@ export async function POST(
       );
     }
 
-    const result = await addCustomDomain(id, domain);
+    const result = await addCustomDomainWithRedirectVariants(id, domain);
     return NextResponse.json(result, { status: 200 });
   } catch (error) {
     console.error("[add-domain] error:", error);

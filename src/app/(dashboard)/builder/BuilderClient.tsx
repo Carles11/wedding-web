@@ -4,8 +4,9 @@ import { useState, useEffect, useCallback } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useSupabaseAuth } from "@/4-shared/hooks/useSupabaseAuth";
 import { useSite } from "@/4-shared/hooks/useSite";
-import { getCurrentUserSubscription } from "@/4-shared/api/builder/getCurrentUserSubscription";
+import { usePlan } from "@/app/providers";
 import { SUPPORTED_LANGUAGES } from "@/4-shared/config/i18n";
+import { FREE_LANGUAGES_LIMIT } from "@/4-shared/config/limits/usage-limits";
 import GeneralSiteForm from "@/1-widgets/builder/ui/GeneralSiteForm";
 import ImagesBuilderStep from "@/1-widgets/builder/ui/ImagesBuilderStep";
 import ProgramEventsBuilderStep from "@/1-widgets/builder/ui/ProgramEventsBuilderStep";
@@ -20,7 +21,6 @@ import {
   GreenCheckIcon,
   RedDotIcon,
 } from "@/4-shared/ui/icons/completenessIcons";
-import { FREE_LANGUAGES_LIMIT } from "@/4-shared/config/limits/usage-limits";
 import { fetchImagesBySite } from "@/3-entities/images/api";
 import { fetchHasProgramEvents } from "@/3-entities/program_events/api";
 import { fetchContactSection } from "@/3-entities/sections/api/fetchContactSection";
@@ -87,12 +87,11 @@ export default function BuilderClient({
     error: siteError,
     refresh,
   } = useSite(user ?? null);
+  const { planType, subscription } = usePlan();
 
   const [active, setActive] = useState(0);
   const [currentLang, setCurrentLang] = useState(initialLang);
-  const [planType, setPlanType] = useState<
-    "free" | "monthly" | "yearly" | null
-  >(null);
+
   const [heroImageExists, setHeroImageExists] = useState(false);
   const [hasProgramEvents, setHasProgramEvents] = useState(false);
   const [hasContact, setHasContact] = useState(false);
@@ -122,14 +121,6 @@ export default function BuilderClient({
     // Only run when site not found after user is loaded
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, site, siteLoading]);
-
-  useEffect(() => {
-    if (user) {
-      getCurrentUserSubscription(user.id)
-        .then((type) => setPlanType(type))
-        .catch(() => setPlanType("free"));
-    }
-  }, [user]);
 
   useEffect(() => {
     if (site?.id) {

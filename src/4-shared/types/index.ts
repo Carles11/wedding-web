@@ -10,4 +10,5 @@ export * from "./accommodation";
 export * from "./whatToSee";
 export * from "./contact";
 export * from "./vercel";
+export * from "./billing";
 export * from "./wedding_gift";

@@ -7,9 +7,10 @@ import { verifyCustomDomainClient } from "@/2-features/custom-domain/api/verifyC
 import MainModal from "@/4-shared/ui/modals/MainModal";
 import DnsModalContent from "@/2-features/custom-domain/components/DnsModalContent";
 import { notify } from "@/4-shared/lib/toast/toast";
+import { PlanType } from "@/4-shared/types";
 
 interface Props {
-  planType: "free" | "monthly" | "yearly";
+  planType: PlanType;
   translations: Record<string, string>;
   siteId: string;
   verifiedDomains: string[];
@@ -66,83 +67,18 @@ export const CustomDomainSection: React.FC<Props> = ({
     e.preventDefault();
     setLocalStatus("saving");
     setLocalMsg(null);
+
     // Optimistically update UI
     setPendingDomains((prev) => [...prev, inputDomain]);
     setDomainStatuses((prev) => ({ ...prev, [inputDomain]: "pending" }));
 
-    const normalizedDomain = inputDomain.replace(/^www\./, "");
-    const variants = new Set([
-      normalizedDomain, // non-www
-      `www.${normalizedDomain}`, // www
-    ]);
-
     try {
-      let anySuccess = false;
-      let showableError: unknown = null;
-
-      for (const domain of variants) {
-        try {
-          await addCustomDomainClient(siteId, domain);
-          anySuccess = true;
-        } catch (err: unknown) {
-          // Narrow unknown to string (message property or as string)
-          let msg: string = "";
-          if (
-            err &&
-            typeof err === "object" &&
-            "message" in err &&
-            typeof (err as { message?: unknown }).message === "string"
-          ) {
-            msg = (err as { message: string }).message;
-          } else if (typeof err === "string") {
-            msg = err;
-          } else {
-            msg =
-              translations["builder.domain.error_generic"] || "Server error";
-          }
-          // Only ignore "already" or "exists" or "duplicate" errors
-          const check = msg.toLowerCase();
-          if (
-            check.includes("already") ||
-            check.includes("exists") ||
-            check.includes("duplicate")
-          ) {
-            // Not a real error, ignore
-            continue;
-          }
-          // Store the first showable error
-          showableError = err;
-          // Optionally: break here if you want to abort on first "real" error
-        }
-      }
-      if (anySuccess) {
-        setLocalStatus("success");
-        setInputDomain("");
-        notify.success(translations["builder.domain.custom_domain_success"]);
-      } else if (showableError) {
-        // Derive the message, type-safely
-        let msg = "";
-        if (
-          showableError &&
-          typeof showableError === "object" &&
-          "message" in showableError &&
-          typeof (showableError as { message?: unknown }).message === "string"
-        ) {
-          msg = (showableError as { message: string }).message;
-        } else if (typeof showableError === "string") {
-          msg = showableError;
-        } else {
-          msg = translations["builder.domain.error_generic"] || "Server error";
-        }
-        setLocalStatus("error");
-        notify.error(msg);
-      } else {
-        setLocalStatus("error");
-        notify.error(
-          translations["builder.domain.error_generic"] || "Server error",
-        );
-      }
+      await addCustomDomainClient(siteId, inputDomain); // Only user input—let backend handle variants/redirect/delay!
+      setLocalStatus("success");
+      setInputDomain("");
+      notify.success(translations["builder.domain.custom_domain_success"]);
     } catch (err: unknown) {
+      setLocalStatus("error");
       let msg = "";
       if (
         err &&
@@ -156,13 +92,11 @@ export const CustomDomainSection: React.FC<Props> = ({
       } else {
         msg = translations["builder.domain.error_generic"] || "Server error";
       }
-      setLocalStatus("error");
       notify.error(msg);
     } finally {
       await refetchDomains();
     }
   };
-
   const handleRemove = async (domain: string) => {
     if (!domain || loading) return;
     setLocalStatus("saving");

@@ -88,7 +88,7 @@ export default function SignupForm() {
             click the link to activate your account.
           </p>
           <Link
-            href="/login"
+            href="/auth/login"
             className="text-blue-600 hover:text-blue-500 font-medium"
           >
             Return to Login
@@ -196,7 +196,7 @@ export default function SignupForm() {
           <p className="text-sm text-gray-600">
             Already have an account?{" "}
             <Link
-              href="/login"
+              href="/auth/login"
               className="font-medium text-blue-600 hover:text-blue-500"
             >
               Log in

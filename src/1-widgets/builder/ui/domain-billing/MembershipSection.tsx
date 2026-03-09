@@ -1,8 +1,9 @@
 "use client";
 import { useRouter } from "next/navigation";
+import { PlanType } from "@/4-shared/types";
 
 interface Props {
-  planType: "free" | "monthly" | "yearly";
+  planType: PlanType;
   translations: Record<string, string>;
   // Add more props if you have: renewalDate, billingMethod, etc
 }
@@ -12,8 +13,9 @@ export default function MembershipSection({ planType, translations }: Props) {
 
   const planLabel = {
     free: translations["builder.billing.current_plan_free"],
-    monthly: translations["builder.billing.current_plan_monthly"],
-    yearly: translations["builder.billing.current_plan_yearly"],
+    pro: translations["builder.billing.current_plan_pro"],
+    agency_monthly: translations["builder.billing.current_plan_agency_monthly"],
+    agency_yearly: translations["builder.billing.current_plan_agency_yearly"],
   }[planType];
 
   return (

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
 import { createSiteForUser } from "@/4-shared/api/builder/createSiteForUser";
+import { getCurrentUser } from "@/3-entities/user/api/getCurrentUser";
 
 export async function POST() {
   const cookieStore = await cookies();
@@ -15,9 +16,7 @@ export async function POST() {
     },
   });
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
 
   if (!user || !user.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

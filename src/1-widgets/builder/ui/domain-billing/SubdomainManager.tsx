@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { copyToClipboard } from "@/4-shared/utils/copyToClipboard";
-import type { Site } from "@/4-shared/types";
+import type { Site, PlanType } from "@/4-shared/types";
 import { isValidSubdomain } from "@/4-shared/utils/validations";
 
 interface Props {
@@ -10,7 +10,7 @@ interface Props {
   refresh: () => void;
   translations: Record<string, string>;
   domainSuffix?: string; // "weddweb.com"
-  planType: "free" | "monthly" | "yearly";
+  planType: PlanType;
   canEdit?: boolean;
 }
 

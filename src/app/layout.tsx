@@ -3,8 +3,7 @@ import { Footer } from "@/4-shared/ui/footer/Footer";
 import { Roboto, Niconne } from "next/font/google";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/next";
-import { headers } from "next/headers";
-import ToastProvider from "./providers/ToastProvider";
+import { ToastProvider } from "./providers/ToastProvider";
 
 const roboto = Roboto({
   weight: ["400"],

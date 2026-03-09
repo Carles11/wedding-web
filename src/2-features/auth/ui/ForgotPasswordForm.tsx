@@ -67,7 +67,7 @@ export default function ForgotPasswordForm() {
             and click the link to reset your password.
           </p>
           <Link
-            href="/login"
+            href="/auth/login"
             className="text-blue-600 hover:text-blue-500 font-medium"
           >
             Return to Login
@@ -123,7 +123,7 @@ export default function ForgotPasswordForm() {
           <p className="text-sm text-gray-600">
             Remember your password?{" "}
             <Link
-              href="/login"
+              href="/auth/login"
               className="font-medium text-blue-600 hover:text-blue-500"
             >
               Log in

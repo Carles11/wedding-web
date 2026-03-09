@@ -6,13 +6,14 @@ import CustomDomainSection from "./CustomDomainSection";
 import type { Site, TranslationDictionary } from "@/4-shared/types";
 import MembershipSection from "./MembershipSection";
 import { useState } from "react";
+import { PlanType } from "@/4-shared/types";
 
 interface DomainAndBillingBuilderStepProps {
   site: Site;
   refresh: () => void;
   lang: string;
   translations: TranslationDictionary;
-  planType: "free" | "monthly" | "yearly";
+  planType: PlanType;
 }
 
 export default function DomainAndBillingBuilderStep({

@@ -8,7 +8,7 @@ import {
   SUPPORTED_LANGUAGES,
   SUPPORTED_LANGUAGE_LABELS,
 } from "@/4-shared/config/i18n";
-import type { Site } from "@/4-shared/types";
+import type { Site, PlanType } from "@/4-shared/types";
 import { StepLayout } from "../step-layout";
 
 type Props = {
@@ -17,7 +17,7 @@ type Props = {
   lang: string;
   translations: Record<string, string>;
   langLimit: number;
-  planType: "free" | "monthly" | "yearly";
+  planType: PlanType;
 };
 
 export default function GeneralSiteForm({
