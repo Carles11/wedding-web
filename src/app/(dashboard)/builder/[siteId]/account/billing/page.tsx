@@ -1,8 +1,6 @@
-import { getCurrentUserSubscription } from "@/4-shared/api/builder/getCurrentUserSubscription";
-import { getMergedTranslations } from "@/4-shared/lib/i18n";
-import { createSupabaseSSRClient } from "@/4-shared/lib/supabase/server";
-import { usePlan } from "@/app/providers";
 import { getCurrentUser } from "@/3-entities/user/api/getCurrentUser";
+import { getMergedTranslations } from "@/4-shared/lib/i18n";
+import AccountBillingDetails from "./AccountBillingDetails";
 
 interface PageProps {
   params: { siteId: string };
@@ -19,7 +17,6 @@ export default async function AccountBillingPage({
   const siteId = typeof params?.siteId === "string" ? params.siteId : "";
 
   const t = await getMergedTranslations(siteId, lang, "en");
-  const supabase = await createSupabaseSSRClient();
 
   // Auth: SSR-aware
   const user = await getCurrentUser();
@@ -28,10 +25,6 @@ export default async function AccountBillingPage({
     throw new Error("Not authenticated: cannot show billing page!");
   }
 
-  // NEW: Get the full subscription object
-  const subscription =
-    user != null ? await getCurrentUserSubscription(user.id) : null;
-  console.log("User subscription in page component:", subscription);
   // Render
   return (
     <html lang={lang}>
@@ -56,23 +49,5 @@ export default async function AccountBillingPage({
         </main>
       </body>
     </html>
-  );
-}
-
-// Example detail widget using usePlan (you can separate into its own file)
-
-function AccountBillingDetails({ t }: { t: Record<string, string> }) {
-  const { planType, features, subscription } = usePlan();
-
-  return (
-    <div className="space-y-4">
-      <p>
-        {t["billing.subscription_type"] ?? "Current Plan"}:{" "}
-        <span className="font-semibold capitalize">
-          {planType ?? t["billing.none"] ?? "None"}
-        </span>
-      </p>
-      {/* You can show more info, usage stats, or plan features here */}
-    </div>
   );
 }

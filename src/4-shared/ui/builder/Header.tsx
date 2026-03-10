@@ -1,6 +1,6 @@
 import { LogoutButton } from "@/2-features/auth/ui";
 import type { Site } from "@/4-shared/types";
-import LanguageSelector from "../../LanguageSelector";
+import LanguageSelector from "./LanguageSelector";
 
 export function BuilderHeader({
   translations,

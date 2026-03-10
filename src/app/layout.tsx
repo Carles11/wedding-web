@@ -1,8 +1,8 @@
-import "./globals.css";
-import { Footer } from "@/4-shared/ui/footer/Footer";
-import { Roboto, Niconne } from "next/font/google";
-import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Footer } from "@/4-shared/ui/commons/footer/Footer";
 import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Niconne, Roboto } from "next/font/google";
+import "./globals.css";
 import { ToastProvider } from "./providers/ToastProvider";
 
 const roboto = Roboto({

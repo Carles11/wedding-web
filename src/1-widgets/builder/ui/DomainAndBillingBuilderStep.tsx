@@ -1,12 +1,12 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import SubdomainManager from "./SubdomainManager";
-import CustomDomainSection from "./CustomDomainSection";
+import MembershipSection from "@/2-features/builder/billing/ui/MembershipSection";
+import CustomDomainSection from "@/2-features/builder/custom-domain/components/CustomDomainSection";
+import SubdomainManager from "@/2-features/builder/custom-domain/components/SubdomainManager";
 import type { Site, TranslationDictionary } from "@/4-shared/types";
-import MembershipSection from "./MembershipSection";
-import { useState } from "react";
 import { PlanType } from "@/4-shared/types";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 interface DomainAndBillingBuilderStepProps {
   site: Site;
@@ -70,7 +70,11 @@ export default function DomainAndBillingBuilderStep({
         refetchDomains={refetchDomains}
         loading={domainLoading}
       />
-      <MembershipSection planType={planType} translations={translations} />
+      <MembershipSection
+        planType={planType}
+        translations={translations}
+        siteId={site.id}
+      />
     </div>
   );
 }

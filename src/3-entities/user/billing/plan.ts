@@ -1,4 +1,4 @@
-import { getCurrentUserSubscription } from "@/4-shared/api/builder/getCurrentUserSubscription";
+import { getCurrentUserSubscription } from "@/3-entities/user/api/getCurrentUserSubscription.client";
 import { PLAN_DEFINITIONS } from "@/4-shared/config/plans/planDefinitions";
 import type { PlanType, Subscription } from "@/4-shared/types";
 

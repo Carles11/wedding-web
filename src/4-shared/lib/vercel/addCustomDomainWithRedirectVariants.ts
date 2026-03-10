@@ -1,4 +1,4 @@
-import { addCustomDomain } from "@/2-features/custom-domain/api/addCustomDomain";
+import { addCustomDomain } from "@/2-features/builder/custom-domain/api/addCustomDomain";
 import { patchDomainToRedirect } from "@/4-shared/lib/vercel/patchDomainToRedirect";
 
 function delay(ms: number) {

@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getVercelDomainStatus } from "@/4-shared/lib/vercel/vercel-domains";
-import { verifyCustomDomain } from "@/2-features/custom-domain/api/verifyCustomDomain";
-import type { VercelDomainStatusResult } from "@/4-shared/lib/vercel/vercel-domains";
+import { verifyCustomDomain } from "@/2-features/builder/custom-domain/api/verifyCustomDomain";
 import { RouteContext, getParams } from "@/4-shared/lib/route-context";
+import type { VercelDomainStatusResult } from "@/4-shared/lib/vercel/vercel-domains";
+import { getVercelDomainStatus } from "@/4-shared/lib/vercel/vercel-domains";
+import { NextRequest, NextResponse } from "next/server";
 
 interface ParseVercelStatusResult {
   status: "pending" | "verified" | "error";
@@ -51,7 +51,7 @@ export async function POST(
 
     await verifyCustomDomain(id, domain);
 
-    console.log(JSON.stringify(vercelResult, null, 2));
+    // console.log(JSON.stringify(vercelResult, null, 2));
 
     const parsed: ParseVercelStatusResult = parseVercelStatus(vercelResult);
 

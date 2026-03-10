@@ -1,4 +1,4 @@
-import StickyMobileBar from "@/4-shared/ui/mobileBars/StickyMobileBar";
+import StickyMobileBar from "@/4-shared/ui/builder/StickyMobileBar";
 import { ReactNode } from "react";
 
 type StepLayoutProps = {

@@ -1,7 +1,7 @@
-import SectionContainer from "@/4-shared/ui/section/SectionContainer";
-import type { TranslationDictionary } from "@/4-shared/types";
-import UnderlinedLink from "@/4-shared/ui/link/UnderlinedLink";
 import { formatEventTime } from "@/4-shared/helpers/formatEventTime";
+import type { TranslationDictionary } from "@/4-shared/types";
+import UnderlinedLink from "@/4-shared/ui/commons/link/UnderlinedLink";
+import SectionContainer from "@/4-shared/ui/tenant/section/SectionContainer";
 
 type ProgramEvent = {
   id: string;

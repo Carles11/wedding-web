@@ -1,9 +1,9 @@
 "use client";
 
-import { getPlanFeatures } from "@/4-shared/billing/plan";
+import { getPlanFeatures } from "@/3-entities/user/billing/plan";
 import type { PlanType, Subscription } from "@/4-shared/types";
-import { createContext, useContext, useMemo } from "react";
 import type { ReactNode } from "react";
+import { createContext, useContext, useMemo } from "react";
 
 interface PlanContextProps {
   planType: PlanType;

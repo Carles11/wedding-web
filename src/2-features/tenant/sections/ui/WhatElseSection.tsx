@@ -1,9 +1,9 @@
-import SectionContainer from "@/4-shared/ui/section/SectionContainer";
-import UnderlinedLink from "@/4-shared/ui/link/UnderlinedLink";
 import type {
-  WhatToSeeEntryFull,
   TranslationDictionary,
+  WhatToSeeEntryFull,
 } from "@/4-shared/types";
+import UnderlinedLink from "@/4-shared/ui/commons/link/UnderlinedLink";
+import SectionContainer from "@/4-shared/ui/tenant/section/SectionContainer";
 
 type WhatElseSectionProps = {
   items: WhatToSeeEntryFull[];

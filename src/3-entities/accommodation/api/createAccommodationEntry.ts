@@ -1,7 +1,9 @@
-import type { AccommodationEntry } from "@/4-shared/types";
-import type { AccommodationFormValues } from "@/4-shared/types";
-import { createClient } from "@/4-shared/lib/supabase/client";
 import { FREE_ACCOMMODATION_LIMIT } from "@/4-shared/config/limits/usage-limits";
+import { createClient } from "@/4-shared/lib/supabase/client";
+import type {
+  AccommodationEntry,
+  AccommodationFormValues,
+} from "@/4-shared/types";
 
 // Update signature: form values type, not AccommodationEntry!
 export async function createAccommodationEntry(
@@ -11,7 +13,6 @@ export async function createAccommodationEntry(
   const isProUser = true; // TODO stub — do not check subscription in this MVP
 
   if (!siteId) return null;
-  console.log("Creating accommodation entry for site:", siteId, entry);
   // Check plan limit
   const supabase = await createClient();
   const { data: existingRows, error: fetchError } = await supabase

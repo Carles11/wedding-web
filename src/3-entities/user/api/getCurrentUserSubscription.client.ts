@@ -1,14 +1,15 @@
 import { createClient } from "@/4-shared/lib/supabase/client";
 import type { Subscription } from "@/4-shared/types";
 
+/**
+ * Client-only: Fetch current user's subscription using browser Supabase client.
+ * This works in React client components, hooks.
+ */
 export async function getCurrentUserSubscription(
   user_id: string,
 ): Promise<Subscription | null> {
-  const supabase = await createClient();
-  console.log(
-    "xxxxxxxxxxxxxxxxxxxxxxxxxxxxx:_user_id in getCURRENTSUBSCRIPTON",
-    user_id,
-  );
+  const supabase = createClient();
+
   const { data, error } = await supabase
     .from("subscriptions")
     .select("*")
@@ -16,12 +17,6 @@ export async function getCurrentUserSubscription(
     .order("created_at", { ascending: false })
     .limit(1)
     .maybeSingle();
-
-  console.log("XXXXXXXXXXXXXXXXXXXXXXXgetCurrentUserSubscription: data", data);
-  console.log(
-    "XXXXXXXXXXXXXXXXXXXXXXXgetCurrentUserSubscription: error",
-    error,
-  );
 
   if (error || !data) return null;
   return data as Subscription;

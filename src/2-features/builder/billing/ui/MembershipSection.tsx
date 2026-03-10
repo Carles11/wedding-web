@@ -1,14 +1,20 @@
 "use client";
-import { useRouter } from "next/navigation";
 import { PlanType } from "@/4-shared/types";
+import { useRouter } from "next/navigation";
 
 interface Props {
   planType: PlanType;
   translations: Record<string, string>;
+  siteId: string;
+
   // Add more props if you have: renewalDate, billingMethod, etc
 }
 
-export default function MembershipSection({ planType, translations }: Props) {
+export default function MembershipSection({
+  planType,
+  siteId,
+  translations,
+}: Props) {
   const router = useRouter();
 
   const planLabel = {
@@ -53,7 +59,7 @@ export default function MembershipSection({ planType, translations }: Props) {
             <button
               type="button"
               className="px-4 py-2 bg-gray-200 text-gray-800 rounded"
-              onClick={() => router.push("/user/billing")}
+              onClick={() => router.push(`/builder/${siteId}/account/billing`)}
             >
               {translations["builder.billing.manage_btn"]}
             </button>

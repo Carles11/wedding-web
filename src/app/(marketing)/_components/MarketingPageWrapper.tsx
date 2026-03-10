@@ -1,13 +1,13 @@
 "use client";
-import { useState } from "react";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import LanguageSelector from "@/4-shared/ui/LanguageSelector";
 import HeroMarketing, {
-  FeaturesGrid,
-  TestimonialsSection,
-  PricingSection,
   CTASection,
+  FeaturesGrid,
+  PricingSection,
+  TestimonialsSection,
 } from "@/1-widgets/marketing/ui";
+import LanguageSelector from "@/4-shared/ui/builder/LanguageSelector";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
 
 interface Props {
   initialLang?: string;

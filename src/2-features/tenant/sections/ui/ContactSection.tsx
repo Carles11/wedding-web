@@ -1,9 +1,10 @@
-import Image from "next/image";
-import { getTextForLang } from "@/4-shared/lib/getTextForLang";
-import SectionContainer from "@/4-shared/ui/section/SectionContainer";
-import type { TranslationDictionary } from "@/4-shared/types";
-import UnderlinedLink from "@/4-shared/ui/link/UnderlinedLink";
 import { getPublicUrlForTenantBucketImage } from "@/4-shared/helpers/getPublicUrlForTenantBucketImage";
+import { getTextForLang } from "@/4-shared/lib/getTextForLang";
+import type { TranslationDictionary } from "@/4-shared/types";
+
+import UnderlinedLink from "@/4-shared/ui/commons/link/UnderlinedLink";
+import SectionContainer from "@/4-shared/ui/tenant/section/SectionContainer";
+import Image from "next/image";
 
 interface ContactPerson {
   name: string;

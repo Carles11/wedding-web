@@ -1,6 +1,6 @@
-import SectionContainer from "@/4-shared/ui/section/SectionContainer";
-import UnderlinedLink from "@/4-shared/ui/link/UnderlinedLink";
-import type { WeddingGift, TranslationDictionary } from "@/4-shared/types";
+import type { TranslationDictionary, WeddingGift } from "@/4-shared/types";
+import UnderlinedLink from "@/4-shared/ui/commons/link/UnderlinedLink";
+import SectionContainer from "@/4-shared/ui/tenant/section/SectionContainer";
 
 type Props = {
   data: WeddingGift | null;

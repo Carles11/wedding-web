@@ -1,7 +1,7 @@
-import { createClient } from "@/4-shared/lib/supabase/client";
-import type { ImageRow } from "@/4-shared/types";
 import { STORAGE_BUCKET_TENANT } from "@/4-shared/lib/supabase/buckets";
+import { createClient } from "@/4-shared/lib/supabase/client";
 import { notify } from "@/4-shared/lib/toast/toast";
+import type { ImageRow } from "@/4-shared/types";
 
 export async function deleteImage(image: ImageRow): Promise<boolean> {
   const supabase = createClient();
@@ -33,7 +33,6 @@ export async function deleteImage(image: ImageRow): Promise<boolean> {
     notify.error("Image record was not deleted (RLS?)");
     return false;
   }
-  console.log("Deleted rows:", data);
   notify.success("Image deleted");
 
   return true;

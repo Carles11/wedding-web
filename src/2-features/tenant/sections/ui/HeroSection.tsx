@@ -1,7 +1,7 @@
-import type { HeroSectionType } from "@/4-shared/types";
-import Image from "next/image";
-import Heading from "@/4-shared/ui/typography/Heading";
 import { getPublicUrlForTenantBucketImage } from "@/4-shared/helpers/getPublicUrlForTenantBucketImage";
+import type { HeroSectionType } from "@/4-shared/types";
+import Heading from "@/4-shared/ui/commons/typography/Heading";
+import Image from "next/image";
 
 type HeroSectionProps = {
   hero: HeroSectionType;

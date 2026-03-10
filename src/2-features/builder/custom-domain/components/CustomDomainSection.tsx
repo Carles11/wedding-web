@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
-import { addCustomDomainClient } from "@/2-features/custom-domain/api/addCustomDomain.client";
-import { removeCustomDomainClient } from "@/2-features/custom-domain/api/removeCustomDomain.client";
-import { verifyCustomDomainClient } from "@/2-features/custom-domain/api/verifyCustomDomain.client";
-import MainModal from "@/4-shared/ui/modals/MainModal";
-import DnsModalContent from "@/2-features/custom-domain/components/DnsModalContent";
+import { addCustomDomainClient } from "@/2-features/builder/custom-domain/api/addCustomDomain.client";
+import { removeCustomDomainClient } from "@/2-features/builder/custom-domain/api/removeCustomDomain.client";
+import { verifyCustomDomainClient } from "@/2-features/builder/custom-domain/api/verifyCustomDomain.client";
+import DnsModalContent from "@/2-features/builder/custom-domain/components/DnsModalContent";
 import { notify } from "@/4-shared/lib/toast/toast";
 import { PlanType } from "@/4-shared/types";
+import MainModal from "@/4-shared/ui/commons/modals/MainModal";
+import React, { useState } from "react";
 
 interface Props {
   planType: PlanType;

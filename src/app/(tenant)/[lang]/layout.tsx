@@ -1,4 +1,4 @@
-import ScrollToTopButton from "@/4-shared/ui/scroll/ScrollToTopButton";
+import ScrollToTopButton from "@/4-shared/ui/commons/scroll/ScrollToTopButton";
 
 type TenantLayoutProps = {
   children: React.ReactNode;

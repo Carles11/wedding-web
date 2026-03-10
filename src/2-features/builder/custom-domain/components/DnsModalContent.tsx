@@ -1,4 +1,4 @@
-import CopyButton from "@/4-shared/ui/buttons/CopyButton";
+import CopyButton from "@/4-shared/ui/commons/buttons/CopyButton";
 
 const DnsRecord = ({
   step,

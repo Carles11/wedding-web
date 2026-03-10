@@ -1,29 +1,29 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import type {
-  Site,
-  ProgramEvent,
-  ProgramEventTranslation,
-} from "@/4-shared/types";
-import type { SupportedLanguage } from "@/4-shared/config/i18n";
 import {
-  fetchProgramEventsBySite,
   createProgramEvent,
-  updateProgramEvent,
   deleteProgramEvent,
+  fetchProgramEventsBySite,
+  updateProgramEvent,
 } from "@/3-entities/program_events/api";
+import type { SupportedLanguage } from "@/4-shared/config/i18n";
 import { FREE_EVENT_LIMIT } from "@/4-shared/config/limits/usage-limits";
 import { formatTime, timeToMinutes } from "@/4-shared/helpers/formatTime";
 import { interpolate } from "@/4-shared/helpers/interpolateVars";
-import { StepLayout } from "../step-layout";
 import { notify } from "@/4-shared/lib/toast/toast";
+import type {
+  ProgramEvent,
+  ProgramEventTranslation,
+  Site,
+} from "@/4-shared/types";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { StepLayout } from "../step-layout";
 
 // Import your reusable inputs
-import { DateInput } from "@/4-shared/ui/inputs/DateInput";
-import { TimeInput } from "@/4-shared/ui/inputs/TimeInput";
+import { DateInput } from "@/4-shared/ui/builder/inputs/DateInput";
+import { TimeInput } from "@/4-shared/ui/builder/inputs/TimeInput";
 // Import the Toggle Button
-import { Toggle } from "@/4-shared/ui/buttons/Toggle";
+import { Toggle } from "@/4-shared/ui/commons/buttons/Toggle";
 
 function t(
   translations: Record<string, string>,

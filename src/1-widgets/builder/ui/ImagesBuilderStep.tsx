@@ -1,21 +1,21 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import type { ImageRow, Site } from "@/4-shared/types";
 import {
-  fetchImagesBySite,
-  uploadImageForSite,
   deleteImage,
+  fetchImagesBySite,
+  fetchSectionId,
   getPublicUrlForImage,
   updateImage,
-  fetchSectionId,
+  uploadImageForSite,
 } from "@/3-entities/images/api";
-import Image from "next/image";
-import FileUploader from "@/4-shared/ui/fileUploader/FileUploader";
-import type { Accept } from "react-dropzone";
 import { FREE_IMAGE_LIMIT } from "@/4-shared/config/limits/usage-limits";
-import { StepLayout } from "../step-layout";
 import { notify } from "@/4-shared/lib/toast/toast";
+import type { ImageRow, Site } from "@/4-shared/types";
+import FileUploader from "@/4-shared/ui/builder/FileUploader";
+import Image from "next/image";
+import { useEffect, useMemo, useRef, useState } from "react";
+import type { Accept } from "react-dropzone";
+import { StepLayout } from "../step-layout";
 
 type Props = {
   site: Site | null;

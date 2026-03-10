@@ -1,5 +1,3 @@
-import React from "react";
-
 type TimeInputProps = {
   value: string; // "HH:mm"
   onChange: (newTime: string) => void;

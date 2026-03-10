@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { removeCustomDomain } from "@/2-features/custom-domain/api/removeCustomDomain";
+import { removeCustomDomain } from "@/2-features/builder/custom-domain/api/removeCustomDomain";
 import { RouteContext, getParams } from "@/4-shared/lib/route-context";
 
 export async function POST(

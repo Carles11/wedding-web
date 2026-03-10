@@ -1,27 +1,27 @@
-import { JsonLd } from "@/4-shared/ui/seo/JsonLd";
-import { generateEventSchema } from "@/4-shared/lib/seo/generateEventSchema";
-import { headers } from "next/headers";
-import type { Metadata } from "next";
 import { getSiteByDomain } from "@/4-shared/lib/getSiteByDomain";
+import { generateEventSchema } from "@/4-shared/lib/seo/generateEventSchema";
+import { JsonLd } from "@/4-shared/ui/seo/JsonLd";
+import type { Metadata } from "next";
+import { headers } from "next/headers";
 
-import { fetchWhatToSeeDataForTenant } from "@/3-entities/what_to_see/api/fetchWhatToSeeDataForTenant";
-import { fetchContactSection } from "@/3-entities/sections/api/fetchContactSection";
-import { fetchImagesForTenantSite } from "@/3-entities/images/api/fetchImagesForTenantSite";
 import { fetchAccommodationEntriesForTenant } from "@/3-entities/accommodation/api/fetchAccommodationEntriesForTenant";
+import { fetchImagesForTenantSite } from "@/3-entities/images/api/fetchImagesForTenantSite";
 import { fetchProgramSectionDataForTenant } from "@/3-entities/program_events/api/fetchProgramDataForTenant";
+import { fetchContactSection } from "@/3-entities/sections/api/fetchContactSection";
 import { fetchWeddingGiftSectionDataForTenant } from "@/3-entities/wedding_gifts/api/fetchWeddingGiftSectionDataForTenant";
+import { fetchWhatToSeeDataForTenant } from "@/3-entities/what_to_see/api/fetchWhatToSeeDataForTenant";
 
-import HeroSection from "@/3-entities/sections/ui/HeroSection";
-import ProgramSectionComponent from "@/3-entities/sections/ui/ProgramSection";
-import DetailsSection from "@/3-entities/sections/ui/DetailsSection";
-import AccommodationSection from "@/3-entities/sections/ui/AccommodationSection";
-import WhatElseSection from "@/3-entities/sections/ui/WhatElseSection";
-import ContactSection from "@/3-entities/sections/ui/ContactSection";
-import WeddingGiftSection from "@/3-entities/sections/ui/WeddingGiftSection";
+import AccommodationSection from "@/2-features/tenant/sections/ui/AccommodationSection";
+import ContactSection from "@/2-features/tenant/sections/ui/ContactSection";
+import DetailsSection from "@/2-features/tenant/sections/ui/DetailsSection";
+import HeroSection from "@/2-features/tenant/sections/ui/HeroSection";
+import ProgramSectionComponent from "@/2-features/tenant/sections/ui/ProgramSection";
+import WeddingGiftSection from "@/2-features/tenant/sections/ui/WeddingGiftSection";
+import WhatElseSection from "@/2-features/tenant/sections/ui/WhatElseSection";
 
-import Heading from "@/4-shared/ui/typography/Heading";
-import { LanguageToggle } from "@/2-features/language-toggle/ui/LanguageToggle";
-import TopMenu from "@/2-features/top-menu/ui/TopMenu";
+import { LanguageToggle } from "@/2-features/tenant/language-toggle/ui/LanguageToggle";
+import TopMenu from "@/2-features/tenant/top-menu/ui/TopMenu";
+import Heading from "@/4-shared/ui/commons/typography/Heading";
 
 import { getMergedTranslations } from "@/4-shared/lib/i18n";
 import { ProgramSection } from "@/4-shared/types";

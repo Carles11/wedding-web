@@ -1,31 +1,32 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { useSupabaseAuth } from "@/4-shared/hooks/useSupabaseAuth";
-import { useSite } from "@/4-shared/hooks/useSite";
-import { usePlan } from "@/app/providers";
-import { SUPPORTED_LANGUAGES } from "@/4-shared/config/i18n";
-import { FREE_LANGUAGES_LIMIT } from "@/4-shared/config/limits/usage-limits";
+import AccommodationBuilderStep from "@/1-widgets/builder/ui/AccommodationBuilderStep";
+import ContactBuilderStep from "@/1-widgets/builder/ui/ContactBuilderStep";
+import DomainAndBillingBuilderStep from "@/1-widgets/builder/ui/DomainAndBillingBuilderStep";
 import GeneralSiteForm from "@/1-widgets/builder/ui/GeneralSiteForm";
 import ImagesBuilderStep from "@/1-widgets/builder/ui/ImagesBuilderStep";
 import ProgramEventsBuilderStep from "@/1-widgets/builder/ui/ProgramEventsBuilderStep";
-import AccommodationBuilderStep from "@/1-widgets/builder/ui/AccommodationBuilderStep";
-import ContactBuilderStep from "@/1-widgets/builder/ui/ContactBuilderStep";
-import WhatToSeeBuilderStep from "@/1-widgets/builder/ui/WhatToSeeBuilderStep";
 import WeddingGiftBuilderStep from "@/1-widgets/builder/ui/WeddingGiftBuilderStep";
-import DomainAndBillingBuilderStep from "@/1-widgets/builder/ui/domain-billing/DomainAndBillingBuilderStep";
+import WhatToSeeBuilderStep from "@/1-widgets/builder/ui/WhatToSeeBuilderStep";
 
-import type { Site } from "@/4-shared/types";
-import {
-  GreenCheckIcon,
-  RedDotIcon,
-} from "@/4-shared/ui/icons/completenessIcons";
+import { SUPPORTED_LANGUAGES } from "@/4-shared/config/i18n";
+import { FREE_LANGUAGES_LIMIT } from "@/4-shared/config/limits/usage-limits";
+import { useSite } from "@/4-shared/hooks/useSite";
+import { useSupabaseAuth } from "@/4-shared/hooks/useSupabaseAuth";
+import { usePlan } from "@/app/providers";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
+
 import { fetchImagesBySite } from "@/3-entities/images/api";
 import { fetchHasProgramEvents } from "@/3-entities/program_events/api";
 import { fetchContactSection } from "@/3-entities/sections/api/fetchContactSection";
+import type { Site } from "@/4-shared/types";
+import { BuilderHeader } from "@/4-shared/ui/builder";
+import {
+  GreenCheckIcon,
+  RedDotIcon,
+} from "@/4-shared/ui/commons/icons/completenessIcons";
 import { EMAIL_RE } from "@/4-shared/utils/validations";
-import { BuilderHeader } from "@/4-shared/ui/header/builder";
 
 interface ImageSection {
   type: string;
@@ -79,7 +80,6 @@ export default function BuilderClient({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-
   const { user } = useSupabaseAuth();
   const {
     site,
@@ -88,6 +88,7 @@ export default function BuilderClient({
     refresh,
   } = useSite(user ?? null);
   const { planType, subscription } = usePlan();
+  console.log("XXXXXXXXXXXXXX", { planType, subscription });
 
   const [active, setActive] = useState(0);
   const [currentLang, setCurrentLang] = useState(initialLang);
@@ -152,6 +153,9 @@ export default function BuilderClient({
     }
   }, [site?.id]);
 
+  //       // Contact completeness
+  // Program-events completeness
+
   useEffect(() => {
     if (!site?.id) return;
     fetchHasProgramEvents(site.id).then(setHasProgramEvents);
@@ -176,7 +180,8 @@ export default function BuilderClient({
     isDomainBillingComplete,
   ];
 
-  if (!site || !planType) return <div>Loading…</div>;
+  if (!site || !planType)
+    return <div>{translations["builder.status.loading"]}</div>;
 
   return (
     <div className="min-h-screen bg-gray-100">
