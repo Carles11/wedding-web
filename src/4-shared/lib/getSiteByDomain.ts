@@ -13,7 +13,7 @@ export async function getSiteByDomain(host: string | null) {
     // 1) Try domains array contains normalized host (if you store domains as text[] in sites.domains)
     const { data: byDomain, error: errDomain } = await supabase
       .from("sites")
-      .select("id, subdomain, default_lang, languages, domains")
+      .select("id, owner_user_id, subdomain, default_lang, languages, domains")
       .contains("domains", [normalized])
       .limit(1)
       .maybeSingle();
@@ -29,7 +29,7 @@ export async function getSiteByDomain(host: string | null) {
     // 2) Fallback: try matching subdomain column
     const { data: bySubdomain, error: errSub } = await supabase
       .from("sites")
-      .select("id, subdomain, default_lang, languages, domains")
+      .select("id, owner_user_id, subdomain, default_lang, languages, domains")
       .eq("subdomain", normalized)
       .limit(1)
       .maybeSingle();

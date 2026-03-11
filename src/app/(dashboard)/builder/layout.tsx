@@ -1,6 +1,9 @@
 import { getCurrentUser } from "@/3-entities/user/api/getCurrentUser";
 import { getCurrentUserSubscription } from "@/3-entities/user/api/getCurrentUserSubscription";
-import { redirect } from "next/navigation"; // Add this line
+import { Footer } from "@/4-shared/ui/commons/footer/Footer";
+import { shouldShowFooter } from "@/4-shared/utils/shouldShowFooter";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { ReactNode } from "react";
 import { PlanProvider } from "../../providers";
 
@@ -16,7 +19,19 @@ export default async function DashboardLayout({
     redirect("/auth/login");
   }
   const subscription = await getCurrentUserSubscription(user.id);
-  console.log({ subscription });
+  const host = ((await headers()).get("host") ?? "").toLowerCase().trim();
+  const showFooter = await shouldShowFooter({ host, routeKind: "builder" });
 
-  return <PlanProvider subscription={subscription}>{children}</PlanProvider>;
+  return (
+    <PlanProvider subscription={subscription}>
+      {children}
+      {showFooter && (
+        <Footer
+          siteName="Weddweb.com"
+          author="Carles del Río Francés"
+          repoUrl="https://www.rio-frances.com"
+        />
+      )}
+    </PlanProvider>
+  );
 }

@@ -88,7 +88,10 @@ export default function BuilderClient({
     refresh,
   } = useSite(user ?? null);
   const { planType, subscription } = usePlan();
-  console.log("XXXXXXXXXXXXXX", { planType, subscription });
+  console.log("XXXXXXBuilderClient { planType, subscription } XXXXXXXX", {
+    planType,
+    subscription,
+  });
 
   const [active, setActive] = useState(0);
   const [currentLang, setCurrentLang] = useState(initialLang);

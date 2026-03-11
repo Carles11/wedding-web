@@ -31,7 +31,6 @@ export default async function TenantPageComponent({
 }: {
   params: { lang: string };
 }) {
-  console.log("[SSR] RENDER", { params });
   const realParams = await params;
   const lang = isValidLanguage(realParams.lang) ? realParams.lang : "en";
   const host = ((await headers()).get("host") ?? "").toLowerCase().trim();
