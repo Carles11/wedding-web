@@ -1,4 +1,4 @@
-import { supabaseAdmin } from "@/4-shared/lib/supabase/supabaseServer";
+import { createSupabaseSSRClient } from "@/4-shared/lib/supabase/server";
 import { addDomainToVercelProject } from "@/4-shared/lib/vercel/vercel-domains";
 
 // Accepts: siteId, domain string
@@ -13,7 +13,9 @@ export async function addCustomDomain(siteId: string, domain: string) {
     throw new Error("Invalid domain format");
   }
 
-  const { data: site, error: fetchError } = await supabaseAdmin
+  const supabase = await createSupabaseSSRClient();
+
+  const { data: site, error: fetchError } = await supabase
     .from("sites")
     .select("pending_custom_domains, domain_statuses, domains")
     .eq("id", siteId)
@@ -39,7 +41,7 @@ export async function addCustomDomain(siteId: string, domain: string) {
   };
 
   // Save to DB before starting Vercel API call (*UX improvement)
-  await supabaseAdmin
+  await supabase
     .from("sites")
     .update({ pending_custom_domains, domain_statuses })
     .eq("id", siteId);
@@ -50,10 +52,7 @@ export async function addCustomDomain(siteId: string, domain: string) {
   // If error, update domain status accordingly for UI/UX
   if (vercelResult.status === "error") {
     domain_statuses[cleanDomain] = "error";
-    await supabaseAdmin
-      .from("sites")
-      .update({ domain_statuses })
-      .eq("id", siteId);
+    await supabase.from("sites").update({ domain_statuses }).eq("id", siteId);
     throw new Error(vercelResult.error || "Failed to add domain to Vercel");
   }
 

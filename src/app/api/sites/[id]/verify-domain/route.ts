@@ -1,4 +1,5 @@
 import { verifyCustomDomain } from "@/2-features/builder/custom-domain/api/verifyCustomDomain";
+import { requireSiteAccess } from "@/4-shared/lib/requireSiteAccess";
 import { RouteContext, getParams } from "@/4-shared/lib/route-context";
 import type { VercelDomainStatusResult } from "@/4-shared/lib/vercel/vercel-domains";
 import { getVercelDomainStatus } from "@/4-shared/lib/vercel/vercel-domains";
@@ -41,6 +42,15 @@ export async function POST(
 ) {
   try {
     const { id } = await getParams(context);
+
+    const access = await requireSiteAccess(id);
+    if (!access.ok) {
+      return NextResponse.json(
+        { error: access.message },
+        { status: access.status },
+      );
+    }
+
     const { domain } = (await req.json()) as { domain: string };
     if (!domain || typeof domain !== "string") {
       return NextResponse.json({ error: "Invalid domain" }, { status: 400 });

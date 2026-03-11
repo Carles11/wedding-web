@@ -1,6 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
 import { removeCustomDomain } from "@/2-features/builder/custom-domain/api/removeCustomDomain";
+import { requireSiteAccess } from "@/4-shared/lib/requireSiteAccess";
 import { RouteContext, getParams } from "@/4-shared/lib/route-context";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(
   req: NextRequest,
@@ -8,6 +9,14 @@ export async function POST(
 ) {
   try {
     const { id } = await getParams(context);
+
+    const access = await requireSiteAccess(id);
+    if (!access.ok) {
+      return NextResponse.json(
+        { error: access.message },
+        { status: access.status },
+      );
+    }
 
     const { domain } = await req.json();
 

@@ -1,11 +1,13 @@
-import { supabaseAdmin } from "@/4-shared/lib/supabase/supabaseServer";
+import { createSupabaseSSRClient } from "@/4-shared/lib/supabase/server";
 import { removeDomainFromVercelProject } from "@/4-shared/lib/vercel/vercel-domains";
 
 export async function removeCustomDomain(siteId: string, domain: string) {
   const cleanDomain = domain.trim().toLowerCase();
 
+  const supabase = await createSupabaseSSRClient();
+
   // 1. Fetch current domain arrays/status from DB
-  const { data: site, error: fetchError } = await supabaseAdmin
+  const { data: site, error: fetchError } = await supabase
     .from("sites")
     .select("domains, pending_custom_domains, domain_statuses")
     .eq("id", siteId)
@@ -22,7 +24,7 @@ export async function removeCustomDomain(siteId: string, domain: string) {
   delete domain_statuses[cleanDomain];
 
   // 3. Save to Supabase (fail if this doesn't work)
-  const { error } = await supabaseAdmin
+  const { error } = await supabase
     .from("sites")
     .update({ domains, pending_custom_domains, domain_statuses })
     .eq("id", siteId);

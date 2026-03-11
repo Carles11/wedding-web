@@ -1,4 +1,5 @@
 import { updateSubdomain } from "@/3-entities/sites/api/updateSubdomain";
+import { requireSiteAccess } from "@/4-shared/lib/requireSiteAccess";
 import { RouteContext, getParams } from "@/4-shared/lib/route-context";
 
 export async function PATCH(
@@ -7,6 +8,14 @@ export async function PATCH(
 ) {
   try {
     const { id } = await getParams(context);
+
+    const access = await requireSiteAccess(id);
+    if (!access.ok) {
+      return Response.json(
+        { message: access.message },
+        { status: access.status },
+      );
+    }
 
     const body = await req.json();
     const { subdomain } = body;

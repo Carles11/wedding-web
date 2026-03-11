@@ -1,4 +1,4 @@
-import { supabaseAdmin } from "@/4-shared/lib/supabase/supabaseServer";
+import { createSupabaseSSRClient } from "@/4-shared/lib/supabase/server";
 import { getVercelDomainStatus } from "@/4-shared/lib/vercel/vercel-domains"; // You'll write this (see below)
 
 /**
@@ -17,8 +17,10 @@ export async function verifyCustomDomain(siteId: string, domain: string) {
     dnsInstructions,
   } = await getVercelDomainStatus(cleanDomain);
 
+  const supabase = await createSupabaseSSRClient();
+
   // 2. Load site from Supabase
-  const { data: site, error: fetchError } = await supabaseAdmin
+  const { data: site, error: fetchError } = await supabase
     .from("sites")
     .select("domains, pending_custom_domains, domain_statuses")
     .eq("id", siteId)
@@ -49,7 +51,7 @@ export async function verifyCustomDomain(siteId: string, domain: string) {
   }
 
   // 4. Save back to Supabase
-  const { error: updateError } = await supabaseAdmin
+  const { error: updateError } = await supabase
     .from("sites")
     .update({ domains, pending_custom_domains, domain_statuses })
     .eq("id", siteId);

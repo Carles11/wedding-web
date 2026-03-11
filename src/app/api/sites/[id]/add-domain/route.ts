@@ -1,7 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
-import { RouteContext, getParams } from "@/4-shared/lib/route-context";
 import { fetchBuilderTranslations } from "@/4-shared/api/builder/getTranslations";
+import { requireSiteAccess } from "@/4-shared/lib/requireSiteAccess";
+import { RouteContext, getParams } from "@/4-shared/lib/route-context";
 import { addCustomDomainWithRedirectVariants } from "@/4-shared/lib/vercel/addCustomDomainWithRedirectVariants";
+import { NextRequest, NextResponse } from "next/server";
 
 // Helper to select the language (default fallback 'en' if not specified/requested)
 function getLang(req: NextRequest): string {
@@ -37,6 +38,14 @@ export async function POST(
             translations["builder.domain.invalid_site_id"] || "Invalid site id",
         },
         { status: 400 },
+      );
+    }
+
+    const access = await requireSiteAccess(id);
+    if (!access.ok) {
+      return NextResponse.json(
+        { error: access.message },
+        { status: access.status },
       );
     }
 

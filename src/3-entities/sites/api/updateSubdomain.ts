@@ -1,12 +1,14 @@
-import { supabaseAdmin } from "@/4-shared/lib/supabase/supabaseServer";
+import { createSupabaseSSRClient } from "@/4-shared/lib/supabase/server";
 import { isValidSubdomain } from "@/4-shared/utils/validations";
 
 export async function updateSubdomain(siteId: string, subdomain: string) {
   const subdomainIsValid = isValidSubdomain(subdomain);
   if (!subdomainIsValid) throw new Error("Invalid or reserved subdomain");
 
+  const supabase = await createSupabaseSSRClient();
+
   // 1. Load current domains from DB
-  const { data: siteRow, error: fetchError } = await supabaseAdmin
+  const { data: siteRow, error: fetchError } = await supabase
     .from("sites")
     .select("domains")
     .eq("id", siteId)
@@ -32,7 +34,7 @@ export async function updateSubdomain(siteId: string, subdomain: string) {
   ];
 
   // 4. Check for subdomain collision
-  const { data: existing } = await supabaseAdmin
+  const { data: existing } = await supabase
     .from("sites")
     .select("id")
     .eq("subdomain", subdomain)
@@ -41,7 +43,7 @@ export async function updateSubdomain(siteId: string, subdomain: string) {
   if (existing) throw new Error("Subdomain already taken");
 
   // 5. Update both subdomain and domains as before
-  const { error } = await supabaseAdmin
+  const { error } = await supabase
     .from("sites")
     .update({
       subdomain,
