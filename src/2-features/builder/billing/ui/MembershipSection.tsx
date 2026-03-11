@@ -1,6 +1,9 @@
 "use client";
+
+import { useRouter, useSearchParams } from "next/navigation";
+
+import { isValidLanguage } from "@/4-shared/helpers/isValidLanguage";
 import { PlanType } from "@/4-shared/types";
-import { useRouter } from "next/navigation";
 
 interface Props {
   planType: PlanType;
@@ -14,6 +17,10 @@ export default function MembershipSection({
   translations,
 }: Props) {
   const router = useRouter();
+  const params = useSearchParams();
+
+  const langRaw = params.get("lang"); // langRaw: string | null
+  const lang = isValidLanguage(langRaw ?? undefined) ? (langRaw ?? "en") : "en";
 
   const planLabel = {
     free: translations["builder.billing.current_plan_free"],
@@ -67,7 +74,7 @@ export default function MembershipSection({
             <button
               type="button"
               className="px-5 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition"
-              onClick={() => router.push("/upgrade")}
+              onClick={() => router.push(`/marketing/pricing?lang=${lang}`)}
             >
               {translations["builder.billing.upgrade_btn"]}
             </button>
@@ -77,7 +84,9 @@ export default function MembershipSection({
             <button
               type="button"
               className="px-5 py-2.5 bg-gray-200 text-gray-800 text-sm font-medium rounded-md hover:bg-gray-300 transition"
-              onClick={() => router.push(`/builder/${siteId}/account/billing`)}
+              onClick={() =>
+                router.push(`/builder/${siteId}/account/billing?lang=${lang}`)
+              }
             >
               {translations["builder.billing.manage_btn"]}
             </button>
@@ -87,7 +96,7 @@ export default function MembershipSection({
 
       <div
         className="mt-3 text-sm text-blue-700 underline cursor-pointer hover:text-blue-800 transition"
-        onClick={() => router.push("/pricing")}
+        onClick={() => router.push(`/marketing/pricing?lang=${lang}`)}
       >
         {translations["builder.billing.learn_more"]}
       </div>

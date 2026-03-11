@@ -1,20 +1,20 @@
 "use client";
 
 import { getPlanFeatures } from "@/3-entities/user/billing/plan";
-import type { PlanType, Subscription } from "@/4-shared/types";
+import type {
+  PlanContextProps,
+  PlanType,
+  Subscription,
+} from "@/4-shared/types";
 import type { ReactNode } from "react";
 import { createContext, useContext, useMemo } from "react";
-
-interface PlanContextProps {
-  planType: PlanType;
-  subscription: Subscription | null;
-  features: unknown;
-}
 
 const PlanContext = createContext<PlanContextProps>({
   planType: "free",
   subscription: null,
   features: getPlanFeatures("free"),
+  usage: null,
+  lastInvoice: null,
 });
 
 export const PlanProvider = ({
@@ -30,7 +30,15 @@ export const PlanProvider = ({
   const features = useMemo(() => getPlanFeatures(planType), [planType]);
 
   return (
-    <PlanContext.Provider value={{ planType, subscription, features }}>
+    <PlanContext.Provider
+      value={{
+        planType,
+        subscription,
+        features,
+        usage: null,
+        lastInvoice: null,
+      }}
+    >
       {children}
     </PlanContext.Provider>
   );
