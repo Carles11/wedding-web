@@ -200,12 +200,16 @@ export default function ImagesBuilderStep({
 
   function publicUrlFor(image: ImageRow): string | null {
     if (!image?.url) return null;
-
     const base = getPublicUrlForImage({ url: image.url });
     if (!base) return null;
 
-    // 🔥 cache buster so Next/Image refetches immediately
-    return `${base}?t=${image.created_at ?? Date.now()}`;
+    // Only use a **stable** cache-buster, never Date.now() here!
+    const cacheBuster =
+      typeof image.created_at === "string"
+        ? image.created_at
+        : image.id || "missing";
+
+    return `${base}?t=${cacheBuster}`;
   }
 
   function ImageCard({

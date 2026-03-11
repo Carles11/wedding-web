@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useCallback, useRef } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 
 /**
  * ScrollToTopButton
@@ -64,7 +64,7 @@ export default function ScrollToTopButton({
         handleClick();
       }
     },
-    [handleClick]
+    [handleClick],
   );
 
   // Inline styles for positioning and size (so consumers can pass tailwind-less offsets)
@@ -127,14 +127,7 @@ export default function ScrollToTopButton({
  * Hook: prefers-reduced-motion
  */
 function usePrefersReducedMotion(): boolean {
-  const [prefersReduced, setPrefersReduced] = useState(() => {
-    if (
-      typeof window === "undefined" ||
-      typeof window.matchMedia === "undefined"
-    )
-      return false;
-    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  });
+  const [prefersReduced, setPrefersReduced] = useState(false);
 
   useEffect(() => {
     if (
@@ -142,19 +135,19 @@ function usePrefersReducedMotion(): boolean {
       typeof window.matchMedia === "undefined"
     )
       return;
+
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setPrefersReduced(mq.matches);
+
     const handler = (ev: MediaQueryListEvent) => setPrefersReduced(ev.matches);
-    // matchMedia.addEventListener is not available in older Safari; fallback
+
+    // Add event listeners (modern first, fallback for older Safari)
     if (typeof mq.addEventListener === "function") {
       mq.addEventListener("change", handler);
       return () => mq.removeEventListener("change", handler);
     } else {
-      // legacy fallback for older Safari
       mq.addListener(handler);
-      return () => {
-        // legacy fallback for older Safari
-        mq.removeListener(handler);
-      };
+      return () => mq.removeListener(handler);
     }
   }, []);
 

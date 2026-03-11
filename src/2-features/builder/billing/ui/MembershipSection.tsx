@@ -6,8 +6,6 @@ interface Props {
   planType: PlanType;
   translations: Record<string, string>;
   siteId: string;
-
-  // Add more props if you have: renewalDate, billingMethod, etc
 }
 
 export default function MembershipSection({
@@ -19,46 +17,66 @@ export default function MembershipSection({
 
   const planLabel = {
     free: translations["builder.billing.current_plan_free"],
-    pro: translations["builder.billing.current_plan_pro"],
+    premium: translations["builder.billing.current_plan_premium"],
     agency_monthly: translations["builder.billing.current_plan_agency_monthly"],
     agency_yearly: translations["builder.billing.current_plan_agency_yearly"],
   }[planType];
 
+  const featuresHtml =
+    planType === "free"
+      ? translations["builder.billing.features_free"]
+      : planType === "agency_monthly" || planType === "agency_yearly"
+        ? translations["builder.billing.features_paid_agency"]
+        : translations["builder.billing.features_paid"];
+
+  const isAgency =
+    planType === "agency_monthly" || planType === "agency_yearly";
+  const canUpgrade = planType === "free";
+  const canManage = planType === "premium" || isAgency;
+
   return (
     <section className="mt-12">
-      <h4 className="font-semibold mb-2">
+      <h4 className="font-semibold text-gray-900 mb-4">
         {translations["builder.billing.membership_title"]}
       </h4>
-      <div className="border rounded bg-gray-50 p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <div className="font-medium text-gray-700">
-            {translations["builder.billing.current_plan"]}: {planLabel}
+
+      <div className="border rounded-lg bg-gray-50 p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-6 transition hover:shadow-sm">
+        {/* LEFT SIDE */}
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-3">
+            <span className="text-sm text-gray-600">
+              {translations["builder.billing.current_plan"]}
+            </span>
+
+            <span className="px-2.5 py-1 text-xs font-medium rounded bg-white border text-gray-700">
+              {planLabel}
+            </span>
           </div>
+
           <div
-            className="mt-1 text-xs text-gray-500"
+            className="text-sm text-gray-500 leading-relaxed"
             dangerouslySetInnerHTML={{
-              __html:
-                planType === "free"
-                  ? translations["builder.billing.features_free"]
-                  : translations["builder.billing.features_paid"],
+              __html: featuresHtml,
             }}
           />
         </div>
-        <div className="flex flex-col gap-2">
-          {/* Only show upgrade if not already on top tier */}
-          {planType === "free" && (
+
+        {/* RIGHT SIDE */}
+        <div className="flex flex-col sm:flex-row gap-3 shrink-0">
+          {canUpgrade && (
             <button
               type="button"
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+              className="px-5 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition"
               onClick={() => router.push("/upgrade")}
             >
               {translations["builder.billing.upgrade_btn"]}
             </button>
           )}
-          {["monthly", "yearly"].includes(planType) && (
+
+          {canManage && (
             <button
               type="button"
-              className="px-4 py-2 bg-gray-200 text-gray-800 rounded"
+              className="px-5 py-2.5 bg-gray-200 text-gray-800 text-sm font-medium rounded-md hover:bg-gray-300 transition"
               onClick={() => router.push(`/builder/${siteId}/account/billing`)}
             >
               {translations["builder.billing.manage_btn"]}
@@ -66,8 +84,9 @@ export default function MembershipSection({
           )}
         </div>
       </div>
+
       <div
-        className="mt-2 text-xs text-blue-700 underline cursor-pointer"
+        className="mt-3 text-sm text-blue-700 underline cursor-pointer hover:text-blue-800 transition"
         onClick={() => router.push("/pricing")}
       >
         {translations["builder.billing.learn_more"]}
