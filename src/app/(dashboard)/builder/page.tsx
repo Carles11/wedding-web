@@ -1,12 +1,7 @@
 // Remove ALL fetching/redirecting for user here!
+import BuilderClient from "@/0-pages/(builder)/BuilderClient";
 import { fetchBuilderTranslations } from "@/4-shared/api/builder/getTranslations";
-import BuilderClient from "./BuilderClient";
-import { SUPPORTED_LANGUAGES } from "@/4-shared/config/i18n";
-import type { SupportedLanguage } from "@/4-shared/config/i18n";
-
-function isValidLanguage(lang: string | undefined): lang is SupportedLanguage {
-  return !!lang && SUPPORTED_LANGUAGES.includes(lang as SupportedLanguage);
-}
+import { isValidLanguage } from "@/4-shared/helpers/isValidLanguage";
 
 export default async function BuilderPage({
   searchParams,

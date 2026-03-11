@@ -1,50 +1,22 @@
 import { getSiteByDomain } from "@/4-shared/lib/getSiteByDomain";
-import { generateEventSchema } from "@/4-shared/lib/seo/generateEventSchema";
-import { JsonLd } from "@/4-shared/ui/seo/JsonLd";
+import { getMergedTranslations } from "@/4-shared/lib/i18n";
+import { generateSiteMetadata } from "@/4-shared/lib/seo/generateSiteMetadata";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 
-import { fetchAccommodationEntriesForTenant } from "@/3-entities/accommodation/api/fetchAccommodationEntriesForTenant";
-import { fetchImagesForTenantSite } from "@/3-entities/images/api/fetchImagesForTenantSite";
-import { fetchProgramSectionDataForTenant } from "@/3-entities/program_events/api/fetchProgramDataForTenant";
-import { fetchContactSection } from "@/3-entities/sections/api/fetchContactSection";
-import { fetchWeddingGiftSectionDataForTenant } from "@/3-entities/wedding_gifts/api/fetchWeddingGiftSectionDataForTenant";
-import { fetchWhatToSeeDataForTenant } from "@/3-entities/what_to_see/api/fetchWhatToSeeDataForTenant";
+// --- 1. Page UI: export from FSD boundary ---
+export { default } from "@/0-pages/(tenant)/TenantPageComponent";
 
-import AccommodationSection from "@/2-features/tenant/sections/ui/AccommodationSection";
-import ContactSection from "@/2-features/tenant/sections/ui/ContactSection";
-import DetailsSection from "@/2-features/tenant/sections/ui/DetailsSection";
-import HeroSection from "@/2-features/tenant/sections/ui/HeroSection";
-import ProgramSectionComponent from "@/2-features/tenant/sections/ui/ProgramSection";
-import WeddingGiftSection from "@/2-features/tenant/sections/ui/WeddingGiftSection";
-import WhatElseSection from "@/2-features/tenant/sections/ui/WhatElseSection";
-
-import { LanguageToggle } from "@/2-features/tenant/language-toggle/ui/LanguageToggle";
-import TopMenu from "@/2-features/tenant/top-menu/ui/TopMenu";
-import Heading from "@/4-shared/ui/commons/typography/Heading";
-
-import { getMergedTranslations } from "@/4-shared/lib/i18n";
-import { ProgramSection } from "@/4-shared/types";
-
-export const dynamic = "force-dynamic";
-
-/**
- * Generate SEO metadata for tenant wedding sites
- * - Dynamic title/description per site and language
- * - Open Graph tags for social sharing
- * - hreflang alternates for multilingual SEO
- */
+// --- 2. Page metadata: define and export here ---
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ lang: string }>;
+  params?: { lang?: string }; // <- union with undefined for safety
 }): Promise<Metadata> {
-  const { lang } = await params;
+  const realParams = await params;
+  const lang = realParams?.lang ?? "en";
   const host = ((await headers()).get("host") ?? "").toLowerCase().trim();
   const site = await getSiteByDomain(host);
-  const siteId = site?.id ?? null;
-
-  const translations = await getMergedTranslations(siteId, lang, "en");
 
   if (!site) {
     return {
@@ -54,236 +26,16 @@ export async function generateMetadata({
   }
 
   const baseUrl = `https://${host}`;
+  const translations = await getMergedTranslations(site.id, lang, "en");
 
-  const heroFromi18n = {
-    title: translations["sections.hero.title"] ?? "",
-    description: translations["sections.hero.description"] ?? "",
-  };
-
-  // Get available languages from site
-  const availableLangs =
-    Array.isArray(site.languages) && site.languages.length > 0
-      ? site.languages
-      : [site.default_lang || "ca"];
-
-  // Build hreflang alternates
-  const languages: Record<string, string> = {};
-  availableLangs.forEach((l) => {
-    languages[l] = `${baseUrl}/${l}`;
-  });
-
-  return {
-    title: heroFromi18n.title,
-    description: heroFromi18n.description,
-    openGraph: {
-      title: heroFromi18n.title,
-      description: heroFromi18n.description,
-      type: "website",
-      locale: lang === "ca" ? "ca_ES" : lang === "es" ? "es_ES" : "en_US",
-      url: `${baseUrl}/${lang}`,
-      siteName: heroFromi18n.title,
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: heroFromi18n.title,
-      description: heroFromi18n.description,
-    },
-    alternates: {
-      canonical: `${baseUrl}/${lang}`,
-      languages,
-    },
-    robots: {
-      index: true,
-      follow: true,
-    },
-  };
-}
-
-export default async function HomePage(props: {
-  params: Promise<{ lang: string }>;
-}) {
-  const realParams = await props.params;
-  const lang = realParams.lang ?? "ca";
-
-  const host = ((await headers()).get("host") ?? "").toLowerCase().trim();
-
-  const site = await getSiteByDomain(host);
-  const siteId = site?.id ?? null;
-
-  const availableLangs =
-    Array.isArray(site?.languages) && site.languages.length > 0
-      ? site.languages
-      : site?.default_lang
-        ? [site.default_lang]
-        : ["en"];
-
-  const translations = await getMergedTranslations(siteId, lang, "en");
-
-  if (!siteId) {
-    return (
-      <div className="w-full flex flex-col items-center justify-center min-h-[60vh] p-8">
-        <Heading as="h1" className="text-3xl md:text-4xl mb-4 text-red-700">
-          {translations["event_not_found_title"] ?? "Wedding Event Not Found"}
-        </Heading>
-        <p className="text-lg text-gray-600 max-w-lg text-center">
-          {translations["event_not_found_body"] ??
-            "This wedding website is not yet published or available for this domain:"}{" "}
-          <strong>{host}</strong>
-        </p>
-      </div>
-    );
-  }
-
-  // for hero-section we just need the title/description keys, so we can get them directly from i18n
-  const heroFromi18n = {
-    title: translations[`hero.title.${siteId}`] ?? "",
-    description: translations[`hero.description.${siteId}`] ?? "",
-  };
-
-  // Fetch rest in parallel
-  const [images, programData, accommodations, whatelse, weddingGift, contact] =
-    await Promise.all([
-      fetchImagesForTenantSite(siteId),
-      fetchProgramSectionDataForTenant(siteId),
-      fetchAccommodationEntriesForTenant(siteId),
-      fetchWhatToSeeDataForTenant(siteId),
-      fetchWeddingGiftSectionDataForTenant(siteId),
-      fetchContactSection(siteId),
-    ]);
-
-  // Fetch hero-images for background images in hero and contact sections
-  const heroImage = images[0]?.url ?? ""; // first image for hero section
-  const contactImage = images[1]?.url ?? ""; // second image for contact section
-
-  const { mainEvent, events } = programData;
-
-  // Build a minimal compatible object for the schema
-  const programSectionForSEO: ProgramSection | null = mainEvent
-    ? {
-        id: mainEvent.id,
-        site_id: mainEvent.site_id,
-        type: "program",
-        title: {
-          [lang]: translations["program.event.main-title"] ?? "Main event",
-        },
-        content: {
-          headline: {
-            [lang]: translations["program.event.main-title"] ?? "Main event",
-          },
-          when: {
-            [lang]: mainEvent.time
-              ? `${mainEvent.date} ${mainEvent.time}`
-              : (mainEvent.date ?? ""),
-          },
-          where: {
-            wedding: {
-              [lang]:
-                translations[`program.event.location.${mainEvent.id}`] ?? "",
-            },
-          },
-          description: {
-            [lang]:
-              translations[`program.event.description.${mainEvent.id}`] ?? "",
-          },
-        },
-        sort_order: mainEvent.sort_order ?? 0,
-        created_at: mainEvent.created_at ?? undefined,
-      }
-    : null;
-
-  // Generate structured data for SEO
-  const baseUrl = `https://${host}/${lang}`;
-
-  const eventSchema = generateEventSchema({
-    hero: heroFromi18n,
-    program: programSectionForSEO,
+  return generateSiteMetadata({
+    site,
     lang,
+    translations,
     baseUrl,
-    backgroundImage: heroImage,
+    pageKind: "tenant",
   });
-
-  const normalizedEvents = events.map((ev) => ({
-    ...ev,
-    title: ev.title ?? undefined,
-    location: ev.location ?? undefined,
-    description: ev.description ?? undefined,
-  }));
-  return (
-    <>
-      {/* JSON-LD Structured Data */}
-      <JsonLd data={eventSchema} />
-
-      <div className="relative">
-        {/* Top-left: menu */}
-        <div className="absolute top-3 left-3 z-50 pointer-events-auto">
-          <div className="backdrop-blur-sm rounded-md p-1 shadow-sm">
-            <TopMenu lang={lang} translations={translations} />
-          </div>
-        </div>
-
-        {/* Top-right: language toggle */}
-        <header
-          aria-label="Page controls"
-          className="absolute top-3 right-3 z-50 pointer-events-auto"
-        >
-          <div className="backdrop-blur-sm rounded-md p-1 shadow-sm">
-            <LanguageToggle activeLang={lang} availableLangs={availableLangs} />
-          </div>
-        </header>
-
-        {/* Hero */}
-        {heroFromi18n && (
-          <HeroSection hero={heroFromi18n} backgroundImage={heroImage} />
-        )}
-      </div>
-
-      <main className="flex flex-col gap-0">
-        {/* Program Main */}
-        <ProgramSectionComponent
-          mainEvent={mainEvent}
-          lang={lang}
-          translations={translations}
-        />
-        {/* Details - Full timeline all events */}
-        {normalizedEvents && (
-          <DetailsSection
-            events={normalizedEvents}
-            translations={translations}
-          />
-        )}
-
-        {/* Accommodation */}
-        {accommodations && (
-          <AccommodationSection
-            hotels={accommodations}
-            translations={translations}
-          />
-        )}
-
-        {/* What else */}
-
-        {whatelse && (
-          <WhatElseSection
-            items={whatelse}
-            lang={lang}
-            translations={translations}
-          />
-        )}
-        {/* Wedding Gift */}
-        {weddingGift && (
-          <WeddingGiftSection data={weddingGift} translations={translations} />
-        )}
-
-        {/* Contact */}
-        {contact && (
-          <ContactSection
-            data={contact}
-            lang={lang}
-            translations={translations}
-            backgroundImage={contactImage}
-          />
-        )}
-      </main>
-    </>
-  );
 }
+
+// --- 3. Page runtime directive: must be defined here ---
+export const dynamic = "force-dynamic";

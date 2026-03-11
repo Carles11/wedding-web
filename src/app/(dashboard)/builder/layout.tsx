@@ -2,7 +2,7 @@ import { getCurrentUser } from "@/3-entities/user/api/getCurrentUser";
 import { getCurrentUserSubscription } from "@/3-entities/user/api/getCurrentUserSubscription";
 import { redirect } from "next/navigation"; // Add this line
 import { ReactNode } from "react";
-import { PlanProvider } from "../providers";
+import { PlanProvider } from "../../providers";
 
 type DashboardLayoutProps = {
   children: ReactNode;

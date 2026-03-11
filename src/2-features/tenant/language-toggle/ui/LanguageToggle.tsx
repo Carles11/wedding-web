@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { LanguageToggleProps } from "@/4-shared/types";
+import Link from "next/link";
 
 export function LanguageToggle({
   activeLang,
@@ -24,7 +24,7 @@ export function LanguageToggle({
               `}
               hrefLang={lang}
               prefetch={true}
-              scroll={false}
+              // Remove scroll={false} to scroll to top on language change
             >
               {lang.toUpperCase()}
             </Link>

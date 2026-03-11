@@ -1,10 +1,9 @@
+import MarketingPageComponent from "@/0-pages/(marketing)/MarketingPageComponent";
 import { fetchMarketingTranslations } from "@/4-shared/api/marketing";
-import MarketingPageWrapper from "@/app/(marketing)/_components/MarketingPageWrapper";
+import type { SupportedLanguage } from "@/4-shared/config/i18n";
+import { SUPPORTED_LANGUAGES } from "@/4-shared/config/i18n";
 import { getSEOMetadata } from "@/4-shared/config/seo";
 import type { Metadata } from "next";
-import { SUPPORTED_LANGUAGES } from "@/4-shared/config/i18n";
-import type { SupportedLanguage } from "@/4-shared/config/i18n";
-
 export const dynamic = "force-dynamic";
 
 function isValidLanguage(lang: string | undefined): lang is SupportedLanguage {
@@ -71,6 +70,6 @@ export default async function MarketingPage({
   const translations = await fetchMarketingTranslations(lang, "en");
 
   return (
-    <MarketingPageWrapper initialLang={lang} translations={translations} />
+    <MarketingPageComponent initialLang={lang} translations={translations} />
   );
 }

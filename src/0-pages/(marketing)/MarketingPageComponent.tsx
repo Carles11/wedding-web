@@ -14,7 +14,7 @@ interface Props {
   translations: Record<string, string>;
 }
 
-export default function MarketingPageWrapper({
+export default function MarketingPageComponent({
   initialLang = "en",
   translations,
 }: Props) {
