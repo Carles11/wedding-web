@@ -1,5 +1,12 @@
 // Plan types must match DB AND Stripe config
-export type PlanType = "free" | "pro" | "agency_monthly" | "agency_yearly";
+import { PLAN_DEFINITIONS } from "@/4-shared/config/plans/planDefinitions";
+
+const PLAN_TYPES = Object.keys(PLAN_DEFINITIONS) as Array<
+  keyof typeof PLAN_DEFINITIONS
+>;
+
+export type PlanType = (typeof PLAN_TYPES)[number];
+
 export type UserSubscriptionStatus =
   | "active"
   | "canceled"

@@ -5,7 +5,7 @@ export const PLAN_DEFINITIONS = {
     stripeProductId: "prod_U7LiIVoZ9cCn29",
     stripePriceId: "price_1T971S0Aqqbt2X3BjtUToGpA",
   },
-  pro: {
+  premium: {
     name: "PREMIUM",
     // PRO features and info
     stripeProductId: "prod_U7LgorlMU8UTVU",
