@@ -64,6 +64,7 @@ export default function OnboardingClient({ translations }: Props) {
           <PricingTable
             translations={translations}
             type="private"
+            lang={currentLang}
             onSelect={handlePlanSelect}
           />
         </div>

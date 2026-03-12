@@ -7,14 +7,24 @@ function formatLimit(val: number, t: Record<string, string>, prop: string) {
   return val;
 }
 
+function tr(
+  translations: Record<string, string>,
+  key: string,
+  fallback: string,
+) {
+  return translations[key] ?? fallback;
+}
+
 export default function PricingTable({
   translations,
   type,
   onSelect,
+  lang = "en",
 }: {
   translations: Record<string, string>;
   type: "private" | "agency";
   onSelect?: (plan: PlanType) => void;
+  lang?: string;
 }) {
   const planKeys = Object.keys(PLAN_DEFINITIONS) as PlanType[];
 
@@ -31,10 +41,20 @@ export default function PricingTable({
         const formattedPrice =
           def.price === -1
             ? null
-            : new Intl.NumberFormat("en", {
+            : new Intl.NumberFormat(lang, {
                 style: "currency",
                 currency: def.currency,
               }).format(def.price);
+
+        const planName = tr(
+          translations,
+          `pricing.plan.${plan}.name`,
+          def.name,
+        );
+
+        const localizedFeatures = def.featuresList.map((feat, index) =>
+          tr(translations, `pricing.plan.${plan}.feature_${index + 1}`, feat),
+        );
 
         return (
           <div
@@ -54,7 +74,7 @@ export default function PricingTable({
 
             {/* PLAN TITLE */}
             <div className="mb-6 text-center">
-              <h3 className="text-xl font-semibold">{def.name}</h3>
+              <h3 className="text-xl font-semibold">{planName}</h3>
             </div>
 
             {/* PRICE */}
@@ -72,13 +92,15 @@ export default function PricingTable({
                   )}
                 </>
               ) : (
-                <p className="text-2xl font-semibold">Free</p>
+                <p className="text-2xl font-semibold">
+                  {tr(translations, "pricing.free", "Free")}
+                </p>
               )}
             </div>
 
             {/* FEATURES */}
             <ul className="mb-6 space-y-3 text-sm">
-              {def.featuresList.map((feat, i) => (
+              {localizedFeatures.map((feat, i) => (
                 <li key={i} className="flex items-start gap-3">
                   <span className="mt-1 flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-xs text-blue-600">
                     ✓
@@ -94,7 +116,13 @@ export default function PricingTable({
                 <div className="space-y-2">
                   {Object.entries(def.limits).map(([prop, val]) => (
                     <div key={prop} className="flex justify-between">
-                      <span className="text-gray-500 capitalize">{prop}</span>
+                      <span className="text-gray-500 capitalize">
+                        {tr(
+                          translations,
+                          `pricing.limit.${prop}`,
+                          prop.replace(/([A-Z])/g, " $1").trim(),
+                        )}
+                      </span>
                       <span className="font-medium">
                         {formatLimit(val as number, translations, prop)}
                       </span>

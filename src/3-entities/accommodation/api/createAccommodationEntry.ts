@@ -1,19 +1,17 @@
-import { FREE_ACCOMMODATION_LIMIT } from "@/4-shared/config/limits/usage-limits";
+import { canUseQuota } from "@/4-shared/helpers/billing/entitlements";
 import { createClient } from "@/4-shared/lib/supabase/client";
 import type {
   AccommodationEntry,
   AccommodationFormValues,
+  PlanType,
 } from "@/4-shared/types";
 
-// Update signature: form values type, not AccommodationEntry!
 export async function createAccommodationEntry(
   siteId: string,
   entry: AccommodationFormValues,
+  planType: PlanType = "free",
 ): Promise<AccommodationEntry | null> {
-  const isProUser = true; // TODO stub — do not check subscription in this MVP
-
   if (!siteId) return null;
-  // Check plan limit
   const supabase = await createClient();
   const { data: existingRows, error: fetchError } = await supabase
     .from("accommodations")
@@ -28,11 +26,10 @@ export async function createAccommodationEntry(
     return null;
   }
 
-  if (!isProUser && (existingRows?.length ?? 0) >= FREE_ACCOMMODATION_LIMIT) {
+  if (!canUseQuota(planType, "accommodations", existingRows?.length ?? 0)) {
     return null;
   }
 
-  // Insert new accommodation, adding site_id (not in form values!)
   const { data, error } = await supabase
     .from("accommodations")
     .insert([{ site_id: siteId, ...entry }])

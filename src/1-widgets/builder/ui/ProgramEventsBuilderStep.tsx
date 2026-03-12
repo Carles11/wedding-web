@@ -7,11 +7,15 @@ import {
   updateProgramEvent,
 } from "@/3-entities/program_events/api";
 import type { SupportedLanguage } from "@/4-shared/config/i18n";
-import { FREE_EVENT_LIMIT } from "@/4-shared/config/limits/usage-limits";
+import {
+  canUseQuota,
+  getPlanLimit,
+} from "@/4-shared/helpers/billing/entitlements";
 import { formatTime, timeToMinutes } from "@/4-shared/helpers/formatTime";
 import { interpolate } from "@/4-shared/helpers/interpolateVars";
 import { notify } from "@/4-shared/lib/toast/toast";
 import type {
+  PlanType,
   ProgramEvent,
   ProgramEventTranslation,
   Site,
@@ -38,6 +42,7 @@ type Props = {
   refresh: () => void;
   lang: string;
   translations: Record<string, string>;
+  planType: PlanType;
 };
 
 // Day keys and labels, sourced from translations
@@ -66,6 +71,7 @@ export default function ProgramEventsBuilderStep({
   site,
   refresh,
   translations,
+  planType,
 }: Props) {
   const formRef = useRef<HTMLDivElement | null>(null);
 
@@ -83,8 +89,7 @@ export default function ProgramEventsBuilderStep({
   const [form, setForm] = useState<Partial<ProgramEvent>>({
     day_tag: "wedding_day",
   });
-
-  const isProUser = true; // TODO stub — do not check subscription in this MVP
+  const eventsLimit = getPlanLimit(planType, "events");
 
   const languages = useMemo(() => {
     if (!site) return ["en"];
@@ -133,8 +138,7 @@ export default function ProgramEventsBuilderStep({
   }
 
   function canAddMore() {
-    if (isProUser) return true;
-    return events.length < FREE_EVENT_LIMIT;
+    return canUseQuota(planType, "events", events.length);
   }
 
   function startCreate() {
@@ -471,9 +475,13 @@ export default function ProgramEventsBuilderStep({
           t(
             translations,
             "builder.program_events.info",
-            "Events are grouped by Day Before, Wedding Day, and Day After. Free plan supports up to {FREE_EVENT_LIMIT} events total. Title and location are required in the site default language ({defaultLang}).",
+            "Events are grouped by Day Before, Wedding Day, and Day After. Free plan supports up to {limit} events total. Title and location are required in the site default language ({defaultLang}).",
           ),
-          { FREE_EVENT_LIMIT, defaultLang },
+          {
+            limit: eventsLimit,
+            FREE_EVENT_LIMIT: eventsLimit,
+            defaultLang,
+          },
         )}
       </div>
 
@@ -908,15 +916,18 @@ export default function ProgramEventsBuilderStep({
         </div>
       )}
 
-      {!canAddMore() && !isProUser && (
+      {!canAddMore() && (
         <div className="mt-3 text-sm text-gray-600">
           {interpolate(
             t(
               translations,
               "builder.program_events.limit_reached",
-              "Free plan limit reached ({FREE_EVENT_LIMIT} events). Upgrade to add more.",
+              "Free plan limit reached ({limit} events). Upgrade to add more.",
             ),
-            { FREE_EVENT_LIMIT },
+            {
+              limit: eventsLimit,
+              FREE_EVENT_LIMIT: eventsLimit,
+            },
           )}
           <button className="underline text-blue-600">
             {t(

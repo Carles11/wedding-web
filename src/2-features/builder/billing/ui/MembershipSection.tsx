@@ -2,8 +2,9 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 
+import { PLAN_DEFINITIONS } from "@/4-shared/config/plans/planDefinitions";
 import { isValidLanguage } from "@/4-shared/helpers/isValidLanguage";
-import { PlanType } from "@/4-shared/types";
+import type { PlanType } from "@/4-shared/types";
 
 interface Props {
   planType: PlanType;
@@ -28,11 +29,14 @@ export default function MembershipSection({
     // TODO(agencies): restore agency_monthly / agency_yearly labels when launching agency tier
   }[planType];
 
-  const featuresHtml =
-    planType === "free"
-      ? translations["builder.billing.features_free"]
-      : translations["builder.billing.features_paid"];
-  // TODO(agencies): restore agency branch: planType === "agency_monthly" || planType === "agency_yearly"
+  const planDefinition = PLAN_DEFINITIONS[planType];
+  const localizedFeatures = planDefinition.featuresList.map(
+    (feature, index) => {
+      return (
+        translations[`pricing.plan.${planType}.feature_${index + 1}`] || feature
+      );
+    },
+  );
 
   const canUpgrade = planType === "free";
   const canManage = planType === "premium";
@@ -56,12 +60,11 @@ export default function MembershipSection({
             </span>
           </div>
 
-          <div
-            className="text-sm text-gray-500 leading-relaxed"
-            dangerouslySetInnerHTML={{
-              __html: featuresHtml,
-            }}
-          />
+          <ul className="space-y-2 text-sm text-gray-500 leading-relaxed">
+            {localizedFeatures.map((feature, index) => (
+              <li key={`${planType}-feature-${index}`}>{feature}</li>
+            ))}
+          </ul>
         </div>
 
         {/* RIGHT SIDE */}

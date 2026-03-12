@@ -9,8 +9,7 @@ import ProgramEventsBuilderStep from "@/1-widgets/builder/ui/ProgramEventsBuilde
 import WeddingGiftBuilderStep from "@/1-widgets/builder/ui/WeddingGiftBuilderStep";
 import WhatToSeeBuilderStep from "@/1-widgets/builder/ui/WhatToSeeBuilderStep";
 
-import { SUPPORTED_LANGUAGES } from "@/4-shared/config/i18n";
-import { FREE_LANGUAGES_LIMIT } from "@/4-shared/config/limits/usage-limits";
+import { getPlanLimit } from "@/4-shared/helpers/billing/entitlements";
 import { useSite } from "@/4-shared/hooks/useSite";
 import { useSupabaseAuth } from "@/4-shared/hooks/useSupabaseAuth";
 import { usePlan } from "@/app/providers";
@@ -100,8 +99,7 @@ export default function BuilderClient({
   const [hasProgramEvents, setHasProgramEvents] = useState(false);
   const [hasContact, setHasContact] = useState(false);
 
-  const langLimit =
-    planType === "free" ? FREE_LANGUAGES_LIMIT : SUPPORTED_LANGUAGES.length;
+  const langLimit = getPlanLimit(planType, "languages");
 
   // Provision the site if it doesn't exist
   const provisionSite = useCallback(async () => {
@@ -302,6 +300,7 @@ export default function BuilderClient({
                     refresh={refresh}
                     lang={currentLang}
                     translations={translations}
+                    planType={planType}
                   />
                 )}
                 {active === 3 && site && (
@@ -309,6 +308,7 @@ export default function BuilderClient({
                     site={site}
                     lang={currentLang}
                     translations={translations}
+                    planType={planType}
                   />
                 )}
                 {active === 4 && site && (
@@ -317,6 +317,7 @@ export default function BuilderClient({
                     refresh={refresh}
                     lang={currentLang}
                     translations={translations}
+                    planType={planType}
                   />
                 )}
                 {active === 5 && site && (

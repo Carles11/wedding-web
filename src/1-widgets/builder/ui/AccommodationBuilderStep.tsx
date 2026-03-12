@@ -1,30 +1,36 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  createAccommodationEntry,
+  deleteAccommodationEntry,
+  fetchAccommodationEntries,
+  updateAccommodationEntry,
+} from "@/3-entities/accommodation/api";
+import {
+  canUseQuota,
+  getPlanLimit,
+} from "@/4-shared/helpers/billing/entitlements";
+import { interpolate } from "@/4-shared/helpers/interpolateVars";
 import type {
-  Site,
   AccommodationEntry,
   AccommodationFormValues,
+  PlanType,
+  Site,
 } from "@/4-shared/types";
-import {
-  fetchAccommodationEntries,
-  createAccommodationEntry,
-  updateAccommodationEntry,
-  deleteAccommodationEntry,
-} from "@/3-entities/accommodation/api";
-import { FREE_ACCOMMODATION_LIMIT } from "@/4-shared/config/limits/usage-limits";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { StepLayout } from "../step-layout";
-import { interpolate } from "@/4-shared/helpers/interpolateVars";
 
 type Props = {
   site: Site | null;
   lang: string;
   translations: Record<string, string>;
+  planType: PlanType;
 };
 
 export default function AccommodationBuilderStep({
   site,
   translations,
+  planType,
 }: Props) {
   const [items, setItems] = useState<AccommodationEntry[]>([]);
   const [loading, setLoading] = useState(false);
@@ -34,7 +40,7 @@ export default function AccommodationBuilderStep({
   const [isListOpen, setIsListOpen] = useState(true);
 
   const formRef = useRef<HTMLDivElement | null>(null);
-  const isProUser = true;
+  const accommodationLimit = getPlanLimit(planType, "accommodations");
 
   const load = useCallback(async () => {
     if (!site?.id) return;
@@ -55,8 +61,7 @@ export default function AccommodationBuilderStep({
   }, [load]);
 
   function canAddMore() {
-    if (isProUser) return true;
-    return items.length < FREE_ACCOMMODATION_LIMIT;
+    return canUseQuota(planType, "accommodations", items.length);
   }
 
   function scrollToForm() {
@@ -126,7 +131,10 @@ export default function AccommodationBuilderStep({
         interpolate(
           translations["builder.accommodation.error.limit_reached"] ||
             "Free limit reached. Upgrade to add more accommodations.",
-          { FREE_ACCOMMODATION_LIMIT },
+          {
+            limit: accommodationLimit,
+            FREE_ACCOMMODATION_LIMIT: accommodationLimit,
+          },
         ),
       );
       return;
@@ -145,7 +153,7 @@ export default function AccommodationBuilderStep({
         if (!updated) throw new Error("Update failed");
         setItems((prev) => prev.map((i) => (i.id === editingId ? updated : i)));
       } else {
-        const created = await createAccommodationEntry(site.id, form);
+        const created = await createAccommodationEntry(site.id, form, planType);
         if (!created) throw new Error("Create failed");
         setItems((prev) => [...prev, created]);
       }
@@ -236,8 +244,11 @@ export default function AccommodationBuilderStep({
       <div className="text-sm text-gray-600 mb-3">
         {interpolate(
           translations["builder.accommodation.description"] ||
-            "Add hotels or places to stay. Free plan allows up to {FREE_ACCOMMODATION_LIMIT} entries.",
-          { FREE_ACCOMMODATION_LIMIT },
+            "Add hotels or places to stay. Free plan allows up to {limit} entries.",
+          {
+            limit: accommodationLimit,
+            FREE_ACCOMMODATION_LIMIT: accommodationLimit,
+          },
         )}
       </div>
 
@@ -248,9 +259,11 @@ export default function AccommodationBuilderStep({
         >
           <span>{isListOpen ? "▼" : "▶"}</span>
           <span>
-            {translations["builder.accommodation.existing"] ||
-              "Existing accommodations"}{" "}
-            ({items.length})
+            {interpolate(
+              translations["builder.accommodation.existing"] ||
+                "Existing accommodations ({count})",
+              { count: items.length },
+            )}
           </span>
         </button>
       </div>
@@ -432,8 +445,11 @@ export default function AccommodationBuilderStep({
         <div className="mt-3 text-sm text-gray-600">
           {interpolate(
             translations["builder.accommodation.limit_reached_notice"] ||
-              "Free plan limit reached ({FREE_ACCOMMODATION_LIMIT}).",
-            { FREE_ACCOMMODATION_LIMIT },
+              "Free plan limit reached ({limit}).",
+            {
+              limit: accommodationLimit,
+              FREE_ACCOMMODATION_LIMIT: accommodationLimit,
+            },
           )}{" "}
           <button className="underline text-blue-600">
             {translations["builder.accommodation.upgrade"] || "Upgrade"}

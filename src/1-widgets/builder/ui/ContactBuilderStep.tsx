@@ -1,15 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import type { Site, ContactSection } from "@/4-shared/types";
+import { StepLayout } from "@/1-widgets/builder/step-layout";
 import { upsertContactSection } from "@/3-entities/contact/api";
-import { fetchContactSection } from "@/3-entities/sections/api/fetchContactSection";
 import {
   fetchImagesBySite,
   getPublicUrlForImage,
 } from "@/3-entities/images/api";
-import { StepLayout } from "@/1-widgets/builder/step-layout";
+import { fetchContactSection } from "@/3-entities/sections/api/fetchContactSection";
+import type { ContactSection, Site } from "@/4-shared/types";
 import { EMAIL_RE } from "@/4-shared/utils/validations";
+import { useEffect, useState } from "react";
 
 type Props = {
   site: Site | null;
@@ -109,7 +109,10 @@ export default function ContactBuilderStep({
     const groom = (form?.groom as Partner | undefined) ?? {};
 
     if (!validContact(bride) && !validContact(groom)) {
-      setError("At least one partner must have a name and a valid email");
+      setError(
+        translations["builder.contact.error.at_least_one"] ||
+          "At least one partner must have a name and a valid email",
+      );
       return;
     }
 
@@ -120,7 +123,10 @@ export default function ContactBuilderStep({
     };
 
     if (!phoneCheck(bride?.phone) || !phoneCheck(groom?.phone)) {
-      setError("If provided, phone numbers must contain 7–15 digits");
+      setError(
+        translations["builder.contact.error.phone_invalid"] ||
+          "If provided, phone numbers must contain 7-15 digits",
+      );
       return;
     }
 
@@ -164,30 +170,36 @@ export default function ContactBuilderStep({
       onNext={handleSave}
       nextLoading={saving}
       nextDisabled={saving}
-      nextLabel="Save"
+      nextLabel={translations["builder.actions.save"] || "Save"}
       onBack={load}
-      backLabel="Reload"
+      backLabel={translations["builder.contact.reload"] || "Reload"}
       translations={translations}
     >
       <div className="space-y-4">
         <div>
-          <h3 className="text-lg font-medium">Contact</h3>
+          <h3 className="text-lg font-medium">
+            {translations["builder.contact.title"] || "Contact"}
+          </h3>
           <p className="text-sm text-gray-600 mt-1">
-            Provide the main contact details used for RSVP and site contact.
+            {translations["builder.contact.description"] ||
+              "Provide the main contact details used for RSVP and site contact."}
           </p>
         </div>
 
         {loading ? (
-          <p>Loading…</p>
+          <p>{translations["common.loading"] || "Loading..."}</p>
         ) : (
           <div className="space-y-4">
             {contactImageUrl && (
               <div className="max-w-xs">
-                <div className="text-xs text-gray-600 mb-1">Contact image</div>
+                <div className="text-xs text-gray-600 mb-1">
+                  {translations["builder.contact.image_label"] ||
+                    "Contact image"}
+                </div>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={contactImageUrl ?? undefined}
-                  alt="Contact"
+                  alt={translations["builder.contact.image_alt"] || "Contact"}
                   className="w-full h-32 object-cover rounded-lg"
                 />
               </div>
@@ -197,11 +209,13 @@ export default function ContactBuilderStep({
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {/* Bride */}
                 <div className="p-3 border rounded-xl bg-white">
-                  <div className="font-medium">Bride</div>
+                  <div className="font-medium">
+                    {translations["builder.contact.bride"] || "Bride"}
+                  </div>
                   <div className="mt-3 space-y-3">
                     <div>
                       <label className="block text-xs text-gray-600">
-                        Name
+                        {translations["builder.contact.field.name"] || "Name"}
                       </label>
                       <input
                         value={(form?.bride as Partner | undefined)?.name ?? ""}
@@ -214,7 +228,7 @@ export default function ContactBuilderStep({
 
                     <div>
                       <label className="block text-xs text-gray-600">
-                        Email
+                        {translations["builder.contact.field.email"] || "Email"}
                       </label>
                       <input
                         value={
@@ -233,7 +247,8 @@ export default function ContactBuilderStep({
 
                     <div>
                       <label className="block text-xs text-gray-600">
-                        Phone (optional)
+                        {translations["builder.contact.field.phone_optional"] ||
+                          "Phone (optional)"}
                       </label>
                       <input
                         value={
@@ -254,11 +269,13 @@ export default function ContactBuilderStep({
 
                 {/* Groom */}
                 <div className="p-3 border rounded-xl bg-white">
-                  <div className="font-medium">Groom</div>
+                  <div className="font-medium">
+                    {translations["builder.contact.groom"] || "Groom"}
+                  </div>
                   <div className="mt-3 space-y-3">
                     <div>
                       <label className="block text-xs text-gray-600">
-                        Name
+                        {translations["builder.contact.field.name"] || "Name"}
                       </label>
                       <input
                         value={(form?.groom as Partner | undefined)?.name ?? ""}
@@ -271,7 +288,7 @@ export default function ContactBuilderStep({
 
                     <div>
                       <label className="block text-xs text-gray-600">
-                        Email
+                        {translations["builder.contact.field.email"] || "Email"}
                       </label>
                       <input
                         value={
@@ -290,7 +307,8 @@ export default function ContactBuilderStep({
 
                     <div>
                       <label className="block text-xs text-gray-600">
-                        Phone (optional)
+                        {translations["builder.contact.field.phone_optional"] ||
+                          "Phone (optional)"}
                       </label>
                       <input
                         value={
@@ -314,11 +332,16 @@ export default function ContactBuilderStep({
 
               {/* Preview */}
               <div className="mt-6">
-                <div className="font-medium mb-2">Contact section preview</div>
+                <div className="font-medium mb-2">
+                  {translations["builder.contact.preview_title"] ||
+                    "Contact section preview"}
+                </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {(form?.bride as Partner | undefined)?.name && (
                     <div className="p-3 border rounded-xl bg-white">
-                      <div className="font-semibold">Bride</div>
+                      <div className="font-semibold">
+                        {translations["builder.contact.bride"] || "Bride"}
+                      </div>
                       <div className="text-sm">
                         {(form?.bride as Partner).name}
                       </div>
@@ -341,7 +364,9 @@ export default function ContactBuilderStep({
 
                   {(form?.groom as Partner | undefined)?.name && (
                     <div className="p-3 border rounded-xl bg-white">
-                      <div className="font-semibold">Groom</div>
+                      <div className="font-semibold">
+                        {translations["builder.contact.groom"] || "Groom"}
+                      </div>
                       <div className="text-sm">
                         {(form?.groom as Partner).name}
                       </div>

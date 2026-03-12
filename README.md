@@ -161,3 +161,32 @@ This architecture ensures that all public-facing experiences—including tenant 
 ###########################################################################
 ###########################################################################
 ###########################################################################
+
+## Plan Feature Update Guide
+
+Plan feature strings are currently sourced from the plan catalog and optionally overridden by translation keys in the database.
+
+### How Rendering Works Today
+
+1. Plan structure comes from `src/4-shared/config/plans/planCatalog.ts`.
+2. UI components read each plan feature by index (feature 1, feature 2, etc.).
+3. For each feature, UI first tries DB translation key `pricing.plan.<plan>.feature_<index>`.
+4. If the DB key is missing, UI falls back to the value in `planCatalog.ts`.
+
+### How To Update Features Safely
+
+When you change a feature text in `planCatalog.ts` (for example `Unlimited events` -> `Unlimited program events`):
+
+1. Update the feature string in `src/4-shared/config/plans/planCatalog.ts`.
+2. Update matching translation keys in the SQL seed script(s), for all locales:
+
+- `pricing.plan.free.feature_N`
+- `pricing.plan.premium.feature_N`
+
+3. Run the SQL script in Supabase (idempotent with `ON CONFLICT DO UPDATE`).
+4. Reload the UI.
+
+### Important Notes
+
+- Feature keys are index-based (`feature_1`, `feature_2`, ...), so reordering features requires updating translation keys accordingly.
+- Builder translations are cached in memory for a short TTL, so changes may take a few minutes to appear if cache is warm.

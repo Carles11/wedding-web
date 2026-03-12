@@ -27,9 +27,14 @@ export default function PricingCTATable({
           as="h2"
           className="font-ligh text-left tracking-wide drop-shadow-lg max-w-[90%] md:max-w-3xl pb-8"
         >
-          For couples
+          {t["pricing.for_couples"] ?? "For couples"}
         </Heading>
-        <PricingTable translations={t} type="private" onSelect={handleSelect} />
+        <PricingTable
+          translations={t}
+          type="private"
+          lang={lang}
+          onSelect={handleSelect}
+        />
       </div>
       {/* TODO(agencies): un-comment when launching agency tier
       <div className="mb-12">

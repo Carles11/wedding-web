@@ -5,6 +5,7 @@ import HeroMarketing, {
   PricingSection,
   TestimonialsSection,
 } from "@/1-widgets/marketing/ui";
+import { useSupabaseAuth } from "@/4-shared/hooks/useSupabaseAuth";
 import LanguageSelector from "@/4-shared/ui/builder/LanguageSelector";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
@@ -21,6 +22,7 @@ export default function MarketingPageComponent({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const { user, supabase } = useSupabaseAuth();
   const [currentLang, setCurrentLang] = useState(initialLang || "en");
 
   const handleLanguageChange = (lang: string) => {
@@ -32,9 +34,20 @@ export default function MarketingPageComponent({
     router.push(`${pathname}?${params.toString()}`);
   };
 
-  const handlePrimaryClick = () => {
-    const params = new URLSearchParams();
+  const handlePrimaryClick = async () => {
+    const params = new URLSearchParams(searchParams.toString());
     params.set("lang", currentLang);
+
+    // Re-check session at click time to avoid stale/null client state after back navigation.
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (user || session?.user) {
+      router.push(`/builder?${params.toString()}`);
+      return;
+    }
+
     router.push(`/auth/signup?${params.toString()}`);
   };
 

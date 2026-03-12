@@ -1,21 +1,25 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { interpolate } from "@/4-shared/helpers/interpolateVars";
 import type {
   CreateWhatToSeePayload,
+  PlanType,
   Site,
   WhatToSeeEntryFull,
   WhatToSeeTranslation,
 } from "@/4-shared/types";
-import { interpolate } from "@/4-shared/helpers/interpolateVars";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import {
-  fetchWhatToSeeEntries,
   createWhatToSeeEntry,
-  updateWhatToSeeEntry,
   deleteWhatToSeeEntry,
+  fetchWhatToSeeEntries,
+  updateWhatToSeeEntry,
 } from "@/3-entities/what_to_see/api";
-import { FREE_WHATTOSEE_LIMIT } from "@/4-shared/config/limits/usage-limits";
+import {
+  canUseQuota,
+  getPlanLimit,
+} from "@/4-shared/helpers/billing/entitlements";
 import { StepLayout } from "../step-layout";
 
 type Props = {
@@ -23,6 +27,7 @@ type Props = {
   refresh: () => void;
   lang: string;
   translations: Record<string, string>;
+  planType: PlanType;
 };
 
 function t(
@@ -37,6 +42,7 @@ export default function WhatToSeeBuilderStep({
   site,
   refresh,
   translations,
+  planType,
 }: Props) {
   const [items, setItems] = useState<WhatToSeeEntryFull[]>([]);
   const [loading, setLoading] = useState(false);
@@ -46,7 +52,7 @@ export default function WhatToSeeBuilderStep({
   const [collapsed, setCollapsed] = useState(false);
 
   const formRef = useRef<HTMLDivElement | null>(null);
-  const isProUser = true;
+  const whatToSeeLimit = getPlanLimit(planType, "whatToSee");
 
   const languages = useMemo(() => {
     if (!site) return ["en"];
@@ -78,7 +84,7 @@ export default function WhatToSeeBuilderStep({
   }
 
   function canAddMore() {
-    return isProUser || items.length < FREE_WHATTOSEE_LIMIT;
+    return canUseQuota(planType, "whatToSee", items.length);
   }
 
   // Form state for the currently editing/creating item
@@ -318,9 +324,12 @@ export default function WhatToSeeBuilderStep({
           t(
             translations,
             "builder.what_to_see.limit_info",
-            `Add up to ${FREE_WHATTOSEE_LIMIT} recommended places.`,
+            `Add up to ${whatToSeeLimit} recommended places.`,
           ),
-          { FREE_WHATTOSEE_LIMIT: String(FREE_WHATTOSEE_LIMIT) },
+          {
+            limit: whatToSeeLimit,
+            FREE_WHATTOSEE_LIMIT: whatToSeeLimit,
+          },
         )}
       </div>
 
@@ -556,9 +565,12 @@ export default function WhatToSeeBuilderStep({
             t(
               translations,
               "builder.what_to_see.limit_reached",
-              `Free plan limit reached (${FREE_WHATTOSEE_LIMIT}).`,
+              `Free plan limit reached (${whatToSeeLimit}).`,
             ),
-            { FREE_WHATTOSEE_LIMIT: String(FREE_WHATTOSEE_LIMIT) },
+            {
+              limit: whatToSeeLimit,
+              FREE_WHATTOSEE_LIMIT: whatToSeeLimit,
+            },
           )}{" "}
           <button className="underline text-blue-600">
             {t(translations, "builder.what_to_see.button.upgrade", "Upgrade")}
