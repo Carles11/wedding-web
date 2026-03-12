@@ -1,6 +1,5 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
 import { getSiteGeneralContent } from "@/4-shared/api/builder/getSiteGeneralContent";
 import { saveSiteGeneralContent } from "@/4-shared/api/builder/saveSiteGeneralContent";
 import type { SupportedLanguage } from "@/4-shared/config/i18n";
@@ -8,7 +7,8 @@ import {
   SUPPORTED_LANGUAGES,
   SUPPORTED_LANGUAGE_LABELS,
 } from "@/4-shared/config/i18n";
-import type { Site, PlanType } from "@/4-shared/types";
+import type { PlanType, Site } from "@/4-shared/types";
+import React, { useEffect, useState } from "react";
 import { StepLayout } from "../step-layout";
 
 type Props = {
@@ -18,6 +18,8 @@ type Props = {
   translations: Record<string, string>;
   langLimit: number;
   planType: PlanType;
+  /** Called with true once hero title + subtitle are saved for the default language. */
+  setGeneralComplete?: (v: boolean) => void;
 };
 
 export default function GeneralSiteForm({
@@ -26,6 +28,7 @@ export default function GeneralSiteForm({
   translations,
   langLimit,
   planType,
+  setGeneralComplete,
 }: Props) {
   const [languages, setLanguages] = useState<SupportedLanguage[]>([]);
   const [defaultLang, setDefaultLang] = useState<SupportedLanguage>("en");
@@ -36,13 +39,23 @@ export default function GeneralSiteForm({
   >({});
   const [activeLang, setActiveLang] = useState<SupportedLanguage>("en");
   const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [showUpgradeCTA, setShowUpgradeCTA] = useState(false);
 
+  function arraysEqual<T>(a: T[], b: T[]) {
+    if (a.length !== b.length) return false;
+    return a.every((v, i) => v === b[i]);
+  }
+
   // 🔹 Fetch + sync
   const fetchAndApplyGeneralContent = async () => {
-    if (!site) return;
+    if (!site) {
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
     try {
       const res = await getSiteGeneralContent(site.id);
       setLanguages(res.languages);
@@ -64,8 +77,16 @@ export default function GeneralSiteForm({
       );
 
       setActiveLang(res.default_lang);
+
+      // Notify parent whether the default-language hero content is complete
+      const defLang = res.default_lang;
+      setGeneralComplete?.(
+        !!res.titles[defLang]?.trim() && !!res.subtitles[defLang]?.trim(),
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -77,6 +98,21 @@ export default function GeneralSiteForm({
     fetchData();
     // eslint-disable-next-line
   }, [site?.id]);
+
+  if (loading) {
+    return (
+      <StepLayout
+        nextLabel="Save"
+        backLabel="Cancel"
+        backDisabled
+        translations={translations}
+      >
+        <p className="text-sm text-gray-600">
+          {translations["builder.status.loading"] || "Loading..."}
+        </p>
+      </StepLayout>
+    );
+  }
 
   // 🔹 Language toggle
   const handleLangCheckbox = (lang: SupportedLanguage) => {
@@ -99,7 +135,7 @@ export default function GeneralSiteForm({
       return;
     }
 
-    if (languages.length >= langLimit) {
+    if (langLimit !== -1 && languages.length >= langLimit) {
       setShowUpgradeCTA(true);
       return;
     }
@@ -115,6 +151,7 @@ export default function GeneralSiteForm({
   // 🔹 Save
   const handleSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault();
+    if (saving) return;
     setError(null);
     setSuccess(null);
 
@@ -138,13 +175,20 @@ export default function GeneralSiteForm({
       return;
     }
 
+    const nextSubdomain = !site.subdomain ? subdomain.trim().toLowerCase() : "";
+    const existingLanguages = (site.languages ?? []) as SupportedLanguage[];
+    const languagesChanged = !arraysEqual(existingLanguages, languages);
+    const defaultLangChanged = (site.default_lang ?? "en") !== defaultLang;
+    const shouldRefreshSiteMeta =
+      !!nextSubdomain || languagesChanged || defaultLangChanged;
+
     setSaving(true);
     try {
       await saveSiteGeneralContent({
         site_id: site.id,
-        heroId,
+        heroId: site.id,
         content,
-        subdomain: !site.subdomain ? subdomain.trim().toLowerCase() : undefined,
+        subdomain: nextSubdomain || undefined,
         languages,
         default_lang: defaultLang,
       });
@@ -154,7 +198,19 @@ export default function GeneralSiteForm({
           "Saved successfully.",
       );
 
-      refresh();
+      // Re-check completeness after save
+      const defLang = defaultLang;
+      setGeneralComplete?.(
+        !!content[defLang]?.title?.trim() &&
+          !!content[defLang]?.subtitle?.trim(),
+      );
+
+      // Keep the just-saved values in local state. An immediate refetch can read
+      // stale rows and overwrite the inputs with older values right after save.
+      // Only refresh site metadata when it actually changed.
+      if (shouldRefreshSiteMeta) {
+        await refresh();
+      }
     } catch (err: unknown) {
       if (err instanceof Error) setError(err.message);
       else setError("An unknown error occurred.");
@@ -167,6 +223,8 @@ export default function GeneralSiteForm({
       nextLabel="Save"
       backLabel="Cancel"
       onNext={handleSubmit}
+      nextDisabled={saving}
+      nextLoading={saving}
       onBack={() => {
         /* optional: handle cancel/exit here */
       }}
@@ -200,7 +258,9 @@ export default function GeneralSiteForm({
                   onChange={() => handleLangCheckbox(lang)}
                   className="mr-2"
                   disabled={
-                    !languages.includes(lang) && languages.length >= langLimit
+                    langLimit !== -1 &&
+                    !languages.includes(lang) &&
+                    languages.length >= langLimit
                   }
                 />
                 {SUPPORTED_LANGUAGE_LABELS[lang]}

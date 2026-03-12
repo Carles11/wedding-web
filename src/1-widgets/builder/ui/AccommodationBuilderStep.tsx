@@ -17,7 +17,7 @@ import type {
   PlanType,
   Site,
 } from "@/4-shared/types";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { StepLayout } from "../step-layout";
 
 type Props = {
@@ -25,12 +25,15 @@ type Props = {
   lang: string;
   translations: Record<string, string>;
   planType: PlanType;
+  /** Fired whenever the accommodation item count changes (initial load + add/delete). */
+  setItemCount?: (count: number) => void;
 };
 
 export default function AccommodationBuilderStep({
   site,
   translations,
   planType,
+  setItemCount,
 }: Props) {
   const [items, setItems] = useState<AccommodationEntry[]>([]);
   const [loading, setLoading] = useState(false);
@@ -42,23 +45,30 @@ export default function AccommodationBuilderStep({
   const formRef = useRef<HTMLDivElement | null>(null);
   const accommodationLimit = getPlanLimit(planType, "accommodations");
 
-  const load = useCallback(async () => {
+  useEffect(() => {
     if (!site?.id) return;
+    let mounted = true;
     setLoading(true);
     setError(null);
-    try {
-      const rows = await fetchAccommodationEntries(site.id);
-      setItems(rows ?? []);
-    } catch (err: unknown) {
-      setError((err as Error)?.message ?? String(err));
-    } finally {
-      setLoading(false);
-    }
+    fetchAccommodationEntries(site.id)
+      .then((rows) => {
+        if (mounted) setItems(rows ?? []);
+      })
+      .catch((err: unknown) => {
+        if (mounted) setError((err as Error)?.message ?? String(err));
+      })
+      .finally(() => {
+        if (mounted) setLoading(false);
+      });
+    return () => {
+      mounted = false;
+    };
   }, [site?.id]);
 
+  // Notify parent whenever the item count changes (covers initial load + add/delete)
   useEffect(() => {
-    load();
-  }, [load]);
+    setItemCount?.(items.length);
+  }, [items.length, setItemCount]);
 
   function canAddMore() {
     return canUseQuota(planType, "accommodations", items.length);

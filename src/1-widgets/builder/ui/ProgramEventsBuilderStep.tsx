@@ -43,6 +43,7 @@ type Props = {
   lang: string;
   translations: Record<string, string>;
   planType: PlanType;
+  setHasMainProgramEvent?: (hasMain: boolean) => void;
 };
 
 // Day keys and labels, sourced from translations
@@ -72,11 +73,12 @@ export default function ProgramEventsBuilderStep({
   refresh,
   translations,
   planType,
+  setHasMainProgramEvent,
 }: Props) {
   const formRef = useRef<HTMLDivElement | null>(null);
 
   const [events, setEvents] = useState<ProgramEvent[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -125,10 +127,17 @@ export default function ProgramEventsBuilderStep({
   }
 
   useEffect(() => {
-    if (!site?.id) return;
+    if (!site?.id) {
+      setLoading(false);
+      return;
+    }
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [site?.id]);
+
+  useEffect(() => {
+    setHasMainProgramEvent?.(events.some((event) => !!event.is_main_event));
+  }, [events, setHasMainProgramEvent]);
 
   function toggleDay(day: string) {
     setOpenDays((s) => ({
@@ -305,34 +314,34 @@ export default function ProgramEventsBuilderStep({
               "Update failed",
             ),
           );
+
+        // Reflect edit immediately in UI without waiting for a refetch race.
+        setEvents((prev) =>
+          prev.map((e) => {
+            if (e.id !== editingId) {
+              if (
+                form.is_main_event &&
+                form.day_tag === "wedding_day" &&
+                e.day_tag === "wedding_day"
+              ) {
+                return { ...e, is_main_event: false };
+              }
+              return e;
+            }
+            return {
+              ...e,
+              ...updated,
+              title: form.title ?? {},
+              location: form.location ?? {},
+              description: form.description ?? {},
+            } as ProgramEvent;
+          }),
+        );
       } else {
         const created = await createProgramEvent(
           { site_id: site.id, ...structuralFields },
           translationArr,
         );
-
-        if (
-          structuralFields.is_main_event &&
-          structuralFields.day_tag === "wedding_day"
-        ) {
-          // 1. Turn off other main events in DB
-          const otherWeddingEvents = events.filter(
-            (e) => e.day_tag === "wedding_day" && e.is_main_event,
-          );
-
-          await Promise.all(
-            otherWeddingEvents.map((e) =>
-              updateProgramEvent(e.id, { is_main_event: false }),
-            ),
-          );
-
-          // 2. Update local state to reflect uniqueness
-          setEvents((prev) =>
-            prev.map((e) =>
-              e.day_tag === "wedding_day" ? { ...e, is_main_event: false } : e,
-            ),
-          );
-        }
 
         if (!created) {
           throw new Error(
@@ -343,16 +352,28 @@ export default function ProgramEventsBuilderStep({
             ),
           );
         }
-        // Hydrate locally using form translations
-        setEvents((prev) => [
-          ...prev,
-          {
-            ...created,
-            title: form.title ?? {},
-            location: form.location ?? {},
-            description: form.description ?? {},
-          } as ProgramEvent,
-        ]);
+
+        setEvents((prev) => {
+          const cleaned =
+            structuralFields.is_main_event &&
+            structuralFields.day_tag === "wedding_day"
+              ? prev.map((e) =>
+                  e.day_tag === "wedding_day"
+                    ? { ...e, is_main_event: false }
+                    : e,
+                )
+              : prev;
+
+          return [
+            ...cleaned,
+            {
+              ...created,
+              title: form.title ?? {},
+              location: form.location ?? {},
+              description: form.description ?? {},
+            } as ProgramEvent,
+          ];
+        });
       }
 
       clearForm();

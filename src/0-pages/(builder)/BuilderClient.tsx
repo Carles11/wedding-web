@@ -16,12 +16,15 @@ import { usePlan } from "@/app/providers";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
+import { fetchAccommodationEntries } from "@/3-entities/accommodation/api";
 import { fetchImagesBySite } from "@/3-entities/images/api";
-import { fetchHasProgramEvents } from "@/3-entities/program_events/api";
+import { fetchHasMainProgramEvent } from "@/3-entities/program_events/api";
 import { fetchContactSection } from "@/3-entities/sections/api/fetchContactSection";
-import type { Site } from "@/4-shared/types";
+import { fetchWeddingGiftBySite } from "@/3-entities/wedding_gifts/api";
+import { fetchWhatToSeeEntries } from "@/3-entities/what_to_see/api";
 import { BuilderHeader } from "@/4-shared/ui/builder";
 import {
+  GrayCircleIcon,
   GreenCheckIcon,
   RedDotIcon,
 } from "@/4-shared/ui/commons/icons/completenessIcons";
@@ -37,28 +40,22 @@ interface Props {
   translations: Record<string, string>;
 }
 
-// Step completeness logic/helpers
-function isGeneralComplete(site?: Site | null): boolean {
-  return !!site?.title && !!site?.subdomain;
-}
+/** Three-state step status: done (green), pending (red, mandatory), optional (gray). */
+type StepStatus = "done" | "pending" | "optional";
 
-function isAccommodationComplete(site?: Site | null): boolean {
-  // TODO: Implement real accommodations completeness logic
-  return true;
-}
-function isWhatToSeeComplete(site?: Site | null): boolean {
-  // TODO: Implement real what-to-see completeness logic
-  return true;
-}
-
-function isBankDataComplete(site?: Site | null): boolean {
-  // TODO: Implement real bank data completeness logic
-  return true;
-}
-
-function isDomainBillingComplete(site?: Site | null): boolean {
-  // Assume always true if not billing/connecting domain
-  return true;
+function hasAnyGiftPaymentMethod(
+  gift: Record<string, unknown> | null,
+): boolean {
+  if (!gift) return false;
+  return !!(
+    gift.paypal_url ||
+    gift.bank_account_iban ||
+    gift.bizum_phone ||
+    gift.venmo_username ||
+    gift.giftlist_url ||
+    gift.honeymoon_fund_url ||
+    gift.other_method_url
+  );
 }
 
 const STEP_KEYS = [
@@ -87,16 +84,21 @@ export default function BuilderClient({
     refresh,
   } = useSite(user ?? null);
   const { planType, subscription } = usePlan();
-  console.log("XXXXXXBuilderClient { planType, subscription } XXXXXXXX", {
-    planType,
-    subscription,
-  });
+  // console.log("XXXXXXBuilderClient { planType, subscription } XXXXXXXX", {
+  //   planType,
+  //   subscription,
+  // });
 
   const [active, setActive] = useState(0);
   const [currentLang, setCurrentLang] = useState(initialLang);
 
+  // --- step completeness state ---
+  const [hasHeroContent, setHasHeroContent] = useState(false);
   const [heroImageExists, setHeroImageExists] = useState(false);
-  const [hasProgramEvents, setHasProgramEvents] = useState(false);
+  const [hasMainProgramEvent, setHasMainProgramEvent] = useState(false);
+  const [accommodationCount, setAccommodationCount] = useState(0);
+  const [whatToSeeCount, setWhatToSeeCount] = useState(0);
+  const [hasWeddingGiftData, setHasWeddingGiftData] = useState(false);
   const [hasContact, setHasContact] = useState(false);
 
   const langLimit = getPlanLimit(planType, "languages");
@@ -125,42 +127,47 @@ export default function BuilderClient({
   }, [user, site, siteLoading]);
 
   useEffect(() => {
-    if (site?.id) {
-      // Images completeness
-      fetchImagesBySite(site.id).then((images) => {
-        setHeroImageExists(
-          images.some(
-            (img) =>
-              img.section &&
-              typeof img.section === "object" &&
-              (img.section as ImageSection).type === "hero",
-          ),
-        );
-      });
-
-      // Contact completeness
-      fetchContactSection(site.id).then((section) => {
-        const f = section?.content ?? {};
-        const bride = f.bride ?? {};
-        const groom = f.groom ?? {};
-        interface ContactPerson {
-          name?: string;
-          email?: string;
-        }
-        const validContact = (pt: ContactPerson) =>
-          pt?.name && pt?.email && EMAIL_RE.test(pt.email);
-        setHasContact(!!(validContact(bride) || validContact(groom)));
-      });
-    }
-  }, [site?.id]);
-
-  //       // Contact completeness
-  // Program-events completeness
-
-  useEffect(() => {
     if (!site?.id) return;
-    fetchHasProgramEvents(site.id).then(setHasProgramEvents);
-  }, [site]);
+    const id = site.id;
+
+    // Images — hero image is mandatory
+    fetchImagesBySite(id).then((images) => {
+      setHeroImageExists(
+        images.some(
+          (img) =>
+            img.section &&
+            typeof img.section === "object" &&
+            (img.section as ImageSection).type === "hero",
+        ),
+      );
+    });
+
+    // Contact — both bride AND groom require name + valid email
+    fetchContactSection(id).then((section) => {
+      const f = section?.content ?? {};
+      const bride = (f.bride ?? {}) as { name?: string; email?: string };
+      const groom = (f.groom ?? {}) as { name?: string; email?: string };
+      const validContact = (pt: { name?: string; email?: string }) =>
+        !!pt?.name && !!pt?.email && EMAIL_RE.test(pt.email ?? "");
+      setHasContact(validContact(bride) && validContact(groom));
+    });
+
+    // Program events — at least one event must be flagged as main event
+    fetchHasMainProgramEvent(id).then(setHasMainProgramEvent);
+
+    // Optional sections — load counts so sidebar shows correct status immediately
+    fetchAccommodationEntries(id).then((rows) =>
+      setAccommodationCount(rows?.length ?? 0),
+    );
+    fetchWhatToSeeEntries(id).then((rows) =>
+      setWhatToSeeCount(rows?.length ?? 0),
+    );
+    fetchWeddingGiftBySite(id).then((gift) =>
+      setHasWeddingGiftData(
+        hasAnyGiftPaymentMethod(gift as Record<string, unknown> | null),
+      ),
+    );
+  }, [site?.id]);
 
   const handleLanguageChange = (lang: string) => {
     setCurrentLang(lang);
@@ -169,16 +176,27 @@ export default function BuilderClient({
     router.push(`${pathname}?${params.toString()}`);
   };
 
-  // STEP_COMPLETENESS is now defined inside the functional component
-  const STEP_COMPLETENESS: ((site?: Site | null) => boolean)[] = [
-    isGeneralComplete,
-    () => heroImageExists,
-    () => hasProgramEvents,
-    isAccommodationComplete,
-    isWhatToSeeComplete,
-    isBankDataComplete,
-    () => hasContact,
-    isDomainBillingComplete,
+  // STEP_STATUS maps each step index to its 3-state indicator.
+  // "done"     → green check  (requirement met)
+  // "pending"  → red dot      (mandatory step, not yet complete)
+  // "optional" → gray circle  (not required, ok to skip)
+  const STEP_STATUS: StepStatus[] = [
+    // 0 General — mandatory: subdomain set AND hero title+subtitle saved
+    !!site?.subdomain && hasHeroContent ? "done" : "pending",
+    // 1 Images — mandatory: hero image must exist
+    heroImageExists ? "done" : "pending",
+    // 2 Program events — mandatory: at least one main-event entry
+    hasMainProgramEvent ? "done" : "pending",
+    // 3 Accommodation — optional; green once at least one entry exists
+    accommodationCount > 0 ? "done" : "optional",
+    // 4 What to see — optional; same
+    whatToSeeCount > 0 ? "done" : "optional",
+    // 5 Wedding gift — optional; green once any payment method is saved
+    hasWeddingGiftData ? "done" : "optional",
+    // 6 Contact — mandatory: both bride AND groom need name + valid email
+    hasContact ? "done" : "pending",
+    // 7 Domain & Billing — always done; valid in all plan states
+    "done",
   ];
 
   if (!site || !planType)
@@ -200,7 +218,7 @@ export default function BuilderClient({
             <div className="lg:hidden border-b bg-white">
               <div className="flex overflow-x-auto gap-2 p-3">
                 {STEP_KEYS.map((k, i) => {
-                  const isComplete = STEP_COMPLETENESS[i](site);
+                  const status = STEP_STATUS[i];
                   return (
                     <button
                       key={k}
@@ -211,7 +229,13 @@ export default function BuilderClient({
                           : "bg-white hover:bg-gray-50"
                       }`}
                     >
-                      {isComplete ? <GreenCheckIcon /> : <RedDotIcon />}
+                      {status === "done" ? (
+                        <GreenCheckIcon />
+                      ) : status === "optional" ? (
+                        <GrayCircleIcon />
+                      ) : (
+                        <RedDotIcon />
+                      )}
                       <span className="text-sm">{translations[k]}</span>
                     </button>
                   );
@@ -225,7 +249,7 @@ export default function BuilderClient({
               </h3>
               <ul className="mt-4 flex md:block gap-2 md:gap-0 space-y-0 md:space-y-2 min-w-max md:min-w-0">
                 {STEP_KEYS.map((k, i) => {
-                  const isComplete = STEP_COMPLETENESS[i](site);
+                  const status = STEP_STATUS[i];
                   return (
                     <li key={k}>
                       <button
@@ -237,7 +261,13 @@ export default function BuilderClient({
                         onClick={() => setActive(i)}
                       >
                         <span className="w-6 flex justify-center items-center">
-                          {isComplete ? <GreenCheckIcon /> : <RedDotIcon />}
+                          {status === "done" ? (
+                            <GreenCheckIcon />
+                          ) : status === "optional" ? (
+                            <GrayCircleIcon />
+                          ) : (
+                            <RedDotIcon />
+                          )}
                         </span>
                         {translations[k]}
                       </button>
@@ -283,6 +313,7 @@ export default function BuilderClient({
                     translations={translations}
                     langLimit={langLimit}
                     planType={planType}
+                    setGeneralComplete={setHasHeroContent}
                   />
                 )}
                 {active === 1 && site && (
@@ -292,6 +323,7 @@ export default function BuilderClient({
                     lang={currentLang}
                     translations={translations}
                     setHeroImageExists={setHeroImageExists}
+                    planType={planType}
                   />
                 )}
                 {active === 2 && site && (
@@ -301,6 +333,7 @@ export default function BuilderClient({
                     lang={currentLang}
                     translations={translations}
                     planType={planType}
+                    setHasMainProgramEvent={setHasMainProgramEvent}
                   />
                 )}
                 {active === 3 && site && (
@@ -309,6 +342,7 @@ export default function BuilderClient({
                     lang={currentLang}
                     translations={translations}
                     planType={planType}
+                    setItemCount={setAccommodationCount}
                   />
                 )}
                 {active === 4 && site && (
@@ -318,6 +352,7 @@ export default function BuilderClient({
                     lang={currentLang}
                     translations={translations}
                     planType={planType}
+                    setItemCount={setWhatToSeeCount}
                   />
                 )}
                 {active === 5 && site && (
@@ -326,6 +361,7 @@ export default function BuilderClient({
                     refresh={refresh}
                     lang={currentLang}
                     translations={translations}
+                    setHasData={setHasWeddingGiftData}
                   />
                 )}
                 {active === 6 && site && (

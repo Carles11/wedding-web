@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from "react";
 import { createClient } from "@/4-shared/lib/supabase/client";
-import type { User } from "@supabase/supabase-js";
 import type { Site } from "@/4-shared/types";
+import type { User } from "@supabase/supabase-js";
+import { useEffect, useRef, useState } from "react";
 
 /**
  * Hook to fetch (but NOT create) a `site` row for the authenticated user.
@@ -10,6 +10,7 @@ export function useSite(user: User | null) {
   const [site, setSite] = useState<Site | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const lockedSiteId = useRef<string | null>(null);
 
   // Store a ref to the in-flight fetch resolver so refresh() can await it.
   const resolveRefresh = useRef<(() => void) | null>(null);
@@ -36,28 +37,57 @@ export function useSite(user: User | null) {
           default_lang,
           languages,
           domains,
+          created_at,
           pending_custom_domains,
           domain_statuses
         `,
         )
         .eq("owner_user_id", user.id)
-        .limit(1)
-        .maybeSingle();
+        .order("created_at", { ascending: true })
+        .order("id", { ascending: true });
 
       if (fetchErr) throw fetchErr;
 
-      if (data) {
-        if (typeof data.domain_statuses === "string") {
+      const rows = Array.isArray(data) ? data : [];
+      const chosenSite =
+        (lockedSiteId.current
+          ? (rows.find((row) => row.id === lockedSiteId.current) ?? null)
+          : null) ??
+        rows[0] ??
+        null;
+
+      if (rows.length > 1) {
+        console.warn("[useSite] Multiple site rows found for owner_user_id", {
+          userId: user.id,
+          lockedSiteId: lockedSiteId.current,
+          availableSiteIds: rows.map((row) => row.id),
+          chosenSiteId: chosenSite?.id ?? null,
+        });
+      }
+
+      if (chosenSite?.id !== lockedSiteId.current) {
+        console.log("[useSite] Active site selection changed", {
+          userId: user.id,
+          previousSiteId: lockedSiteId.current,
+          nextSiteId: chosenSite?.id ?? null,
+          availableSiteIds: rows.map((row) => row.id),
+        });
+      }
+
+      lockedSiteId.current = chosenSite?.id ?? null;
+
+      if (chosenSite) {
+        if (typeof chosenSite.domain_statuses === "string") {
           try {
-            data.domain_statuses = JSON.parse(data.domain_statuses);
+            chosenSite.domain_statuses = JSON.parse(chosenSite.domain_statuses);
           } catch {}
         }
-        if (!Array.isArray(data.pending_custom_domains)) {
-          data.pending_custom_domains = [];
+        if (!Array.isArray(chosenSite.pending_custom_domains)) {
+          chosenSite.pending_custom_domains = [];
         }
       }
 
-      setSite(data ? { ...data } : null);
+      setSite(chosenSite ? { ...chosenSite } : null);
     } catch (err: unknown) {
       if (err instanceof Error) setError(err.message);
       else setError(String(err));

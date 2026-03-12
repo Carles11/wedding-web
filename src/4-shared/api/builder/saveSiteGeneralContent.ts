@@ -1,5 +1,5 @@
-import { createClient } from "@/4-shared/lib/supabase/client";
 import type { SupportedLanguage } from "@/4-shared/config/i18n";
+import { createClient } from "@/4-shared/lib/supabase/client";
 import { GlobalTranslationRow } from "@/4-shared/types";
 
 type SaveOpts = {
@@ -23,33 +23,72 @@ export async function saveSiteGeneralContent({
   default_lang,
 }: SaveOpts): Promise<void> {
   const supabase = await createClient();
+  const heroTranslationId = heroId ?? site_id;
 
-  // Collect all translation rows to upsert in one SQL statement
-  const translationsToUpsert: GlobalTranslationRow[] = [];
+  // Collect all translation rows to write in one statement
+  const translationsToWrite: GlobalTranslationRow[] = [];
   for (const [lang, val] of Object.entries(content)) {
     if (!val) continue; // skip missing languages!
 
-    translationsToUpsert.push(
+    translationsToWrite.push(
       {
         site_id,
-        key: `hero.title.${heroId}`,
+        key: `hero.title.${heroTranslationId}`,
         locale: lang,
         value: val.title,
       },
       {
         site_id,
-        key: `hero.description.${heroId}`,
+        key: `hero.description.${heroTranslationId}`,
         locale: lang,
         value: val.subtitle,
       },
     );
   }
 
-  if (translationsToUpsert.length) {
-    const { error } = await supabase
+  if (translationsToWrite.length) {
+    const keys = Array.from(new Set(translationsToWrite.map((r) => r.key)));
+    const locales = Array.from(
+      new Set(translationsToWrite.map((r) => String(r.locale))),
+    );
+
+    const { data: existingRows, error: existingRowsError } = await supabase
       .from("site_translations")
-      .upsert(translationsToUpsert, { onConflict: "site_id,key,locale" });
-    if (error) throw error;
+      .select("id, site_id, key, locale, value")
+      .eq("site_id", site_id)
+      .in("key", keys)
+      .in("locale", locales)
+      .order("created_at", { ascending: true });
+    if (existingRowsError) throw existingRowsError;
+
+    console.log("[saveSiteGeneralContent] Existing rows before delete", {
+      site_id,
+      keys,
+      locales,
+      rowCount: existingRows?.length ?? 0,
+      rows: existingRows ?? [],
+    });
+
+    // Defensive write path: delete current rows for these key/locale pairs first,
+    // then insert exactly one row per pair. This avoids stale duplicate reads even
+    // when DB unique constraints are missing or were added later.
+    const { error: deleteError } = await supabase
+      .from("site_translations")
+      .delete()
+      .eq("site_id", site_id)
+      .in("key", keys)
+      .in("locale", locales);
+    if (deleteError) throw deleteError;
+
+    const { error: insertError } = await supabase
+      .from("site_translations")
+      .insert(translationsToWrite);
+    if (insertError) throw insertError;
+
+    console.log("[saveSiteGeneralContent] Inserted rows", {
+      site_id,
+      rows: translationsToWrite,
+    });
   }
 
   // 2. If site language metadata or subdomain needs updating:

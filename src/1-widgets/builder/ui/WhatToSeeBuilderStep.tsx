@@ -28,6 +28,8 @@ type Props = {
   lang: string;
   translations: Record<string, string>;
   planType: PlanType;
+  /** Fired whenever the item count changes (initial load + add/delete). */
+  setItemCount?: (count: number) => void;
 };
 
 function t(
@@ -43,6 +45,7 @@ export default function WhatToSeeBuilderStep({
   refresh,
   translations,
   planType,
+  setItemCount,
 }: Props) {
   const [items, setItems] = useState<WhatToSeeEntryFull[]>([]);
   const [loading, setLoading] = useState(false);
@@ -65,9 +68,28 @@ export default function WhatToSeeBuilderStep({
 
   useEffect(() => {
     if (!site?.id) return;
-    load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    let mounted = true;
+    setLoading(true);
+    setError(null);
+    fetchWhatToSeeEntries(site.id)
+      .then((rows) => {
+        if (mounted) setItems(rows ?? []);
+      })
+      .catch((err: unknown) => {
+        if (mounted) setError((err as Error)?.message ?? String(err));
+      })
+      .finally(() => {
+        if (mounted) setLoading(false);
+      });
+    return () => {
+      mounted = false;
+    };
   }, [site?.id]);
+
+  // Notify parent whenever item count changes
+  useEffect(() => {
+    setItemCount?.(items.length);
+  }, [items.length, setItemCount]);
 
   async function load() {
     if (!site?.id) return;
@@ -245,7 +267,7 @@ export default function WhatToSeeBuilderStep({
       setForm({});
       setEditingId(null);
       setCollapsed(false);
-      refresh();
+      // No refresh() here: doesn't change the sites table; local state is authoritative.
     } catch (err: unknown) {
       setError((err as Error)?.message ?? String(err));
     } finally {

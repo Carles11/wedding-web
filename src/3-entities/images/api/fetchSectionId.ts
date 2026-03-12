@@ -12,9 +12,32 @@ export async function fetchSectionId(
     .eq("site_id", siteId)
     .eq("type", type)
     .maybeSingle();
+
+  if (data?.id) {
+    return data.id;
+  }
+
   if (error) {
     console.error("Failed to fetch section UUID", error);
     return null;
   }
-  return data?.id ?? null;
+
+  const { data: inserted, error: insertError } = await supabase
+    .from("sections")
+    .insert([
+      {
+        site_id: siteId,
+        type,
+        content: {},
+      },
+    ])
+    .select("id")
+    .maybeSingle<{ id: string }>();
+
+  if (insertError) {
+    console.error("Failed to create section UUID", insertError);
+    return null;
+  }
+
+  return inserted?.id ?? null;
 }

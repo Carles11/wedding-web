@@ -32,22 +32,33 @@ export default function ContactBuilderStep({
 
   useEffect(() => {
     if (!site?.id) return;
-    load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    let mounted = true;
+    setLoading(true);
+    setError(null);
+    fetchContactSection(site.id)
+      .then((sec) => {
+        if (mounted) setSection(sec);
+      })
+      .catch((err: unknown) => {
+        if (mounted) setError((err as Error)?.message ?? String(err));
+      })
+      .finally(() => {
+        if (mounted) setLoading(false);
+      });
+    return () => {
+      mounted = false;
+    };
   }, [site?.id]);
 
-  async function load() {
+  // Manual reload used by the "Reload" back button
+  function load() {
     if (!site?.id) return;
     setLoading(true);
     setError(null);
-    try {
-      const sec = await fetchContactSection(site.id);
-      setSection(sec);
-    } catch (err: unknown) {
-      setError((err as Error)?.message ?? String(err));
-    } finally {
-      setLoading(false);
-    }
+    fetchContactSection(site.id)
+      .then((sec) => setSection(sec))
+      .catch((err: unknown) => setError((err as Error)?.message ?? String(err)))
+      .finally(() => setLoading(false));
   }
 
   const [form, setForm] = useState<ContactSection["content"]>({
@@ -97,7 +108,7 @@ export default function ContactBuilderStep({
     if (setHasContact) {
       const bride = (form?.bride as Partner | undefined) ?? {};
       const groom = (form?.groom as Partner | undefined) ?? {};
-      setHasContact(validContact(bride) || validContact(groom));
+      setHasContact(validContact(bride) && validContact(groom));
     }
   }, [form, setHasContact]);
 
@@ -135,7 +146,7 @@ export default function ContactBuilderStep({
       const updated = await upsertContactSection(site.id, form ?? {});
       if (!updated) throw new Error("Save failed");
       setSection(updated);
-      refresh();
+      // No refresh() here: doesn't change the sites table; local state is authoritative.
     } catch (err: unknown) {
       setError((err as Error)?.message ?? String(err));
     } finally {

@@ -1,23 +1,25 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import type {
-  Site,
-  WeddingGift,
-  TranslationDictionary,
-} from "@/4-shared/types";
 import {
-  fetchWeddingGiftBySite,
-  updateWeddingGiftBySite,
   createWeddingGiftBySite,
   deleteWeddingGiftBySite,
+  fetchWeddingGiftBySite,
+  updateWeddingGiftBySite,
 } from "@/3-entities/wedding_gifts/api/";
+import type {
+  Site,
+  TranslationDictionary,
+  WeddingGift,
+} from "@/4-shared/types";
+import { useEffect, useState } from "react";
 
 type Props = {
   site: Site;
   refresh?: () => void;
   lang: string;
   translations: TranslationDictionary;
+  /** Fired when at least one payment method is saved (or cleared). */
+  setHasData?: (hasData: boolean) => void;
 };
 function t(
   translations: Record<string, string>,
@@ -32,6 +34,7 @@ export default function WeddingGiftBuilderStep({
   refresh,
   lang,
   translations,
+  setHasData,
 }: Props) {
   const [gift, setGift] = useState<Partial<WeddingGift> | null>(null);
   const [loading, setLoading] = useState(false);
@@ -41,13 +44,39 @@ export default function WeddingGiftBuilderStep({
 
   useEffect(() => {
     if (!site?.id) return;
+    let mounted = true;
     setLoading(true);
     setError(null);
     fetchWeddingGiftBySite(site.id)
-      .then((row) => setGift(row ?? {}))
-      .catch((err) => setError((err as Error).message))
-      .finally(() => setLoading(false));
+      .then((row) => {
+        if (mounted) setGift(row ?? {});
+      })
+      .catch((err) => {
+        if (mounted) setError((err as Error).message);
+      })
+      .finally(() => {
+        if (mounted) setLoading(false);
+      });
+    return () => {
+      mounted = false;
+    };
   }, [site?.id]);
+
+  // Notify parent whether any payment method is configured
+  useEffect(() => {
+    if (gift === null) return; // not yet loaded
+    setHasData?.(
+      !!(
+        gift.paypal_url ||
+        gift.bank_account_iban ||
+        gift.bizum_phone ||
+        gift.venmo_username ||
+        gift.giftlist_url ||
+        gift.honeymoon_fund_url ||
+        gift.other_method_url
+      ),
+    );
+  }, [gift, setHasData]);
 
   function updateField(
     field: keyof WeddingGift,

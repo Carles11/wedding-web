@@ -1,12 +1,12 @@
-import { createClient } from "@/4-shared/lib/supabase/client";
-import { SUPPORTED_LANGUAGES } from "@/4-shared/config/i18n";
 import type { SupportedLanguage } from "@/4-shared/config/i18n";
+import { SUPPORTED_LANGUAGES } from "@/4-shared/config/i18n";
+import { createClient } from "@/4-shared/lib/supabase/client";
 
 type GeneralContent = {
   languages: SupportedLanguage[];
   default_lang: SupportedLanguage;
   subdomain: string;
-  heroId: string | null; // still keep for referencing image, etc.
+  heroId: string | null;
   titles: Record<SupportedLanguage, string>;
   subtitles: Record<SupportedLanguage, string>;
 };
@@ -33,15 +33,9 @@ export async function getSiteGeneralContent(
     allLangs.includes(lang as SupportedLanguage),
   ) as SupportedLanguage[];
 
-  // Get hero section row just for id (not for title/description or image,
-  // those are now in site_translations and images respectively for better i18n support)
-  const { data: hero, error: heroErr } = await supabase
-    .from("sections")
-    .select("id, site_id,content")
-    .eq("site_id", site_id)
-    .eq("type", "hero")
-    .maybeSingle();
-  if (heroErr) throw heroErr;
+  // Hero titles/subtitles are keyed by site id.
+  const titleKey = `hero.title.${site_id}`;
+  const subtitleKey = `hero.description.${site_id}`;
 
   // Fetch hero title/description translations for all enabled languages in one query
   const { data: translations, error: trErr } = await supabase
@@ -49,10 +43,7 @@ export async function getSiteGeneralContent(
     .select("key, locale, value")
     .eq("site_id", site_id)
     .in("locale", enabledLangs)
-    .in("key", [
-      `hero.title.${hero?.site_id}`,
-      `hero.description.${hero?.site_id}`,
-    ]);
+    .in("key", [titleKey, subtitleKey]);
   if (trErr) throw trErr;
   // Build title/subtitle objects per language
   const titles: Record<SupportedLanguage, string> = {} as Record<
@@ -65,21 +56,18 @@ export async function getSiteGeneralContent(
   >;
   for (const lang of enabledLangs) {
     titles[lang] =
-      translations?.find(
-        (t) => t.key === `hero.title.${hero?.site_id}` && t.locale === lang,
-      )?.value ?? "";
+      translations?.find((t) => t.key === titleKey && t.locale === lang)
+        ?.value ?? "";
     subtitles[lang] =
-      translations?.find(
-        (t) =>
-          t.key === `hero.description.${hero?.site_id}` && t.locale === lang,
-      )?.value ?? "";
+      translations?.find((t) => t.key === subtitleKey && t.locale === lang)
+        ?.value ?? "";
   }
 
   return {
     languages: enabledLangs,
     default_lang: site.default_lang ?? "en",
     subdomain: site.subdomain ?? "",
-    heroId: hero?.site_id ?? null,
+    heroId: site_id,
     titles,
     subtitles,
   };

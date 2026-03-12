@@ -1,6 +1,6 @@
+import type { SupportedLanguage } from "@/4-shared/config/i18n";
 import { createClient } from "@/4-shared/lib/supabase/client";
 import type { ProgramEvent } from "@/4-shared/types";
-import type { SupportedLanguage } from "@/4-shared/config/i18n";
 
 /**
  * Fetches all program events for a site, with translations from site_translations.
@@ -22,11 +22,11 @@ export async function fetchProgramEventsBySite(
     .eq("site_id", siteId)
     .order("sort_order", { ascending: true });
 
-  if (eventsErr || !events || events.length === 0) {
-    console.error(
-      "[fetchProgramEventsBySite] Supabase error or no events:",
-      eventsErr,
-    );
+  if (eventsErr) {
+    console.error("[fetchProgramEventsBySite] Supabase error:", eventsErr);
+    return [];
+  }
+  if (!events || events.length === 0) {
     return [];
   }
 

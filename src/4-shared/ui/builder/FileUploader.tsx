@@ -1,14 +1,15 @@
 import React from "react";
-import { useDropzone, Accept } from "react-dropzone";
+import { Accept, useDropzone } from "react-dropzone";
 
 interface FileUploaderProps {
-  onFile: (file: File) => void;
+  onFile: (file: File) => void | Promise<void>;
   disabled?: boolean;
   label?: string; // fallback default label
   translations?: Record<string, string>;
   accept?: Accept;
   multiple?: boolean;
   className?: string;
+  resetKey?: string | number;
 }
 
 export function FileUploader({
@@ -19,10 +20,15 @@ export function FileUploader({
   accept = { "image/*": [] },
   multiple = false,
   className = "",
+  resetKey,
 }: FileUploaderProps) {
   const [selectedFileNames, setSelectedFileNames] = React.useState<string[]>(
     [],
   );
+
+  React.useEffect(() => {
+    setSelectedFileNames([]);
+  }, [resetKey]);
 
   const onDrop = React.useCallback(
     (acceptedFiles: File[]) => {
