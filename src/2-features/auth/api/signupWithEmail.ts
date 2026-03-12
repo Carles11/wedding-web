@@ -1,6 +1,7 @@
 "use server";
 
 import { createSupabaseSSRClient } from "@/4-shared/lib/supabase/server";
+import { supabaseAdmin } from "@/4-shared/lib/supabase/supabaseServer";
 
 /**
  * Server action to sign up a new user with email and password.
@@ -18,17 +19,40 @@ export async function signupWithEmail(
 ): Promise<{ error?: string; success?: boolean; needsVerification?: boolean }> {
   const supabase = await createSupabaseSSRClient();
 
-  const { error } = await supabase.auth.signUp({
+  const { error, data } = await supabase.auth.signUp({
     email,
     password,
     options: {
       data: fullName ? { full_name: fullName } : undefined,
-      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
+      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/confirm`,
     },
   });
 
   if (error) {
     return { error: error.message };
+  }
+
+  // Get the newly created user ID
+  const userId = data?.user?.id;
+  if (!userId) {
+    return { error: "Failed to create user account" };
+  }
+
+  // Insert user_profiles row using admin client (bypasses RLS during signup)
+  // This triggers handle_new_user_subscription() which auto-creates free subscription
+  const { error: profileError } = await supabaseAdmin
+    .from("user_profiles")
+    .upsert([
+      {
+        id: userId,
+        email,
+        full_name: fullName || null,
+        preferred_language: "en",
+      },
+    ]);
+
+  if (profileError) {
+    return { error: `Failed to create user profile: ${profileError.message}` };
   }
 
   return { success: true, needsVerification: true };

@@ -25,21 +25,17 @@ export default function MembershipSection({
   const planLabel = {
     free: translations["builder.billing.current_plan_free"],
     premium: translations["builder.billing.current_plan_premium"],
-    agency_monthly: translations["builder.billing.current_plan_agency_monthly"],
-    agency_yearly: translations["builder.billing.current_plan_agency_yearly"],
+    // TODO(agencies): restore agency_monthly / agency_yearly labels when launching agency tier
   }[planType];
 
   const featuresHtml =
     planType === "free"
       ? translations["builder.billing.features_free"]
-      : planType === "agency_monthly" || planType === "agency_yearly"
-        ? translations["builder.billing.features_paid_agency"]
-        : translations["builder.billing.features_paid"];
+      : translations["builder.billing.features_paid"];
+  // TODO(agencies): restore agency branch: planType === "agency_monthly" || planType === "agency_yearly"
 
-  const isAgency =
-    planType === "agency_monthly" || planType === "agency_yearly";
   const canUpgrade = planType === "free";
-  const canManage = planType === "premium" || isAgency;
+  const canManage = planType === "premium";
 
   return (
     <section className="mt-12">

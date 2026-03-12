@@ -9,19 +9,15 @@ export function resolvePlanType(
   if (!data) return "free";
 
   if (typeof data === "string") {
-    if (data === "agency_monthly") return "agency_monthly";
-    if (data === "agency_yearly") return "agency_yearly";
+    // TODO(agencies): restore agency_monthly / agency_yearly branches when launching agency tier
     if (data === "premium") return "premium";
     return "free";
   }
 
   if (!["active", "trialing"].includes(data.status)) return "free";
 
+  // TODO(agencies): restore agency_monthly / agency_yearly cases when launching agency tier
   switch (data.plan_type) {
-    case "agency_monthly":
-      return "agency_monthly";
-    case "agency_yearly":
-      return "agency_yearly";
     case "premium":
       return "premium";
     default:

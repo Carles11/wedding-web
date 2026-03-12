@@ -16,7 +16,7 @@ export default function PricingCTATable({
 
   function handleSelect(plan: PlanType) {
     // Route to /checkout?plan=xyz&lang=...
-    router.push(`/checkout?plan=${plan}&lang=${lang}`);
+    router.push(`/builder/checkout?plan=${plan}&lang=${lang}`);
   }
 
   return (
@@ -31,6 +31,7 @@ export default function PricingCTATable({
         </Heading>
         <PricingTable translations={t} type="private" onSelect={handleSelect} />
       </div>
+      {/* TODO(agencies): un-comment when launching agency tier
       <div className="mb-12">
         <Heading
           id="hero-title"
@@ -41,6 +42,7 @@ export default function PricingCTATable({
         </Heading>
         <PricingTable translations={t} type="agency" onSelect={handleSelect} />
       </div>
+      */}
     </>
   );
 }

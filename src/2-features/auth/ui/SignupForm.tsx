@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
 import { signupWithEmail } from "@/2-features/auth/api";
+import { notify } from "@/4-shared/lib/toast/toast";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 
 export default function SignupForm() {
   const [fullName, setFullName] = useState("");
@@ -12,6 +14,21 @@ export default function SignupForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const searchParams = useSearchParams();
+  const notifiedStatus = useRef<string | null>(null);
+
+  useEffect(() => {
+    const status = searchParams.get("status");
+    if (!status || notifiedStatus.current === status) return;
+
+    notifiedStatus.current = status;
+
+    if (status === "verify-email") {
+      notify.info(
+        "Please verify your email before accessing the builder. Check your inbox for the confirmation link.",
+      );
+    }
+  }, [searchParams]);
 
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

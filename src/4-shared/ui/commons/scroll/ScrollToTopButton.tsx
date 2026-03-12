@@ -83,7 +83,7 @@ export default function ScrollToTopButton({
         onKeyDown={handleKeyDown}
         title={title}
         aria-label={title}
-        className={`fixed z-[9999] flex items-center justify-center rounded-full bg-black/70 text-white shadow-lg
+        className={`fixed z-9999 flex items-center justify-center rounded-full bg-black/70 text-white shadow-lg
           transition-opacity duration-200 ease-in-out transform-gpu
           ${
             visible

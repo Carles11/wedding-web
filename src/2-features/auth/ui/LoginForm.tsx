@@ -1,21 +1,63 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { loginWithEmail, resendVerificationEmail } from "@/2-features/auth/api";
+import { notify } from "@/4-shared/lib/toast/toast";
 import Link from "next/link";
-import { loginWithEmail } from "@/2-features/auth/api";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 
 export default function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [resendingVerification, setResendingVerification] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const notifiedStatus = useRef<string | null>(null);
+
+  useEffect(() => {
+    const status = searchParams.get("status");
+    if (!status || notifiedStatus.current === status) return;
+
+    notifiedStatus.current = status;
+
+    if (status === "verify-email") {
+      notify.info(
+        "Please verify your email before accessing the builder. Check your inbox for the confirmation link.",
+      );
+    }
+  }, [searchParams]);
 
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
+  };
+
+  const isUnverifiedEmailError = (message: string) =>
+    /unverified email|email not confirmed|confirm your email/i.test(message);
+
+  const handleResendVerification = async () => {
+    if (!validateEmail(email)) {
+      setError("Please enter your email above to resend verification.");
+      return;
+    }
+
+    setResendingVerification(true);
+    try {
+      const result = await resendVerificationEmail(email);
+      if (result.error) {
+        notify.error(result.error);
+        return;
+      }
+
+      notify.success("Verification email sent. Please check your inbox.");
+    } catch {
+      notify.error("Could not resend verification email. Please try again.");
+    } finally {
+      setResendingVerification(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -111,13 +153,27 @@ export default function LoginForm() {
           </button>
         </form>
         {error && (
-          <p
-            id="error-message"
-            className="mt-4 text-sm text-red-600 text-center"
-            role="alert"
-          >
-            {error}
-          </p>
+          <div className="mt-4">
+            <p
+              id="error-message"
+              className="text-sm text-red-600 text-center"
+              role="alert"
+            >
+              {error}
+            </p>
+            {isUnverifiedEmailError(error) && (
+              <button
+                type="button"
+                onClick={handleResendVerification}
+                disabled={resendingVerification}
+                className="mt-3 w-full py-2 px-4 border border-blue-300 text-blue-700 font-medium rounded-md hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {resendingVerification
+                  ? "Resending verification..."
+                  : "Resend verification email"}
+              </button>
+            )}
+          </div>
         )}
         {success && (
           <p className="mt-4 text-sm text-green-600 text-center">

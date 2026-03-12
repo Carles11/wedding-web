@@ -18,6 +18,12 @@ export default async function DashboardLayout({
   if (!user) {
     redirect("/auth/login");
   }
+
+  // Email/password users must confirm their email before accessing builder.
+  if (user.email && !user.email_confirmed_at) {
+    redirect("/auth/signup?status=verify-email");
+  }
+
   const subscription = await getCurrentUserSubscription(user.id);
   const host = ((await headers()).get("host") ?? "").toLowerCase().trim();
   const showFooter = await shouldShowFooter({ host, routeKind: "builder" });

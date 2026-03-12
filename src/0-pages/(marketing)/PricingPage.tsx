@@ -1,4 +1,4 @@
-import PricingCTATable from "@/2-features/marketing/pricing/PricingCTATable";
+import PricingCTATable from "@/2-features/builder/billing/ui/pricing/PricingCTATable";
 
 import { getSiteIdForDomainOrSubdomain } from "@/4-shared/lib/getSiteIdForDomain";
 import { getMergedTranslations } from "@/4-shared/lib/i18n";

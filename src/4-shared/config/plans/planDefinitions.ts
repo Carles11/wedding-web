@@ -7,6 +7,8 @@ import {
   FREE_WHATTOSEE_LIMIT,
 } from "@/4-shared/config/limits/usage-limits";
 
+// Stripe IDs are resolved server-side from environment variables in
+// src/4-shared/lib/stripe/stripeConfig.ts.
 export const PLAN_DEFINITIONS = {
   free: {
     name: "Free",
@@ -29,8 +31,6 @@ export const PLAN_DEFINITIONS = {
       languages: FREE_LANGUAGES_LIMIT,
       customDomains: FREE_CUSTOM_DOMAIN_LIMIT,
     },
-    stripeProductId: "prod_U7LiIVoZ9cCn29",
-    stripePriceId: "price_1T971S0Aqqbt2X3BjtUToGpA",
     price: -1,
     currency: "EUR",
     billing: "one-time",
@@ -52,57 +52,38 @@ export const PLAN_DEFINITIONS = {
       languages: -1, // -1 for unlimited
       customDomains: 1,
     },
-    stripeProductId: "prod_U7LgorlMU8UTVU",
-    stripePriceId: "price_1T96z40Aqqbt2X3BrbPBAenX",
     price: 39.0,
     currency: "EUR",
     billing: "one-time",
   },
-  agency_monthly: {
-    name: "AGENCY (Monthly)",
-    description: "For agencies: organize many events per month.",
-    featuresList: [
-      "Unlimited websites",
-      "Unlimited events",
-      "Custom domains",
-      "Agency-specific tools",
-    ],
-    limits: {
-      images: -1, // -1 for unlimited
-      accommodations: -1, // -1 for unlimited
-      events: -1, // -1 for unlimited
-      whatToSee: -1, // -1 for unlimited
-      languages: -1, // -1 for unlimited
-      customDomains: -1,
-    },
-    stripeProductId: "prod_U7Lq5ygZ81U9Uw",
-    stripePriceId: "price_1T97920Aqqbt2X3Bbpmu06Dv",
-    price: 59.0,
-    currency: "EUR",
-    billing: "monthly",
-  },
-  agency_yearly: {
-    name: "AGENCY (Yearly)",
-    description: "Same agency advantages with yearly billing.",
-    featuresList: [
-      "Unlimited websites",
-      "Unlimited events",
-      "Custom domains",
-      "Agency-specific tools",
-      "Best price for annual commitment",
-    ],
-    limits: {
-      images: -1, // -1 for unlimited
-      accommodations: -1, // -1 for unlimited
-      events: -1, // -1 for unlimited
-      whatToSee: -1, // -1 for unlimited
-      languages: -1, // -1 for unlimited
-      customDomains: -1,
-    },
-    stripeProductId: "prod_U7LtQ7a4gaBd1f",
-    stripePriceId: "price_1T97BI0Aqqbt2X3BOb4L7RWK",
-    price: 599.0,
-    currency: "EUR",
-    billing: "yearly",
-  },
+  // TODO(agencies): re-enable when launching agency tier
+  // agency_monthly: {
+  //   name: "AGENCY (Monthly)",
+  //   description: "For agencies: organize many events per month.",
+  //   featuresList: [
+  //     "Unlimited websites",
+  //     "Unlimited events",
+  //     "Custom domains",
+  //     "Agency-specific tools",
+  //   ],
+  //   limits: { images: -1, accommodations: -1, events: -1, whatToSee: -1, languages: -1, customDomains: -1 },
+  //   price: 59.0,
+  //   currency: "EUR",
+  //   billing: "monthly",
+  // },
+  // agency_yearly: {
+  //   name: "AGENCY (Yearly)",
+  //   description: "Same agency advantages with yearly billing.",
+  //   featuresList: [
+  //     "Unlimited websites",
+  //     "Unlimited events",
+  //     "Custom domains",
+  //     "Agency-specific tools",
+  //     "Best price for annual commitment",
+  //   ],
+  //   limits: { images: -1, accommodations: -1, events: -1, whatToSee: -1, languages: -1, customDomains: -1 },
+  //   price: 599.0,
+  //   currency: "EUR",
+  //   billing: "yearly",
+  // },
 };

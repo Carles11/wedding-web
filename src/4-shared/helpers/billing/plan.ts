@@ -4,26 +4,17 @@ import type { PlanType, Subscription } from "@/4-shared/types";
 
 // Resolves the full plan type from subscription (expand as you add more plans)
 export function resolvePlanType(
-  data: Subscription | PlanType | "monthly" | "yearly" | null,
+  data: Subscription | PlanType | null,
 ): PlanType {
   if (!data) return "free";
 
   if (typeof data === "string") {
-    if (data === "monthly") return "agency_monthly";
-    if (data === "yearly") return "agency_yearly";
+    // TODO(agencies): restore agency_monthly / agency_yearly branches when launching agency tier
+    if (data === "premium") return "premium";
     return "free";
   }
 
-  if (
-    ["active", "trialing"].includes(data.status) &&
-    data.plan_type === "agency_monthly"
-  )
-    return "agency_monthly";
-  if (
-    ["active", "trialing"].includes(data.status) &&
-    data.plan_type === "agency_yearly"
-  )
-    return "agency_yearly";
+  // TODO(agencies): restore agency_monthly / agency_yearly branches when launching agency tier
   if (
     ["active", "trialing"].includes(data.status) &&
     data.plan_type === "premium"
