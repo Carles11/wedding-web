@@ -33,8 +33,9 @@ export default function MarketingPageComponent({
   };
 
   const handlePrimaryClick = () => {
-    // For demo purposes, we'll just alert. In a real app, this could navigate to the builder or open a signup modal.
-    router.push("/builder");
+    const params = new URLSearchParams();
+    params.set("lang", currentLang);
+    router.push(`/auth/signup?${params.toString()}`);
   };
 
   return (

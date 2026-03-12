@@ -1,11 +1,35 @@
+import { isValidLanguage } from "@/4-shared/helpers/isValidLanguage";
+import { fetchGlobalTranslations } from "@/4-shared/lib/globalTranslations";
 import type { Metadata } from "next";
 import Link from "next/link";
 
-export const metadata: Metadata = {
-  title: "Authentication Error | WeddWeb",
-};
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ lang?: string }>;
+}): Promise<Metadata> {
+  const params = await searchParams;
+  const requested = params?.lang;
+  const lang = isValidLanguage(requested) ? requested : "en";
+  const translations = await fetchGlobalTranslations(lang, "en");
 
-export default function AuthErrorPage() {
+  return {
+    title:
+      translations["auth.error.page_title"] ?? "Authentication Error | WeddWeb",
+  };
+}
+
+export default async function AuthErrorPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ lang?: string }>;
+}) {
+  const params = await searchParams;
+  const requested = params?.lang;
+  const lang = isValidLanguage(requested) ? requested : "en";
+  const translations = await fetchGlobalTranslations(lang, "en");
+  const langQuery = `?lang=${encodeURIComponent(lang)}`;
+
   return (
     <main className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-md">
@@ -26,17 +50,17 @@ export default function AuthErrorPage() {
             </svg>
           </div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            Authentication Error
+            {translations["auth.error.title"] ?? "Authentication Error"}
           </h1>
           <p className="text-gray-600 mb-6">
-            We couldn&apos;t complete your authentication. This could be due to
-            an expired link or invalid code.
+            {translations["auth.error.message"] ??
+              "We couldn&apos;t complete your authentication. This could be due to an expired link or invalid code."}
           </p>
           <Link
-            href="/auth/login"
+            href={`/auth/login${langQuery}`}
             className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
-            Return to Login
+            {translations["auth.common.return_to_login"] ?? "Return to Login"}
           </Link>
         </div>
       </div>

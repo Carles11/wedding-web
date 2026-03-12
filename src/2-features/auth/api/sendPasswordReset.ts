@@ -1,5 +1,6 @@
 "use server";
 
+import { isValidLanguage } from "@/4-shared/helpers/isValidLanguage";
 import { createSupabaseSSRClient } from "@/4-shared/lib/supabase/server";
 
 /**
@@ -11,11 +12,16 @@ import { createSupabaseSSRClient } from "@/4-shared/lib/supabase/server";
  */
 export async function sendPasswordReset(
   email: string,
+  preferredLanguage?: string,
 ): Promise<{ error?: string; success?: boolean }> {
   const supabase = await createSupabaseSSRClient();
+  const selectedLang = isValidLanguage(preferredLanguage)
+    ? preferredLanguage
+    : "en";
+  const langQuery = `?lang=${encodeURIComponent(selectedLang)}`;
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/reset-password`,
+    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/reset-password${langQuery}`,
   });
 
   if (error) {

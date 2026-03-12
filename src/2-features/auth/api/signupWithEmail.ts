@@ -1,5 +1,6 @@
 "use server";
 
+import { isValidLanguage } from "@/4-shared/helpers/isValidLanguage";
 import { createSupabaseSSRClient } from "@/4-shared/lib/supabase/server";
 import { supabaseAdmin } from "@/4-shared/lib/supabase/supabaseServer";
 
@@ -16,15 +17,22 @@ export async function signupWithEmail(
   email: string,
   password: string,
   fullName?: string,
+  preferredLanguage?: string,
 ): Promise<{ error?: string; success?: boolean; needsVerification?: boolean }> {
   const supabase = await createSupabaseSSRClient();
+  const selectedLang = isValidLanguage(preferredLanguage)
+    ? preferredLanguage
+    : "en";
+  const onboardingNext = encodeURIComponent(
+    `/builder/onboarding?lang=${selectedLang}`,
+  );
 
   const { error, data } = await supabase.auth.signUp({
     email,
     password,
     options: {
       data: fullName ? { full_name: fullName } : undefined,
-      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/confirm`,
+      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/confirm?lang=${selectedLang}&next=${onboardingNext}`,
     },
   });
 
@@ -47,7 +55,7 @@ export async function signupWithEmail(
         id: userId,
         email,
         full_name: fullName || null,
-        preferred_language: "en",
+        preferred_language: selectedLang,
       },
     ]);
 

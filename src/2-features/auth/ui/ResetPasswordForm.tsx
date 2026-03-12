@@ -1,16 +1,33 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { resetPassword } from "@/2-features/auth/api";
+import { isValidLanguage } from "@/4-shared/helpers/isValidLanguage";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
 
-export default function ResetPasswordForm() {
+type Props = {
+  translations: Record<string, string>;
+};
+
+function tr(
+  translations: Record<string, string>,
+  key: string,
+  fallback: string,
+) {
+  return translations[key] ?? fallback;
+}
+
+export default function ResetPasswordForm({ translations }: Props) {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const requestedLang = searchParams.get("lang") ?? undefined;
+  const currentLang = isValidLanguage(requestedLang) ? requestedLang : "en";
+  const langQuery = `?lang=${encodeURIComponent(currentLang)}`;
 
   const validatePassword = (password: string) => {
     return password.length >= 8;
@@ -22,12 +39,24 @@ export default function ResetPasswordForm() {
     setSuccess(false);
 
     if (!validatePassword(newPassword)) {
-      setError("Password must be at least 8 characters long.");
+      setError(
+        tr(
+          translations,
+          "auth.common.password_min_length",
+          "Password must be at least 8 characters long.",
+        ),
+      );
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      setError("Passwords do not match.");
+      setError(
+        tr(
+          translations,
+          "auth.common.passwords_do_not_match",
+          "Passwords do not match.",
+        ),
+      );
       return;
     }
 
@@ -39,11 +68,17 @@ export default function ResetPasswordForm() {
       } else {
         setSuccess(true);
         setTimeout(() => {
-          router.push("/auth/login");
+          router.push(`/auth/login${langQuery}`);
         }, 2000);
       }
     } catch {
-      setError("An unexpected error occurred. Please try again.");
+      setError(
+        tr(
+          translations,
+          "auth.common.unexpected_error",
+          "An unexpected error occurred. Please try again.",
+        ),
+      );
     } finally {
       setLoading(false);
     }
@@ -69,10 +104,18 @@ export default function ResetPasswordForm() {
             </svg>
           </div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            Password Reset Successful
+            {tr(
+              translations,
+              "auth.reset.success_title",
+              "Password Reset Successful",
+            )}
           </h2>
           <p className="text-gray-600 mb-6">
-            Your password has been reset. Redirecting to login...
+            {tr(
+              translations,
+              "auth.reset.success_message",
+              "Your password has been reset. Redirecting to login...",
+            )}
           </p>
         </div>
       </div>
@@ -83,7 +126,7 @@ export default function ResetPasswordForm() {
     <div className="flex items-center justify-center min-h-screen bg-gray-50">
       <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-md">
         <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
-          Reset Your Password
+          {tr(translations, "auth.reset.title", "Reset Your Password")}
         </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -91,7 +134,7 @@ export default function ResetPasswordForm() {
               htmlFor="newPassword"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
-              New Password
+              {tr(translations, "auth.reset.new_password", "New Password")}
             </label>
             <input
               type="password"
@@ -99,7 +142,11 @@ export default function ResetPasswordForm() {
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Enter your new password (min 8 characters)"
+              placeholder={tr(
+                translations,
+                "auth.reset.new_password_placeholder",
+                "Enter your new password (min 8 characters)",
+              )}
               required
               aria-describedby={error ? "error-message" : undefined}
             />
@@ -109,7 +156,11 @@ export default function ResetPasswordForm() {
               htmlFor="confirmPassword"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
-              Confirm New Password
+              {tr(
+                translations,
+                "auth.reset.confirm_new_password",
+                "Confirm New Password",
+              )}
             </label>
             <input
               type="password"
@@ -117,7 +168,11 @@ export default function ResetPasswordForm() {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Confirm your new password"
+              placeholder={tr(
+                translations,
+                "auth.reset.confirm_new_password_placeholder",
+                "Confirm your new password",
+              )}
               required
               aria-describedby={error ? "error-message" : undefined}
             />
@@ -127,7 +182,13 @@ export default function ResetPasswordForm() {
             disabled={loading}
             className="w-full py-2 px-4 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? "Resetting Password..." : "Reset Password"}
+            {loading
+              ? tr(
+                  translations,
+                  "auth.reset.submitting",
+                  "Resetting Password...",
+                )
+              : tr(translations, "auth.reset.submit", "Reset Password")}
           </button>
         </form>
         {error && (

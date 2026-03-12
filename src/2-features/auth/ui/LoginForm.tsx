@@ -1,12 +1,25 @@
 "use client";
 
 import { loginWithEmail, resendVerificationEmail } from "@/2-features/auth/api";
+import { isValidLanguage } from "@/4-shared/helpers/isValidLanguage";
 import { notify } from "@/4-shared/lib/toast/toast";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
-export default function LoginForm() {
+type Props = {
+  translations: Record<string, string>;
+};
+
+function tr(
+  translations: Record<string, string>,
+  key: string,
+  fallback: string,
+) {
+  return translations[key] ?? fallback;
+}
+
+export default function LoginForm({ translations }: Props) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -16,6 +29,9 @@ export default function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const notifiedStatus = useRef<string | null>(null);
+  const requestedLang = searchParams.get("lang") ?? undefined;
+  const currentLang = isValidLanguage(requestedLang) ? requestedLang : "en";
+  const langQuery = `?lang=${encodeURIComponent(currentLang)}`;
 
   useEffect(() => {
     const status = searchParams.get("status");
@@ -25,10 +41,14 @@ export default function LoginForm() {
 
     if (status === "verify-email") {
       notify.info(
-        "Please verify your email before accessing the builder. Check your inbox for the confirmation link.",
+        tr(
+          translations,
+          "auth.common.verify_email_required",
+          "Please verify your email before accessing the builder. Check your inbox for the confirmation link.",
+        ),
       );
     }
-  }, [searchParams]);
+  }, [searchParams, translations]);
 
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -40,21 +60,39 @@ export default function LoginForm() {
 
   const handleResendVerification = async () => {
     if (!validateEmail(email)) {
-      setError("Please enter your email above to resend verification.");
+      setError(
+        tr(
+          translations,
+          "auth.login.enter_email_for_resend",
+          "Please enter your email above to resend verification.",
+        ),
+      );
       return;
     }
 
     setResendingVerification(true);
     try {
-      const result = await resendVerificationEmail(email);
+      const result = await resendVerificationEmail(email, currentLang);
       if (result.error) {
         notify.error(result.error);
         return;
       }
 
-      notify.success("Verification email sent. Please check your inbox.");
+      notify.success(
+        tr(
+          translations,
+          "auth.common.verification_sent",
+          "Verification email sent. Please check your inbox.",
+        ),
+      );
     } catch {
-      notify.error("Could not resend verification email. Please try again.");
+      notify.error(
+        tr(
+          translations,
+          "auth.common.verification_resend_failed",
+          "Could not resend verification email. Please try again.",
+        ),
+      );
     } finally {
       setResendingVerification(false);
     }
@@ -66,12 +104,24 @@ export default function LoginForm() {
     setSuccess(false);
 
     if (!validateEmail(email)) {
-      setError("Please enter a valid email address.");
+      setError(
+        tr(
+          translations,
+          "auth.common.email_invalid",
+          "Please enter a valid email address.",
+        ),
+      );
       return;
     }
 
     if (!password.trim()) {
-      setError("Password is required.");
+      setError(
+        tr(
+          translations,
+          "auth.common.password_required",
+          "Password is required.",
+        ),
+      );
       return;
     }
 
@@ -83,11 +133,17 @@ export default function LoginForm() {
       } else {
         setSuccess(true);
         setTimeout(() => {
-          router.push("/builder");
+          router.push(`/builder${langQuery}`);
         }, 1000);
       }
     } catch {
-      setError("An unexpected error occurred. Please try again.");
+      setError(
+        tr(
+          translations,
+          "auth.common.unexpected_error",
+          "An unexpected error occurred. Please try again.",
+        ),
+      );
     } finally {
       setLoading(false);
     }
@@ -97,7 +153,7 @@ export default function LoginForm() {
     <div className="flex items-center justify-center min-h-screen bg-gray-50">
       <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-md">
         <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
-          Login to Your Account
+          {tr(translations, "auth.login.title", "Login to Your Account")}
         </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -105,7 +161,7 @@ export default function LoginForm() {
               htmlFor="email"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
-              Email
+              {tr(translations, "auth.common.email", "Email")}
             </label>
             <input
               type="email"
@@ -113,7 +169,11 @@ export default function LoginForm() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Enter your email"
+              placeholder={tr(
+                translations,
+                "auth.common.email_placeholder",
+                "Enter your email",
+              )}
               required
               aria-describedby={error ? "error-message" : undefined}
             />
@@ -123,7 +183,7 @@ export default function LoginForm() {
               htmlFor="password"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
-              Password
+              {tr(translations, "auth.common.password", "Password")}
             </label>
             <input
               type="password"
@@ -131,17 +191,25 @@ export default function LoginForm() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Enter your password"
+              placeholder={tr(
+                translations,
+                "auth.login.password_placeholder",
+                "Enter your password",
+              )}
               required
               aria-describedby={error ? "error-message" : undefined}
             />
           </div>
           <div className="text-right">
             <Link
-              href="/auth/forgot-password"
+              href={`/auth/forgot-password${langQuery}`}
               className="text-sm text-blue-600 hover:text-blue-500"
             >
-              Forgot password?
+              {tr(
+                translations,
+                "auth.login.forgot_password",
+                "Forgot password?",
+              )}
             </Link>
           </div>
           <button
@@ -149,7 +217,9 @@ export default function LoginForm() {
             disabled={loading}
             className="w-full py-2 px-4 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? "Logging in..." : "Login"}
+            {loading
+              ? tr(translations, "auth.login.submitting", "Logging in...")
+              : tr(translations, "auth.common.log_in", "Login")}
           </button>
         </form>
         {error && (
@@ -169,25 +239,41 @@ export default function LoginForm() {
                 className="mt-3 w-full py-2 px-4 border border-blue-300 text-blue-700 font-medium rounded-md hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {resendingVerification
-                  ? "Resending verification..."
-                  : "Resend verification email"}
+                  ? tr(
+                      translations,
+                      "auth.common.resending_verification",
+                      "Resending verification...",
+                    )
+                  : tr(
+                      translations,
+                      "auth.common.resend_verification",
+                      "Resend verification email",
+                    )}
               </button>
             )}
           </div>
         )}
         {success && (
           <p className="mt-4 text-sm text-green-600 text-center">
-            Login successful! Redirecting...
+            {tr(
+              translations,
+              "auth.login.success_redirecting",
+              "Login successful! Redirecting...",
+            )}
           </p>
         )}
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-600">
-            Don&apos;t have an account?{" "}
+            {tr(
+              translations,
+              "auth.login.no_account",
+              "Don&apos;t have an account?",
+            )}{" "}
             <Link
-              href="/auth/signup"
+              href={`/auth/signup${langQuery}`}
               className="font-medium text-blue-600 hover:text-blue-500"
             >
-              Sign up
+              {tr(translations, "auth.common.sign_up", "Sign up")}
             </Link>
           </p>
         </div>

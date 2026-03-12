@@ -1,8 +1,9 @@
-import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import { createServerClient } from "@supabase/ssr";
-import { createSiteForUser } from "@/4-shared/api/builder/createSiteForUser";
 import { getCurrentUser } from "@/3-entities/user/api/getCurrentUser";
+import { createSiteForUser } from "@/4-shared/api/builder/createSiteForUser";
+import { supabaseAdmin } from "@/4-shared/lib/supabase/supabaseServer";
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
+import { NextResponse } from "next/server";
 
 export async function POST() {
   const cookieStore = await cookies();
@@ -39,9 +40,16 @@ export async function POST() {
     }
 
     // No site exists, create one
+    const { data: profileData } = await supabaseAdmin
+      .from("user_profiles")
+      .select("preferred_language")
+      .eq("id", user.id)
+      .maybeSingle();
+
     const site = await createSiteForUser({
       id: user.id,
       email: user.email ?? null,
+      preferredLanguage: profileData?.preferred_language ?? null,
     });
     return NextResponse.json({ site }, { status: 201 });
   } catch (e: unknown) {

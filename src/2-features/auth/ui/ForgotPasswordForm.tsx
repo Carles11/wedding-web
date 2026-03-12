@@ -1,14 +1,32 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
 import { sendPasswordReset } from "@/2-features/auth/api";
+import { isValidLanguage } from "@/4-shared/helpers/isValidLanguage";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { useState } from "react";
 
-export default function ForgotPasswordForm() {
+type Props = {
+  translations: Record<string, string>;
+};
+
+function tr(
+  translations: Record<string, string>,
+  key: string,
+  fallback: string,
+) {
+  return translations[key] ?? fallback;
+}
+
+export default function ForgotPasswordForm({ translations }: Props) {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const searchParams = useSearchParams();
+  const requestedLang = searchParams.get("lang") ?? undefined;
+  const currentLang = isValidLanguage(requestedLang) ? requestedLang : "en";
+  const langQuery = `?lang=${encodeURIComponent(currentLang)}`;
 
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -21,20 +39,32 @@ export default function ForgotPasswordForm() {
     setSuccess(false);
 
     if (!validateEmail(email)) {
-      setError("Please enter a valid email address.");
+      setError(
+        tr(
+          translations,
+          "auth.common.email_invalid",
+          "Please enter a valid email address.",
+        ),
+      );
       return;
     }
 
     setLoading(true);
     try {
-      const result = await sendPasswordReset(email);
+      const result = await sendPasswordReset(email, currentLang);
       if (result.error) {
         setError(result.error);
       } else {
         setSuccess(true);
       }
     } catch {
-      setError("An unexpected error occurred. Please try again.");
+      setError(
+        tr(
+          translations,
+          "auth.common.unexpected_error",
+          "An unexpected error occurred. Please try again.",
+        ),
+      );
     } finally {
       setLoading(false);
     }
@@ -60,17 +90,20 @@ export default function ForgotPasswordForm() {
             </svg>
           </div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            Check Your Email
+            {tr(translations, "auth.common.check_email", "Check Your Email")}
           </h2>
           <p className="text-gray-600 mb-6">
-            We&apos;ve sent you a password reset link. Please check your email
-            and click the link to reset your password.
+            {tr(
+              translations,
+              "auth.forgot.success_message",
+              "We&apos;ve sent you a password reset link. Please check your email and click the link to reset your password.",
+            )}
           </p>
           <Link
-            href="/auth/login"
+            href={`/auth/login${langQuery}`}
             className="text-blue-600 hover:text-blue-500 font-medium"
           >
-            Return to Login
+            {tr(translations, "auth.common.return_to_login", "Return to Login")}
           </Link>
         </div>
       </div>
@@ -81,7 +114,7 @@ export default function ForgotPasswordForm() {
     <div className="flex items-center justify-center min-h-screen bg-gray-50">
       <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-md">
         <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
-          Reset Your Password
+          {tr(translations, "auth.forgot.title", "Reset Your Password")}
         </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -89,7 +122,7 @@ export default function ForgotPasswordForm() {
               htmlFor="email"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
-              Email
+              {tr(translations, "auth.common.email", "Email")}
             </label>
             <input
               type="email"
@@ -97,7 +130,11 @@ export default function ForgotPasswordForm() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Enter your email"
+              placeholder={tr(
+                translations,
+                "auth.common.email_placeholder",
+                "Enter your email",
+              )}
               required
               aria-describedby={error ? "error-message" : undefined}
             />
@@ -107,7 +144,13 @@ export default function ForgotPasswordForm() {
             disabled={loading}
             className="w-full py-2 px-4 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? "Sending Reset Link..." : "Send Reset Link"}
+            {loading
+              ? tr(
+                  translations,
+                  "auth.forgot.submitting",
+                  "Sending Reset Link...",
+                )
+              : tr(translations, "auth.forgot.submit", "Send Reset Link")}
           </button>
         </form>
         {error && (
@@ -121,12 +164,16 @@ export default function ForgotPasswordForm() {
         )}
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-600">
-            Remember your password?{" "}
+            {tr(
+              translations,
+              "auth.forgot.remember_password",
+              "Remember your password?",
+            )}{" "}
             <Link
-              href="/auth/login"
+              href={`/auth/login${langQuery}`}
               className="font-medium text-blue-600 hover:text-blue-500"
             >
-              Log in
+              {tr(translations, "auth.common.log_in", "Log in")}
             </Link>
           </p>
         </div>

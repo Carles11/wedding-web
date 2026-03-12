@@ -1,9 +1,11 @@
+import { isValidLanguage } from "@/4-shared/helpers/isValidLanguage";
 import { supabaseAdmin } from "@/4-shared/lib/supabase/supabaseServer";
 import type { Site } from "@/4-shared/types";
 
 export async function createSiteForUser(user: {
   id: string;
   email: string | null;
+  preferredLanguage?: string | null;
 }): Promise<Site | null> {
   const defaultSubdomain =
     (user.email ?? user.id)
@@ -17,6 +19,9 @@ export async function createSiteForUser(user: {
     user.email && user.email.includes("@")
       ? `${user.email.split("@")[0]}'s Wedding`
       : "Wedding Site";
+  const initialLang = isValidLanguage(user.preferredLanguage ?? undefined)
+    ? user.preferredLanguage
+    : "en";
 
   // 1. Insert site row
   const { data: siteData, error: siteError } = await supabaseAdmin
@@ -26,8 +31,8 @@ export async function createSiteForUser(user: {
         owner_user_id: user.id,
         title: defaultTitle,
         subdomain: defaultSubdomain,
-        default_lang: "en",
-        languages: ["en"],
+        default_lang: initialLang,
+        languages: [initialLang],
         domains: [],
       },
     ])
