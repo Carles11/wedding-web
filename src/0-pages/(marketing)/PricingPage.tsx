@@ -1,14 +1,45 @@
 import PricingCTATable from "@/2-features/builder/billing/ui/pricing/PricingCTATable";
+import { fetchBuilderTranslations } from "@/4-shared/api/builder/getTranslations";
+import { isValidLanguage } from "@/4-shared/helpers/isValidLanguage";
 
-import { getSiteIdForDomainOrSubdomain } from "@/4-shared/lib/getSiteIdForDomain";
-import { getMergedTranslations } from "@/4-shared/lib/i18n";
-import { headers } from "next/headers";
+type PricingPageProps = {
+  lang?: string;
+  searchParams?:
+    | { [key: string]: string | string[] | undefined }
+    | Promise<{ [key: string]: string | string[] | undefined }>;
+};
 
-export default async function PricingPage({ lang = "en" }: { lang?: string }) {
-  const host = ((await headers()).get("host") ?? "").toLowerCase().trim();
-  const siteId = await getSiteIdForDomainOrSubdomain(host);
+export default async function PricingPage({
+  lang,
+  searchParams,
+}: PricingPageProps) {
+  let resolvedSearchParams = searchParams;
+  if (
+    resolvedSearchParams &&
+    typeof resolvedSearchParams === "object" &&
+    typeof (resolvedSearchParams as unknown as Promise<unknown>).then ===
+      "function"
+  ) {
+    resolvedSearchParams = await (resolvedSearchParams as Promise<{
+      [key: string]: string | string[] | undefined;
+    }>);
+  }
 
-  const t = await getMergedTranslations(siteId, lang, "en");
+  const paramsObj = resolvedSearchParams as
+    | { [key: string]: string | string[] | undefined }
+    | undefined;
+
+  const langRaw =
+    typeof lang === "string"
+      ? lang
+      : Array.isArray(paramsObj?.lang) && typeof paramsObj?.lang[0] === "string"
+        ? paramsObj?.lang[0]
+        : typeof paramsObj?.lang === "string"
+          ? paramsObj?.lang
+          : "en";
+
+  const resolvedLang = isValidLanguage(langRaw) ? langRaw : "en";
+  const t = await fetchBuilderTranslations(resolvedLang, "en");
   return (
     <main className="relative overflow-hidden">
       {/* background glow */}
@@ -27,7 +58,7 @@ export default async function PricingPage({ lang = "en" }: { lang?: string }) {
               "Create a beautiful wedding website and share your special day."}
           </p>
         </div>
-        <PricingCTATable lang={lang} t={t} />
+        <PricingCTATable lang={resolvedLang} t={t} />
         {/* FINE PRINT */}
         <p className="text-sm text-gray-500 text-center mt-20 max-w-xl mx-auto">
           {t["pricing.fine_print"] ??

@@ -56,6 +56,9 @@ export default function PricingTable({
           tr(translations, `pricing.plan.${plan}.feature_${index + 1}`, feat),
         );
 
+        const billingKey = `pricing.billing.${String(def.billing).replace("-", "_")}`;
+        const billingLabel = tr(translations, billingKey, String(def.billing));
+
         return (
           <div
             key={plan}
@@ -84,11 +87,11 @@ export default function PricingTable({
                   <p className="text-4xl font-bold">{formattedPrice}</p>
 
                   {def.billing !== "one-time" && (
-                    <p className="text-sm text-gray-500">/{def.billing}</p>
+                    <p className="text-sm text-gray-500">/{billingLabel}</p>
                   )}
 
                   {def.billing === "one-time" && (
-                    <p className="text-sm text-gray-500">one-time</p>
+                    <p className="text-sm text-gray-500">{billingLabel}</p>
                   )}
                 </>
               ) : (

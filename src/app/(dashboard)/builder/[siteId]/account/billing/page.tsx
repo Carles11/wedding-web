@@ -1,8 +1,6 @@
 import AccountBillingDetails from "@/0-pages/(builder)/[siteId]/account/billing/AccountBillingDetails";
 import { getCurrentUser } from "@/3-entities/user/api/getCurrentUser";
-import { getSiteIdForDomainOrSubdomain } from "@/4-shared/lib/getSiteIdForDomain";
-import { getMergedTranslations } from "@/4-shared/lib/i18n";
-import { headers } from "next/headers";
+import { fetchBuilderTranslations } from "@/4-shared/api/builder/getTranslations";
 
 interface PageProps {
   params: { siteId: string };
@@ -15,10 +13,6 @@ export default async function AccountBillingPage({
   params,
   searchParams,
 }: PageProps) {
-  const headerList = await headers();
-
-  const host = (headerList.get("host") ?? "").toLowerCase().trim();
-
   // --- SAFELY UNWRAP searchParams ---
   let resolvedSearchParams = searchParams;
 
@@ -46,8 +40,7 @@ export default async function AccountBillingPage({
         ? langRaw[0]
         : "en";
 
-  const siteId = await getSiteIdForDomainOrSubdomain(host);
-  const t = await getMergedTranslations(siteId, lang, "en");
+  const t = await fetchBuilderTranslations(lang, "en");
   const user = await getCurrentUser();
 
   if (!user) {
