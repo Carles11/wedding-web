@@ -85,9 +85,7 @@ export default function GeneralSiteForm({
 
       // Notify parent whether the default-language hero content is complete
       const defLang = res.default_lang;
-      setGeneralComplete?.(
-        !!res.titles[defLang]?.trim() && !!res.subtitles[defLang]?.trim(),
-      );
+      setGeneralComplete?.(!!res.titles[defLang]?.trim());
     } catch (err) {
       notify.error(
         err instanceof Error
@@ -201,6 +199,7 @@ export default function GeneralSiteForm({
         default_lang: defaultLang,
       });
 
+      await refresh();
       notify.success(
         translations["builder.general.form.save_success"] ||
           "Saved successfully.",
@@ -208,10 +207,7 @@ export default function GeneralSiteForm({
 
       // Re-check completeness after save
       const defLang = defaultLang;
-      setGeneralComplete?.(
-        !!content[defLang]?.title?.trim() &&
-          !!content[defLang]?.subtitle?.trim(),
-      );
+      setGeneralComplete?.(!!content[defLang]?.title?.trim());
 
       // Keep the just-saved values in local state. An immediate refetch can read
       // stale rows and overwrite the inputs with older values right after save.
@@ -226,8 +222,9 @@ export default function GeneralSiteForm({
           : translations["error.something_went_wrong"] ||
               "An unknown error occurred.",
       );
+    } finally {
+      setSaving(false);
     }
-    setSaving(false);
   };
 
   return (

@@ -34,7 +34,7 @@ export const PLAN_CATALOG = {
       "Premium customization",
     ],
     limits: {
-      images: -1,
+      images: 2,
       accommodations: -1,
       events: -1,
       whatToSee: -1,

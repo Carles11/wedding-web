@@ -47,48 +47,13 @@ export async function saveSiteGeneralContent({
   }
 
   if (translationsToWrite.length) {
-    const keys = Array.from(new Set(translationsToWrite.map((r) => r.key)));
-    const locales = Array.from(
-      new Set(translationsToWrite.map((r) => String(r.locale))),
-    );
-
-    const { data: existingRows, error: existingRowsError } = await supabase
+    const { error: upsertError } = await supabase
       .from("site_translations")
-      .select("id, site_id, key, locale, value")
-      .eq("site_id", site_id)
-      .in("key", keys)
-      .in("locale", locales)
-      .order("created_at", { ascending: true });
-    if (existingRowsError) throw existingRowsError;
-
-    console.log("[saveSiteGeneralContent] Existing rows before delete", {
-      site_id,
-      keys,
-      locales,
-      rowCount: existingRows?.length ?? 0,
-      rows: existingRows ?? [],
-    });
-
-    // Defensive write path: delete current rows for these key/locale pairs first,
-    // then insert exactly one row per pair. This avoids stale duplicate reads even
-    // when DB unique constraints are missing or were added later.
-    const { error: deleteError } = await supabase
-      .from("site_translations")
-      .delete()
-      .eq("site_id", site_id)
-      .in("key", keys)
-      .in("locale", locales);
-    if (deleteError) throw deleteError;
-
-    const { error: insertError } = await supabase
-      .from("site_translations")
-      .insert(translationsToWrite);
-    if (insertError) throw insertError;
-
-    console.log("[saveSiteGeneralContent] Inserted rows", {
-      site_id,
-      rows: translationsToWrite,
-    });
+      .upsert(translationsToWrite, {
+        onConflict: "site_id,key,locale",
+        ignoreDuplicates: false,
+      });
+    if (upsertError) throw upsertError;
   }
 
   // 2. If site language metadata or subdomain needs updating:
