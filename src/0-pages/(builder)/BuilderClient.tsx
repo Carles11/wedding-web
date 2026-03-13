@@ -383,20 +383,6 @@ export default function BuilderClient({
                   />
                 )}
               </div>
-
-              <div className="mt-6 flex items-center gap-3">
-                <button className="px-4 py-2 border rounded bg-white">
-                  {translations["builder.actions.preview"]}
-                </button>
-                <button
-                  className="px-3 py-2 text-sm text-gray-600"
-                  onClick={() =>
-                    alert(translations["builder.actions.discard_alert"])
-                  }
-                >
-                  {translations["builder.actions.discard"]}
-                </button>
-              </div>
             </div>
           </section>
         </div>
