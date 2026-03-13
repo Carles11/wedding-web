@@ -1,11 +1,14 @@
 "use client";
 
 import { isValidLanguage } from "@/4-shared/helpers/isValidLanguage";
+import { notify } from "@/4-shared/lib/toast/toast";
+import Heading from "@/4-shared/ui/commons/typography/Heading";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 interface CheckoutResponse {
   success: boolean;
+  code?: string;
   planType: string;
   sessionId?: string;
   url?: string;
@@ -27,6 +30,7 @@ export default function CheckoutPage() {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [errorCode, setErrorCode] = useState<string | null>(null);
 
   useEffect(() => {
     handleCheckout();
@@ -36,6 +40,7 @@ export default function CheckoutPage() {
     try {
       setLoading(true);
       setError(null);
+      setErrorCode(null);
 
       // Success redirect from Stripe
       if (successParam === "true" && sessionIdParam) {
@@ -59,6 +64,15 @@ export default function CheckoutPage() {
       const data: CheckoutResponse = await response.json();
 
       if (!data.success) {
+        if (data.code === "ALREADY_PREMIUM") {
+          notify.info("You are already premium.", {
+            toastId: "checkout-already-premium",
+          });
+          router.replace(`/marketing/pricing?lang=${lang}`);
+          return;
+        }
+
+        setErrorCode(data.code ?? null);
         setError(data.message || "Failed to create checkout session");
         return;
       }
@@ -92,9 +106,14 @@ export default function CheckoutPage() {
       <main className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
         <div className="max-w-md w-full text-center">
           <div className="bg-white rounded-lg shadow-sm border border-red-200 p-8">
-            <h1 className="text-2xl font-semibold text-red-700 mb-3">
-              Checkout Error
-            </h1>
+            <Heading
+              as="h2"
+              className="text-2xl font-semibold text-red-700 mb-3"
+            >
+              {errorCode === "DOWNGRADE_NOT_AVAILABLE"
+                ? "Plan Change Not Available"
+                : "Checkout Error"}
+            </Heading>
             <p className="text-gray-600 mb-6">{error}</p>
             <button
               onClick={() => router.push(`/marketing/pricing?lang=${lang}`)}
@@ -120,9 +139,9 @@ export default function CheckoutPage() {
             </div>
           </div>
 
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
+          <Heading as="h2" className="text-2xl font-bold text-gray-900 mb-2">
             {successParam === "true" ? "Payment Successful!" : "Processing..."}
-          </h1>
+          </Heading>
 
           <p className="text-gray-600 mb-6">
             {successParam === "true"

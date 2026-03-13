@@ -1,4 +1,5 @@
 import { getCurrentUser } from "@/3-entities/user/api/getCurrentUser";
+import { getCurrentUserSubscription } from "@/3-entities/user/api/getCurrentUserSubscription";
 import { createCheckoutSession } from "@/4-shared/lib/stripe/stripeCheckout";
 import type { PlanType } from "@/4-shared/types";
 import { NextRequest, NextResponse } from "next/server";
@@ -37,12 +38,46 @@ export async function POST(req: NextRequest) {
     const host = req.headers.get("host") || "localhost:3000";
     const baseUrl = `${protocol}://${host}`;
 
+    const subscription = await getCurrentUserSubscription(user.id);
+
     if (planType === "free") {
+      const hasActivePaidPlan =
+        !!subscription &&
+        subscription.plan_type !== "free" &&
+        ["active", "trialing"].includes(subscription.status ?? "");
+
+      if (hasActivePaidPlan) {
+        return NextResponse.json(
+          {
+            success: false,
+            code: "DOWNGRADE_NOT_AVAILABLE",
+            message:
+              "Downgrading from your current paid plan to Free is not available yet. Your current plan remains active.",
+          },
+          { status: 409 },
+        );
+      }
+
       return NextResponse.json({
         success: true,
         planType: "free",
         redirectTo: `/builder?lang=${language}`,
       });
+    }
+
+    const alreadyPremium =
+      subscription?.plan_type === "premium" &&
+      ["active", "trialing"].includes(subscription.status ?? "");
+
+    if (alreadyPremium) {
+      return NextResponse.json(
+        {
+          success: false,
+          code: "ALREADY_PREMIUM",
+          message: "You are already premium.",
+        },
+        { status: 409 },
+      );
     }
 
     const result = await createCheckoutSession(
