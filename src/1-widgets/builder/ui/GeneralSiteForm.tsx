@@ -7,7 +7,10 @@ import {
   SUPPORTED_LANGUAGES,
   SUPPORTED_LANGUAGE_LABELS,
 } from "@/4-shared/config/i18n";
+import { notify } from "@/4-shared/lib/toast/toast";
 import type { PlanType, Site } from "@/4-shared/types";
+import MainModal from "@/4-shared/ui/commons/modals/MainModal";
+import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { StepLayout } from "../step-layout";
 
@@ -25,11 +28,13 @@ type Props = {
 export default function GeneralSiteForm({
   site,
   refresh,
+  lang,
   translations,
   langLimit,
   planType,
   setGeneralComplete,
 }: Props) {
+  const router = useRouter();
   const [languages, setLanguages] = useState<SupportedLanguage[]>([]);
   const [defaultLang, setDefaultLang] = useState<SupportedLanguage>("en");
   const [subdomain, setSubdomain] = useState("");
@@ -41,7 +46,6 @@ export default function GeneralSiteForm({
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
   const [showUpgradeCTA, setShowUpgradeCTA] = useState(false);
 
   function arraysEqual<T>(a: T[], b: T[]) {
@@ -58,6 +62,7 @@ export default function GeneralSiteForm({
     setLoading(true);
     try {
       const res = await getSiteGeneralContent(site.id);
+
       setLanguages(res.languages);
       setDefaultLang(res.default_lang);
       setSubdomain(res.subdomain);
@@ -84,7 +89,12 @@ export default function GeneralSiteForm({
         !!res.titles[defLang]?.trim() && !!res.subtitles[defLang]?.trim(),
       );
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      notify.error(
+        err instanceof Error
+          ? err.message
+          : translations["error.something_went_wrong"] ||
+              "An unknown error occurred.",
+      );
     } finally {
       setLoading(false);
     }
@@ -118,7 +128,6 @@ export default function GeneralSiteForm({
   const handleLangCheckbox = (lang: SupportedLanguage) => {
     setShowUpgradeCTA(false);
     setError(null);
-    setSuccess(null);
 
     if (languages.includes(lang)) {
       const updated = languages.filter((l) => l !== lang);
@@ -153,10 +162,9 @@ export default function GeneralSiteForm({
     e?.preventDefault();
     if (saving) return;
     setError(null);
-    setSuccess(null);
 
     if (!site) {
-      setError(
+      notify.error(
         translations["builder.errors.site_not_ready"] || "Site not ready.",
       );
       return;
@@ -186,14 +194,14 @@ export default function GeneralSiteForm({
     try {
       await saveSiteGeneralContent({
         site_id: site.id,
-        heroId: site.id,
+        heroId: heroId,
         content,
         subdomain: nextSubdomain || undefined,
         languages,
         default_lang: defaultLang,
       });
 
-      setSuccess(
+      notify.success(
         translations["builder.general.form.save_success"] ||
           "Saved successfully.",
       );
@@ -212,8 +220,12 @@ export default function GeneralSiteForm({
         await refresh();
       }
     } catch (err: unknown) {
-      if (err instanceof Error) setError(err.message);
-      else setError("An unknown error occurred.");
+      notify.error(
+        err instanceof Error
+          ? err.message
+          : translations["error.something_went_wrong"] ||
+              "An unknown error occurred.",
+      );
     }
     setSaving(false);
   };
@@ -257,36 +269,42 @@ export default function GeneralSiteForm({
                   checked={languages.includes(lang)}
                   onChange={() => handleLangCheckbox(lang)}
                   className="mr-2"
-                  disabled={
-                    langLimit !== -1 &&
-                    !languages.includes(lang) &&
-                    languages.length >= langLimit
-                  }
                 />
                 {SUPPORTED_LANGUAGE_LABELS[lang]}
               </label>
             ))}
           </div>
 
-          {showUpgradeCTA && planType === "free" && (
-            <div className="mt-2 text-sm text-yellow-800">
-              {translations["builder.general.form.need_more_langs"] ||
-                "Need more languages?"}{" "}
+          <MainModal
+            open={showUpgradeCTA && planType === "free"}
+            title={
+              translations["builder.general.form.need_more_langs"] ||
+              "Need more languages?"
+            }
+            onClose={() => setShowUpgradeCTA(false)}
+          >
+            <p className="text-sm text-gray-700 mb-5">
+              {translations["builder.general.form.upgrade_description"] ||
+                "Your current plan only allows one language. Upgrade to Premium to unlock all languages for your wedding site."}
+            </p>
+            <div className="flex justify-end gap-3">
               <button
-                className="underline text-blue-600"
                 type="button"
-                onClick={() =>
-                  alert(
-                    translations["builder.general.form.upgrade"] ||
-                      "Upgrade to Pro to unlock more languages.",
-                  )
-                }
+                className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition"
+                onClick={() => setShowUpgradeCTA(false)}
+              >
+                {translations["builder.general.form.cancel"] || "Cancel"}
+              </button>
+              <button
+                type="button"
+                className="px-5 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition"
+                onClick={() => router.push(`/marketing/pricing?lang=${lang}`)}
               >
                 {translations["builder.general.form.upgrade"] ||
-                  "Upgrade to Pro"}
+                  "Upgrade to Premium"}
               </button>
             </div>
-          )}
+          </MainModal>
         </div>
 
         {/* Language tabs */}
@@ -350,30 +368,7 @@ export default function GeneralSiteForm({
           />
         </div>
 
-        {/* Subdomain */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            {translations["builder.general.form.label.subdomain"] ??
-              "Subdomain"}
-          </label>
-
-          {site?.subdomain ? (
-            <div className="mt-1 text-sm text-gray-700">{site.subdomain}</div>
-          ) : (
-            <div className="mt-1 flex flex-col sm:flex-row gap-2 sm:items-center">
-              <input
-                value={subdomain}
-                onChange={(e) => setSubdomain(e.target.value)}
-                placeholder="your-name-2026"
-                className="w-full sm:w-auto min-w-0 rounded border px-3 py-2"
-              />
-              <span className="text-sm text-gray-500">.weddweb.com</span>
-            </div>
-          )}
-        </div>
-
         {/* Status */}
-        {success && <div className="text-sm text-green-600">{success}</div>}
         {error && <div className="text-sm text-red-600">{error}</div>}
       </form>
     </StepLayout>
