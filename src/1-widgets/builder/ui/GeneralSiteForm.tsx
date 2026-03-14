@@ -202,8 +202,8 @@ export default function GeneralSiteForm({
         await refresh();
       }
 
-      // Always rehydrate from authoritative DB state after persistence.
-      await fetchAndApplyGeneralContent();
+      const defLang = defaultLang;
+      setGeneralComplete?.(!!content[defLang]?.title?.trim());
 
       notify.success(
         translations["builder.general.form.save_success"] ||

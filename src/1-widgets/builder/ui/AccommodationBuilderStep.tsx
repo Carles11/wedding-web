@@ -304,10 +304,10 @@ export default function AccommodationBuilderStep({
                             (translations["builder.accommodation.no_name"] ||
                               "(no name)")}
                         </div>
-                        <div className="text-xs text-gray-600 break-words">
+                        <div className="text-xs text-gray-600 wrap-break-word">
                           {it.address ?? ""}
                         </div>
-                        <div className="text-xs text-gray-600 break-words">
+                        <div className="text-xs text-gray-600 wrap-break-word">
                           {it.notes ?? ""}
                         </div>
                         {it.website && (

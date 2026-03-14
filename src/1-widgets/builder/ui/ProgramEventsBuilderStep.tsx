@@ -542,7 +542,7 @@ export default function ProgramEventsBuilderStep({
                       <div className="flex-1 space-y-2 min-w-0">
                         {/* Title + Toggle */}
                         <div className="flex items-center gap-3 flex-wrap">
-                          <strong className="text-base break-words">
+                          <strong className="text-base wrap-break-word">
                             {ev.title?.[defaultLang] ?? "(no title)"}
                           </strong>
 
@@ -641,14 +641,14 @@ export default function ProgramEventsBuilderStep({
 
                         {/* Location */}
                         {ev.location?.[defaultLang] && (
-                          <div className="text-sm text-gray-700 break-words">
+                          <div className="text-sm text-gray-700 wrap-break-word">
                             {ev.location[defaultLang]}
                           </div>
                         )}
 
                         {/* Description */}
                         {ev.description?.[defaultLang] && (
-                          <div className="text-sm text-gray-500 break-words">
+                          <div className="text-sm text-gray-500 wrap-break-word">
                             {ev.description[defaultLang]}
                           </div>
                         )}
