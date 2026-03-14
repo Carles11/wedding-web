@@ -566,7 +566,7 @@ export default function ProgramEventsBuilderStep({
                                     if (!otherMainExists) {
                                       notify.error(
                                         translations[
-                                          "builder.error.empty-main-not-allowed"
+                                          "builder.program_events.error.empty-main-not-allowed"
                                         ] ||
                                           "At least one main event must be set for Wedding Day.",
                                       );
