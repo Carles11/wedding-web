@@ -26,39 +26,34 @@ export default function ContactBuilderStep({
   translations,
 }: Props) {
   const [section, setSection] = useState<ContactSection | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!site?.id) return;
-    let mounted = true;
+  async function fetchAndApplyContactSection() {
+    if (!site?.id) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     setError(null);
-    fetchContactSection(site.id)
-      .then((sec) => {
-        if (mounted) setSection(sec);
-      })
-      .catch((err: unknown) => {
-        if (mounted) setError((err as Error)?.message ?? String(err));
-      })
-      .finally(() => {
-        if (mounted) setLoading(false);
-      });
-    return () => {
-      mounted = false;
-    };
+    try {
+      const sec = await fetchContactSection(site.id);
+      setSection(sec);
+    } catch (err: unknown) {
+      setError((err as Error)?.message ?? String(err));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    fetchAndApplyContactSection();
   }, [site?.id]);
 
   // Manual reload used by the "Reload" back button
   function load() {
-    if (!site?.id) return;
-    setLoading(true);
-    setError(null);
-    fetchContactSection(site.id)
-      .then((sec) => setSection(sec))
-      .catch((err: unknown) => setError((err as Error)?.message ?? String(err)))
-      .finally(() => setLoading(false));
+    fetchAndApplyContactSection();
   }
 
   const [form, setForm] = useState<ContactSection["content"]>({
@@ -145,8 +140,9 @@ export default function ContactBuilderStep({
     try {
       const updated = await upsertContactSection(site.id, form ?? {});
       if (!updated) throw new Error("Save failed");
-      setSection(updated);
-      // No refresh() here: doesn't change the sites table; local state is authoritative.
+
+      await Promise.resolve(refresh());
+      await fetchAndApplyContactSection();
     } catch (err: unknown) {
       setError((err as Error)?.message ?? String(err));
     } finally {

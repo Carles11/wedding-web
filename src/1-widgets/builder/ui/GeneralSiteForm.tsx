@@ -198,23 +198,17 @@ export default function GeneralSiteForm({
         languages,
         default_lang: defaultLang,
       });
+      if (shouldRefreshSiteMeta) {
+        await refresh();
+      }
 
-      await refresh();
+      // Always rehydrate from authoritative DB state after persistence.
+      await fetchAndApplyGeneralContent();
+
       notify.success(
         translations["builder.general.form.save_success"] ||
           "Saved successfully.",
       );
-
-      // Re-check completeness after save
-      const defLang = defaultLang;
-      setGeneralComplete?.(!!content[defLang]?.title?.trim());
-
-      // Keep the just-saved values in local state. An immediate refetch can read
-      // stale rows and overwrite the inputs with older values right after save.
-      // Only refresh site metadata when it actually changed.
-      if (shouldRefreshSiteMeta) {
-        await refresh();
-      }
     } catch (err: unknown) {
       notify.error(
         err instanceof Error

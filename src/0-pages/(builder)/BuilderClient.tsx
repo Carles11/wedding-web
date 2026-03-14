@@ -19,7 +19,7 @@ import { useCallback, useEffect, useState } from "react";
 import { fetchAccommodationEntries } from "@/3-entities/accommodation/api";
 import { fetchImagesBySite } from "@/3-entities/images/api";
 import { fetchHasMainProgramEvent } from "@/3-entities/program_events/api";
-import { fetchContactSection } from "@/3-entities/sections/api/fetchContactSection";
+import { fetchContactSection } from "@/3-entities/sections/api/fetchContactSection"; // fetched from "sections" table
 import { fetchWeddingGiftBySite } from "@/3-entities/wedding_gifts/api";
 import { fetchWhatToSeeEntries } from "@/3-entities/what_to_see/api";
 import { BuilderHeader } from "@/4-shared/ui/builder";
@@ -305,7 +305,10 @@ export default function BuilderClient({
               )}
 
               <div className="mt-8 border rounded p-4 bg-gray-50">
-                {active === 0 && site && (
+                {/* Steps are always mounted to preserve local state across tab switches.
+                    Unmounting + remounting would trigger a re-fetch that can land in the
+                    brief stale-read window after a Supabase write, showing pre-save data. */}
+                <div className={active !== 0 ? "hidden" : undefined}>
                   <GeneralSiteForm
                     site={site}
                     refresh={refresh}
@@ -315,8 +318,8 @@ export default function BuilderClient({
                     planType={planType}
                     setGeneralComplete={setHasHeroContent}
                   />
-                )}
-                {active === 1 && site && (
+                </div>
+                <div className={active !== 1 ? "hidden" : undefined}>
                   <ImagesBuilderStep
                     site={site}
                     refresh={refresh}
@@ -325,8 +328,8 @@ export default function BuilderClient({
                     setHeroImageExists={setHeroImageExists}
                     planType={planType}
                   />
-                )}
-                {active === 2 && site && (
+                </div>
+                <div className={active !== 2 ? "hidden" : undefined}>
                   <ProgramEventsBuilderStep
                     site={site}
                     refresh={refresh}
@@ -335,17 +338,18 @@ export default function BuilderClient({
                     planType={planType}
                     setHasMainProgramEvent={setHasMainProgramEvent}
                   />
-                )}
-                {active === 3 && site && (
+                </div>
+                <div className={active !== 3 ? "hidden" : undefined}>
                   <AccommodationBuilderStep
                     site={site}
+                    refresh={refresh}
                     lang={currentLang}
                     translations={translations}
                     planType={planType}
                     setItemCount={setAccommodationCount}
                   />
-                )}
-                {active === 4 && site && (
+                </div>
+                <div className={active !== 4 ? "hidden" : undefined}>
                   <WhatToSeeBuilderStep
                     site={site}
                     refresh={refresh}
@@ -354,8 +358,8 @@ export default function BuilderClient({
                     planType={planType}
                     setItemCount={setWhatToSeeCount}
                   />
-                )}
-                {active === 5 && site && (
+                </div>
+                <div className={active !== 5 ? "hidden" : undefined}>
                   <WeddingGiftBuilderStep
                     site={site}
                     refresh={refresh}
@@ -363,8 +367,8 @@ export default function BuilderClient({
                     translations={translations}
                     setHasData={setHasWeddingGiftData}
                   />
-                )}
-                {active === 6 && site && (
+                </div>
+                <div className={active !== 6 ? "hidden" : undefined}>
                   <ContactBuilderStep
                     site={site}
                     refresh={refresh}
@@ -372,8 +376,8 @@ export default function BuilderClient({
                     translations={translations}
                     setHasContact={setHasContact}
                   />
-                )}
-                {active === 7 && site && (
+                </div>
+                <div className={active !== 7 ? "hidden" : undefined}>
                   <DomainAndBillingBuilderStep
                     site={site}
                     refresh={refresh}
@@ -381,7 +385,7 @@ export default function BuilderClient({
                     translations={translations}
                     planType={planType}
                   />
-                )}
+                </div>
               </div>
             </div>
           </section>

@@ -37,29 +37,30 @@ export default function WeddingGiftBuilderStep({
   setHasData,
 }: Props) {
   const [gift, setGift] = useState<Partial<WeddingGift> | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  useEffect(() => {
-    if (!site?.id) return;
-    let mounted = true;
+  async function fetchAndApplyWeddingGift() {
+    if (!site?.id) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     setError(null);
-    fetchWeddingGiftBySite(site.id)
-      .then((row) => {
-        if (mounted) setGift(row ?? {});
-      })
-      .catch((err) => {
-        if (mounted) setError((err as Error).message);
-      })
-      .finally(() => {
-        if (mounted) setLoading(false);
-      });
-    return () => {
-      mounted = false;
-    };
+    try {
+      const row = await fetchWeddingGiftBySite(site.id);
+      setGift(row ?? {});
+    } catch (err) {
+      setError((err as Error).message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    fetchAndApplyWeddingGift();
   }, [site?.id]);
 
   // Notify parent whether any payment method is configured
@@ -95,12 +96,14 @@ export default function WeddingGiftBuilderStep({
       if (gift?.id) {
         // Update existing
         await updateWeddingGiftBySite(site.id, { data: gift ?? {} });
-        setGift({ ...gift }); // Keep the updated object
       } else {
         // Create new
-        const created = await createWeddingGiftBySite(site.id, gift ?? {});
-        setGift(created); // Set the new object
+        await createWeddingGiftBySite(site.id, gift ?? {});
       }
+
+      await Promise.resolve(refresh?.());
+      await fetchAndApplyWeddingGift();
+
       setSuccess(true);
       setTimeout(() => setSuccess(false), 1800);
     } catch (err) {
@@ -125,7 +128,10 @@ export default function WeddingGiftBuilderStep({
     setError(null);
     try {
       await deleteWeddingGiftBySite(site.id);
-      setGift(null); // Clear the UI
+
+      await Promise.resolve(refresh?.());
+      await fetchAndApplyWeddingGift();
+
       setSuccess(false);
     } catch (err) {
       setError((err as Error)?.message ?? String(err));

@@ -24,7 +24,7 @@ export async function saveSiteGeneralContent({
 }: SaveOpts): Promise<void> {
   const supabase = await createClient();
   const heroTranslationId = heroId ?? site_id;
-
+  console.log({ site_id, heroId, content, subdomain, languages, default_lang });
   // Collect all translation rows to write in one statement
   const translationsToWrite: GlobalTranslationRow[] = [];
   for (const [lang, val] of Object.entries(content)) {

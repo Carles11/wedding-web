@@ -186,11 +186,11 @@ export default function ImagesBuilderStep({
       setLoading(false);
       return;
     }
-    fetchImages();
+    fetchAndApplyImages();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [site?.id]);
 
-  async function fetchImages() {
+  async function fetchAndApplyImages() {
     if (!site?.id) return;
     setLoading(true);
     setError(null);
@@ -333,9 +333,10 @@ export default function ImagesBuilderStep({
           );
         }
       }
-      // No redundant re-fetch here: local state above is authoritative
-      // and avoids the loading flicker that hides the newly uploaded preview.
-      // refresh();
+
+      await Promise.resolve(refresh());
+      // Confirm UI state against persisted DB state after mutation.
+      await fetchAndApplyImages();
 
       notify.success(
         translations[
@@ -373,14 +374,15 @@ export default function ImagesBuilderStep({
       const ok = await deleteImage(image);
       if (!ok) {
         // rollback if failed
-        await fetchImages();
+        await fetchAndApplyImages();
         notify.error(translations["builder.images.error.delete_failed"]);
         return;
       }
 
-      // refresh();
+      await Promise.resolve(refresh());
+      await fetchAndApplyImages();
     } catch (err) {
-      await fetchImages();
+      await fetchAndApplyImages();
       notify.error(translations["builder.images.error.delete_failed"]);
     } finally {
       setAssigning(false);

@@ -48,7 +48,7 @@ export default function WhatToSeeBuilderStep({
   setItemCount,
 }: Props) {
   const [items, setItems] = useState<WhatToSeeEntryFull[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -66,32 +66,7 @@ export default function WhatToSeeBuilderStep({
 
   const defaultLang = site?.default_lang ?? languages[0] ?? "en";
 
-  useEffect(() => {
-    if (!site?.id) return;
-    let mounted = true;
-    setLoading(true);
-    setError(null);
-    fetchWhatToSeeEntries(site.id)
-      .then((rows) => {
-        if (mounted) setItems(rows ?? []);
-      })
-      .catch((err: unknown) => {
-        if (mounted) setError((err as Error)?.message ?? String(err));
-      })
-      .finally(() => {
-        if (mounted) setLoading(false);
-      });
-    return () => {
-      mounted = false;
-    };
-  }, [site?.id]);
-
-  // Notify parent whenever item count changes
-  useEffect(() => {
-    setItemCount?.(items.length);
-  }, [items.length, setItemCount]);
-
-  async function load() {
+  async function fetchAndApplyWhatToSeeEntries() {
     if (!site?.id) return;
     setLoading(true);
     setError(null);
@@ -104,6 +79,19 @@ export default function WhatToSeeBuilderStep({
       setLoading(false);
     }
   }
+
+  useEffect(() => {
+    if (!site?.id) {
+      setLoading(false);
+      return;
+    }
+    fetchAndApplyWhatToSeeEntries();
+  }, [site?.id]);
+
+  // Notify parent whenever item count changes
+  useEffect(() => {
+    setItemCount?.(items.length);
+  }, [items.length, setItemCount]);
 
   function canAddMore() {
     return canUseQuota(planType, "whatToSee", items.length);
@@ -229,19 +217,6 @@ export default function WhatToSeeBuilderStep({
               "Update failed",
             ),
           );
-
-        setItems((prev) =>
-          prev.map((item) =>
-            item.id === updated.id
-              ? {
-                  ...updated,
-                  name: form.name ?? {},
-                  description: form.description ?? {},
-                  notes: form.notes ?? {},
-                }
-              : item,
-          ),
-        );
       } else {
         const created = await createWhatToSeeEntry(payload, translationsDB);
         if (!created)
@@ -252,22 +227,14 @@ export default function WhatToSeeBuilderStep({
               "Create failed",
             ),
           );
-
-        setItems((prev) => [
-          ...prev,
-          {
-            ...created,
-            name: form.name ?? {},
-            description: form.description ?? {},
-            notes: form.notes ?? {},
-          },
-        ]);
       }
 
       setForm({});
       setEditingId(null);
       setCollapsed(false);
-      // No refresh() here: doesn't change the sites table; local state is authoritative.
+
+      await Promise.resolve(refresh());
+      await fetchAndApplyWhatToSeeEntries();
     } catch (err: unknown) {
       setError((err as Error)?.message ?? String(err));
     } finally {
@@ -301,8 +268,8 @@ export default function WhatToSeeBuilderStep({
       return;
     }
 
-    setItems((prev) => prev.filter((item) => item.id !== id));
-    // (no refresh, it's immediate)
+    await Promise.resolve(refresh());
+    await fetchAndApplyWhatToSeeEntries();
   }
 
   return (
