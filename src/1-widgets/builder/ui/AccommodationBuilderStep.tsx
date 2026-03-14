@@ -38,7 +38,7 @@ export default function AccommodationBuilderStep({
   setItemCount,
 }: Props) {
   const [items, setItems] = useState<AccommodationEntry[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -47,29 +47,24 @@ export default function AccommodationBuilderStep({
   const formRef = useRef<HTMLDivElement | null>(null);
   const accommodationLimit = getPlanLimit(planType, "accommodations");
 
-  async function fetchAndApplyAccommodationEntries() {
-    if (!site?.id) {
-      setLoading(false);
-      return;
-    }
+  useEffect(() => {
+    if (!site?.id) return;
+    let mounted = true;
     setLoading(true);
     setError(null);
-    try {
-      const rows = await fetchAccommodationEntries(site.id);
-      setItems(rows ?? []);
-    } catch (err: unknown) {
-      setError((err as Error)?.message ?? String(err));
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    if (!site?.id) {
-      setLoading(false);
-      return;
-    }
-    fetchAndApplyAccommodationEntries();
+    fetchAccommodationEntries(site.id)
+      .then((rows) => {
+        if (mounted) setItems(rows ?? []);
+      })
+      .catch((err: unknown) => {
+        if (mounted) setError((err as Error)?.message ?? String(err));
+      })
+      .finally(() => {
+        if (mounted) setLoading(false);
+      });
+    return () => {
+      mounted = false;
+    };
   }, [site?.id]);
 
   // Notify parent whenever the item count changes (covers initial load + add/delete)
@@ -168,9 +163,11 @@ export default function AccommodationBuilderStep({
           form,
         );
         if (!updated) throw new Error("Update failed");
+        setItems((prev) => prev.map((i) => (i.id === editingId ? updated : i)));
       } else {
         const created = await createAccommodationEntry(site.id, form, planType);
         if (!created) throw new Error("Create failed");
+        setItems((prev) => [...prev, created]);
       }
 
       setEditingId(null);
@@ -183,9 +180,6 @@ export default function AccommodationBuilderStep({
         email: "",
       });
       setIsListOpen(true);
-
-      await Promise.resolve(refresh());
-      await fetchAndApplyAccommodationEntries();
     } catch (err: unknown) {
       setError((err as Error)?.message ?? String(err));
     } finally {
@@ -214,8 +208,7 @@ export default function AccommodationBuilderStep({
       return;
     }
 
-    await Promise.resolve(refresh());
-    await fetchAndApplyAccommodationEntries();
+    setItems((prev) => prev.filter((item) => item.id !== id));
   }
 
   return (

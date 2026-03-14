@@ -103,7 +103,7 @@ export default function ProgramEventsBuilderStep({
   const defaultLang = site?.default_lang ?? languages[0] ?? "en";
 
   // 🔹 Fetch translated events
-  async function fetchAndApplyProgramEvents() {
+  async function load() {
     if (!site?.id) return;
     setLoading(true);
     setError(null);
@@ -131,8 +131,9 @@ export default function ProgramEventsBuilderStep({
       setLoading(false);
       return;
     }
-    fetchAndApplyProgramEvents();
-  }, [site?.id, languages]);
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [site?.id]);
 
   useEffect(() => {
     setHasMainProgramEvent?.(events.some((event) => !!event.is_main_event));
@@ -313,6 +314,29 @@ export default function ProgramEventsBuilderStep({
               "Update failed",
             ),
           );
+
+        // Reflect edit immediately in UI without waiting for a refetch race.
+        setEvents((prev) =>
+          prev.map((e) => {
+            if (e.id !== editingId) {
+              if (
+                form.is_main_event &&
+                form.day_tag === "wedding_day" &&
+                e.day_tag === "wedding_day"
+              ) {
+                return { ...e, is_main_event: false };
+              }
+              return e;
+            }
+            return {
+              ...e,
+              ...updated,
+              title: form.title ?? {},
+              location: form.location ?? {},
+              description: form.description ?? {},
+            } as ProgramEvent;
+          }),
+        );
       } else {
         const created = await createProgramEvent(
           { site_id: site.id, ...structuralFields },
@@ -328,11 +352,32 @@ export default function ProgramEventsBuilderStep({
             ),
           );
         }
+
+        setEvents((prev) => {
+          const cleaned =
+            structuralFields.is_main_event &&
+            structuralFields.day_tag === "wedding_day"
+              ? prev.map((e) =>
+                  e.day_tag === "wedding_day"
+                    ? { ...e, is_main_event: false }
+                    : e,
+                )
+              : prev;
+
+          return [
+            ...cleaned,
+            {
+              ...created,
+              title: form.title ?? {},
+              location: form.location ?? {},
+              description: form.description ?? {},
+            } as ProgramEvent,
+          ];
+        });
       }
 
       clearForm();
-      await Promise.resolve(refresh());
-      await fetchAndApplyProgramEvents();
+      refresh();
     } catch (err: unknown) {
       console.error(err);
       setError((err as Error)?.message ?? String(err));
@@ -377,8 +422,8 @@ export default function ProgramEventsBuilderStep({
       );
       return;
     }
-    await Promise.resolve(refresh());
-    await fetchAndApplyProgramEvents();
+    setEvents((prev) => prev.filter((e) => e.id !== id));
+    refresh();
   }
 
   const DAY_TAGS = getDayTags(translations);
