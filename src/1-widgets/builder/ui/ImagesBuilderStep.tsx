@@ -82,6 +82,7 @@ function ImageCard({
   uploading,
   translations,
   onDelete,
+  vertical,
 }: {
   img: ImageRow;
   label?: string;
@@ -89,8 +90,15 @@ function ImageCard({
   uploading: boolean;
   translations: Record<string, string>;
   onDelete?: () => void;
+  vertical?: boolean;
 }) {
   const url = publicUrlFor(img);
+  const imgClass = vertical
+    ? "w-full aspect-[3/4] object-cover rounded-lg"
+    : "w-full h-48 md:h-56 object-cover rounded-lg";
+  const fallbackClass = vertical
+    ? "aspect-[3/4] bg-gray-100 flex items-center justify-center text-xs text-gray-500"
+    : "h-48 md:h-56 bg-gray-100 flex items-center justify-center text-xs text-gray-500";
 
   return (
     <div className="relative group w-full md:max-w-md">
@@ -101,12 +109,12 @@ function ImageCard({
             alt={label ?? "uploaded image"}
             key={img.id}
             width={500}
-            height={300}
-            className="w-full h-48 md:h-56 object-cover rounded-lg"
+            height={vertical ? 667 : 300}
+            className={imgClass}
             unoptimized
           />
         ) : (
-          <div className="h-48 md:h-56 bg-gray-100 flex items-center justify-center text-xs text-gray-500">
+          <div className={fallbackClass}>
             {translations["builder.images.label.preview_unavailable"] ||
               "No preview available"}
           </div>
@@ -480,6 +488,10 @@ export default function ImagesBuilderStep({
                     {translations["builder.images.hint.contact"] ||
                       "Optional. This image can be shown in the contact section."}
                   </p>
+                  <p className="text-xs text-amber-700 mt-1">
+                    {translations["builder.images.hint.contact_vertical_tip"] ||
+                      "For best resultsss, use a portrait (vertical) image."}
+                  </p>
                 </div>
                 <span className="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-700">
                   {translations["builder.images.label.optional"] || "Optional"}
@@ -496,6 +508,7 @@ export default function ImagesBuilderStep({
                   uploading={uploadingSlot === "contact"}
                   translations={translations}
                   onDelete={() => handleDelete(assignedContact)}
+                  vertical
                 />
               ) : (
                 <EmptySlot
