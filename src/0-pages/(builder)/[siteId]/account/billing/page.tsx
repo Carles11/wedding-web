@@ -1,6 +1,6 @@
-import AccountBillingDetails from "@/0-pages/(builder)/[siteId]/account/billing/AccountBillingDetails";
 import { getCurrentUser } from "@/3-entities/user/api/getCurrentUser";
 import { fetchBuilderTranslations } from "@/4-shared/api/builder/getTranslations";
+import AccountBillingDetails from "./AccountBillingDetails";
 
 interface PageProps {
   params: { siteId: string };
@@ -13,7 +13,6 @@ export default async function AccountBillingPage({
   params,
   searchParams,
 }: PageProps) {
-  // --- SAFELY UNWRAP searchParams ---
   let resolvedSearchParams = searchParams;
 
   if (
@@ -27,7 +26,6 @@ export default async function AccountBillingPage({
     }>);
   }
 
-  // Tell TypeScript: from here on, this is the resolved object
   const paramsObj = resolvedSearchParams as
     | { [key: string]: string | string[] | undefined }
     | undefined;

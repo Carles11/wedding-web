@@ -4,8 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "npm run check:billing-hardlinks && next build",
     "start": "next start",
+    "check:billing-hardlinks": "node scripts/check-billing-hardlinks.mjs",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "format": "prettier --write ."
   },

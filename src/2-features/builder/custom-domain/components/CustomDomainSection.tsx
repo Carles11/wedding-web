@@ -172,7 +172,7 @@ export const CustomDomainSection: React.FC<Props> = ({
           </span>
           <span>{translations["builder.domain.custom_domain_locked"]}</span>
           <button
-            className="ml-auto px-3 py-1 bg-blue-600 text-white rounded text-sm"
+            className="cursor-pointer ml-auto px-3 py-1 bg-blue-600 text-white rounded text-sm"
             onClick={onUpgradeClick}
             type="button"
           >

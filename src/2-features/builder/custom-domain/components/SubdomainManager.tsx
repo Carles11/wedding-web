@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { notify } from "@/4-shared/lib/toast/toast";
+import type { PlanType, Site } from "@/4-shared/types";
 import { copyToClipboard } from "@/4-shared/utils/copyToClipboard";
-import type { Site, PlanType } from "@/4-shared/types";
 import { isValidSubdomain } from "@/4-shared/utils/validations";
+import { useState } from "react";
 
 interface Props {
   site: Site;
@@ -81,9 +82,17 @@ export default function SubdomainManager({
       site.subdomain = subdomain; // This mutates the prop, which is not recommended in React
       setSubdomain(subdomain); // But this updates local input—they are already in sync, so should be fine
       setEditing(false);
+
+      notify.success(
+        translations["builder.general.form.save_success"] ||
+          "Saved successfully.",
+      );
     } catch {
       setStatus("error");
       setHelpText(translations["builder.domain.error_generic"]);
+      notify.error(
+        translations["error.something_went_wrong"] ?? "Something went wrong",
+      );
     }
   }
 
@@ -156,7 +165,7 @@ export default function SubdomainManager({
               status === "saving" ||
               !isValidSubdomain(subdomain)
             }
-            className="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-200 disabled:text-gray-500"
+            className="cursor-pointer mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-200 disabled:text-gray-500"
           >
             {translations["builder.domain.save_btn"]}
           </button>
