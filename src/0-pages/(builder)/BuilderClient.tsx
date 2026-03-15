@@ -14,7 +14,7 @@ import { useSite } from "@/4-shared/hooks/useSite";
 import { useSupabaseAuth } from "@/4-shared/hooks/useSupabaseAuth";
 import { usePlan } from "@/app/providers";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { Fragment, useCallback, useEffect, useState } from "react";
 
 import { fetchAccommodationEntries } from "@/3-entities/accommodation/api";
 import { fetchImagesBySite } from "@/3-entities/images/api";
@@ -251,27 +251,34 @@ export default function BuilderClient({
                 {STEP_KEYS.map((k, i) => {
                   const status = STEP_STATUS[i];
                   return (
-                    <li key={k}>
-                      <button
-                        className={`flex items-center px-3 py-2 rounded whitespace-nowrap md:w-full md:text-left ${
-                          i === active
-                            ? "bg-blue-50 font-semibold"
-                            : "hover:bg-gray-50"
-                        }`}
-                        onClick={() => setActive(i)}
-                      >
-                        <span className="w-6 flex justify-center items-center">
-                          {status === "done" ? (
-                            <GreenCheckIcon />
-                          ) : status === "optional" ? (
-                            <GrayCircleIcon />
-                          ) : (
-                            <RedDotIcon />
-                          )}
-                        </span>
-                        {translations[k]}
-                      </button>
-                    </li>
+                    <Fragment key={k}>
+                      {i === 7 && (
+                        <li className="my-3 px-3" aria-hidden="true">
+                          <div className="h-px bg-gray-200" />
+                        </li>
+                      )}
+                      <li>
+                        <button
+                          className={`flex items-center px-3 py-2 rounded whitespace-nowrap md:w-full md:text-left ${
+                            i === active
+                              ? "bg-blue-50 font-semibold"
+                              : "hover:bg-gray-50"
+                          }`}
+                          onClick={() => setActive(i)}
+                        >
+                          <span className="w-6 flex justify-center items-center">
+                            {status === "done" ? (
+                              <GreenCheckIcon />
+                            ) : status === "optional" ? (
+                              <GrayCircleIcon />
+                            ) : (
+                              <RedDotIcon />
+                            )}
+                          </span>
+                          {translations[k]}
+                        </button>
+                      </li>
+                    </Fragment>
                   );
                 })}
               </ul>
@@ -292,10 +299,10 @@ export default function BuilderClient({
                 </p>
               ) : (
                 <>
-                  <p className="text-sm text-gray-600">
+                  {/* <p className="text-sm text-gray-600">
                     {translations["builder.status.site_id"]}{" "}
                     {site?.id ?? translations["builder.status.site_id_empty"]}
-                  </p>
+                  </p> */}
                   <p className="text-sm text-gray-600">
                     {translations["builder.status.subdomain"]}{" "}
                     {site?.subdomain ??

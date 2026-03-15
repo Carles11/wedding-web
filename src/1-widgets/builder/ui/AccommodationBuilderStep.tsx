@@ -11,6 +11,8 @@ import {
   getPlanLimit,
 } from "@/4-shared/helpers/billing/entitlements";
 import { interpolate } from "@/4-shared/helpers/interpolateVars";
+import { useAlertConfirm } from "@/4-shared/hooks/useAlertConfirm";
+import { notify } from "@/4-shared/lib/toast/toast";
 import type {
   AccommodationEntry,
   AccommodationFormValues,
@@ -49,6 +51,7 @@ export default function AccommodationBuilderStep({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isListOpen, setIsListOpen] = useState(true);
   const [showUpgradeCTA, setShowUpgradeCTA] = useState(false);
+  const { confirm: confirmDelete, confirmDialog } = useAlertConfirm();
 
   const formRef = useRef<HTMLDivElement | null>(null);
   const accommodationLimit = getPlanLimit(planType, "accommodations");
@@ -218,10 +221,18 @@ export default function AccommodationBuilderStep({
         );
         if (!updated) throw new Error("Update failed");
         setItems((prev) => prev.map((i) => (i.id === editingId ? updated : i)));
+        notify.success(
+          translations["builder.general.form.save_success"] ||
+            "Saved successfully.",
+        );
       } else {
         const created = await createAccommodationEntry(site.id, form, planType);
         if (!created) throw new Error("Create failed");
         setItems((prev) => [...prev, created]);
+        notify.success(
+          translations["builder.general.form.save_success"] ||
+            "Saved successfully.",
+        );
       }
 
       setEditingId(null);
@@ -242,13 +253,16 @@ export default function AccommodationBuilderStep({
   }
 
   async function handleDelete(id: string) {
-    if (
-      !confirm(
+    const okToDelete = await confirmDelete({
+      title: translations["builder.actions.delete"] || "Delete",
+      message:
         translations["builder.accommodation.confirm_delete"] ||
-          "Delete this accommodation entry?",
-      )
-    )
-      return;
+        "Delete this accommodation entry?",
+      confirmLabel: translations["builder.actions.delete"] || "Delete",
+      cancelLabel: translations["builder.actions.cancel"] || "Cancel",
+      tone: "danger",
+    });
+    if (!okToDelete) return;
 
     setSaving(true);
     const ok = await deleteAccommodationEntry(site?.id ?? "", id);
@@ -261,8 +275,10 @@ export default function AccommodationBuilderStep({
       );
       return;
     }
-
     setItems((prev) => prev.filter((item) => item.id !== id));
+    notify.success(
+      translations["common.delete_success"] || "Deleted successfully.",
+    );
   }
 
   return (
@@ -292,16 +308,13 @@ export default function AccommodationBuilderStep({
       backLabel={translations["builder.actions.cancel"] || "Cancel"}
       translations={translations}
     >
-      <div className="mb-3 flex items-center justify-between">
-        <h3 className="text-lg font-medium">
-          {translations["builder.accommodation.title"] || "Accommodation"}
-        </h3>
+      <div className="mb-3 flex items-center justify-end">
         <div>
           <button
             className={`px-1 py-1 rounded text-white ${
               canAddMore()
                 ? "bg-blue-600 hover:bg-blue-700"
-                : "bg-blue-400 cursor-not-allowed"
+                : "bg-blue-400 cursor-pointer "
             }`}
             onClick={() => {
               if (!canAddMore()) {
@@ -409,13 +422,13 @@ export default function AccommodationBuilderStep({
                       </div>
                       <div className="flex gap-2 shrink-0">
                         <button
-                          className="text-xs font-medium px-3 py-1.5 rounded-md border border-gray-200 bg-white hover:bg-gray-50 active:scale-[0.98] transition"
+                          className="cursor-pointer text-xs font-medium px-3 py-1.5 rounded-md border border-gray-200 bg-white hover:bg-gray-50 active:scale-[0.98] transition"
                           onClick={() => startEdit(it)}
                         >
                           {translations["builder.actions.edit"] || "Edit"}
                         </button>
                         <button
-                          className="text-xs font-medium px-3 py-1.5 rounded-md border border-red-200 text-red-600 bg-white hover:bg-red-50 active:scale-[0.98] transition"
+                          className="cursor-pointer text-xs font-medium px-3 py-1.5 rounded-md border border-red-200 text-red-600 bg-white hover:bg-red-50 active:scale-[0.98] transition"
                           onClick={() => handleDelete(it.id)}
                           disabled={saving}
                         >
@@ -530,7 +543,10 @@ export default function AccommodationBuilderStep({
               FREE_ACCOMMODATION_LIMIT: accommodationLimit,
             },
           )}{" "}
-          <button className="underline text-blue-600" onClick={goToPricing}>
+          <button
+            className="cursor-pointer underline text-blue-600"
+            onClick={goToPricing}
+          >
             {translations["builder.accommodation.upgrade"] || "Upgrade"}
           </button>{" "}
           {translations["builder.accommodation.to_add_more"] || "to add more."}
@@ -567,6 +583,7 @@ export default function AccommodationBuilderStep({
           </button>
         </div>
       </MainModal>
+      {confirmDialog}
     </StepLayout>
   );
 }

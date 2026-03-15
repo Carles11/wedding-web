@@ -52,7 +52,7 @@ export function StepLayout({
           <button
             onClick={onBack}
             disabled={backDisabled}
-            className="rounded-lg border px-4 py-2 text-sm font-medium hover:bg-gray-50 disabled:opacity-50"
+            className="cursor-pointer rounded-lg border px-4 py-2 text-sm font-medium hover:bg-gray-50 disabled:opacity-50"
           >
             {resolvedBack}
           </button>
@@ -60,7 +60,7 @@ export function StepLayout({
           <button
             onClick={onNext}
             disabled={nextDisabled}
-            className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50"
+            className="cursor-pointer rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50"
           >
             {resolvedNext}
           </button>

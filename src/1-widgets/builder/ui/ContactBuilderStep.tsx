@@ -7,6 +7,7 @@ import {
   getPublicUrlForImage,
 } from "@/3-entities/images/api";
 import { fetchContactSection } from "@/3-entities/sections/api/fetchContactSection";
+import { notify } from "@/4-shared/lib/toast/toast";
 import type { ContactSection, Site } from "@/4-shared/types";
 import { EMAIL_RE } from "@/4-shared/utils/validations";
 import { useEffect, useRef, useState } from "react";
@@ -193,6 +194,10 @@ export default function ContactBuilderStep({
       const updated = await upsertContactSection(site.id, form ?? {});
       if (!updated) throw new Error("Save failed");
       setSection(updated);
+      notify.success(
+        translations["builder.general.form.save_success"] ||
+          "Saved successfully.",
+      );
       // No refresh() here: doesn't change the sites table; local state is authoritative.
     } catch (err: unknown) {
       setError((err as Error)?.message ?? String(err));
@@ -389,7 +394,7 @@ export default function ContactBuilderStep({
               {error && <div className="text-red-600 mt-4">{error}</div>}
 
               {/* Preview */}
-              <div className="mt-6">
+              {/* <div className="mt-6">
                 <div className="font-medium mb-2">
                   {translations["builder.contact.preview_title"] ||
                     "Contact section preview"}
@@ -445,7 +450,7 @@ export default function ContactBuilderStep({
                     </div>
                   )}
                 </div>
-              </div>
+              </div> */}
             </div>
           </div>
         )}

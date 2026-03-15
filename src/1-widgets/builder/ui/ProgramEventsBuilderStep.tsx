@@ -30,6 +30,7 @@ import { StepLayout } from "../step-layout";
 import { DateInput } from "@/4-shared/ui/builder/inputs/DateInput";
 import { TimeInput } from "@/4-shared/ui/builder/inputs/TimeInput";
 // Import the Toggle Button
+import { useAlertConfirm } from "@/4-shared/hooks/useAlertConfirm";
 import { Toggle } from "@/4-shared/ui/commons/buttons/Toggle";
 
 function t(
@@ -126,6 +127,7 @@ export default function ProgramEventsBuilderStep({
   }, [site]);
 
   const defaultLang = site?.default_lang ?? languages[0] ?? "en";
+  const { confirm: confirmDelete, confirmDialog } = useAlertConfirm();
 
   const weddingDayReferenceDate = useMemo(() => {
     const ref = events.find(
@@ -528,16 +530,18 @@ export default function ProgramEventsBuilderStep({
       return;
     }
 
-    if (
-      !confirm(
-        t(
-          translations,
-          "builder.program_events.confirm.delete",
-          "Delete this event?",
-        ),
-      )
-    )
-      return;
+    const okToDelete = await confirmDelete({
+      title: t(translations, "builder.actions.delete", "Delete"),
+      message: t(
+        translations,
+        "builder.program_events.confirm.delete",
+        "Delete this event?",
+      ),
+      confirmLabel: t(translations, "builder.actions.delete", "Delete"),
+      cancelLabel: t(translations, "builder.actions.cancel", "Cancel"),
+      tone: "danger",
+    });
+    if (!okToDelete) return;
     setSaving(true);
     const ok = await deleteProgramEvent(id);
     setSaving(false);
@@ -552,6 +556,9 @@ export default function ProgramEventsBuilderStep({
       return;
     }
     setEvents((prev) => prev.filter((e) => e.id !== id));
+    notify.success(
+      translations["common.delete_success"] || "Deleted successfully.",
+    );
     refresh();
   }
 
@@ -598,17 +605,10 @@ export default function ProgramEventsBuilderStep({
         "Cancel",
       )}
     >
-      <div className="mb-3 flex items-center justify-between gap-2">
-        <label className="block text-md font-normal text-gray-700">
-          {t(
-            translations,
-            "builder.program_events.heading",
-            "Program / Events",
-          )}
-        </label>
+      <div className="mb-3 flex items-center justify-end gap-2">
         <div>
           <button
-            className="px-3 py-1 bg-blue-600 text-white rounded disabled:opacity-50"
+            className="cursor-pointer px-3 py-1 bg-blue-600 text-white rounded disabled:opacity-50"
             onClick={() => startCreate()}
             disabled={!canAddMore()}
           >
@@ -803,7 +803,7 @@ export default function ProgramEventsBuilderStep({
                       {/* RIGHT SIDE */}
                       <div className="flex flex-col gap-2 shrink-0">
                         <button
-                          className="px-3 py-1.5 rounded-md border bg-white hover:bg-gray-100"
+                          className="cursor-pointer px-3 py-1.5 rounded-md border bg-white hover:bg-gray-100"
                           onClick={() => startEdit(ev)}
                         >
                           {t(
@@ -814,7 +814,7 @@ export default function ProgramEventsBuilderStep({
                         </button>
 
                         <button
-                          className="px-3 py-1.5 rounded-md border border-red-200 text-red-600 hover:bg-red-50"
+                          className="cursor-pointer px-3 py-1.5 rounded-md border border-red-200 text-red-600 hover:bg-red-50"
                           onClick={() => handleDelete(ev.id)}
                         >
                           {t(translations, "builder.actions.delete", "Delete")}
@@ -1135,6 +1135,7 @@ export default function ProgramEventsBuilderStep({
           </button>
         </div>
       )}
+      {confirmDialog}
     </StepLayout>
   );
 }

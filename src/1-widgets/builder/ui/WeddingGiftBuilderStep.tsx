@@ -1,5 +1,6 @@
 "use client";
 
+import { StepLayout } from "@/1-widgets/builder/step-layout";
 import {
   createWeddingGiftBySite,
   deleteWeddingGiftBySite,
@@ -9,6 +10,8 @@ import {
 import { countWeddingGiftMethods } from "@/4-shared/helpers/billing/countWeddingGiftMethods";
 import { getPlanLimit } from "@/4-shared/helpers/billing/entitlements";
 import { interpolate } from "@/4-shared/helpers/interpolateVars";
+import { useAlertConfirm } from "@/4-shared/hooks/useAlertConfirm";
+import { notify } from "@/4-shared/lib/toast/toast";
 import type {
   PlanType,
   Site,
@@ -49,9 +52,8 @@ export default function WeddingGiftBuilderStep({
   const [gift, setGift] = useState<Partial<WeddingGift> | null>(null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
   const [showUpgradeCTA, setShowUpgradeCTA] = useState(false);
+  const { confirm: confirmDelete, confirmDialog } = useAlertConfirm();
 
   const giftMethodLimit = getPlanLimit(planType, "weddingGiftMethods");
 
@@ -111,7 +113,6 @@ export default function WeddingGiftBuilderStep({
 
     const load = async () => {
       setLoading(true);
-      setError(null);
 
       try {
         const row = await fetchWeddingGiftBySite(site.id);
@@ -122,7 +123,7 @@ export default function WeddingGiftBuilderStep({
         await reconcileGift(requestId, safeRow);
       } catch (err) {
         if (mounted && fetchCounterRef.current === requestId) {
-          setError((err as Error).message);
+          notify.error((err as Error).message);
         }
       } finally {
         if (mounted && fetchCounterRef.current === requestId) {
@@ -167,7 +168,7 @@ export default function WeddingGiftBuilderStep({
     const draftGift = gift ?? {};
     const methodsCount = countWeddingGiftMethods(draftGift);
     if (giftMethodLimit !== -1 && methodsCount > giftMethodLimit) {
-      setError(
+      notify.error(
         interpolate(
           t(
             translations,
@@ -185,8 +186,6 @@ export default function WeddingGiftBuilderStep({
     }
 
     setSaving(true);
-    setError(null);
-    setSuccess(false);
 
     try {
       if (gift?.id) {
@@ -202,10 +201,12 @@ export default function WeddingGiftBuilderStep({
         );
         setGift(created); // Set the new object
       }
-      setSuccess(true);
-      setTimeout(() => setSuccess(false), 1800);
+      notify.success(
+        translations["builder.general.form.save_success"] ||
+          "Saved successfully.",
+      );
     } catch (err) {
-      setError((err as Error)?.message ?? String(err));
+      notify.error((err as Error)?.message ?? String(err));
     } finally {
       setSaving(false);
     }
@@ -213,34 +214,46 @@ export default function WeddingGiftBuilderStep({
 
   async function handleDelete() {
     if (!site?.id) return;
-    const ok = window.confirm(
-      t(
+    const ok = await confirmDelete({
+      title: t(translations, "builder.actions.delete", "Delete"),
+      message: t(
         translations,
         "builder.gift.delete_confirm",
         "Delete wedding gift information for this site? This action cannot be undone.",
       ),
-    );
+      confirmLabel: t(translations, "builder.actions.delete", "Delete"),
+      cancelLabel: t(translations, "builder.actions.cancel", "Cancel"),
+      tone: "danger",
+    });
     if (!ok) return;
 
     setSaving(true);
-    setError(null);
     try {
       await deleteWeddingGiftBySite(site.id);
       setGift(null); // Clear the UI
-      setSuccess(false);
+      notify.success(
+        translations["common.delete_success"] || "Deleted successfully.",
+      );
     } catch (err) {
-      setError((err as Error)?.message ?? String(err));
+      notify.error((err as Error)?.message ?? String(err));
     } finally {
       setSaving(false);
     }
   }
 
+  const hasPersistedGift = !!gift?.id;
+
   return (
-    <div>
-      <h3 className="text-lg font-medium mb-3">
-        {t(translations, "builder.nav.step.wedding_gift", "Wedding Gift")}
-      </h3>
-      <div className="mb-4 text-sm text-gray-600">
+    <StepLayout
+      onNext={!loading ? handleSave : undefined}
+      onBack={!loading ? handleDelete : undefined}
+      nextDisabled={saving || loading}
+      backDisabled={saving || loading || !hasPersistedGift}
+      nextLoading={saving}
+      nextLabel={t(translations, "builder.common.save", "Save")}
+      backLabel={t(translations, "builder.gift.clear_all", "Clear all data")}
+    >
+      <div className="mb-4 text-md text-gray-600">
         {t(
           translations,
           "builder.gift.desc",
@@ -260,7 +273,10 @@ export default function WeddingGiftBuilderStep({
               FREE_WEDDING_GIFT_METHODS_LIMIT: giftMethodLimit,
             },
           )}{" "}
-          <button className="underline text-blue-600" onClick={goToPricing}>
+          <button
+            className="cursor-pointer underline text-blue-600"
+            onClick={goToPricing}
+          >
             {t(translations, "builder.general.form.upgrade", "Upgrade")}
           </button>
         </div>
@@ -524,50 +540,6 @@ export default function WeddingGiftBuilderStep({
               </div>
             </div>
           </div>
-
-          {/* Error/Success */}
-          {error && (
-            <div className="text-red-600 py-2 italic text-sm">{error}</div>
-          )}
-          {success && (
-            <div className="text-green-700 py-2 italic text-sm">✔ Saved!</div>
-          )}
-
-          <div className="mt-2 flex gap-3">
-            <button
-              type="submit"
-              disabled={saving}
-              className={`px-4 py-2 rounded bg-blue-600 text-white text-sm font-semibold ${
-                saving ? "opacity-50 cursor-wait" : "hover:bg-blue-700"
-              }`}
-            >
-              {saving
-                ? t(translations, "builder.common.saving", "Saving…")
-                : t(translations, "builder.common.save", "Save")}
-            </button>
-            <button
-              type="button"
-              disabled={saving}
-              className={`px-4 py-2 rounded bg-red-100 text-red-700 text-sm font-semibold border border-red-300 ${
-                saving ? "opacity-50 cursor-wait" : "hover:bg-red-200"
-              }`}
-              onClick={() => {
-                if (
-                  window.confirm(
-                    t(
-                      translations,
-                      "builder.gift.delete_confirm",
-                      "Delete wedding gift information for this site? This action cannot be undone.",
-                    ),
-                  )
-                ) {
-                  handleDelete();
-                }
-              }}
-            >
-              {t(translations, "builder.gift.clear_all", "Clear all data")}
-            </button>
-          </div>
         </form>
       )}
 
@@ -610,6 +582,7 @@ export default function WeddingGiftBuilderStep({
           </button>
         </div>
       </MainModal>
-    </div>
+      {confirmDialog}
+    </StepLayout>
   );
 }

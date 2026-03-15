@@ -332,7 +332,10 @@ export default function GeneralSiteForm({
 
           <div className="flex flex-wrap gap-x-3 gap-y-2 my-2">
             {SUPPORTED_LANGUAGES.map((lang) => (
-              <label key={lang} className="inline-flex items-center">
+              <label
+                key={lang}
+                className="cursor-pointer inline-flex items-center"
+              >
                 <input
                   type="checkbox"
                   value={lang}
