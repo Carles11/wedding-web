@@ -14,6 +14,7 @@ export function BuilderHeader({
   currentLang?: string;
   handleLanguageChange?: (lang: string) => void;
 }) {
+  console.log({ site });
   return (
     <header className="border-b bg-white p-4 flex items-center justify-between">
       <div>
@@ -26,7 +27,7 @@ export function BuilderHeader({
       </div>
       <div className="flex flex-col md:flex-row items-end-safe gap-4">
         <div className="flex items-center gap-4">
-          {site ? (
+          {site?.subdomain ? (
             <a
               className="text-sm text-blue-600"
               href={`https://${site.subdomain}.weddweb.com`}

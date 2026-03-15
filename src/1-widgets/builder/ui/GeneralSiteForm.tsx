@@ -36,6 +36,7 @@ export default function GeneralSiteForm({
 }: Props) {
   const router = useRouter();
   const fetchCounterRef = useRef(0);
+  const lastFetchedRef = useRef<Awaited<ReturnType<typeof getSiteGeneralContent>> | null>(null);
   const [languages, setLanguages] = useState<SupportedLanguage[]>([]);
   const [defaultLang, setDefaultLang] = useState<SupportedLanguage>("en");
   const [subdomain, setSubdomain] = useState("");
@@ -57,6 +58,7 @@ export default function GeneralSiteForm({
   type GeneralContentState = Awaited<ReturnType<typeof getSiteGeneralContent>>;
 
   function applyGeneralContent(res: GeneralContentState) {
+    lastFetchedRef.current = res;
     setLanguages(res.languages);
     setDefaultLang(res.default_lang);
     setSubdomain(res.subdomain);
@@ -192,6 +194,15 @@ export default function GeneralSiteForm({
   }
 
   // 🔹 Language toggle
+  // 🔹 Discard changes
+  const handleDiscard = () => {
+    if (lastFetchedRef.current) {
+      applyGeneralContent(lastFetchedRef.current);
+    }
+    setError(null);
+  };
+
+  // 🔹 Language toggle
   const handleLangCheckbox = (lang: SupportedLanguage) => {
     setShowUpgradeCTA(false);
     setError(null);
@@ -297,11 +308,8 @@ export default function GeneralSiteForm({
       onNext={handleSubmit}
       nextDisabled={saving}
       nextLoading={saving}
-      onBack={() => {
-        /* optional: handle cancel/exit here */
-      }}
-      backDisabled
       translations={translations}
+      onBack={handleDiscard}
     >
       {" "}
       <form onSubmit={handleSubmit} className="space-y-4 min-w-0 pb-24 md:pb-0">
