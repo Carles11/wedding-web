@@ -333,7 +333,7 @@ export default function AccommodationBuilderStep({
         </div>
       </div>
 
-      <div className="text-sm text-gray-600 mb-3">
+      <div className="mb-4 text-md text-gray-600">
         {interpolate(
           translations["builder.accommodation.description"] ||
             "Add hotels or places to stay. Free plan allows up to {limit} entries.",

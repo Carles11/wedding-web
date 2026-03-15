@@ -621,7 +621,7 @@ export default function ProgramEventsBuilderStep({
         </div>
       </div>
 
-      <div className="text-sm text-gray-600 mb-3">
+      <div className="mb-4 text-md text-gray-600">
         {interpolate(
           t(
             translations,

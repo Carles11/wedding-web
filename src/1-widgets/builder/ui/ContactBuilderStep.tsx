@@ -239,14 +239,9 @@ export default function ContactBuilderStep({
       translations={translations}
     >
       <div className="space-y-4">
-        <div>
-          <h3 className="text-lg font-medium">
-            {translations["builder.contact.title"] || "Contact"}
-          </h3>
-          <p className="text-sm text-gray-600 mt-1">
-            {translations["builder.contact.description"] ||
-              "Provide the main contact details used for RSVP and site contact."}
-          </p>
+        <div className="mb-4 text-md text-gray-600">
+          {translations["builder.contact.description"] ||
+            "Provide the main contact details used for RSVP and site contact."}
         </div>
 
         {loading ? (

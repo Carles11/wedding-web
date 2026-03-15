@@ -414,11 +414,9 @@ export default function ImagesBuilderStep({
     <StepLayout showActions={false}>
       <div className="space-y-6 min-w-0">
         {/* HEADER */}
-        <div>
-          <p className="text-sm text-gray-600 mt-1">
-            {translations["builder.images.label.intro"] ||
-              "Upload and assign your images."}
-          </p>
+        <div className="mb-4 text-md text-gray-600">
+          {translations["builder.images.label.intro"] ||
+            "Upload and assign your images."}
         </div>
 
         {/* STATES */}

@@ -51,8 +51,8 @@ export default function DomainAndBillingBuilderStep({
 
   return (
     <div>
-      <div className="mb-4 text-xl text-gray-600">
-        <h3>{translations["builder.step.domain_billing_subtitle"]}</h3>
+      <div className="mb-4 text-md text-gray-600">
+        {translations["builder.step.domain_billing_subtitle"]}
       </div>
       <SubdomainManager
         site={site}
