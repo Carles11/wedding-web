@@ -93,6 +93,14 @@ export default function ProgramEventsBuilderStep({
     day_tag: "wedding_day",
   });
   const eventsLimit = getPlanLimit(planType, "events");
+  const eventsLimitLabel =
+    eventsLimit === -1
+      ? t(
+          translations,
+          "pricing.unlimited",
+          t(translations, "billing.unlimited", "Unlimited"),
+        )
+      : String(eventsLimit);
 
   const languages = useMemo(() => {
     if (!site) return ["en"];
@@ -560,8 +568,8 @@ export default function ProgramEventsBuilderStep({
             "Events are grouped by Day Before, Wedding Day, and Day After. Free plan supports up to {limit} events total. Title and location are required in the site default language ({defaultLang}).",
           ),
           {
-            limit: eventsLimit,
-            FREE_EVENT_LIMIT: eventsLimit,
+            limit: eventsLimitLabel,
+            FREE_EVENT_LIMIT: eventsLimitLabel,
             defaultLang,
           },
         )}
@@ -1007,8 +1015,8 @@ export default function ProgramEventsBuilderStep({
               "Free plan limit reached ({limit} events). Upgrade to add more.",
             ),
             {
-              limit: eventsLimit,
-              FREE_EVENT_LIMIT: eventsLimit,
+              limit: eventsLimitLabel,
+              FREE_EVENT_LIMIT: eventsLimitLabel,
             },
           )}
           <button className="underline text-blue-600">
