@@ -11,7 +11,7 @@ import type {
   TranslationDictionary,
   WeddingGift,
 } from "@/4-shared/types";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type Props = {
   site: Site;
@@ -36,27 +36,87 @@ export default function WeddingGiftBuilderStep({
   translations,
   setHasData,
 }: Props) {
+  const fetchCounterRef = useRef(0);
   const [gift, setGift] = useState<Partial<WeddingGift> | null>(null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
+  function giftSignature(row: Partial<WeddingGift> | null | undefined): string {
+    if (!row) return "empty";
+
+    return [
+      row.id ?? "",
+      row.updated_at ?? "",
+      row.created_at ?? "",
+      row.paypal_url ?? "",
+      row.bank_account_iban ?? "",
+      row.bank_account_swift ?? "",
+      row.bank_account_holder ?? "",
+      row.bank_name ?? "",
+      row.bizum_phone ?? "",
+      row.venmo_username ?? "",
+      row.giftlist_url ?? "",
+      row.honeymoon_fund_url ?? "",
+      row.other_method_url ?? "",
+      row.other_method_desc ?? "",
+    ].join("|");
+  }
+
+  async function reconcileGift(
+    requestId: number,
+    baselineGift: Partial<WeddingGift> | null,
+    maxAttempts = 3,
+  ) {
+    if (!site?.id) return;
+
+    let baselineSignature = giftSignature(baselineGift);
+
+    for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      if (!site?.id || fetchCounterRef.current !== requestId) return;
+
+      const nextGift = await fetchWeddingGiftBySite(site.id);
+      const safeNextGift = nextGift ?? null;
+      const nextSignature = giftSignature(safeNextGift);
+
+      if (nextSignature !== baselineSignature) {
+        setGift(safeNextGift);
+        baselineSignature = nextSignature;
+      }
+    }
+  }
+
   useEffect(() => {
     if (!site?.id) return;
     let mounted = true;
-    setLoading(true);
-    setError(null);
-    fetchWeddingGiftBySite(site.id)
-      .then((row) => {
-        if (mounted) setGift(row ?? {});
-      })
-      .catch((err) => {
-        if (mounted) setError((err as Error).message);
-      })
-      .finally(() => {
-        if (mounted) setLoading(false);
-      });
+    const requestId = ++fetchCounterRef.current;
+
+    const load = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const row = await fetchWeddingGiftBySite(site.id);
+        if (!mounted || fetchCounterRef.current !== requestId) return;
+
+        const safeRow = row ?? null;
+        setGift(safeRow);
+        await reconcileGift(requestId, safeRow);
+      } catch (err) {
+        if (mounted && fetchCounterRef.current === requestId) {
+          setError((err as Error).message);
+        }
+      } finally {
+        if (mounted && fetchCounterRef.current === requestId) {
+          setLoading(false);
+        }
+      }
+    };
+
+    load();
+
     return () => {
       mounted = false;
     };

@@ -9,7 +9,7 @@ import {
 import { fetchContactSection } from "@/3-entities/sections/api/fetchContactSection";
 import type { ContactSection, Site } from "@/4-shared/types";
 import { EMAIL_RE } from "@/4-shared/utils/validations";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type Props = {
   site: Site | null;
@@ -25,26 +25,73 @@ export default function ContactBuilderStep({
   setHasContact,
   translations,
 }: Props) {
+  const fetchCounterRef = useRef(0);
   const [section, setSection] = useState<ContactSection | null>(null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  function sectionSignature(nextSection: ContactSection | null): string {
+    if (!nextSection) return "empty";
+
+    return [
+      nextSection.id ?? "",
+      nextSection.created_at ?? "",
+      JSON.stringify(nextSection.content ?? null),
+    ].join("|");
+  }
+
+  async function reconcileSection(
+    requestId: number,
+    baselineSection: ContactSection | null,
+    maxAttempts = 3,
+  ) {
+    if (!site?.id) return;
+
+    let baselineSignature = sectionSignature(baselineSection);
+
+    for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      if (!site?.id || fetchCounterRef.current !== requestId) return;
+
+      const nextSection = await fetchContactSection(site.id);
+      const nextSignature = sectionSignature(nextSection);
+
+      if (nextSignature !== baselineSignature) {
+        setSection(nextSection);
+        baselineSignature = nextSignature;
+      }
+    }
+  }
+
   useEffect(() => {
     if (!site?.id) return;
     let mounted = true;
-    setLoading(true);
-    setError(null);
-    fetchContactSection(site.id)
-      .then((sec) => {
-        if (mounted) setSection(sec);
-      })
-      .catch((err: unknown) => {
-        if (mounted) setError((err as Error)?.message ?? String(err));
-      })
-      .finally(() => {
-        if (mounted) setLoading(false);
-      });
+    const requestId = ++fetchCounterRef.current;
+
+    const load = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const sec = await fetchContactSection(site.id);
+        if (!mounted || fetchCounterRef.current !== requestId) return;
+
+        setSection(sec);
+        await reconcileSection(requestId, sec);
+      } catch (err: unknown) {
+        if (mounted && fetchCounterRef.current === requestId) {
+          setError((err as Error)?.message ?? String(err));
+        }
+      } finally {
+        if (mounted && fetchCounterRef.current === requestId) {
+          setLoading(false);
+        }
+      }
+    };
+
+    load();
+
     return () => {
       mounted = false;
     };

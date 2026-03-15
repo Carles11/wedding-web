@@ -47,6 +47,7 @@ export default function WhatToSeeBuilderStep({
   planType,
   setItemCount,
 }: Props) {
+  const fetchCounterRef = useRef(0);
   const [items, setItems] = useState<WhatToSeeEntryFull[]>([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -56,6 +57,38 @@ export default function WhatToSeeBuilderStep({
 
   const formRef = useRef<HTMLDivElement | null>(null);
   const whatToSeeLimit = getPlanLimit(planType, "whatToSee");
+
+  function itemsSignature(rows: WhatToSeeEntryFull[]): string {
+    return rows
+      .map(
+        (row) => `${row.id}:${row.sort_order ?? ""}:${row.location_url ?? ""}`,
+      )
+      .join("|");
+  }
+
+  async function reconcileItems(
+    requestId: number,
+    baselineRows: WhatToSeeEntryFull[],
+    maxAttempts = 3,
+  ) {
+    if (!site?.id) return;
+
+    let baselineSignature = itemsSignature(baselineRows);
+
+    for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      if (!site?.id || fetchCounterRef.current !== requestId) return;
+
+      const nextRows = await fetchWhatToSeeEntries(site.id);
+      const safeNextRows = nextRows ?? [];
+      const nextSignature = itemsSignature(safeNextRows);
+
+      if (nextSignature !== baselineSignature) {
+        setItems(safeNextRows);
+        baselineSignature = nextSignature;
+      }
+    }
+  }
 
   const languages = useMemo(() => {
     if (!site) return ["en"];
@@ -69,18 +102,32 @@ export default function WhatToSeeBuilderStep({
   useEffect(() => {
     if (!site?.id) return;
     let mounted = true;
-    setLoading(true);
-    setError(null);
-    fetchWhatToSeeEntries(site.id)
-      .then((rows) => {
-        if (mounted) setItems(rows ?? []);
-      })
-      .catch((err: unknown) => {
-        if (mounted) setError((err as Error)?.message ?? String(err));
-      })
-      .finally(() => {
-        if (mounted) setLoading(false);
-      });
+    const requestId = ++fetchCounterRef.current;
+
+    const loadInitial = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const rows = await fetchWhatToSeeEntries(site.id);
+        if (!mounted || fetchCounterRef.current !== requestId) return;
+
+        const safeRows = rows ?? [];
+        setItems(safeRows);
+        await reconcileItems(requestId, safeRows);
+      } catch (err: unknown) {
+        if (mounted && fetchCounterRef.current === requestId) {
+          setError((err as Error)?.message ?? String(err));
+        }
+      } finally {
+        if (mounted && fetchCounterRef.current === requestId) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadInitial();
+
     return () => {
       mounted = false;
     };
