@@ -176,7 +176,7 @@ export const CustomDomainSection: React.FC<Props> = ({
             onClick={onUpgradeClick}
             type="button"
           >
-            {translations["builder.domain.upgrade_btn"]}
+            {translations["builder.domain.upgrade_btn"] ?? "Upgrade"}
           </button>
         </div>
       ) : (

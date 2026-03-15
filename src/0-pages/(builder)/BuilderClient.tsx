@@ -365,6 +365,7 @@ export default function BuilderClient({
                     refresh={refresh}
                     lang={currentLang}
                     translations={translations}
+                    planType={planType}
                     setHasData={setHasWeddingGiftData}
                   />
                 </div>

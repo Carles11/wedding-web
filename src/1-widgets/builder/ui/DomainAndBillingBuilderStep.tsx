@@ -25,7 +25,8 @@ export default function DomainAndBillingBuilderStep({
 }: DomainAndBillingBuilderStepProps) {
   const router = useRouter();
 
-  const handleUpgradeClick = () => router.push("/upgrade");
+  const handleUpgradeClick = () =>
+    router.push(`/marketing/pricing?lang=${lang || "en"}`);
 
   // 1. All "real" custom domains (not platform test/production domains)
   const verifiedDomains =

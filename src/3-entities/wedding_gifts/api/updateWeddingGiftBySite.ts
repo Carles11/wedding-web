@@ -1,6 +1,8 @@
-import { createClient } from "@/4-shared/lib/supabase/client";
-import type { WeddingGift } from "@/4-shared/types";
 import type { SupportedLanguage } from "@/4-shared/config/i18n";
+import { countWeddingGiftMethods } from "@/4-shared/helpers/billing/countWeddingGiftMethods";
+import { getPlanLimit } from "@/4-shared/helpers/billing/entitlements";
+import { createClient } from "@/4-shared/lib/supabase/client";
+import type { PlanType, WeddingGift } from "@/4-shared/types";
 
 type UpdateWeddingGiftOpts = {
   // Main non-i18n payment fields
@@ -17,6 +19,7 @@ type UpdateWeddingGiftOpts = {
 export async function updateWeddingGiftBySite(
   siteId: string,
   opts: UpdateWeddingGiftOpts,
+  planType: PlanType = "free",
 ): Promise<void> {
   if (!siteId) throw new Error("Missing siteId");
 
@@ -25,12 +28,21 @@ export async function updateWeddingGiftBySite(
   // Find the existing gift row (or upsert is possible here)
   const { data, error } = await supabase
     .from("wedding_gift")
-    .select("id")
+    .select(
+      "id, paypal_url, bank_account_iban, bank_account_swift, bank_account_holder, bank_name, bizum_phone, venmo_username, giftlist_url, honeymoon_fund_url, other_method_url, other_method_desc",
+    )
     .eq("site_id", siteId)
     .limit(1)
     .maybeSingle();
   if (error) throw new Error(error.message);
   if (!data) throw new Error("Wedding gift row not found");
+
+  const methodLimit = getPlanLimit(planType, "weddingGiftMethods");
+  const mergedGift = { ...data, ...(opts.data ?? {}) } as Partial<WeddingGift>;
+  const methodsCount = countWeddingGiftMethods(mergedGift);
+  if (methodLimit !== -1 && methodsCount > methodLimit) {
+    throw new Error(`Wedding gift limit reached (${methodLimit} method).`);
+  }
 
   const giftId = data.id;
 

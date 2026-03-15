@@ -17,6 +17,8 @@ import type {
   PlanType,
   Site,
 } from "@/4-shared/types";
+import MainModal from "@/4-shared/ui/commons/modals/MainModal";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { StepLayout } from "../step-layout";
 
@@ -33,10 +35,12 @@ type Props = {
 export default function AccommodationBuilderStep({
   site,
   refresh,
+  lang,
   translations,
   planType,
   setItemCount,
 }: Props) {
+  const router = useRouter();
   const fetchCounterRef = useRef(0);
   const [items, setItems] = useState<AccommodationEntry[]>([]);
   const [loading, setLoading] = useState(false);
@@ -44,6 +48,7 @@ export default function AccommodationBuilderStep({
   const [error, setError] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isListOpen, setIsListOpen] = useState(true);
+  const [showUpgradeCTA, setShowUpgradeCTA] = useState(false);
 
   const formRef = useRef<HTMLDivElement | null>(null);
   const accommodationLimit = getPlanLimit(planType, "accommodations");
@@ -119,6 +124,10 @@ export default function AccommodationBuilderStep({
 
   function canAddMore() {
     return canUseQuota(planType, "accommodations", items.length);
+  }
+
+  function goToPricing() {
+    router.push(`/marketing/pricing?lang=${lang || "en"}`);
   }
 
   function scrollToForm() {
@@ -289,9 +298,21 @@ export default function AccommodationBuilderStep({
         </h3>
         <div>
           <button
-            className="px-1 py-1 bg-blue-600 text-white rounded disabled:opacity-50"
-            onClick={() => startCreate()}
-            disabled={!canAddMore()}
+            className={`px-1 py-1 rounded text-white ${
+              canAddMore()
+                ? "bg-blue-600 hover:bg-blue-700"
+                : "bg-blue-400 cursor-not-allowed"
+            }`}
+            onClick={() => {
+              if (!canAddMore()) {
+                if (planType === "free") {
+                  setShowUpgradeCTA(true);
+                }
+                return;
+              }
+              startCreate();
+            }}
+            aria-disabled={!canAddMore()}
           >
             {translations["builder.accommodation.add_button"] ||
               "+ Add accommodation"}
@@ -509,12 +530,43 @@ export default function AccommodationBuilderStep({
               FREE_ACCOMMODATION_LIMIT: accommodationLimit,
             },
           )}{" "}
-          <button className="underline text-blue-600">
+          <button className="underline text-blue-600" onClick={goToPricing}>
             {translations["builder.accommodation.upgrade"] || "Upgrade"}
           </button>{" "}
           {translations["builder.accommodation.to_add_more"] || "to add more."}
         </div>
       )}
+
+      <MainModal
+        open={showUpgradeCTA && planType === "free"}
+        title={
+          translations["builder.general.form.need_more_langs"] ||
+          "Need more languages?"
+        }
+        onClose={() => setShowUpgradeCTA(false)}
+      >
+        <p className="text-sm text-gray-700 mb-5">
+          {translations["builder.general.form.upgrade_description"] ||
+            "Your current plan only allows one language. Upgrade to Premium to unlock all languages for your wedding site."}
+        </p>
+        <div className="flex justify-end gap-3">
+          <button
+            type="button"
+            className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition"
+            onClick={() => setShowUpgradeCTA(false)}
+          >
+            {translations["builder.general.form.cancel"] || "Cancel"}
+          </button>
+          <button
+            type="button"
+            className="px-5 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition"
+            onClick={goToPricing}
+          >
+            {translations["builder.general.form.upgrade"] ||
+              "Upgrade to Premium"}
+          </button>
+        </div>
+      </MainModal>
     </StepLayout>
   );
 }

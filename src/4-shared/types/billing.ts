@@ -40,6 +40,7 @@ export interface PlanLimits {
   accommodations?: number;
   events?: number;
   whatToSee?: number;
+  weddingGiftMethods?: number;
   languages?: number;
   customDomains?: number;
 }

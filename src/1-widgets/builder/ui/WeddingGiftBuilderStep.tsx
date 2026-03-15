@@ -6,11 +6,17 @@ import {
   fetchWeddingGiftBySite,
   updateWeddingGiftBySite,
 } from "@/3-entities/wedding_gifts/api/";
+import { countWeddingGiftMethods } from "@/4-shared/helpers/billing/countWeddingGiftMethods";
+import { getPlanLimit } from "@/4-shared/helpers/billing/entitlements";
+import { interpolate } from "@/4-shared/helpers/interpolateVars";
 import type {
+  PlanType,
   Site,
   TranslationDictionary,
   WeddingGift,
 } from "@/4-shared/types";
+import MainModal from "@/4-shared/ui/commons/modals/MainModal";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 type Props = {
@@ -18,6 +24,7 @@ type Props = {
   refresh?: () => void;
   lang: string;
   translations: TranslationDictionary;
+  planType: PlanType;
   /** Fired when at least one payment method is saved (or cleared). */
   setHasData?: (hasData: boolean) => void;
 };
@@ -34,14 +41,23 @@ export default function WeddingGiftBuilderStep({
   refresh,
   lang,
   translations,
+  planType,
   setHasData,
 }: Props) {
+  const router = useRouter();
   const fetchCounterRef = useRef(0);
   const [gift, setGift] = useState<Partial<WeddingGift> | null>(null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [showUpgradeCTA, setShowUpgradeCTA] = useState(false);
+
+  const giftMethodLimit = getPlanLimit(planType, "weddingGiftMethods");
+
+  function goToPricing() {
+    router.push(`/marketing/pricing?lang=${lang || "en"}`);
+  }
 
   function giftSignature(row: Partial<WeddingGift> | null | undefined): string {
     if (!row) return "empty";
@@ -147,6 +163,27 @@ export default function WeddingGiftBuilderStep({
 
   async function handleSave(e?: React.FormEvent) {
     if (e) e.preventDefault();
+
+    const draftGift = gift ?? {};
+    const methodsCount = countWeddingGiftMethods(draftGift);
+    if (giftMethodLimit !== -1 && methodsCount > giftMethodLimit) {
+      setError(
+        interpolate(
+          t(
+            translations,
+            "builder.gift.error.method_limit",
+            "Free plan supports up to {limit} gift method. Upgrade to add more.",
+          ),
+          {
+            limit: giftMethodLimit,
+            FREE_WEDDING_GIFT_METHODS_LIMIT: giftMethodLimit,
+          },
+        ),
+      );
+      setShowUpgradeCTA(true);
+      return;
+    }
+
     setSaving(true);
     setError(null);
     setSuccess(false);
@@ -154,11 +191,15 @@ export default function WeddingGiftBuilderStep({
     try {
       if (gift?.id) {
         // Update existing
-        await updateWeddingGiftBySite(site.id, { data: gift ?? {} });
+        await updateWeddingGiftBySite(site.id, { data: gift ?? {} }, planType);
         setGift({ ...gift }); // Keep the updated object
       } else {
         // Create new
-        const created = await createWeddingGiftBySite(site.id, gift ?? {});
+        const created = await createWeddingGiftBySite(
+          site.id,
+          gift ?? {},
+          planType,
+        );
         setGift(created); // Set the new object
       }
       setSuccess(true);
@@ -206,6 +247,24 @@ export default function WeddingGiftBuilderStep({
           "Let guests know how to make a contribution: fill out one or several options.",
         )}
       </div>
+      {giftMethodLimit !== -1 && (
+        <div className="mb-4 text-sm text-gray-600">
+          {interpolate(
+            t(
+              translations,
+              "builder.gift.limit_info",
+              "Free plan supports up to {limit} gift method.",
+            ),
+            {
+              limit: giftMethodLimit,
+              FREE_WEDDING_GIFT_METHODS_LIMIT: giftMethodLimit,
+            },
+          )}{" "}
+          <button className="underline text-blue-600" onClick={goToPricing}>
+            {t(translations, "builder.general.form.upgrade", "Upgrade")}
+          </button>
+        </div>
+      )}
       {loading ? (
         <div>{t(translations, "builder.what_to_see.loading", "Loading…")}</div>
       ) : (
@@ -511,6 +570,46 @@ export default function WeddingGiftBuilderStep({
           </div>
         </form>
       )}
+
+      <MainModal
+        open={showUpgradeCTA && planType === "free"}
+        title={t(
+          translations,
+          "builder.gift.upgrade_title",
+          "Unlock more gift methods",
+        )}
+        onClose={() => setShowUpgradeCTA(false)}
+      >
+        <p className="text-sm text-gray-700 mb-5">
+          {interpolate(
+            t(
+              translations,
+              "builder.gift.upgrade_description",
+              "Your current plan allows up to {limit} gift method. Upgrade to Premium to add multiple payment methods.",
+            ),
+            {
+              limit: giftMethodLimit,
+              FREE_WEDDING_GIFT_METHODS_LIMIT: giftMethodLimit,
+            },
+          )}
+        </p>
+        <div className="flex justify-end gap-3">
+          <button
+            type="button"
+            className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition"
+            onClick={() => setShowUpgradeCTA(false)}
+          >
+            {t(translations, "builder.general.form.cancel", "Cancel")}
+          </button>
+          <button
+            type="button"
+            className="px-5 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition"
+            onClick={goToPricing}
+          >
+            {t(translations, "builder.general.form.upgrade", "Upgrade")}
+          </button>
+        </div>
+      </MainModal>
     </div>
   );
 }

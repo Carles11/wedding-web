@@ -21,6 +21,7 @@ WITH seed("key", en, zh, hi, es, ca, ar, fr, de, pt, ru, it) AS (
     ('pricing.limit.accommodations', 'Accommodations', '住宿', 'आवास', 'Alojamientos', 'Allotjaments', 'الاقامة', 'Hebergements', 'Unterkuenfte', 'Hospedagens', 'Проживание', 'Alloggi'),
     ('pricing.limit.events', 'Events', '活动', 'कार्यक्रम', 'Eventos', 'Esdeveniments', 'الفعاليات', 'Evenements', 'Events', 'Eventos', 'События', 'Eventi'),
     ('pricing.limit.whatToSee', 'Recommendations', '推荐', 'सिफारिशें', 'Recomendaciones', 'Recomanacions', 'التوصيات', 'Recommandations', 'Empfehlungen', 'Recomendacoes', 'Рекомендации', 'Raccomandazioni'),
+    ('pricing.limit.weddingGiftMethods', 'Gift methods', '礼金方式', 'उपहार विधियाँ', 'Metodos de regalo', 'Metodes de regal', 'طرق الهدية', 'Methodes de cadeau', 'Geschenkmethoden', 'Metodos de presente', 'Способы подарка', 'Metodi regalo'),
     ('pricing.limit.languages', 'Languages', '语言', 'भाषाएं', 'Idiomas', 'Idiomes', 'اللغات', 'Langues', 'Sprachen', 'Idiomas', 'Языки', 'Lingue'),
     ('pricing.limit.customDomains', 'Custom domains', '自定义域名', 'कस्टम डोमेन', 'Dominios personalizados', 'Dominis personalitzats', 'نطاقات مخصصة', 'Domaines personnalises', 'Eigene Domains', 'Dominios personalizados', 'Пользовательские домены', 'Domini personalizzati'),
 
