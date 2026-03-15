@@ -27,7 +27,7 @@ export default function ProgramSectionComponent({
           lang,
         )
       : "";
-
+  console.log({ mainEventDate: mainEvent?.date, when });
   // WHERE: translation from program.event.location.{mainEvent.id}
   const whereWedding =
     mainEvent && mainEvent.id

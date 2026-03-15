@@ -36,7 +36,9 @@ export default function GeneralSiteForm({
 }: Props) {
   const router = useRouter();
   const fetchCounterRef = useRef(0);
-  const lastFetchedRef = useRef<Awaited<ReturnType<typeof getSiteGeneralContent>> | null>(null);
+  const lastFetchedRef = useRef<Awaited<
+    ReturnType<typeof getSiteGeneralContent>
+  > | null>(null);
   const [languages, setLanguages] = useState<SupportedLanguage[]>([]);
   const [defaultLang, setDefaultLang] = useState<SupportedLanguage>("en");
   const [subdomain, setSubdomain] = useState("");
@@ -315,9 +317,9 @@ export default function GeneralSiteForm({
       <form onSubmit={handleSubmit} className="space-y-4 min-w-0 pb-24 md:pb-0">
         {/* Languages */}
         <div>
-          <label className="block text-sm font-medium text-gray-700">
+          <label className="block text-md font-normal text-gray-700">
             {translations["builder.general.form.label.languages"] ??
-              "Languages"}
+              "Select your website display languages"}
           </label>
 
           <p className="text-xs text-gray-500">
@@ -395,7 +397,7 @@ export default function GeneralSiteForm({
 
         {/* Title */}
         <div>
-          <label className="block text-sm font-medium text-gray-700">
+          <label className="block text-md font-normal text-gray-700">
             {translations["builder.general.form.label.main_title"] ??
               "Main title"}
           </label>
@@ -417,7 +419,7 @@ export default function GeneralSiteForm({
 
         {/* Subtitle */}
         <div>
-          <label className="block text-sm font-medium text-gray-700">
+          <label className="block text-md font-normal text-gray-700">
             {translations["builder.general.form.label.subtitle"] ?? "Subtitle"}
           </label>
           <textarea

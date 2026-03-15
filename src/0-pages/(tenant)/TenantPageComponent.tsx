@@ -192,6 +192,7 @@ export default async function TenantPageComponent({
         {shouldRenderDetails && (
           <DetailsSection
             events={normalizedEvents}
+            lang={lang}
             translations={translations}
           />
         )}

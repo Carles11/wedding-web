@@ -1,6 +1,33 @@
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
+function parseIsoDateToLocalDate(value?: string): Date | null {
+  if (!value) return null;
+
+  const [yearStr, monthStr, dayStr] = value.split("-");
+  const year = Number(yearStr);
+  const month = Number(monthStr);
+  const day = Number(dayStr);
+
+  if (
+    !Number.isInteger(year) ||
+    !Number.isInteger(month) ||
+    !Number.isInteger(day)
+  ) {
+    return null;
+  }
+
+  // Use local noon to avoid timezone and DST boundary shifts.
+  return new Date(year, month - 1, day, 12, 0, 0, 0);
+}
+
+function formatLocalDateToIso(value: Date): string {
+  const year = value.getFullYear();
+  const month = String(value.getMonth() + 1).padStart(2, "0");
+  const day = String(value.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 type DateInputProps = {
   value: string; // ISO: "YYYY-MM-DD"
   onChange: (newDate: string) => void;
@@ -18,7 +45,10 @@ export function DateInput({
   min,
   max,
 }: DateInputProps) {
-  const dateObj = value ? new Date(value) : null;
+  const dateObj = parseIsoDateToLocalDate(value);
+  const minDate = parseIsoDateToLocalDate(min);
+  const maxDate = parseIsoDateToLocalDate(max);
+
   return (
     <div className="w-full">
       {label && (
@@ -30,12 +60,12 @@ export function DateInput({
       <DatePicker
         selected={dateObj}
         onChange={(dt: Date | null) =>
-          dt ? onChange(dt.toISOString().slice(0, 10)) : onChange("")
+          dt ? onChange(formatLocalDateToIso(dt)) : onChange("")
         }
         dateFormat="yyyy-MM-dd"
         className="w-full border px-3 py-2 rounded"
-        minDate={min ? new Date(min) : undefined}
-        maxDate={max ? new Date(max) : undefined}
+        minDate={minDate ?? undefined}
+        maxDate={maxDate ?? undefined}
         required={required}
         placeholderText="YYYY-MM-DD"
       />

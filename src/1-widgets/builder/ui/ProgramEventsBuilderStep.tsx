@@ -51,7 +51,11 @@ function getDayTags(translations: Record<string, string>) {
   return [
     {
       key: "day_before",
-      label: t(translations, "builder.program_events.day_before", "Day Before"),
+      label: t(
+        translations,
+        "builder.program_events.day_before",
+        "Before Wedding Day",
+      ),
     },
     {
       key: "wedding_day",
@@ -63,7 +67,11 @@ function getDayTags(translations: Record<string, string>) {
     },
     {
       key: "day_after",
-      label: t(translations, "builder.program_events.day_after", "Day After"),
+      label: t(
+        translations,
+        "builder.program_events.day_after",
+        "After Wedding Day",
+      ),
     },
   ] as { key: ProgramEvent["day_tag"]; label: string }[];
 }
@@ -110,6 +118,28 @@ export default function ProgramEventsBuilderStep({
   }, [site]);
 
   const defaultLang = site?.default_lang ?? languages[0] ?? "en";
+
+  const weddingDayReferenceDate = useMemo(() => {
+    const ref = events.find(
+      (e) =>
+        e.day_tag === "wedding_day" &&
+        e.id !== editingId &&
+        typeof e.date === "string" &&
+        e.date.trim() !== "",
+    );
+    return ref?.date ?? "";
+  }, [events, editingId]);
+
+  useEffect(() => {
+    if (
+      form.day_tag === "wedding_day" &&
+      weddingDayReferenceDate &&
+      !form.date
+    ) {
+      setForm((prev) => ({ ...(prev ?? {}), date: weddingDayReferenceDate }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.day_tag, form.date, weddingDayReferenceDate]);
 
   function eventsSignature(rows: ProgramEvent[]): string {
     return rows
@@ -319,6 +349,25 @@ export default function ProgramEventsBuilderStep({
       );
       return;
     }
+
+    if (
+      form.day_tag === "wedding_day" &&
+      weddingDayReferenceDate &&
+      form.date !== weddingDayReferenceDate
+    ) {
+      const message = interpolate(
+        t(
+          translations,
+          "builder.program_events.error.wedding_day_same_date",
+          "All Wedding Day events must use the same date ({date}).",
+        ),
+        { date: weddingDayReferenceDate },
+      );
+      setError(message);
+      notify.error(message);
+      return;
+    }
+
     if (!canAddMore() && !editingId) {
       setError(
         t(
@@ -421,7 +470,10 @@ export default function ProgramEventsBuilderStep({
             ),
           );
         }
-
+        notify.success(
+          translations["builder.general.form.save_success"] ||
+            "Saved successfully.",
+        );
         setEvents((prev) => {
           const cleaned =
             structuralFields.is_main_event &&
@@ -515,6 +567,8 @@ export default function ProgramEventsBuilderStep({
   }, [events]);
 
   // --- All rendering below ---
+
+  console.log({ events });
   return (
     <StepLayout
       translations={translations}
@@ -538,13 +592,13 @@ export default function ProgramEventsBuilderStep({
       )}
     >
       <div className="mb-3 flex items-center justify-between gap-2">
-        <h3 className="text-lg font-medium">
+        <label className="block text-md font-normal text-gray-700">
           {t(
             translations,
             "builder.program_events.heading",
             "Program / Events",
           )}
-        </h3>
+        </label>
         <div>
           <button
             className="px-3 py-1 bg-blue-600 text-white rounded disabled:opacity-50"
@@ -565,7 +619,7 @@ export default function ProgramEventsBuilderStep({
           t(
             translations,
             "builder.program_events.info",
-            "Events are grouped by Day Before, Wedding Day, and Day After. Free plan supports up to {limit} events total. Title and location are required in the site default language ({defaultLang}).",
+            "Events are grouped into Before Wedding Day, Wedding Day, and After Wedding Day. Free plan supports up to {limit} events total. Title and location are required in the site default language ({defaultLang}).",
           ),
           {
             limit: eventsLimitLabel,
@@ -826,6 +880,18 @@ export default function ProgramEventsBuilderStep({
               )}
               required
             />
+            {form.day_tag === "wedding_day" && weddingDayReferenceDate && (
+              <p className="text-xs text-gray-500 sm:col-span-2 lg:col-span-3">
+                {interpolate(
+                  t(
+                    translations,
+                    "builder.program_events.hint.wedding_day_same_date",
+                    "Wedding Day events share one date. Use {date} for this event.",
+                  ),
+                  { date: weddingDayReferenceDate },
+                )}
+              </p>
+            )}
 
             <TimeInput
               value={form.time ?? ""}

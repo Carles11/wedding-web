@@ -15,7 +15,6 @@ export async function fetchContactSection(siteId: string) {
     .limit(1)
     .maybeSingle();
 
-  console.log("[fetchContactSection] fetched section:", data);
   if (error) {
     console.error("[fetchContactSection] supabase error:", error);
     return null;

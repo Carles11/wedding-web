@@ -14,7 +14,6 @@ export function BuilderHeader({
   currentLang?: string;
   handleLanguageChange?: (lang: string) => void;
 }) {
-  console.log({ site });
   return (
     <header className="border-b bg-white p-4 flex items-center justify-between">
       <div>

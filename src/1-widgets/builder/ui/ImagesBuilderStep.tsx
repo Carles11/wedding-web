@@ -329,7 +329,11 @@ export default function ImagesBuilderStep({
         "0",
       );
 
-      if (!inserted) throw new Error("Upload failed");
+      if (!inserted)
+        throw new Error(
+          translations["builder.images.error.upload_failed"] ||
+            "Upload failed.",
+        );
 
       // uploadImageForSite returns a plain DB row without a section join.
       // Attach section.type so normalizeImages can immediately classify this
@@ -411,25 +415,17 @@ export default function ImagesBuilderStep({
       <div className="space-y-6 min-w-0">
         {/* HEADER */}
         <div>
-          <h3 className="text-lg font-medium">
-            {translations["builder.images.label.title"] || "Images"}
-          </h3>
           <p className="text-sm text-gray-600 mt-1">
             {translations["builder.images.label.intro"] ||
               "Upload and assign your images."}
           </p>
         </div>
 
-        {!site?.subdomain && (
-          <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-            {translations["builder.images.warning.subdomain_required"] ||
-              "Save your subdomain in the General step before uploading images."}
-          </div>
-        )}
-
         {/* STATES */}
         {loading && (
-          <p>{translations["builder.images.label.loading"] || "Loading…"}</p>
+          <p>
+            {translations["builder.images.label.loading"] || "Loading images…"}
+          </p>
         )}
         {!loading && error && <p className="text-red-600 text-sm">{error}</p>}
         {!loading && (
