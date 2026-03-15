@@ -18,32 +18,6 @@ import { StepLayout } from "../step-layout";
 
 type ImageSlot = "hero" | "contact";
 
-const DEBUG_IMAGES =
-  process.env.NODE_ENV !== "production" &&
-  process.env.NEXT_PUBLIC_DEBUG_IMAGES !== "0";
-
-function debugImages(message: string, payload?: unknown) {
-  if (!DEBUG_IMAGES) return;
-  const ts = new Date().toISOString();
-  if (payload === undefined) {
-    console.info(`[images-debug][ui][${ts}] ${message}`);
-    return;
-  }
-  console.info(`[images-debug][ui][${ts}] ${message}`, payload);
-}
-
-function compactImage(image: ImageRow | null | undefined) {
-  if (!image) return null;
-  return {
-    id: image.id,
-    site_id: image.site_id,
-    section_id: image.section_id,
-    section: imageSection(image),
-    url: image.url,
-    created_at: image.created_at,
-  };
-}
-
 // ─── Module-level helpers (no component state deps) ───────────────────────────
 
 function imageSection(img: ImageRow): string | null {
@@ -218,23 +192,10 @@ export default function ImagesBuilderStep({
   const isBusy = assigning || uploadingSlot !== null;
 
   useEffect(() => {
-    debugImages("state:images-changed", {
-      count: images.length,
-      hero: compactImage(assignedHero),
-      contact: compactImage(assignedContact),
-      rows: images.map((img) => compactImage(img)),
-    });
-  }, [images, assignedHero, assignedContact]);
-
-  useEffect(() => {
     setHeroImageExists?.(!!assignedHero);
   }, [assignedHero, setHeroImageExists]);
 
   useEffect(() => {
-    debugImages("effect:site-id-changed", {
-      siteId: site?.id ?? null,
-      subdomain: site?.subdomain ?? null,
-    });
     if (!site?.id) {
       setLoading(false);
       return;
@@ -255,11 +216,6 @@ export default function ImagesBuilderStep({
     for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
       await new Promise((resolve) => setTimeout(resolve, 700));
       if (!site?.id || fetchCounterRef.current !== requestId) {
-        debugImages("reconcile:aborted", {
-          requestId,
-          attempt,
-          reason: "stale-request-or-missing-site",
-        });
         return;
       }
 
@@ -267,60 +223,25 @@ export default function ImagesBuilderStep({
       const nextNormalized = normalizeImages(nextRows);
       const nextSignature = imagesSignature(nextNormalized);
 
-      debugImages("reconcile:attempt", {
-        requestId,
-        attempt,
-        baselineSignature,
-        nextSignature,
-        nextCount: nextNormalized.length,
-      });
-
       if (nextSignature !== baselineSignature) {
         setImages(nextNormalized);
-        debugImages("reconcile:applied", {
-          requestId,
-          attempt,
-          nextCount: nextNormalized.length,
-          next: nextNormalized.map((img) => compactImage(img)),
-        });
         baselineSignature = nextSignature;
       }
     }
-
-    debugImages("reconcile:finished", {
-      requestId,
-      finalSignature: baselineSignature,
-    });
   }
 
   async function fetchImages() {
     if (!site?.id) return;
     const requestId = ++fetchCounterRef.current;
-    debugImages("fetchImages:start", {
-      requestId,
-      siteId: site.id,
-      subdomain: site.subdomain,
-    });
     setLoading(true);
     setError(null);
 
     try {
       const rows = await fetchImagesBySite(site.id);
       const normalized = normalizeImages(rows);
-      debugImages("fetchImages:result", {
-        requestId,
-        rowCount: rows.length,
-        rows: rows.map((img) => compactImage(img)),
-        normalizedCount: normalized.length,
-        normalized: normalized.map((img) => compactImage(img)),
-      });
       setImages(normalized);
       await reconcileImages(requestId, rows);
     } catch (err) {
-      debugImages("fetchImages:error", {
-        requestId,
-        error: err instanceof Error ? err.message : String(err),
-      });
       const message =
         err instanceof Error
           ? err.message
@@ -329,7 +250,6 @@ export default function ImagesBuilderStep({
       setError(message);
       notify.error(message);
     } finally {
-      debugImages("fetchImages:done", { requestId });
       setLoading(false);
     }
   }
@@ -355,18 +275,6 @@ export default function ImagesBuilderStep({
   }
 
   async function handleFileChange(file: File, slot: ImageSlot) {
-    debugImages("handleFileChange:start", {
-      slot,
-      file: {
-        name: file?.name,
-        size: file?.size,
-        type: file?.type,
-      },
-      siteId: site?.id ?? null,
-      subdomain: site?.subdomain ?? null,
-      existingHero: compactImage(assignedHero),
-      existingContact: compactImage(assignedContact),
-    });
     if (!file) return;
 
     if (!site?.id) {
@@ -405,11 +313,6 @@ export default function ImagesBuilderStep({
     try {
       const existingInSlot = slot === "hero" ? assignedHero : assignedContact;
       const sectionId = await fetchSectionId(site.id, slot);
-      debugImages("handleFileChange:resolved-section-id", {
-        slot,
-        sectionId,
-        existingInSlot: compactImage(existingInSlot),
-      });
       if (!sectionId) {
         throw new Error(
           translations["builder.images.error.missing_section"] ||
@@ -427,10 +330,6 @@ export default function ImagesBuilderStep({
       );
 
       if (!inserted) throw new Error("Upload failed");
-      debugImages("handleFileChange:upload-inserted", {
-        slot,
-        inserted: compactImage(inserted),
-      });
 
       // uploadImageForSite returns a plain DB row without a section join.
       // Attach section.type so normalizeImages can immediately classify this
@@ -440,28 +339,16 @@ export default function ImagesBuilderStep({
         section: { type: slot },
       };
 
-      setImages((prev) => {
-        const next = normalizeImages([
+      setImages((prev) =>
+        normalizeImages([
           ...prev.filter((img) => img.id !== existingInSlot?.id),
           insertedWithSection,
-        ]);
-        debugImages("handleFileChange:setImages", {
-          slot,
-          prevCount: prev.length,
-          nextCount: next.length,
-          next: next.map((img) => compactImage(img)),
-        });
-        return next;
-      });
+        ]),
+      );
 
       // Keep DB clean: remove the replaced image row after successful upload.
       if (existingInSlot?.id) {
         const removed = await deleteImage(existingInSlot);
-        debugImages("handleFileChange:cleanup-old-slot-image", {
-          slot,
-          removed,
-          existingInSlot: compactImage(existingInSlot),
-        });
         if (!removed) {
           notify.error(
             translations["builder.images.error.replace_cleanup"] ||
@@ -483,12 +370,7 @@ export default function ImagesBuilderStep({
             ? "Hero image uploaded successfully."
             : "Contact image uploaded successfully."),
       );
-      debugImages("handleFileChange:success", { slot });
     } catch (err) {
-      debugImages("handleFileChange:error", {
-        slot,
-        error: err instanceof Error ? err.message : String(err),
-      });
       const rawMessage = err instanceof Error ? err.message : "";
       const fallback =
         translations["builder.images.error.upload_failed"] ||
@@ -497,57 +379,35 @@ export default function ImagesBuilderStep({
       setError(message);
       notify.error(message === fallback ? fallback : `${fallback} ${message}`);
     } finally {
-      debugImages("handleFileChange:done", { slot });
       setUploadingSlot(null);
       bumpUploaderResetKey(slot);
     }
   }
 
   async function handleDelete(image: ImageRow) {
-    debugImages("handleDelete:start", {
-      image: compactImage(image),
-      isBusy,
-    });
     if (isBusy) return;
 
     setAssigning(true);
 
     try {
       const ok = await deleteImage(image);
-      debugImages("handleDelete:delete-result", {
-        imageId: image.id,
-        ok,
-      });
       if (!ok) {
         notify.error(translations["builder.images.error.delete_failed"]);
         return;
       }
 
-      setImages((prev) => {
-        const next = prev.filter((img) => img.id !== image.id);
-        debugImages("handleDelete:committed-setImages", {
-          removedId: image.id,
-          prevCount: prev.length,
-          nextCount: next.length,
-        });
-        return next;
-      });
+      setImages((prev) => prev.filter((img) => img.id !== image.id));
 
       // refresh();
     } catch (err) {
-      debugImages("handleDelete:error", {
-        imageId: image.id,
-        error: err instanceof Error ? err.message : String(err),
-      });
       notify.error(translations["builder.images.error.delete_failed"]);
     } finally {
-      debugImages("handleDelete:done", { imageId: image.id });
       setAssigning(false);
     }
   }
 
   return (
-    <StepLayout nextLabel="Save" backLabel="Cancel" translations={translations}>
+    <StepLayout showActions={false}>
       <div className="space-y-6 min-w-0">
         {/* HEADER */}
         <div>

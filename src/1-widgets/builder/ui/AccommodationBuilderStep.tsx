@@ -37,6 +37,7 @@ export default function AccommodationBuilderStep({
   planType,
   setItemCount,
 }: Props) {
+  const fetchCounterRef = useRef(0);
   const [items, setItems] = useState<AccommodationEntry[]>([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -47,21 +48,65 @@ export default function AccommodationBuilderStep({
   const formRef = useRef<HTMLDivElement | null>(null);
   const accommodationLimit = getPlanLimit(planType, "accommodations");
 
+  function itemsSignature(rows: AccommodationEntry[]): string {
+    return rows
+      .map((row) => `${row.id}:${row.updated_at ?? ""}:${row.created_at ?? ""}`)
+      .join("|");
+  }
+
+  async function reconcileItems(
+    requestId: number,
+    baselineRows: AccommodationEntry[],
+    maxAttempts = 3,
+  ) {
+    if (!site?.id) return;
+
+    let baselineSignature = itemsSignature(baselineRows);
+
+    for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      if (!site?.id || fetchCounterRef.current !== requestId) return;
+
+      const nextRows = await fetchAccommodationEntries(site.id);
+      const safeNextRows = nextRows ?? [];
+      const nextSignature = itemsSignature(safeNextRows);
+
+      if (nextSignature !== baselineSignature) {
+        setItems(safeNextRows);
+        baselineSignature = nextSignature;
+      }
+    }
+  }
+
   useEffect(() => {
     if (!site?.id) return;
     let mounted = true;
-    setLoading(true);
-    setError(null);
-    fetchAccommodationEntries(site.id)
-      .then((rows) => {
-        if (mounted) setItems(rows ?? []);
-      })
-      .catch((err: unknown) => {
-        if (mounted) setError((err as Error)?.message ?? String(err));
-      })
-      .finally(() => {
-        if (mounted) setLoading(false);
-      });
+    const requestId = ++fetchCounterRef.current;
+
+    const load = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const rows = await fetchAccommodationEntries(site.id);
+        if (!mounted || fetchCounterRef.current !== requestId) return;
+
+        const safeRows = rows ?? [];
+        setItems(safeRows);
+        await reconcileItems(requestId, safeRows);
+      } catch (err: unknown) {
+        if (mounted && fetchCounterRef.current === requestId) {
+          setError((err as Error)?.message ?? String(err));
+        }
+      } finally {
+        if (mounted && fetchCounterRef.current === requestId) {
+          setLoading(false);
+        }
+      }
+    };
+
+    load();
+
     return () => {
       mounted = false;
     };
@@ -248,7 +293,8 @@ export default function AccommodationBuilderStep({
             onClick={() => startCreate()}
             disabled={!canAddMore()}
           >
-            {translations["builder.accommodation.add"] || "+ Add accommodation"}
+            {translations["builder.accommodation.add_button"] ||
+              "+ Add accommodation"}
           </button>
         </div>
       </div>
