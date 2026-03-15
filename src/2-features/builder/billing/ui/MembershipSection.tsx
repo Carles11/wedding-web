@@ -38,9 +38,6 @@ export default function MembershipSection({
 
   const canUpgrade = planType === "free";
   const canManage = planType === "premium";
-  const overlayTarget = canManage
-    ? `/builder/${siteId}/account/billing?lang=${lang}`
-    : `/marketing/pricing?lang=${lang}`;
 
   return (
     <section className="mt-12">
@@ -49,7 +46,7 @@ export default function MembershipSection({
       </h4>
 
       <div
-        className="relative border border-gray-200 rounded-2xl bg-gradient-to-br from-white via-gray-50 to-gray-100 p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-6 shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden cursor-pointer"
+        className="relative border border-gray-200 rounded-2xl bg-gradient-to-br from-white via-gray-50 to-gray-100 p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-6 shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden"
         onMouseEnter={() => setIsHovered(true)} // ✅ always fires, for both plan types
         onMouseLeave={() => setIsHovered(false)}
       >
@@ -60,22 +57,28 @@ export default function MembershipSection({
         {(canUpgrade || canManage) && (
           <div
             className={`absolute inset-0 flex items-center justify-center rounded-2xl bg-blue-600/4 backdrop-blur-[1px] transition-opacity duration-200 ${isHovered ? "opacity-100" : "opacity-0"}`}
-            style={{ pointerEvents: isHovered ? "auto" : "none" }}
+            // ✅ no pointer-events-none here — clicks must pass through
           >
-            <button
-              type="button"
-              className="px-4 py-2 rounded-full bg-blue-600 text-white text-xs font-semibold shadow-lg tracking-wide cursor-pointer hover:bg-blue-700 transition-colors"
-              onClick={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                router.push(overlayTarget);
-              }}
-            >
-              ✦{" "}
-              {canUpgrade
-                ? "Click to upgrade"
-                : translations["builder.billing.manage_btn"]}
-            </button>
+            <span className="px-4 py-2 rounded-full bg-blue-600 text-white text-xs font-semibold shadow-lg tracking-wide">
+              <button
+                type="button"
+                className="cursor-pointer"
+                onClick={() =>
+                  canUpgrade
+                    ? router.push(`/marketing/pricing?lang=${lang}`)
+                    : router.push(
+                        `/builder/${siteId}/account/billing?lang=${lang}`,
+                      )
+                }
+              >
+                ✦{" "}
+                {canUpgrade
+                  ? translations["builder.general.form.upgrade"] ||
+                    "Upgrade to Premium"
+                  : translations["builder.billing.manage_btn"] ||
+                    "Manage Subscription"}
+              </button>
+            </span>
           </div>
         )}
 
