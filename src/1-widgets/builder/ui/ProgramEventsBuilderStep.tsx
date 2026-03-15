@@ -76,6 +76,7 @@ export default function ProgramEventsBuilderStep({
   setHasMainProgramEvent,
 }: Props) {
   const formRef = useRef<HTMLDivElement | null>(null);
+  const fetchCounterRef = useRef(0);
 
   const [events, setEvents] = useState<ProgramEvent[]>([]);
   const [loading, setLoading] = useState(true);
@@ -102,8 +103,54 @@ export default function ProgramEventsBuilderStep({
 
   const defaultLang = site?.default_lang ?? languages[0] ?? "en";
 
+  function eventsSignature(rows: ProgramEvent[]): string {
+    return rows
+      .map((row) =>
+        JSON.stringify({
+          id: row.id,
+          day_tag: row.day_tag,
+          date: row.date,
+          time: row.time,
+          location_url: row.location_url,
+          sort_order: row.sort_order,
+          created_at: row.created_at,
+          is_main_event: row.is_main_event,
+          title: row.title ?? {},
+          location: row.location ?? {},
+          description: row.description ?? {},
+        }),
+      )
+      .join("|");
+  }
+
+  async function reconcileEvents(
+    requestId: number,
+    baselineRows: ProgramEvent[],
+    maxAttempts = 3,
+  ) {
+    if (!site?.id) return;
+
+    let baselineSignature = eventsSignature(baselineRows);
+
+    for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      if (!site?.id || fetchCounterRef.current !== requestId) return;
+
+      const nextRows = await fetchProgramEventsBySite(
+        site.id,
+        languages as SupportedLanguage[],
+      );
+      const nextSignature = eventsSignature(nextRows);
+
+      if (nextSignature !== baselineSignature) {
+        setEvents(nextRows);
+        baselineSignature = nextSignature;
+      }
+    }
+  }
+
   // 🔹 Fetch translated events
-  async function load() {
+  async function load(requestId?: number) {
     if (!site?.id) return;
     setLoading(true);
     setError(null);
@@ -112,8 +159,20 @@ export default function ProgramEventsBuilderStep({
         site.id,
         languages as SupportedLanguage[],
       );
+      if (requestId !== undefined && fetchCounterRef.current !== requestId) {
+        return;
+      }
+
       setEvents(rows);
+
+      if (requestId !== undefined) {
+        await reconcileEvents(requestId, rows);
+      }
     } catch (err) {
+      if (requestId !== undefined && fetchCounterRef.current !== requestId) {
+        return;
+      }
+
       notify.error(
         t(
           translations,
@@ -131,7 +190,9 @@ export default function ProgramEventsBuilderStep({
       setLoading(false);
       return;
     }
-    load();
+
+    const requestId = ++fetchCounterRef.current;
+    load(requestId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [site?.id]);
 
