@@ -11,7 +11,7 @@ import { notify } from "@/4-shared/lib/toast/toast";
 import type { PlanType, Site } from "@/4-shared/types";
 import MainModal from "@/4-shared/ui/commons/modals/MainModal";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { StepLayout } from "../step-layout";
 
 type Props = {
@@ -35,6 +35,7 @@ export default function GeneralSiteForm({
   setGeneralComplete,
 }: Props) {
   const router = useRouter();
+  const fetchCounterRef = useRef(0);
   const [languages, setLanguages] = useState<SupportedLanguage[]>([]);
   const [defaultLang, setDefaultLang] = useState<SupportedLanguage>("en");
   const [subdomain, setSubdomain] = useState("");
@@ -53,8 +54,70 @@ export default function GeneralSiteForm({
     return a.every((v, i) => v === b[i]);
   }
 
+  type GeneralContentState = Awaited<ReturnType<typeof getSiteGeneralContent>>;
+
+  function applyGeneralContent(res: GeneralContentState) {
+    setLanguages(res.languages);
+    setDefaultLang(res.default_lang);
+    setSubdomain(res.subdomain);
+    setHeroId(res.heroId);
+
+    setContent(
+      res.languages.reduce(
+        (obj, language) => {
+          obj[language] = {
+            title: res.titles[language] ?? "",
+            subtitle: res.subtitles[language] ?? "",
+          };
+          return obj;
+        },
+        {} as Record<SupportedLanguage, { title: string; subtitle: string }>,
+      ),
+    );
+
+    setActiveLang(res.default_lang);
+    setGeneralComplete?.(!!res.titles[res.default_lang]?.trim());
+  }
+
+  function generalContentSignature(res: GeneralContentState): string {
+    return JSON.stringify({
+      languages: res.languages,
+      default_lang: res.default_lang,
+      subdomain: res.subdomain,
+      heroId: res.heroId,
+      titles: res.titles,
+      subtitles: res.subtitles,
+    });
+  }
+
+  async function reconcileGeneralContent(
+    requestId: number,
+    baseline: GeneralContentState,
+    maxAttempts = 3,
+  ) {
+    if (!site?.id) return;
+
+    let baselineSignature = generalContentSignature(baseline);
+
+    for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      if (!site?.id || fetchCounterRef.current !== requestId) return;
+
+      const nextRes = await getSiteGeneralContent(site.id);
+      const nextSignature = generalContentSignature(nextRes);
+
+      if (nextSignature !== baselineSignature) {
+        applyGeneralContent(nextRes);
+        baselineSignature = nextSignature;
+      }
+    }
+  }
+
   // 🔹 Fetch + sync
-  const fetchAndApplyGeneralContent = async () => {
+  const fetchAndApplyGeneralContent = async (
+    requestId?: number,
+    isActive?: () => boolean,
+  ) => {
     if (!site) {
       setLoading(false);
       return;
@@ -62,31 +125,23 @@ export default function GeneralSiteForm({
     setLoading(true);
     try {
       const res = await getSiteGeneralContent(site.id);
+      if (
+        (requestId !== undefined && fetchCounterRef.current !== requestId) ||
+        (isActive && !isActive())
+      ) {
+        return;
+      }
 
-      setLanguages(res.languages);
-      setDefaultLang(res.default_lang);
-      setSubdomain(res.subdomain);
-      setHeroId(res.heroId);
+      applyGeneralContent(res);
 
-      setContent(
-        res.languages.reduce(
-          (obj, lang) => {
-            obj[lang] = {
-              title: res.titles[lang] ?? "",
-              subtitle: res.subtitles[lang] ?? "",
-            };
-            return obj;
-          },
-          {} as Record<SupportedLanguage, { title: string; subtitle: string }>,
-        ),
-      );
-
-      setActiveLang(res.default_lang);
-
-      // Notify parent whether the default-language hero content is complete
-      const defLang = res.default_lang;
-      setGeneralComplete?.(!!res.titles[defLang]?.trim());
+      if (requestId !== undefined) {
+        await reconcileGeneralContent(requestId, res);
+      }
     } catch (err) {
+      if (isActive && !isActive()) {
+        return;
+      }
+
       notify.error(
         err instanceof Error
           ? err.message
@@ -100,10 +155,24 @@ export default function GeneralSiteForm({
 
   // Initial and whenever site changes, always fetch fresh
   useEffect(() => {
+    if (!site?.id) {
+      setLoading(false);
+      return;
+    }
+
+    let mounted = true;
+    const requestId = ++fetchCounterRef.current;
+    const isActive = () => mounted && fetchCounterRef.current === requestId;
+
     const fetchData = async () => {
-      await fetchAndApplyGeneralContent();
+      await fetchAndApplyGeneralContent(requestId, isActive);
     };
+
     fetchData();
+
+    return () => {
+      mounted = false;
+    };
     // eslint-disable-next-line
   }, [site?.id]);
 
