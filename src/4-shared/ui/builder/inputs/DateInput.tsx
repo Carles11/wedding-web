@@ -50,7 +50,7 @@ export function DateInput({
   const maxDate = parseIsoDateToLocalDate(max);
 
   return (
-    <div className="w-full">
+    <div className="w-fit">
       {label && (
         <label className="block text-xs text-gray-600 mb-1">
           {label}
@@ -63,7 +63,7 @@ export function DateInput({
           dt ? onChange(formatLocalDateToIso(dt)) : onChange("")
         }
         dateFormat="yyyy-MM-dd"
-        className="w-full border px-3 py-2 rounded"
+        className="w-full border px-3 py-2 rounded mb-2"
         minDate={minDate ?? undefined}
         maxDate={maxDate ?? undefined}
         required={required}

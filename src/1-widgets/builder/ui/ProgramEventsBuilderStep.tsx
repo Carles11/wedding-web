@@ -6,7 +6,10 @@ import {
   fetchProgramEventsBySite,
   updateProgramEvent,
 } from "@/3-entities/program_events/api";
-import type { SupportedLanguage } from "@/4-shared/config/i18n";
+import {
+  SUPPORTED_LANGUAGE_LABELS,
+  type SupportedLanguage,
+} from "@/4-shared/config/i18n";
 import {
   canUseQuota,
   getPlanLimit,
@@ -35,6 +38,11 @@ function t(
   fallback: string,
 ): string {
   return translations[key] || fallback;
+}
+
+function getLanguageDisplay(lang: string): string {
+  const label = SUPPORTED_LANGUAGE_LABELS[lang as SupportedLanguage];
+  return label ? `${label} (${lang})` : lang;
 }
 
 type Props = {
@@ -568,7 +576,6 @@ export default function ProgramEventsBuilderStep({
 
   // --- All rendering below ---
 
-  console.log({ events });
   return (
     <StepLayout
       translations={translations}
@@ -847,41 +854,66 @@ export default function ProgramEventsBuilderStep({
                   "Create event",
                 )}
           </h4>
-          <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            <div>
+          <div className="mt-3 grid grid-cols-1 md:grid-cols-12 gap-3">
+            <div className="md:col-span-5">
               <label className="block text-xs text-gray-600">
                 {t(translations, "builder.program_events.field.day", "Day")}
               </label>
-              <select
-                value={form.day_tag ?? "wedding_day"}
-                onChange={(e) =>
-                  updateFormField(
-                    "day_tag",
-                    e.target.value as ProgramEvent["day_tag"],
-                  )
-                }
-                className="mt-1 w-full"
-              >
-                {DAY_TAGS.map((d) => (
-                  <option key={d.key as string} value={d.key ?? ""}>
-                    {d.label}
-                  </option>
-                ))}
-              </select>
+              <div className="relative mt-1">
+                <select
+                  value={form.day_tag ?? "wedding_day"}
+                  onChange={(e) =>
+                    updateFormField(
+                      "day_tag",
+                      e.target.value as ProgramEvent["day_tag"],
+                    )
+                  }
+                  className="w-full appearance-none rounded-md border border-gray-300 bg-white px-3 py-2 pr-9 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer"
+                >
+                  {DAY_TAGS.map((d) => (
+                    <option key={d.key as string} value={d.key ?? ""}>
+                      {d.label}
+                    </option>
+                  ))}
+                </select>
+                <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-500">
+                  ▾
+                </span>
+              </div>
             </div>
 
-            <DateInput
-              value={form.date ?? ""}
-              onChange={(newDate: string) => updateFormField("date", newDate)}
-              label={t(
-                translations,
-                "builder.program_events.field.day",
-                "Date",
-              )}
-              required
-            />
+            <div className="md:col-span-7">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-[18rem_10rem] md:justify-end">
+                <DateInput
+                  value={form.date ?? ""}
+                  onChange={(newDate: string) =>
+                    updateFormField("date", newDate)
+                  }
+                  label={t(
+                    translations,
+                    "builder.program_events.field.day",
+                    "Date",
+                  )}
+                  required
+                />
+
+                <TimeInput
+                  value={form.time ?? ""}
+                  onChange={(newTime: string) =>
+                    updateFormField("time", newTime)
+                  }
+                  label={t(
+                    translations,
+                    "builder.program_events.field.time",
+                    "Time",
+                  )}
+                  required
+                />
+              </div>
+            </div>
+
             {form.day_tag === "wedding_day" && weddingDayReferenceDate && (
-              <p className="text-xs text-gray-500 sm:col-span-2 lg:col-span-3">
+              <p className="text-xs text-gray-500 md:col-span-12">
                 {interpolate(
                   t(
                     translations,
@@ -893,18 +925,7 @@ export default function ProgramEventsBuilderStep({
               </p>
             )}
 
-            <TimeInput
-              value={form.time ?? ""}
-              onChange={(newTime: string) => updateFormField("time", newTime)}
-              label={t(
-                translations,
-                "builder.program_events.field.time",
-                "Time",
-              )}
-              required
-            />
-
-            <div>
+            <div className="md:col-span-6">
               <label className="block text-xs text-gray-600">
                 {t(
                   translations,
@@ -996,7 +1017,27 @@ export default function ProgramEventsBuilderStep({
             </div>
             {languages.map((lang) => (
               <div key={lang} className="mt-2 border rounded p-3 min-w-0">
-                <div className="font-medium">Language: {lang}</div>
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <div className="font-semibold text-gray-800">
+                    {interpolate(
+                      t(
+                        translations,
+                        "builder.program_events.form.language_fields_for",
+                        "Fields for {language}",
+                      ),
+                      { language: getLanguageDisplay(lang) },
+                    )}
+                  </div>
+                  {lang === defaultLang && (
+                    <span className="rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700">
+                      {t(
+                        translations,
+                        "builder.program_events.form.default_language_badge",
+                        "Default language",
+                      )}
+                    </span>
+                  )}
+                </div>
                 <div className="mt-2 grid grid-cols-1 gap-2">
                   <div>
                     <label className="block text-xs text-gray-600">
