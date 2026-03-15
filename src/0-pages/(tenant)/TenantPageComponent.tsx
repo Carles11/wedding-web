@@ -134,6 +134,20 @@ export default async function TenantPageComponent({
     description: ev.description ?? undefined,
   }));
 
+  const shouldRenderDetails = normalizedEvents.length > 0;
+  const shouldRenderAccommodation = accommodations.length > 0;
+  const shouldRenderWhatElse = whatelse.length > 0;
+  const shouldRenderWeddingGift = Boolean(weddingGift);
+  const shouldRenderContact = Boolean(contact);
+
+  const visibleSectionIds = [
+    shouldRenderDetails ? "details" : null,
+    shouldRenderAccommodation ? "accommodation" : null,
+    shouldRenderWhatElse ? "whatelse" : null,
+    shouldRenderWeddingGift ? "gifts" : null,
+    shouldRenderContact ? "contact" : null,
+  ].filter((id): id is string => Boolean(id));
+
   return (
     <>
       {/* JSON-LD SEO */}
@@ -143,7 +157,11 @@ export default async function TenantPageComponent({
         {/* Top-left: menu */}
         <div className="absolute top-3 left-3 z-50 pointer-events-auto">
           <div className="backdrop-blur-sm rounded-md p-1 shadow-sm">
-            <TopMenu lang={lang} translations={translations} />
+            <TopMenu
+              lang={lang}
+              translations={translations}
+              visibleSectionIds={visibleSectionIds}
+            />
           </div>
         </div>
 
@@ -171,7 +189,7 @@ export default async function TenantPageComponent({
           translations={translations}
         />
         {/* Details - Full timeline all events */}
-        {normalizedEvents && (
+        {shouldRenderDetails && (
           <DetailsSection
             events={normalizedEvents}
             translations={translations}
@@ -179,7 +197,7 @@ export default async function TenantPageComponent({
         )}
 
         {/* Accommodation */}
-        {accommodations && (
+        {shouldRenderAccommodation && (
           <AccommodationSection
             hotels={accommodations}
             translations={translations}
@@ -187,7 +205,7 @@ export default async function TenantPageComponent({
         )}
 
         {/* What else */}
-        {whatelse && (
+        {shouldRenderWhatElse && (
           <WhatElseSection
             items={whatelse}
             lang={lang}
@@ -196,12 +214,12 @@ export default async function TenantPageComponent({
         )}
 
         {/* Wedding Gift */}
-        {weddingGift && (
+        {shouldRenderWeddingGift && (
           <WeddingGiftSection data={weddingGift} translations={translations} />
         )}
 
         {/* Contact */}
-        {contact && (
+        {shouldRenderContact && (
           <ContactSection
             data={contact}
             lang={lang}

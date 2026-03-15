@@ -26,7 +26,20 @@ WITH seed("key", en, zh, hi, es, ca, ar, fr, de, pt, ru, it) AS (
       'Diese Hochzeitswebsite ist nicht verfügbar.',
       'Este site de casamento não está disponível.',
       'Этот свадебный сайт недоступен.',
-      'Questo sito di matrimonio non è disponibile.')
+      'Questo sito di matrimonio non è disponibile.'),
+
+    ('menu.wedding_gift',
+      'Wedding Gift',
+      '婚礼礼金',
+      'शादी का उपहार',
+      'Regalo de boda',
+      'Regal de casament',
+      'هدية الزفاف',
+      'Cadeau de mariage',
+      'Hochzeitsgeschenk',
+      'Presente de casamento',
+      'Свадебный подарок',
+      'Regalo di matrimonio')
 ),
 expanded AS (
   SELECT "key", 'en'::text AS locale, en AS value FROM seed

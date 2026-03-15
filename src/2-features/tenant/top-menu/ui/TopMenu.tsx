@@ -1,28 +1,45 @@
 "use client";
 
-import React, { useState } from "react";
-import Image from "next/image";
 import type { TranslationDictionary } from "@/4-shared/types";
+import Image from "next/image";
+import React, { useState } from "react";
 import MenuOverlay from "./MenuOverlay";
 
 type TopMenuProps = {
   lang: string;
   translations?: TranslationDictionary | null;
+  visibleSectionIds?: string[];
 };
 
-export default function TopMenu({ lang, translations }: TopMenuProps) {
+export default function TopMenu({
+  lang,
+  translations,
+  visibleSectionIds,
+}: TopMenuProps) {
   const [open, setOpen] = useState(false);
 
-  const items = [
+  const allItems = [
     { id: "details", key: "menu.details", fallback: "Details" },
     {
       id: "accommodation",
       key: "menu.accommodation",
       fallback: "Accommodation",
     },
-    { id: "whatelse", key: "menu.what_else", fallback: "What else" },
+    {
+      id: "whatelse",
+      key: "menu.what_else",
+      fallback: "What else to see",
+    },
+    { id: "gifts", key: "menu.wedding_gift", fallback: "Wedding Gift" },
     { id: "contact", key: "menu.contact", fallback: "Contact" },
   ];
+
+  const items =
+    visibleSectionIds && visibleSectionIds.length > 0
+      ? allItems.filter((item) => visibleSectionIds.includes(item.id))
+      : allItems;
+
+  if (items.length === 0) return null;
 
   const getLabel = (k: string, fallback: string) =>
     translations?.[k] ?? fallback;
