@@ -15,10 +15,14 @@ interface ContactPerson {
 interface ContactSectionData {
   title?: string;
   subtitle?: string | Record<string, string>;
-  content?: {
-    headline?: string;
-    people?: ContactPerson[];
-  };
+  content?:
+    | {
+        headline?: string;
+        people?: ContactPerson[];
+        bride?: ContactPerson;
+        groom?: ContactPerson;
+      }
+    | string;
   background?:
     | {
         url?: string;
@@ -46,12 +50,36 @@ function normalizeBackground(raw?: ContactSectionData["background"]) {
   return raw as { url?: string; alt?: string };
 }
 
+function normalizeContent(raw?: ContactSectionData["content"]) {
+  if (!raw) return undefined;
+  if (typeof raw === "string") {
+    try {
+      return JSON.parse(raw) as {
+        headline?: string;
+        people?: ContactPerson[];
+        bride?: ContactPerson;
+        groom?: ContactPerson;
+      };
+    } catch {
+      return undefined;
+    }
+  }
+  return raw;
+}
+
+function hasAnyContactValue(person?: ContactPerson) {
+  if (!person) return false;
+  return Boolean(person.name || person.email || person.phone);
+}
+
 export default function ContactSection({
   data,
   lang,
   translations,
   backgroundImage,
 }: ContactSectionProps) {
+  const content = normalizeContent(data?.content);
+
   const headline =
     getTextForLang(
       data?.title as Record<string, string> | undefined,
@@ -59,7 +87,7 @@ export default function ContactSection({
       "",
     ) ||
     getTextForLang(
-      data?.content?.headline as Record<string, string> | undefined,
+      content?.headline as Record<string, string> | undefined,
       lang,
       "",
     ) ||
@@ -72,7 +100,12 @@ export default function ContactSection({
     "",
   );
 
-  const people: ContactPerson[] = data?.content?.people ?? [];
+  const peopleFromList = Array.isArray(content?.people) ? content.people : [];
+  const peopleFromCouple = [content?.bride, content?.groom].filter(
+    hasAnyContactValue,
+  ) as ContactPerson[];
+  const people: ContactPerson[] =
+    peopleFromList.length > 0 ? peopleFromList : peopleFromCouple;
 
   // Defensive parse of background
   const bg = normalizeBackground(data?.background);

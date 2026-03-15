@@ -1,5 +1,8 @@
 import { getSiteByDomain } from "@/4-shared/lib/getSiteByDomain";
-import { getMergedTranslations } from "@/4-shared/lib/i18n";
+import {
+  fetchGlobalTranslations,
+  getMergedTranslations,
+} from "@/4-shared/lib/i18n";
 import { generateSiteMetadata } from "@/4-shared/lib/seo/generateSiteMetadata";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
@@ -19,9 +22,12 @@ export async function generateMetadata({
   const site = await getSiteByDomain(host);
 
   if (!site) {
+    const globalT = await fetchGlobalTranslations(lang, "en");
     return {
-      title: "Wedding Event Not Found",
-      description: "This wedding website is not available.",
+      title: globalT["seo.not_found.title"] ?? "Wedding Event Not Found",
+      description:
+        globalT["seo.not_found.description"] ??
+        "This wedding website is not available.",
     };
   }
 
