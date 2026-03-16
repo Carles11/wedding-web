@@ -23,6 +23,13 @@ export async function createSiteForUser(user: {
     ? user.preferredLanguage
     : "en";
 
+  const defaultDomains = [
+    `${defaultSubdomain}.localhost:3000`,
+    `www.${defaultSubdomain}.localhost:3000`,
+    `${defaultSubdomain}.weddweb.com`,
+    `www.${defaultSubdomain}.weddweb.com`,
+  ];
+
   // 1. Insert site row
   const { data: siteData, error: siteError } = await supabaseAdmin
     .from("sites")
@@ -33,7 +40,7 @@ export async function createSiteForUser(user: {
         subdomain: defaultSubdomain,
         default_lang: initialLang,
         languages: [initialLang],
-        domains: [],
+        domains: defaultDomains,
       },
     ])
     .select("id, subdomain, default_lang, languages, domains")
