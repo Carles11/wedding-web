@@ -1,5 +1,7 @@
 "use client";
 
+import { MarketingButton } from "@/4-shared/ui/marketing";
+
 /**
  * Props for `HeroMarketing` component.
  */
@@ -47,24 +49,24 @@ export default function HeroMarketing({
           </p>
 
           <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:justify-center sm:items-center">
-            <button
-              type="button"
+            <MarketingButton
+              variant="primary"
+              size="lg"
               onClick={onPrimaryClick}
               aria-label={ctaPrimary}
-              className="inline-flex items-center justify-center px-8 py-4 rounded-full text-white font-semibold text-lg shadow-lg transform transition-transform duration-150 hover:scale-[1.03] focus:outline-none focus:ring-4 focus:ring-[#6ABDA6]/30 bg-[#6ABDA6]"
             >
               {ctaPrimary}
-            </button>
+            </MarketingButton>
 
             {ctaSecondary ? (
-              <button
-                type="button"
+              <MarketingButton
+                variant="secondary"
+                size="lg"
                 onClick={onSecondaryClick}
                 aria-label={ctaSecondary}
-                className="inline-flex items-center justify-center px-8 py-4 rounded-full text-[#6ABDA6] font-semibold text-lg border-2 border-[#6ABDA6] bg-white/60 hover:bg-white/80 transition-colors duration-150 focus:outline-none focus:ring-4 focus:ring-[#6ABDA6]/20"
               >
                 {ctaSecondary}
-              </button>
+              </MarketingButton>
             ) : null}
           </div>
         </div>

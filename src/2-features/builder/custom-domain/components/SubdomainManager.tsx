@@ -2,6 +2,7 @@
 
 import { notify } from "@/4-shared/lib/toast/toast";
 import type { PlanType, Site } from "@/4-shared/types";
+import { BuilderButton } from "@/4-shared/ui/builder";
 import { copyToClipboard } from "@/4-shared/utils/copyToClipboard";
 import { isValidSubdomain } from "@/4-shared/utils/validations";
 import { useState } from "react";
@@ -112,13 +113,14 @@ export default function SubdomainManager({
             tabIndex={-1}
             aria-label={translations["builder.domain.current_subdomain_label"]}
           />
-          <button
+          <BuilderButton
             type="button"
-            className="px-2 py-1 text-xs bg-blue-50 border border-blue-100 rounded"
+            variant="secondary"
+            size="sm"
             onClick={() => copyToClipboard(`${site.subdomain}.${domainSuffix}`)}
           >
             {translations["builder.domain.copy_url"]}
-          </button>
+          </BuilderButton>
         </div>
         <div className="mt-1 text-xs text-gray-500">
           {translations["builder.domain.example_url"]}:{" "}
@@ -156,7 +158,7 @@ export default function SubdomainManager({
               {helpText}
             </p>
           )}
-          <button
+          <BuilderButton
             type="button"
             onClick={handleSave}
             disabled={
@@ -165,10 +167,11 @@ export default function SubdomainManager({
               status === "saving" ||
               !isValidSubdomain(subdomain)
             }
-            className="cursor-pointer mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-200 disabled:text-gray-500"
+            loading={status === "saving"}
+            className="mt-2"
           >
             {translations["builder.domain.save_btn"]}
-          </button>
+          </BuilderButton>
         </div>
       )}
     </div>

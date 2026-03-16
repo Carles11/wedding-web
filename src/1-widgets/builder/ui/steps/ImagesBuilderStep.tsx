@@ -14,7 +14,7 @@ import FileUploader from "@/4-shared/ui/builder/FileUploader";
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Accept } from "react-dropzone";
-import { StepLayout } from "../step-layout";
+import { StepLayout } from "../../step-layout";
 
 type ImageSlot = "hero" | "contact";
 

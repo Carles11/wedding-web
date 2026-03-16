@@ -6,6 +6,7 @@ import { verifyCustomDomainClient } from "@/2-features/builder/custom-domain/api
 import DnsModalContent from "@/2-features/builder/custom-domain/components/DnsModalContent";
 import { notify } from "@/4-shared/lib/toast/toast";
 import { PlanType } from "@/4-shared/types";
+import { BuilderButton } from "@/4-shared/ui/builder";
 import MainModal from "@/4-shared/ui/commons/modals/MainModal";
 import React, { useState } from "react";
 
@@ -225,13 +226,14 @@ export const CustomDomainSection: React.FC<Props> = ({
             🔒
           </span>
           <span>{translations["builder.domain.custom_domain_locked"]}</span>
-          <button
-            className="cursor-pointer ml-auto px-3 py-1 bg-blue-600 text-white rounded text-sm"
+          <BuilderButton
+            className="ml-auto"
+            size="sm"
             onClick={onUpgradeClick}
             type="button"
           >
             {translations["builder.domain.upgrade_btn"] ?? "Upgrade"}
-          </button>
+          </BuilderButton>
         </div>
       ) : (
         <>
@@ -274,13 +276,13 @@ export const CustomDomainSection: React.FC<Props> = ({
                 {localMsg}
               </div>
             )}
-            <button
-              className="mt-1 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-200 disabled:text-gray-500"
+            <BuilderButton
+              className="mt-1 w-72"
               type="submit"
               disabled={loading || !inputDomain}
             >
               {translations["builder.domain.save_btn"]}
-            </button>
+            </BuilderButton>
           </form>
 
           {allDomains.length > 0 && (
@@ -320,26 +322,31 @@ export const CustomDomainSection: React.FC<Props> = ({
                         )}
                         {(domainStatuses[domain] ||
                           domainStatuses[`www.${domain}`]) !== "verified" && (
-                          <button
+                          <BuilderButton
                             type="button"
                             disabled={loading || localStatus === "saving"}
-                            className="ml-2 text-xs text-blue-600 underline"
+                            variant="secondary"
+                            size="sm"
+                            className="ml-2"
                             style={{ minWidth: 80 }}
                             onClick={() => handleCheckStatus(domain)}
                           >
                             {translations["builder.domain.check_status_btn"] ||
                               "Check status"}
-                          </button>
+                          </BuilderButton>
                         )}
                       </span>
-                      <button
+                      <BuilderButton
                         type="button"
                         disabled={loading || localStatus === "saving"}
-                        className="text-red-500 hover:underline ml-4 text-xs"
+                        variant="secondary"
+                        tone="danger"
+                        size="sm"
+                        className="ml-4"
                         onClick={() => handleRemove(domain)}
                       >
                         {translations["builder.domain.remove_btn"] || "Remove"}
-                      </button>
+                      </BuilderButton>
                     </li>
 
                     {/* Verified domain: onboarding UX */}
@@ -365,14 +372,15 @@ export const CustomDomainSection: React.FC<Props> = ({
                               {translations["builder.domain.go_to_domain"] ||
                                 "Yes, Visit my website"}
                             </a>
-                            <button
+                            <BuilderButton
                               type="button"
-                              className="px-4 py-1 bg-gray-100 border rounded hover:bg-gray-200"
+                              variant="secondary"
+                              size="sm"
                               onClick={() => setDnsModalDomain(domain)}
                             >
                               {translations["builder.domain.no_show_how"] ||
                                 "No, show me how"}
-                            </button>
+                            </BuilderButton>
                           </div>
                         </div>
                         <MainModal

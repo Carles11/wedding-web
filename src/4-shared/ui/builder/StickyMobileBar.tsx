@@ -1,5 +1,7 @@
 "use client";
 
+import { BuilderButton } from "./BuilderButton";
+
 type Props = {
   primaryLabel: string;
   onPrimary?: () => void;
@@ -22,21 +24,23 @@ export default function StickyMobileBar({
 }: Props) {
   return (
     <div className="fixed bottom-0 left-0 right-0 md:hidden bg-white border-t p-3 flex gap-2">
-      <button
+      <BuilderButton
         onClick={onPrimary}
         disabled={primaryDisabled}
-        className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg disabled:opacity-50"
+        fullWidth
+        loading={primaryLoading}
+        loadingLabel="Saving..."
       >
-        {primaryLoading ? "Saving…" : primaryLabel}
-      </button>
+        {primaryLabel}
+      </BuilderButton>
       {secondaryLabel && onSecondary && (
-        <button
+        <BuilderButton
           onClick={onSecondary}
           disabled={secondaryDisabled}
-          className="px-4 py-2 border rounded-lg bg-white"
+          variant="secondary"
         >
           {secondaryLabel}
-        </button>
+        </BuilderButton>
       )}
     </div>
   );

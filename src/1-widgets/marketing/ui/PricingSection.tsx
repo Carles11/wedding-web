@@ -1,5 +1,7 @@
 "use client";
 
+import { MarketingButton } from "@/4-shared/ui/marketing";
+
 /**
  * Props for PricingSection
  *
@@ -106,14 +108,15 @@ export default function PricingSection({
             </div>
 
             <div className="mt-6">
-              <button
-                type="button"
+              <MarketingButton
+                variant="ghost"
+                size="sm"
+                fullWidth
                 onClick={onFreePlanClick}
                 aria-label={`${freePlanName} - ${freeCTA}`}
-                className="w-full inline-flex justify-center items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-800 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#6ABDA6]"
               >
                 {freeCTA}
-              </button>
+              </MarketingButton>
             </div>
           </div>
 
@@ -151,21 +154,18 @@ export default function PricingSection({
             </div>
 
             <div className="mt-6">
-              <button
-                type="button"
+              <MarketingButton
+                variant="primary"
+                size="sm"
+                fullWidth
+                disabled={premiumComingSoon}
                 onClick={() => {
                   if (!premiumComingSoon) onPremiumPlanClick?.();
                 }}
                 aria-label={`${premiumPlanName} - ${premiumComingSoon ? "Notify me" : premiumPlanCTA}`}
-                disabled={premiumComingSoon}
-                className={`w-full inline-flex justify-center items-center px-4 py-2 rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#6ABDA6] ${
-                  premiumComingSoon
-                    ? "bg-gray-200 text-gray-600 cursor-not-allowed"
-                    : "bg-[#6ABDA6] text-white hover:bg-teal-600"
-                }`}
               >
                 {premiumComingSoon ? "Notify Me" : premiumPlanCTA}
-              </button>
+              </MarketingButton>
             </div>
           </div>
         </div>

@@ -1,5 +1,7 @@
 "use client";
 
+import { MarketingButton } from "@/4-shared/ui/marketing";
+
 /**
  * Props for CTASection
  */
@@ -31,14 +33,15 @@ export default function CTASection({
         <p className="mt-4 text-lg md:text-xl text-white/90">{description}</p>
 
         <div className="mt-8">
-          <button
-            type="button"
+          <MarketingButton
+            variant="on-gradient"
+            size="lg"
             onClick={onButtonClick}
             aria-label={buttonText}
-            className="w-full md:w-auto inline-flex items-center justify-center px-10 py-4 md:py-5 text-xl font-semibold rounded-full bg-white text-[#0f766e] shadow-xl transform transition duration-200 hover:scale-105 focus:outline-none focus:ring-4 focus:ring-white/30"
+            className="w-full md:w-auto"
           >
             {buttonText}
-          </button>
+          </MarketingButton>
         </div>
       </div>
     </section>

@@ -19,7 +19,7 @@ export default function PricingPageShell({
   return (
     <main className="relative overflow-hidden">
       {/* background glow */}
-      <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,rgba(59,130,246,0.15),transparent_60%)]" />
+      <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,rgba(106,189,166,0.15),transparent_60%)]" />
 
       <div className="max-w-5xl mx-auto px-6 py-20">
         {/* HERO */}

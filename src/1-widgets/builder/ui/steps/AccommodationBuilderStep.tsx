@@ -19,10 +19,18 @@ import type {
   PlanType,
   Site,
 } from "@/4-shared/types";
-import MainModal from "@/4-shared/ui/commons/modals/MainModal";
+import {
+  BuilderButton,
+  PlanLimitNotice,
+  UpgradeCTAModal,
+} from "@/4-shared/ui/builder";
+import {
+  BuilderTextInput,
+  BuilderTextarea,
+} from "@/4-shared/ui/builder/inputs";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { StepLayout } from "../step-layout";
+import { StepLayout } from "../../step-layout";
 
 type Props = {
   site: Site | null;
@@ -310,12 +318,9 @@ export default function AccommodationBuilderStep({
     >
       <div className="mb-3 flex items-center justify-end">
         <div>
-          <button
-            className={`px-1 py-1 rounded text-white ${
-              canAddMore()
-                ? "bg-blue-600 hover:bg-blue-700"
-                : "bg-blue-400 cursor-pointer "
-            }`}
+          <BuilderButton
+            variant="primary"
+            size="sm"
             onClick={() => {
               if (!canAddMore()) {
                 if (planType === "free") {
@@ -325,11 +330,11 @@ export default function AccommodationBuilderStep({
               }
               startCreate();
             }}
-            aria-disabled={!canAddMore()}
+            disabled={!canAddMore()}
           >
             {translations["builder.accommodation.add_button"] ||
               "+ Add accommodation"}
-          </button>
+          </BuilderButton>
         </div>
       </div>
 
@@ -421,19 +426,22 @@ export default function AccommodationBuilderStep({
                         )}
                       </div>
                       <div className="flex gap-2 shrink-0">
-                        <button
-                          className="cursor-pointer text-xs font-medium px-3 py-1.5 rounded-md border border-gray-200 bg-white hover:bg-gray-50 active:scale-[0.98] transition"
+                        <BuilderButton
+                          variant="secondary"
+                          size="sm"
                           onClick={() => startEdit(it)}
                         >
                           {translations["builder.actions.edit"] || "Edit"}
-                        </button>
-                        <button
-                          className="cursor-pointer text-xs font-medium px-3 py-1.5 rounded-md border border-red-200 text-red-600 bg-white hover:bg-red-50 active:scale-[0.98] transition"
+                        </BuilderButton>
+                        <BuilderButton
+                          variant="secondary"
+                          tone="danger"
+                          size="sm"
                           onClick={() => handleDelete(it.id)}
                           disabled={saving}
                         >
                           {translations["builder.actions.delete"] || "Delete"}
-                        </button>
+                        </BuilderButton>
                       </div>
                     </div>
                   ))}
@@ -455,78 +463,58 @@ export default function AccommodationBuilderStep({
           </h4>
 
           <div className="mt-3 space-y-3">
-            <div>
-              <label className="block text-xs text-gray-600">
-                {translations["builder.accommodation.field.name"] || "Name"}{" "}
-                <span className="text-red-500">*</span>
-              </label>
-              <input
-                value={form.name}
-                onChange={(e) => updateField("name", e.target.value)}
-                className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                required
-              />
-            </div>
+            <BuilderTextInput
+              label={translations["builder.accommodation.field.name"] || "Name"}
+              value={form.name}
+              onChange={(v) => updateField("name", v)}
+              required
+            />
 
-            <div>
-              <label className="block text-xs text-gray-600">
-                {translations["builder.accommodation.field.address"] ||
-                  "Address (optional)"}
-              </label>
-              <input
-                value={form.address ?? ""}
-                onChange={(e) => updateField("address", e.target.value)}
-                className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
+            <BuilderTextInput
+              label={
+                translations["builder.accommodation.field.address"] ||
+                "Address (optional)"
+              }
+              value={form.address ?? ""}
+              onChange={(v) => updateField("address", v)}
+            />
 
-            <div>
-              <label className="block text-xs text-gray-600">
-                {translations["builder.accommodation.field.notes"] ||
-                  "Notes (optional)"}
-              </label>
-              <textarea
-                value={form.notes ?? ""}
-                onChange={(e) => updateField("notes", e.target.value)}
-                className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
+            <BuilderTextarea
+              label={
+                translations["builder.accommodation.field.notes"] ||
+                "Notes (optional)"
+              }
+              value={form.notes ?? ""}
+              onChange={(v) => updateField("notes", v)}
+              rows={2}
+            />
 
-            <div>
-              <label className="block text-xs text-gray-600">
-                {translations["builder.accommodation.field.website"] ||
-                  "Website (optional)"}
-              </label>
-              <input
-                value={form.website ?? ""}
-                onChange={(e) => updateField("website", e.target.value)}
-                className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
+            <BuilderTextInput
+              label={
+                translations["builder.accommodation.field.website"] ||
+                "Website (optional)"
+              }
+              value={form.website ?? ""}
+              onChange={(v) => updateField("website", v)}
+            />
 
-            <div>
-              <label className="block text-xs text-gray-600">
-                {translations["builder.accommodation.field.phone"] ||
-                  "Phone (optional)"}
-              </label>
-              <input
-                value={form.phone ?? ""}
-                onChange={(e) => updateField("phone", e.target.value)}
-                className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
+            <BuilderTextInput
+              label={
+                translations["builder.accommodation.field.phone"] ||
+                "Phone (optional)"
+              }
+              value={form.phone ?? ""}
+              onChange={(v) => updateField("phone", v)}
+            />
 
-            <div>
-              <label className="block text-xs text-gray-600">
-                {translations["builder.accommodation.field.email"] ||
-                  "Email (optional)"}
-              </label>
-              <input
-                value={form.email ?? ""}
-                onChange={(e) => updateField("email", e.target.value)}
-                className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
+            <BuilderTextInput
+              label={
+                translations["builder.accommodation.field.email"] ||
+                "Email (optional)"
+              }
+              value={form.email ?? ""}
+              onChange={(v) => updateField("email", v)}
+            />
 
             {error && <div className="text-red-600 mt-2">{error}</div>}
           </div>
@@ -534,55 +522,39 @@ export default function AccommodationBuilderStep({
       )}
 
       {!canAddMore() && (
-        <div className="mt-3 text-sm text-gray-600">
-          {interpolate(
+        <PlanLimitNotice
+          message={interpolate(
             translations["builder.accommodation.limit_reached_notice"] ||
               "Free plan limit reached ({limit}).",
             {
               limit: accommodationLimit,
               FREE_ACCOMMODATION_LIMIT: accommodationLimit,
             },
-          )}{" "}
-          <button
-            className="cursor-pointer underline text-blue-600"
-            onClick={goToPricing}
-          >
-            {translations["builder.accommodation.upgrade"] || "Upgrade"}
-          </button>{" "}
-          {translations["builder.accommodation.to_add_more"] || "to add more."}
-        </div>
+          )}
+          upgradeLabel={
+            translations["builder.accommodation.upgrade"] || "Upgrade"
+          }
+          onUpgrade={goToPricing}
+        />
       )}
 
-      <MainModal
+      <UpgradeCTAModal
         open={showUpgradeCTA && planType === "free"}
         title={
           translations["builder.general.form.need_more_langs"] ||
           "Need more languages?"
         }
+        description={
+          translations["builder.general.form.upgrade_description"] ||
+          "Your current plan only allows one language. Upgrade to Premium to unlock all languages for your wedding site."
+        }
+        cancelLabel={translations["builder.general.form.cancel"] || "Cancel"}
+        upgradeLabel={
+          translations["builder.general.form.upgrade"] || "Upgrade to Premium"
+        }
         onClose={() => setShowUpgradeCTA(false)}
-      >
-        <p className="text-sm text-gray-700 mb-5">
-          {translations["builder.general.form.upgrade_description"] ||
-            "Your current plan only allows one language. Upgrade to Premium to unlock all languages for your wedding site."}
-        </p>
-        <div className="flex justify-end gap-3">
-          <button
-            type="button"
-            className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition"
-            onClick={() => setShowUpgradeCTA(false)}
-          >
-            {translations["builder.general.form.cancel"] || "Cancel"}
-          </button>
-          <button
-            type="button"
-            className="px-5 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition"
-            onClick={goToPricing}
-          >
-            {translations["builder.general.form.upgrade"] ||
-              "Upgrade to Premium"}
-          </button>
-        </div>
-      </MainModal>
+        onUpgrade={goToPricing}
+      />
       {confirmDialog}
     </StepLayout>
   );

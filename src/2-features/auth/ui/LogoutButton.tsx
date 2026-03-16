@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { useSupabaseAuth } from "@/4-shared/hooks/useSupabaseAuth";
+import { MarketingButton } from "@/4-shared/ui/marketing";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function LogoutButton() {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -24,13 +25,14 @@ export default function LogoutButton() {
   };
 
   return (
-    <button
+    <MarketingButton
+      variant="auth-outline"
+      loading={isLoggingOut}
+      loadingLabel="Logging out..."
       onClick={handleLogout}
-      disabled={isLoggingOut}
-      className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
       aria-label={isLoggingOut ? "Logging out" : "Logout"}
     >
       {isLoggingOut ? "Logging out..." : "Logout"}
-    </button>
+    </MarketingButton>
   );
 }

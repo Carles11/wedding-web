@@ -9,10 +9,10 @@ import {
 } from "@/4-shared/config/i18n";
 import { notify } from "@/4-shared/lib/toast/toast";
 import type { PlanType, Site } from "@/4-shared/types";
-import MainModal from "@/4-shared/ui/commons/modals/MainModal";
+import { BuilderLangTabs, UpgradeCTAModal } from "@/4-shared/ui/builder";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
-import { StepLayout } from "../step-layout";
+import { StepLayout } from "../../step-layout";
 
 type Props = {
   site: Site | null;
@@ -348,55 +348,35 @@ export default function GeneralSiteForm({
             ))}
           </div>
 
-          <MainModal
+          <UpgradeCTAModal
             open={showUpgradeCTA && planType === "free"}
             title={
               translations["builder.general.form.need_more_langs"] ||
               "Need more languages?"
             }
+            description={
+              translations["builder.general.form.upgrade_description"] ||
+              "Your current plan only allows one language. Upgrade to Premium to unlock all languages for your wedding site."
+            }
+            cancelLabel={
+              translations["builder.general.form.cancel"] || "Cancel"
+            }
+            upgradeLabel={
+              translations["builder.general.form.upgrade"] ||
+              "Upgrade to Premium"
+            }
             onClose={() => setShowUpgradeCTA(false)}
-          >
-            <p className="text-sm text-gray-700 mb-5">
-              {translations["builder.general.form.upgrade_description"] ||
-                "Your current plan only allows one language. Upgrade to Premium to unlock all languages for your wedding site."}
-            </p>
-            <div className="flex justify-end gap-3">
-              <button
-                type="button"
-                className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition"
-                onClick={() => setShowUpgradeCTA(false)}
-              >
-                {translations["builder.general.form.cancel"] || "Cancel"}
-              </button>
-              <button
-                type="button"
-                className="px-5 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition"
-                onClick={() => router.push(`/marketing/pricing?lang=${lang}`)}
-              >
-                {translations["builder.general.form.upgrade"] ||
-                  "Upgrade to Premium"}
-              </button>
-            </div>
-          </MainModal>
+            onUpgrade={() => router.push(`/marketing/pricing?lang=${lang}`)}
+          />
         </div>
 
         {/* Language tabs */}
-        <div className="flex flex-wrap gap-1 mb-2">
-          {languages.map((lang) => (
-            <button
-              type="button"
-              key={lang}
-              className={`px-3 py-1.5 rounded text-sm ${
-                activeLang === lang
-                  ? "bg-blue-700 text-white"
-                  : "bg-white text-gray-800 border"
-              }`}
-              onClick={() => setActiveLang(lang)}
-            >
-              {SUPPORTED_LANGUAGE_LABELS[lang]}
-            </button>
-          ))}
-        </div>
+        <BuilderLangTabs
+          languages={languages}
+          activeLang={activeLang}
+          onChange={(l) => setActiveLang(l as SupportedLanguage)}
+          getLabel={(l) => SUPPORTED_LANGUAGE_LABELS[l as SupportedLanguage]}
+        />
 
         {/* Title */}
         <div>

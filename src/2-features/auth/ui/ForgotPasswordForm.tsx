@@ -2,6 +2,7 @@
 
 import { sendPasswordReset } from "@/2-features/auth/api";
 import { isValidLanguage } from "@/4-shared/helpers/isValidLanguage";
+import { MarketingButton } from "@/4-shared/ui/marketing";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
@@ -99,10 +100,7 @@ export default function ForgotPasswordForm({ translations }: Props) {
               "We&apos;ve sent you a password reset link. Please check your email and click the link to reset your password.",
             )}
           </p>
-          <Link
-            href={`/auth/login${langQuery}`}
-            className="text-blue-600 hover:text-blue-500 font-medium"
-          >
+          <Link href={`/auth/login${langQuery}`} className="marketing-link">
             {tr(translations, "auth.common.return_to_login", "Return to Login")}
           </Link>
         </div>
@@ -129,7 +127,7 @@ export default function ForgotPasswordForm({ translations }: Props) {
               id="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="marketing-input"
               placeholder={tr(
                 translations,
                 "auth.common.email_placeholder",
@@ -139,19 +137,19 @@ export default function ForgotPasswordForm({ translations }: Props) {
               aria-describedby={error ? "error-message" : undefined}
             />
           </div>
-          <button
+          <MarketingButton
             type="submit"
-            disabled={loading}
-            className="w-full py-2 px-4 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            variant="auth"
+            fullWidth
+            loading={loading}
+            loadingLabel={tr(
+              translations,
+              "auth.forgot.submitting",
+              "Sending Reset Link...",
+            )}
           >
-            {loading
-              ? tr(
-                  translations,
-                  "auth.forgot.submitting",
-                  "Sending Reset Link...",
-                )
-              : tr(translations, "auth.forgot.submit", "Send Reset Link")}
-          </button>
+            {tr(translations, "auth.forgot.submit", "Send Reset Link")}
+          </MarketingButton>
         </form>
         {error && (
           <p
@@ -171,7 +169,7 @@ export default function ForgotPasswordForm({ translations }: Props) {
             )}{" "}
             <Link
               href={`/auth/login${langQuery}`}
-              className="font-medium text-blue-600 hover:text-blue-500"
+              className="font-medium marketing-link"
             >
               {tr(translations, "auth.common.log_in", "Log in")}
             </Link>

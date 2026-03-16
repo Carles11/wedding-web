@@ -3,6 +3,7 @@
 import { loginWithEmail, resendVerificationEmail } from "@/2-features/auth/api";
 import { isValidLanguage } from "@/4-shared/helpers/isValidLanguage";
 import { notify } from "@/4-shared/lib/toast/toast";
+import { MarketingButton } from "@/4-shared/ui/marketing";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -168,7 +169,7 @@ export default function LoginForm({ translations }: Props) {
               id="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="marketing-input"
               placeholder={tr(
                 translations,
                 "auth.common.email_placeholder",
@@ -190,7 +191,7 @@ export default function LoginForm({ translations }: Props) {
               id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="marketing-input"
               placeholder={tr(
                 translations,
                 "auth.login.password_placeholder",
@@ -203,7 +204,7 @@ export default function LoginForm({ translations }: Props) {
           <div className="text-right">
             <Link
               href={`/auth/forgot-password${langQuery}`}
-              className="text-sm text-blue-600 hover:text-blue-500"
+              className="text-sm marketing-link"
             >
               {tr(
                 translations,
@@ -212,15 +213,19 @@ export default function LoginForm({ translations }: Props) {
               )}
             </Link>
           </div>
-          <button
+          <MarketingButton
             type="submit"
-            disabled={loading}
-            className="w-full py-2 px-4 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            variant="auth"
+            fullWidth
+            loading={loading}
+            loadingLabel={tr(
+              translations,
+              "auth.login.submitting",
+              "Logging in...",
+            )}
           >
-            {loading
-              ? tr(translations, "auth.login.submitting", "Logging in...")
-              : tr(translations, "auth.common.log_in", "Login")}
-          </button>
+            {tr(translations, "auth.common.log_in", "Login")}
+          </MarketingButton>
         </form>
         {error && (
           <div className="mt-4">
@@ -232,24 +237,26 @@ export default function LoginForm({ translations }: Props) {
               {error}
             </p>
             {isUnverifiedEmailError(error) && (
-              <button
+              <MarketingButton
                 type="button"
+                variant="auth-outline"
+                fullWidth
+                loading={resendingVerification}
+                loadingLabel={tr(
+                  translations,
+                  "auth.common.resending_verification",
+                  "Resending verification...",
+                )}
+                className="mt-3"
                 onClick={handleResendVerification}
                 disabled={resendingVerification}
-                className="mt-3 w-full py-2 px-4 border border-blue-300 text-blue-700 font-medium rounded-md hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {resendingVerification
-                  ? tr(
-                      translations,
-                      "auth.common.resending_verification",
-                      "Resending verification...",
-                    )
-                  : tr(
-                      translations,
-                      "auth.common.resend_verification",
-                      "Resend verification email",
-                    )}
-              </button>
+                {tr(
+                  translations,
+                  "auth.common.resend_verification",
+                  "Resend verification email",
+                )}
+              </MarketingButton>
             )}
           </div>
         )}
@@ -271,11 +278,19 @@ export default function LoginForm({ translations }: Props) {
             )}{" "}
             <Link
               href={`/auth/signup${langQuery}`}
-              className="font-medium text-blue-600 hover:text-blue-500"
+              className="font-medium marketing-link"
             >
               {tr(translations, "auth.common.sign_up", "Sign up")}
             </Link>
           </p>
+        </div>
+        <div className="mt-4 text-center">
+          <Link
+            href={`/marketing${langQuery}`}
+            className="text-sm marketing-link"
+          >
+            {tr(translations, "auth.common.back_to_home", "Back to home")}
+          </Link>
         </div>
       </div>
     </div>

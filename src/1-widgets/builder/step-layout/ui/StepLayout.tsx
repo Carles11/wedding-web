@@ -1,3 +1,4 @@
+import { BuilderButton } from "@/4-shared/ui/builder";
 import StickyMobileBar from "@/4-shared/ui/builder/StickyMobileBar";
 import { ReactNode } from "react";
 
@@ -48,22 +49,23 @@ export function StepLayout({
 
       {/* DESKTOP ACTIONS */}
       {showActions && (
-        <div className="hidden md:flex items-center justify-start gap-3 border-t bg-white px-6 py-4">
-          <button
+        <div className="hidden md:flex items-center justify-start gap-3 border-t builder-muted-surface px-6 py-4">
+          <BuilderButton
+            variant="secondary"
             onClick={onBack}
             disabled={backDisabled}
-            className="cursor-pointer rounded-lg border px-4 py-2 text-sm font-medium hover:bg-gray-50 disabled:opacity-50"
           >
             {resolvedBack}
-          </button>
+          </BuilderButton>
 
-          <button
+          <BuilderButton
             onClick={onNext}
             disabled={nextDisabled}
-            className="cursor-pointer rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50"
+            loading={nextLoading}
+            loadingLabel={translations["builder.actions.saving"] || "Saving..."}
           >
             {resolvedNext}
-          </button>
+          </BuilderButton>
         </div>
       )}
 

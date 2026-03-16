@@ -1,3 +1,4 @@
+import { MarketingButton } from "@/4-shared/ui/marketing";
 import Image from "next/image";
 
 /**
@@ -92,16 +93,16 @@ export default function TestimonialsSection({
                 </div>
 
                 <div className="mt-6">
-                  <a
+                  <MarketingButton
                     href={site.siteUrl}
                     target="_blank"
                     rel="noopener noreferrer"
+                    variant="ghost"
+                    size="sm"
                     aria-label={`Open ${site.siteName} example in new tab`}
-                    className="inline-flex items-center justify-center px-4 py-2 border rounded-md text-sm font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#6ABDA6]"
-                    style={{ borderColor: "#6ABDA6", color: "#064e3b" }}
                   >
                     {viewExampleButtonText}
-                  </a>
+                  </MarketingButton>
                 </div>
               </div>
             </article>

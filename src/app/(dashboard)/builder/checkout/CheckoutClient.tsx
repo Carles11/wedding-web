@@ -1,7 +1,6 @@
 "use client";
 
 import { isValidLanguage } from "@/4-shared/helpers/isValidLanguage";
-import { notify } from "@/4-shared/lib/toast/toast";
 import Heading from "@/4-shared/ui/commons/typography/Heading";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -170,7 +169,7 @@ export default function CheckoutClient({
           >
             <Heading
               as="h2"
-              className={`text-2xl font-semibold mb-3 ${
+              className={` mb-3 ${
                 isAlreadyPremium
                   ? "text-blue-700"
                   : isDowngradeNotAvailable
@@ -188,7 +187,7 @@ export default function CheckoutClient({
                   ? tr(
                       t,
                       "checkout.error.plan_change_not_available",
-                      "Plan Change Not Available",
+                      "Plan Change Not Availabless",
                     )
                   : tr(t, "checkout.error.title", "Checkout Error")}
             </Heading>

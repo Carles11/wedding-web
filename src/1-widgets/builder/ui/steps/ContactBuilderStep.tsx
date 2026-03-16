@@ -9,6 +9,7 @@ import {
 import { fetchContactSection } from "@/3-entities/sections/api/fetchContactSection";
 import { notify } from "@/4-shared/lib/toast/toast";
 import type { ContactSection, Site } from "@/4-shared/types";
+import { BuilderTextInput } from "@/4-shared/ui/builder/inputs";
 import { EMAIL_RE } from "@/4-shared/utils/validations";
 import { useEffect, useRef, useState } from "react";
 
@@ -225,9 +226,6 @@ export default function ContactBuilderStep({
     loadImage();
   }, [site?.id, section?.content?.image_id]);
 
-  const inputCls =
-    "mt-1 w-full border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500";
-
   return (
     <StepLayout
       onNext={handleSave}
@@ -271,57 +269,36 @@ export default function ContactBuilderStep({
                     {translations["builder.contact.bride"] || "Bride"}
                   </div>
                   <div className="mt-3 space-y-3">
-                    <div>
-                      <label className="block text-xs text-gray-600">
-                        {translations["builder.contact.field.name"] || "Name"}
-                      </label>
-                      <input
-                        value={(form?.bride as Partner | undefined)?.name ?? ""}
-                        onChange={(e) =>
-                          updatePartner("bride", "name", e.target.value || null)
-                        }
-                        className={inputCls}
-                      />
-                    </div>
+                    <BuilderTextInput
+                      label={
+                        translations["builder.contact.field.name"] || "Name"
+                      }
+                      value={(form?.bride as Partner | undefined)?.name ?? ""}
+                      onChange={(v) =>
+                        updatePartner("bride", "name", v || null)
+                      }
+                    />
 
-                    <div>
-                      <label className="block text-xs text-gray-600">
-                        {translations["builder.contact.field.email"] || "Email"}
-                      </label>
-                      <input
-                        value={
-                          (form?.bride as Partner | undefined)?.email ?? ""
-                        }
-                        onChange={(e) =>
-                          updatePartner(
-                            "bride",
-                            "email",
-                            e.target.value || null,
-                          )
-                        }
-                        className={inputCls}
-                      />
-                    </div>
+                    <BuilderTextInput
+                      label={
+                        translations["builder.contact.field.email"] || "Email"
+                      }
+                      value={(form?.bride as Partner | undefined)?.email ?? ""}
+                      onChange={(v) =>
+                        updatePartner("bride", "email", v || null)
+                      }
+                    />
 
-                    <div>
-                      <label className="block text-xs text-gray-600">
-                        {translations["builder.contact.field.phone_optional"] ||
-                          "Phone (optional)"}
-                      </label>
-                      <input
-                        value={
-                          (form?.bride as Partner | undefined)?.phone ?? ""
-                        }
-                        onChange={(e) =>
-                          updatePartner(
-                            "bride",
-                            "phone",
-                            e.target.value || null,
-                          )
-                        }
-                        className={inputCls}
-                      />
-                    </div>
+                    <BuilderTextInput
+                      label={
+                        translations["builder.contact.field.phone_optional"] ||
+                        "Phone (optional)"
+                      }
+                      value={(form?.bride as Partner | undefined)?.phone ?? ""}
+                      onChange={(v) =>
+                        updatePartner("bride", "phone", v || null)
+                      }
+                    />
                   </div>
                 </div>
 
@@ -331,57 +308,36 @@ export default function ContactBuilderStep({
                     {translations["builder.contact.groom"] || "Groom"}
                   </div>
                   <div className="mt-3 space-y-3">
-                    <div>
-                      <label className="block text-xs text-gray-600">
-                        {translations["builder.contact.field.name"] || "Name"}
-                      </label>
-                      <input
-                        value={(form?.groom as Partner | undefined)?.name ?? ""}
-                        onChange={(e) =>
-                          updatePartner("groom", "name", e.target.value || null)
-                        }
-                        className={inputCls}
-                      />
-                    </div>
+                    <BuilderTextInput
+                      label={
+                        translations["builder.contact.field.name"] || "Name"
+                      }
+                      value={(form?.groom as Partner | undefined)?.name ?? ""}
+                      onChange={(v) =>
+                        updatePartner("groom", "name", v || null)
+                      }
+                    />
 
-                    <div>
-                      <label className="block text-xs text-gray-600">
-                        {translations["builder.contact.field.email"] || "Email"}
-                      </label>
-                      <input
-                        value={
-                          (form?.groom as Partner | undefined)?.email ?? ""
-                        }
-                        onChange={(e) =>
-                          updatePartner(
-                            "groom",
-                            "email",
-                            e.target.value || null,
-                          )
-                        }
-                        className={inputCls}
-                      />
-                    </div>
+                    <BuilderTextInput
+                      label={
+                        translations["builder.contact.field.email"] || "Email"
+                      }
+                      value={(form?.groom as Partner | undefined)?.email ?? ""}
+                      onChange={(v) =>
+                        updatePartner("groom", "email", v || null)
+                      }
+                    />
 
-                    <div>
-                      <label className="block text-xs text-gray-600">
-                        {translations["builder.contact.field.phone_optional"] ||
-                          "Phone (optional)"}
-                      </label>
-                      <input
-                        value={
-                          (form?.groom as Partner | undefined)?.phone ?? ""
-                        }
-                        onChange={(e) =>
-                          updatePartner(
-                            "groom",
-                            "phone",
-                            e.target.value || null,
-                          )
-                        }
-                        className={inputCls}
-                      />
-                    </div>
+                    <BuilderTextInput
+                      label={
+                        translations["builder.contact.field.phone_optional"] ||
+                        "Phone (optional)"
+                      }
+                      value={(form?.groom as Partner | undefined)?.phone ?? ""}
+                      onChange={(v) =>
+                        updatePartner("groom", "phone", v || null)
+                      }
+                    />
                   </div>
                 </div>
               </div>

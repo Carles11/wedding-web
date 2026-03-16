@@ -20,11 +20,20 @@ import {
   canUseQuota,
   getPlanLimit,
 } from "@/4-shared/helpers/billing/entitlements";
+import { t } from "@/4-shared/helpers/t";
 import { useAlertConfirm } from "@/4-shared/hooks/useAlertConfirm";
 import { notify } from "@/4-shared/lib/toast/toast";
-import MainModal from "@/4-shared/ui/commons/modals/MainModal";
+import {
+  BuilderButton,
+  PlanLimitNotice,
+  UpgradeCTAModal,
+} from "@/4-shared/ui/builder";
+import {
+  BuilderTextInput,
+  BuilderTextarea,
+} from "@/4-shared/ui/builder/inputs";
 import { useRouter } from "next/navigation";
-import { StepLayout } from "../step-layout";
+import { StepLayout } from "../../step-layout";
 
 type Props = {
   site: Site | null;
@@ -35,14 +44,6 @@ type Props = {
   /** Fired whenever the item count changes (initial load + add/delete). */
   setItemCount?: (count: number) => void;
 };
-
-function t(
-  translations: Record<string, string>,
-  key: string,
-  fallback: string,
-): string {
-  return translations[key] || fallback;
-}
 
 export default function WhatToSeeBuilderStep({
   site,
@@ -402,12 +403,9 @@ export default function WhatToSeeBuilderStep({
     >
       {/* Header */}
       <div className="mb-3 flex items-center justify-end">
-        <button
-          className={`px-3 py-1 text-white rounded ${
-            canAddMore()
-              ? "bg-blue-600 hover:bg-blue-700"
-              : "bg-blue-400 cursor-pointer"
-          }`}
+        <BuilderButton
+          variant="primary"
+          size="sm"
           onClick={() => {
             if (!canAddMore()) {
               if (planType === "free") {
@@ -417,10 +415,10 @@ export default function WhatToSeeBuilderStep({
             }
             startCreate();
           }}
-          aria-disabled={!canAddMore()}
+          disabled={!canAddMore()}
         >
           {t(translations, "builder.what_to_see.add_button", "+ Add place")}
-        </button>
+        </BuilderButton>
       </div>
 
       <div className="mb-4 text-md text-gray-600">
@@ -502,14 +500,17 @@ export default function WhatToSeeBuilderStep({
                   </div>
 
                   <div className="flex gap-2 shrink-0">
-                    <button
-                      className="cursor-pointer text-xs font-medium px-3 py-1.5 rounded-md border border-gray-200 bg-white hover:bg-gray-50 transition"
+                    <BuilderButton
+                      variant="secondary"
+                      size="sm"
                       onClick={() => startEdit(it)}
                     >
                       {t(translations, "builder.what_to_see.edit_edit", "Edit")}
-                    </button>
-                    <button
-                      className="cursor-pointer text-xs font-medium px-3 py-1.5 rounded-md border border-red-200 text-red-600 bg-white hover:bg-red-50 transition"
+                    </BuilderButton>
+                    <BuilderButton
+                      variant="secondary"
+                      tone="danger"
+                      size="sm"
                       onClick={() => handleDelete(it.id)}
                       disabled={saving}
                     >
@@ -518,7 +519,7 @@ export default function WhatToSeeBuilderStep({
                         "builder.what_to_see.delete_button",
                         "Delete",
                       )}
-                    </button>
+                    </BuilderButton>
                   </div>
                 </div>
               ))}
@@ -564,73 +565,43 @@ export default function WhatToSeeBuilderStep({
                   )}
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">
-                      {t(
-                        translations,
-                        "builder.what_to_see.field.name",
-                        "Name",
-                      )}{" "}
-                      {lang === defaultLang && (
-                        <span className="text-pink-500">
-                          {t(
-                            translations,
-                            "builder.what_to_see.field.name.required",
-                            "*",
-                          )}
-                        </span>
-                      )}
-                    </label>
-                    <input
-                      value={
-                        (form.name as Record<string, string> | undefined)?.[
-                          lang
-                        ] ?? ""
-                      }
-                      onChange={(e) => updateI18n("name", lang, e.target.value)}
-                      className="w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
-                      autoComplete="off"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">
-                      {t(
-                        translations,
-                        "builder.what_to_see.field.description",
-                        "Description",
-                      )}
-                    </label>
-                    <textarea
-                      value={
-                        (
-                          form.description as Record<string, string> | undefined
-                        )?.[lang] ?? ""
-                      }
-                      onChange={(e) =>
-                        updateI18n("description", lang, e.target.value)
-                      }
-                      className="w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
-                      rows={2}
-                    />
-                  </div>
+                  <BuilderTextInput
+                    label={`${t(translations, "builder.what_to_see.field.name", "Name")}${lang === defaultLang ? " *" : ""}`}
+                    value={
+                      (form.name as Record<string, string> | undefined)?.[
+                        lang
+                      ] ?? ""
+                    }
+                    onChange={(v) => updateI18n("name", lang, v)}
+                    autoComplete="off"
+                  />
+                  <BuilderTextarea
+                    label={t(
+                      translations,
+                      "builder.what_to_see.field.description",
+                      "Description",
+                    )}
+                    value={
+                      (
+                        form.description as Record<string, string> | undefined
+                      )?.[lang] ?? ""
+                    }
+                    onChange={(v) => updateI18n("description", lang, v)}
+                    rows={2}
+                  />
                   <div className="sm:col-span-2">
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">
-                      {t(
+                    <BuilderTextarea
+                      label={t(
                         translations,
                         "builder.what_to_see.field.notes",
                         "Notes",
                       )}
-                    </label>
-                    <textarea
                       value={
                         (form.notes as Record<string, string> | undefined)?.[
                           lang
                         ] ?? ""
                       }
-                      onChange={(e) =>
-                        updateI18n("notes", lang, e.target.value)
-                      }
-                      className="w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
+                      onChange={(v) => updateI18n("notes", lang, v)}
                       rows={2}
                     />
                   </div>
@@ -640,17 +611,14 @@ export default function WhatToSeeBuilderStep({
 
             {/* Single Location URL input, after language blocks */}
             <div className="mb-5">
-              <label className="block text-xs font-semibold text-gray-700 mb-1">
-                {t(
+              <BuilderTextInput
+                label={t(
                   translations,
                   "builder.what_to_see.field.location_url",
                   "Location URL (Google Maps, etc)",
                 )}
-              </label>
-              <input
                 value={form.location_url ?? ""}
-                onChange={(e) => updateField("location_url", e.target.value)}
-                className="w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
+                onChange={(v) => updateField("location_url", v)}
                 placeholder="https://maps.example.com/location"
                 autoComplete="off"
               />
@@ -664,8 +632,8 @@ export default function WhatToSeeBuilderStep({
       )}
 
       {!canAddMore() && (
-        <div className="mt-3 text-sm text-gray-600">
-          {interpolate(
+        <PlanLimitNotice
+          message={interpolate(
             t(
               translations,
               "builder.what_to_see.limit_reached",
@@ -675,46 +643,33 @@ export default function WhatToSeeBuilderStep({
               limit: whatToSeeLimit,
               FREE_WHATTOSEE_LIMIT: whatToSeeLimit,
             },
-          )}{" "}
-          <button
-            className="cursor-pointer underline text-blue-600"
-            onClick={goToPricing}
-          >
-            {t(translations, "builder.what_to_see.button.upgrade", "Upgrade")}
-          </button>
-        </div>
+          )}
+          upgradeLabel={t(
+            translations,
+            "builder.what_to_see.button.upgrade",
+            "Upgrade",
+          )}
+          onUpgrade={goToPricing}
+        />
       )}
 
-      <MainModal
+      <UpgradeCTAModal
         open={showUpgradeCTA && planType === "free"}
         title={
           translations["builder.general.form.need_more_langs"] ||
           "Need more languages?"
         }
+        description={
+          translations["builder.general.form.upgrade_description"] ||
+          "Your current plan only allows one language. Upgrade to Premium to unlock all languages for your wedding site."
+        }
+        cancelLabel={translations["builder.general.form.cancel"] || "Cancel"}
+        upgradeLabel={
+          translations["builder.general.form.upgrade"] || "Upgrade to Premium"
+        }
         onClose={() => setShowUpgradeCTA(false)}
-      >
-        <p className="text-sm text-gray-700 mb-5">
-          {translations["builder.general.form.upgrade_description"] ||
-            "Your current plan only allows one language. Upgrade to Premium to unlock all languages for your wedding site."}
-        </p>
-        <div className="flex justify-end gap-3">
-          <button
-            type="button"
-            className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition"
-            onClick={() => setShowUpgradeCTA(false)}
-          >
-            {translations["builder.general.form.cancel"] || "Cancel"}
-          </button>
-          <button
-            type="button"
-            className="px-5 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition"
-            onClick={goToPricing}
-          >
-            {translations["builder.general.form.upgrade"] ||
-              "Upgrade to Premium"}
-          </button>
-        </div>
-      </MainModal>
+        onUpgrade={goToPricing}
+      />
       {confirmDialog}
     </StepLayout>
   );
