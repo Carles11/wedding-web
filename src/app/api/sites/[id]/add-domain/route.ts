@@ -1,7 +1,11 @@
+import { getCurrentUserSubscription } from "@/3-entities/user/api/getCurrentUserSubscription";
 import { fetchBuilderTranslations } from "@/4-shared/api/builder/getTranslations";
 import { requireSiteAccess } from "@/4-shared/lib/requireSiteAccess";
-import { RouteContext, getParams } from "@/4-shared/lib/route-context";
-import { addCustomDomainWithRedirectVariants } from "@/4-shared/lib/vercel/addCustomDomainWithRedirectVariants";
+import { getParams, RouteContext } from "@/4-shared/lib/route-context";
+import {
+  addCustomDomainWithRedirectVariants,
+  DomainFlowError,
+} from "@/4-shared/lib/vercel/addCustomDomainWithRedirectVariants";
 import { NextRequest, NextResponse } from "next/server";
 
 // Helper to select the language (default fallback 'en' if not specified/requested)
@@ -49,9 +53,28 @@ export async function POST(
       );
     }
 
+    const subscription = await getCurrentUserSubscription(access.user.id);
+    if (subscription?.plan_type !== "premium") {
+      return NextResponse.json(
+        {
+          error:
+            translations["builder.domain.custom_domain_locked"] ||
+            "Custom domains are available only on Premium plan.",
+        },
+        { status: 403 },
+      );
+    }
+
     const result = await addCustomDomainWithRedirectVariants(id, domain);
     return NextResponse.json(result, { status: 200 });
   } catch (error) {
+    if (error instanceof DomainFlowError) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: error.status },
+      );
+    }
+
     console.error("[add-domain] error:", error);
 
     // Conservative: error messages may not be in translations, fallback ALWAYS in English

@@ -9,6 +9,23 @@ import { PlanType } from "@/4-shared/types";
 import MainModal from "@/4-shared/ui/commons/modals/MainModal";
 import React, { useState } from "react";
 
+function toApexDomain(domainInput: string): string {
+  return domainInput
+    .trim()
+    .toLowerCase()
+    .replace(/^https?:\/\//, "")
+    .split("/")[0]
+    .split("?")[0]
+    .split("#")[0]
+    .replace(/\.$/, "")
+    .replace(/^www\./, "");
+}
+
+function getDomainVariants(domainInput: string): { apex: string; www: string } {
+  const apex = toApexDomain(domainInput);
+  return { apex, www: `www.${apex}` };
+}
+
 interface Props {
   planType: PlanType;
   translations: Record<string, string>;
@@ -52,28 +69,54 @@ export const CustomDomainSection: React.FC<Props> = ({
     useState<string[]>(pendingDomainsProp);
   const [domainStatuses, setDomainStatuses] =
     useState<Record<string, string>>(domainStatusesProp);
+  const skipNextPropSyncRef = React.useRef(false);
+
+  const scheduleFollowUpRefetch = () => {
+    window.setTimeout(() => {
+      void refetchDomains();
+    }, 1200);
+  };
 
   // Sync local state with props after backend update
   React.useEffect(() => {
+    if (skipNextPropSyncRef.current) {
+      skipNextPropSyncRef.current = false;
+      return;
+    }
     setVerifiedDomains(verifiedDomainsProp);
     setPendingDomains(pendingDomainsProp);
     setDomainStatuses(domainStatusesProp);
   }, [verifiedDomainsProp, pendingDomainsProp, domainStatusesProp]);
 
   const isPaid = planType !== "free";
-  const allDomains = [...verifiedDomains, ...pendingDomains];
+  const allDomains = Array.from(
+    new Set([...verifiedDomains, ...pendingDomains].map(toApexDomain)),
+  ).filter(Boolean);
 
   const handleAddDomain = async (e: React.FormEvent) => {
     e.preventDefault();
     setLocalStatus("saving");
     setLocalMsg(null);
+    let addSucceeded = false;
+
+    const { apex } = getDomainVariants(inputDomain);
 
     // Optimistically update UI
-    setPendingDomains((prev) => [...prev, inputDomain]);
-    setDomainStatuses((prev) => ({ ...prev, [inputDomain]: "pending" }));
+    setPendingDomains((prev) => {
+      const next = [...prev.filter((d) => toApexDomain(d) !== apex), apex];
+      return Array.from(new Set(next));
+    });
+    setDomainStatuses((prev) => {
+      const next = Object.fromEntries(
+        Object.entries(prev).filter(([key]) => toApexDomain(key) !== apex),
+      );
+      return { ...next, [apex]: "pending" };
+    });
 
     try {
       await addCustomDomainClient(siteId, inputDomain); // Only user input—let backend handle variants/redirect/delay!
+      addSucceeded = true;
+      skipNextPropSyncRef.current = true;
       setLocalStatus("success");
       setInputDomain("");
       notify.success(translations["builder.domain.custom_domain_success"]);
@@ -95,22 +138,30 @@ export const CustomDomainSection: React.FC<Props> = ({
       notify.error(msg);
     } finally {
       await refetchDomains();
+      if (addSucceeded) {
+        scheduleFollowUpRefetch();
+      }
     }
   };
   const handleRemove = async (domain: string) => {
     if (!domain || loading) return;
     setLocalStatus("saving");
     setLocalMsg(null);
+    let removeSucceeded = false;
+    const { apex } = getDomainVariants(domain);
+
     // Optimistically update UI
-    setVerifiedDomains((prev) => prev.filter((d) => d !== domain));
-    setPendingDomains((prev) => prev.filter((d) => d !== domain));
+    setVerifiedDomains((prev) => prev.filter((d) => toApexDomain(d) !== apex));
+    setPendingDomains((prev) => prev.filter((d) => toApexDomain(d) !== apex));
     setDomainStatuses((prev) => {
-      const copy = { ...prev };
-      delete copy[domain];
-      return copy;
+      return Object.fromEntries(
+        Object.entries(prev).filter(([key]) => toApexDomain(key) !== apex),
+      );
     });
     try {
-      await removeCustomDomainClient(siteId, domain);
+      await removeCustomDomainClient(siteId, apex);
+      removeSucceeded = true;
+      skipNextPropSyncRef.current = true;
       setLocalStatus("success");
 
       notify.success(translations["builder.domain.custom_domain_removed"]);
@@ -124,6 +175,9 @@ export const CustomDomainSection: React.FC<Props> = ({
       );
     } finally {
       await refetchDomains();
+      if (removeSucceeded) {
+        scheduleFollowUpRefetch();
+      }
     }
   };
 
@@ -241,23 +295,31 @@ export const CustomDomainSection: React.FC<Props> = ({
                     <li className="flex items-center px-3 py-2 justify-between">
                       <span>
                         {domain}
-                        {domainStatuses[domain] && (
+                        {(domainStatuses[domain] ||
+                          domainStatuses[`www.${domain}`]) && (
                           <span
                             className={`ml-2 text-xs px-2 py-0.5 rounded
                               ${
-                                domainStatuses[domain] === "verified"
+                                (domainStatuses[domain] ||
+                                  domainStatuses[`www.${domain}`]) ===
+                                "verified"
                                   ? "bg-green-100 text-green-800"
-                                  : domainStatuses[domain] === "pending"
+                                  : (domainStatuses[domain] ||
+                                        domainStatuses[`www.${domain}`]) ===
+                                      "pending"
                                     ? "bg-yellow-100 text-yellow-800"
                                     : "bg-red-100 text-red-800"
                               }`}
                           >
                             {translations[
-                              `builder.domain.status_${domainStatuses[domain]}`
-                            ] || domainStatuses[domain]}
+                              `builder.domain.status_${domainStatuses[domain] || domainStatuses[`www.${domain}`]}`
+                            ] ||
+                              domainStatuses[domain] ||
+                              domainStatuses[`www.${domain}`]}
                           </span>
                         )}
-                        {domainStatuses[domain] !== "verified" && (
+                        {(domainStatuses[domain] ||
+                          domainStatuses[`www.${domain}`]) !== "verified" && (
                           <button
                             type="button"
                             disabled={loading || localStatus === "saving"}
@@ -281,7 +343,8 @@ export const CustomDomainSection: React.FC<Props> = ({
                     </li>
 
                     {/* Verified domain: onboarding UX */}
-                    {domainStatuses[domain] === "verified" && (
+                    {(domainStatuses[domain] ||
+                      domainStatuses[`www.${domain}`]) === "verified" && (
                       <div className="px-6 pb-2 pt-2 text-xs rounded-b bg-green-50 border-b border-green-200 flex flex-col gap-2">
                         <span className="text-green-700 font-semibold">
                           {translations["builder.domain.verified_message"] ||

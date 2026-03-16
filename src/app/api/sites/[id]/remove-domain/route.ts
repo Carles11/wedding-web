@@ -1,6 +1,9 @@
-import { removeCustomDomain } from "@/2-features/builder/custom-domain/api/removeCustomDomain";
+import {
+  removeCustomDomain,
+  RemoveDomainError,
+} from "@/2-features/builder/custom-domain/api/removeCustomDomain";
 import { requireSiteAccess } from "@/4-shared/lib/requireSiteAccess";
-import { RouteContext, getParams } from "@/4-shared/lib/route-context";
+import { getParams, RouteContext } from "@/4-shared/lib/route-context";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(
@@ -26,6 +29,13 @@ export async function POST(
     const result = await removeCustomDomain(id, domain);
     return NextResponse.json(result, { status: 200 });
   } catch (error) {
+    if (error instanceof RemoveDomainError) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: error.status },
+      );
+    }
+
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Server error" },
       { status: 500 },

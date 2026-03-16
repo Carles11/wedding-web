@@ -47,10 +47,8 @@ export default async function AccountBillingPage({
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Page header bar */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-4xl mx-auto px-6 py-5 flex items-center gap-4">
-          {/* Avatar initial */}
           <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center shrink-0">
             <span className="text-white text-sm font-semibold">
               {(user.email?.[0] ?? "U").toUpperCase()}
@@ -65,7 +63,6 @@ export default async function AccountBillingPage({
         </div>
       </div>
 
-      {/* Content */}
       <div className="max-w-4xl mx-auto px-6 py-10">
         <AccountBillingDetails t={t} />
       </div>

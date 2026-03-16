@@ -1,8 +1,46 @@
 import { createSupabaseSSRClient } from "@/4-shared/lib/supabase/server";
 import { removeDomainFromVercelProject } from "@/4-shared/lib/vercel/vercel-domains";
 
+const DOMAIN_RE = /^[a-z0-9.-]+\.[a-z]{2,}$/;
+
+export class RemoveDomainError extends Error {
+  status: number;
+
+  constructor(status: number, message: string) {
+    super(message);
+    this.name = "RemoveDomainError";
+    this.status = status;
+  }
+}
+
+function normalizeToApex(domainInput: string): string {
+  const cleaned = domainInput
+    .trim()
+    .toLowerCase()
+    .replace(/^https?:\/\//, "")
+    .split("/")[0]
+    .split("?")[0]
+    .split("#")[0]
+    .replace(/\.$/, "")
+    .replace(/^www\./, "");
+
+  if (!DOMAIN_RE.test(cleaned)) {
+    throw new RemoveDomainError(400, "Invalid domain format");
+  }
+
+  return cleaned;
+}
+
+function toApex(domain: string): string {
+  return domain
+    .trim()
+    .toLowerCase()
+    .replace(/^www\./, "");
+}
+
 export async function removeCustomDomain(siteId: string, domain: string) {
-  const cleanDomain = domain.trim().toLowerCase();
+  const apexDomain = normalizeToApex(domain);
+  const wwwDomain = `www.${apexDomain}`;
 
   const supabase = await createSupabaseSSRClient();
 
@@ -13,15 +51,27 @@ export async function removeCustomDomain(siteId: string, domain: string) {
     .eq("id", siteId)
     .maybeSingle();
 
-  if (fetchError || !site) throw new Error("Site not found");
+  if (fetchError || !site) {
+    throw new RemoveDomainError(404, "Site not found");
+  }
 
-  // 2. Remove domain from all relevant fields
-  const domains = (site.domains ?? []).filter((d: string) => d !== cleanDomain);
-  const pending_custom_domains = (site.pending_custom_domains ?? []).filter(
-    (d: string) => d !== cleanDomain,
+  const shouldKeepDomain = (value: string) => toApex(value) !== apexDomain;
+
+  // 2. Remove both root and www variants from DB state
+  const domains = (site.domains ?? []).filter((d: string) =>
+    shouldKeepDomain(d),
   );
-  const domain_statuses = { ...(site.domain_statuses || {}) };
-  delete domain_statuses[cleanDomain];
+  const pending_custom_domains = (site.pending_custom_domains ?? []).filter(
+    (d: string) => shouldKeepDomain(d),
+  );
+  const currentStatuses =
+    site.domain_statuses && typeof site.domain_statuses === "object"
+      ? (site.domain_statuses as Record<string, string>)
+      : {};
+
+  const domain_statuses = Object.fromEntries(
+    Object.entries(currentStatuses).filter(([key]) => shouldKeepDomain(key)),
+  );
 
   // 3. Save to Supabase (fail if this doesn't work)
   const { error } = await supabase
@@ -29,15 +79,23 @@ export async function removeCustomDomain(siteId: string, domain: string) {
     .update({ domains, pending_custom_domains, domain_statuses })
     .eq("id", siteId);
 
-  if (error) throw new Error("Failed to remove domain in DB");
-
-  // 4. Also attempt to remove from Vercel (never block user flow on error)
-  try {
-    await removeDomainFromVercelProject(cleanDomain);
-  } catch (e) {
-    // Log for backend debugging, but don't block user
-    console.warn("Vercel removeDomain failed:", e);
+  if (error) {
+    throw new RemoveDomainError(500, "Failed to remove domain in DB");
   }
 
-  return { success: true };
+  // 4. Remove both variants from Vercel
+  const [apexResult, wwwResult] = await Promise.all([
+    removeDomainFromVercelProject(apexDomain),
+    removeDomainFromVercelProject(wwwDomain),
+  ]);
+
+  const failures = [apexResult, wwwResult].filter((r) => r.status === "error");
+  if (failures.length > 0) {
+    throw new RemoveDomainError(
+      502,
+      "Domain removed in DB but failed to fully remove from Vercel. Please retry.",
+    );
+  }
+
+  return { success: true, removed: [apexDomain, wwwDomain] };
 }
