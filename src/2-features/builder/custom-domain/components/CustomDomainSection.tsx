@@ -383,7 +383,7 @@ export const CustomDomainSection: React.FC<Props> = ({
                           }
                           onClose={() => setDnsModalDomain(null)}
                         >
-                          <DnsModalContent domain={domain} />
+                          <DnsModalContent translations={translations} />
                         </MainModal>
                       </div>
                     )}
