@@ -55,10 +55,13 @@ export default function ProgramEventsBuilderStep({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [openDays, setOpenDays] = useState<Record<string, boolean>>({
+  const [compactOpenDays, setCompactOpenDays] = useState<
+    Record<string, boolean>
+  >({
     day_before: false,
-    wedding_day: true,
+    wedding_day: false,
     day_after: false,
   });
   const [form, setForm] = useState<Partial<ProgramEvent>>({
@@ -117,10 +120,11 @@ export default function ProgramEventsBuilderStep({
     return map;
   }, [events]);
 
-  const hasPendingChanges =
-    editingId !== null || Object.keys(form ?? {}).length > 1;
+  const hasPendingChanges = isFormOpen;
 
   useEffect(() => {
+    if (!isFormOpen) return;
+
     if (
       form.day_tag === "wedding_day" &&
       weddingDayReferenceDate &&
@@ -227,13 +231,6 @@ export default function ProgramEventsBuilderStep({
     }
   }
 
-  function toggleDay(day: string) {
-    setOpenDays((state) => ({
-      ...state,
-      [day]: !state[day],
-    }));
-  }
-
   function canAddMore() {
     return canUseQuota(planType, "events", events.length);
   }
@@ -243,6 +240,7 @@ export default function ProgramEventsBuilderStep({
   }
 
   function startCreate() {
+    setIsFormOpen(true);
     setForm({
       day_tag: "wedding_day",
       date: undefined,
@@ -253,7 +251,13 @@ export default function ProgramEventsBuilderStep({
       description: {},
       is_main_event: false,
     });
+    setError(null);
     setEditingId(null);
+    setCompactOpenDays({
+      day_before: false,
+      wedding_day: false,
+      day_after: false,
+    });
 
     setTimeout(() => {
       formRef.current?.scrollIntoView({
@@ -264,8 +268,15 @@ export default function ProgramEventsBuilderStep({
   }
 
   function startEdit(event: ProgramEvent) {
+    setIsFormOpen(true);
     setEditingId(event.id);
     setForm({ ...event });
+    setError(null);
+    setCompactOpenDays({
+      day_before: event.day_tag === "day_before",
+      wedding_day: event.day_tag === "wedding_day",
+      day_after: event.day_tag === "day_after",
+    });
 
     setTimeout(() => {
       formRef.current?.scrollIntoView({
@@ -276,8 +287,17 @@ export default function ProgramEventsBuilderStep({
   }
 
   function clearForm() {
+    setIsFormOpen(false);
     setForm({ day_tag: "wedding_day" });
     setEditingId(null);
+    setError(null);
+  }
+
+  function toggleCompactDay(day: string) {
+    setCompactOpenDays((state) => ({
+      ...state,
+      [day]: !state[day],
+    }));
   }
 
   function updateFormField<K extends keyof ProgramEvent>(
@@ -681,13 +701,14 @@ export default function ProgramEventsBuilderStep({
 
       <ProgramEventsList
         loading={loading}
+        lang={lang}
         dayTags={dayTags}
-        openDays={openDays}
+        compactOpenDays={compactOpenDays}
         grouped={grouped}
         defaultLang={defaultLang}
         saving={saving}
         translations={translations}
-        onToggleDay={toggleDay}
+        onToggleCompactDay={toggleCompactDay}
         onStartEdit={startEdit}
         onDelete={handleDelete}
         onToggleMainEvent={handleToggleMainEvent}

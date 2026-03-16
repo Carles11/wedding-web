@@ -12,7 +12,7 @@ export type DayTagOption = {
 
 export function getLanguageDisplay(lang: string): string {
   const label = SUPPORTED_LANGUAGE_LABELS[lang as SupportedLanguage];
-  return label ? `${label} (${lang})` : lang;
+  return label ? label : lang;
 }
 
 export function getDayTags(

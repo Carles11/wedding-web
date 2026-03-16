@@ -21,6 +21,7 @@ import type {
 } from "@/4-shared/types";
 import {
   BuilderButton,
+  BuilderFormCard,
   PlanLimitNotice,
   UpgradeCTAModal,
 } from "@/4-shared/ui/builder";
@@ -453,16 +454,17 @@ export default function AccommodationBuilderStep({
       )}
 
       {!isListOpen && (
-        <div ref={formRef} className="mt-4 border rounded p-4 bg-gray-50">
-          <h4 className="font-medium">
-            {editingId
-              ? translations["builder.accommodation.edit"] ||
-                "Edit accommodation"
-              : translations["builder.accommodation.create"] ||
-                "Create accommodation"}
-          </h4>
-
-          <div className="mt-3 space-y-3">
+        <div ref={formRef}>
+          <BuilderFormCard
+            title={
+              editingId
+                ? translations["builder.accommodation.edit"] ||
+                  "Edit accommodation"
+                : translations["builder.accommodation.create"] ||
+                  "Create accommodation"
+            }
+            error={error}
+          >
             <BuilderTextInput
               label={translations["builder.accommodation.field.name"] || "Name"}
               value={form.name}
@@ -515,9 +517,7 @@ export default function AccommodationBuilderStep({
               value={form.email ?? ""}
               onChange={(v) => updateField("email", v)}
             />
-
-            {error && <div className="text-red-600 mt-2">{error}</div>}
-          </div>
+          </BuilderFormCard>
         </div>
       )}
 

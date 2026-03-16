@@ -1,5 +1,9 @@
 "use client";
 
+import {
+  SUPPORTED_LANGUAGE_LABELS,
+  type SupportedLanguage,
+} from "@/4-shared/config/i18n";
 import { interpolate } from "@/4-shared/helpers/interpolateVars";
 import type {
   CreateWhatToSeePayload,
@@ -25,6 +29,8 @@ import { useAlertConfirm } from "@/4-shared/hooks/useAlertConfirm";
 import { notify } from "@/4-shared/lib/toast/toast";
 import {
   BuilderButton,
+  BuilderFormCard,
+  BuilderLanguageCard,
   PlanLimitNotice,
   UpgradeCTAModal,
 } from "@/4-shared/ui/builder";
@@ -530,51 +536,52 @@ export default function WhatToSeeBuilderStep({
 
       {/* Form */}
       {(editingId !== null || Object.keys(form).length > 0) && (
-        <div ref={formRef} className="mt-4 border rounded p-4 bg-gray-50">
-          <h4 className="font-medium">
-            {editingId
-              ? t(translations, "builder.what_to_see.form.edit", "Edit place")
-              : t(
-                  translations,
-                  "builder.what_to_see.form.create",
-                  "Create place",
+        <div ref={formRef}>
+          <BuilderFormCard
+            title={
+              editingId
+                ? t(translations, "builder.what_to_see.form.edit", "Edit place")
+                : t(
+                    translations,
+                    "builder.what_to_see.form.create",
+                    "Create place",
+                  )
+            }
+            error={error}
+          >
+            {languages.map((locale) => (
+              <BuilderLanguageCard
+                key={locale}
+                languageCode={locale.toUpperCase()}
+                title={interpolate(
+                  t(
+                    translations,
+                    "builder.general.form.language_fields_for",
+                    "Fields for {language}",
+                  ),
+                  {
+                    language: `${SUPPORTED_LANGUAGE_LABELS[locale as SupportedLanguage] ?? locale} (${locale})`,
+                  },
                 )}
-          </h4>
-
-          <div className="mt-3 space-y-3">
-            {languages.map((lang) => (
-              <div
-                key={lang}
-                className={`
-      rounded-xl shadow-sm border bg-white mb-5 p-6 transition
-      ${lang === defaultLang ? "ring-2 ring-blue-600/10" : "hover:shadow-md"}
-    `}
+                isDefault={locale === defaultLang}
+                defaultBadgeLabel={t(
+                  translations,
+                  "builder.what_to_see.badge.default",
+                  "Default",
+                )}
               >
-                <div className="flex items-center mb-3">
-                  <span className="uppercase text-xs tracking-widest text-blue-500 mr-2">
-                    {lang.toUpperCase()}
-                  </span>
-                  {lang === defaultLang && (
-                    <span className="ml-2 bg-blue-100 text-blue-700 text-xxs rounded px-2 py-0.5 font-semibold">
-                      {t(
-                        translations,
-                        "builder.what_to_see.badge.default",
-                        "Default",
-                      )}
-                    </span>
-                  )}
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <BuilderTextInput
-                    label={`${t(translations, "builder.what_to_see.field.name", "Name")}${lang === defaultLang ? " *" : ""}`}
+                    label={`${t(translations, "builder.what_to_see.field.name", "Name")}${locale === defaultLang ? " *" : ""}`}
                     value={
                       (form.name as Record<string, string> | undefined)?.[
-                        lang
+                        locale
                       ] ?? ""
                     }
-                    onChange={(v) => updateI18n("name", lang, v)}
+                    onChange={(v) => updateI18n("name", locale, v)}
                     autoComplete="off"
                   />
+
                   <BuilderTextarea
                     label={t(
                       translations,
@@ -584,11 +591,12 @@ export default function WhatToSeeBuilderStep({
                     value={
                       (
                         form.description as Record<string, string> | undefined
-                      )?.[lang] ?? ""
+                      )?.[locale] ?? ""
                     }
-                    onChange={(v) => updateI18n("description", lang, v)}
+                    onChange={(v) => updateI18n("description", locale, v)}
                     rows={2}
                   />
+
                   <div className="sm:col-span-2">
                     <BuilderTextarea
                       label={t(
@@ -598,36 +606,29 @@ export default function WhatToSeeBuilderStep({
                       )}
                       value={
                         (form.notes as Record<string, string> | undefined)?.[
-                          lang
+                          locale
                         ] ?? ""
                       }
-                      onChange={(v) => updateI18n("notes", lang, v)}
+                      onChange={(v) => updateI18n("notes", locale, v)}
                       rows={2}
                     />
                   </div>
                 </div>
-              </div>
+              </BuilderLanguageCard>
             ))}
 
-            {/* Single Location URL input, after language blocks */}
-            <div className="mb-5">
-              <BuilderTextInput
-                label={t(
-                  translations,
-                  "builder.what_to_see.field.location_url",
-                  "Location URL (Google Maps, etc)",
-                )}
-                value={form.location_url ?? ""}
-                onChange={(v) => updateField("location_url", v)}
-                placeholder="https://maps.example.com/location"
-                autoComplete="off"
-              />
-            </div>
-
-            {error && (
-              <div className="text-red-600 py-2 italic text-sm">{error}</div>
-            )}
-          </div>
+            <BuilderTextInput
+              label={t(
+                translations,
+                "builder.what_to_see.field.location_url",
+                "Location URL (Google Maps, etc)",
+              )}
+              value={form.location_url ?? ""}
+              onChange={(v) => updateField("location_url", v)}
+              placeholder="https://maps.example.com/location"
+              autoComplete="off"
+            />
+          </BuilderFormCard>
         </div>
       )}
 
