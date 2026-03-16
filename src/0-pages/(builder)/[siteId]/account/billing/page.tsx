@@ -46,11 +46,29 @@ export default async function AccountBillingPage({
   }
 
   return (
-    <main className="max-w-xl mx-auto mt-10 p-6 bg-white shadow rounded">
-      <h1 className="text-2xl font-bold mb-4">
-        {t["billing.header"] ?? "Subscription & Billing"}
-      </h1>
-      <AccountBillingDetails t={t} />
-    </main>
+    <div className="min-h-screen bg-gray-50">
+      {/* Page header bar */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-4xl mx-auto px-6 py-5 flex items-center gap-4">
+          {/* Avatar initial */}
+          <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center shrink-0">
+            <span className="text-white text-sm font-semibold">
+              {(user.email?.[0] ?? "U").toUpperCase()}
+            </span>
+          </div>
+          <div>
+            <h1 className="text-lg font-semibold text-gray-900">
+              {t["billing.header"] ?? "Subscription & Billing"}
+            </h1>
+            <p className="text-sm text-gray-500">{user.email}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="max-w-4xl mx-auto px-6 py-10">
+        <AccountBillingDetails t={t} />
+      </div>
+    </div>
   );
 }
