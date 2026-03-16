@@ -1,0 +1,6 @@
+export type PricingPageProps = {
+  lang?: string;
+  searchParams?:
+    | { [key: string]: string | string[] | undefined }
+    | Promise<{ [key: string]: string | string[] | undefined }>;
+};

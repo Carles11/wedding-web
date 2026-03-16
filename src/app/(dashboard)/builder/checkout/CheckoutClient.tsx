@@ -72,13 +72,14 @@ export default function CheckoutClient({
 
       if (!data.success) {
         if (data.code === "ALREADY_PREMIUM") {
-          notify.info(
-            tr(t, "checkout.info.already_premium", "You are already premium."),
-            {
-              toastId: "checkout-already-premium",
-            },
+          setErrorCode(data.code);
+          setError(
+            tr(
+              t,
+              "checkout.info.already_premium",
+              "You are already on a premium plan.",
+            ),
           );
-          router.replace(`/marketing/pricing?lang=${validatedLang}`);
           return;
         }
 
@@ -154,31 +155,61 @@ export default function CheckoutClient({
   }
 
   if (error) {
+    const isAlreadyPremium = errorCode === "ALREADY_PREMIUM";
+    const isDowngradeNotAvailable = errorCode === "DOWNGRADE_NOT_AVAILABLE";
+
     return (
       <main className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
         <div className="max-w-md w-full text-center">
-          <div className="bg-white rounded-lg shadow-sm border border-red-200 p-8">
+          <div
+            className={`rounded-lg shadow-sm border p-8 ${
+              isAlreadyPremium
+                ? "bg-blue-50 border-blue-200"
+                : "bg-white border-red-200"
+            }`}
+          >
             <Heading
               as="h2"
-              className="text-2xl font-semibold text-red-700 mb-3"
+              className={`text-2xl font-semibold mb-3 ${
+                isAlreadyPremium
+                  ? "text-blue-700"
+                  : isDowngradeNotAvailable
+                    ? "text-amber-700"
+                    : "text-red-700"
+              }`}
             >
-              {errorCode === "DOWNGRADE_NOT_AVAILABLE"
+              {isAlreadyPremium
                 ? tr(
                     t,
-                    "checkout.error.plan_change_not_available",
-                    "Plan Change Not Available",
+                    "checkout.info.already_premium_title",
+                    "Already Premium",
                   )
-                : tr(t, "checkout.error.title", "Checkout Error")}
+                : isDowngradeNotAvailable
+                  ? tr(
+                      t,
+                      "checkout.error.plan_change_not_available",
+                      "Plan Change Not Available",
+                    )
+                  : tr(t, "checkout.error.title", "Checkout Error")}
             </Heading>
-            <p className="text-gray-600 mb-6">{error}</p>
-            <button
-              onClick={() =>
-                router.push(`/marketing/pricing?lang=${validatedLang}`)
-              }
-              className="px-6 py-2 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700 transition"
-            >
-              {tr(t, "checkout.action.back_to_pricing", "Back to Pricing")}
-            </button>
+            <p className="text-gray-600 mb-8">{error}</p>
+
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={() => router.push(`/builder?lang=${validatedLang}`)}
+                className="px-6 py-2 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700 transition"
+              >
+                {tr(t, "checkout.action.go_to_dashboard", "Go to Dashboard")}
+              </button>
+              <button
+                onClick={() =>
+                  router.push(`/marketing/pricing?lang=${validatedLang}`)
+                }
+                className="px-6 py-2 bg-gray-200 text-gray-800 rounded-md font-medium hover:bg-gray-300 transition"
+              >
+                {tr(t, "checkout.action.back_to_pricing", "Back to Pricing")}
+              </button>
+            </div>
           </div>
         </div>
       </main>

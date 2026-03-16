@@ -9,20 +9,12 @@ import { fetchContactSection } from "@/3-entities/sections/api/fetchContactSecti
 import { fetchWeddingGiftSectionDataForTenant } from "@/3-entities/wedding_gifts/api/fetchWeddingGiftSectionDataForTenant";
 import { fetchWhatToSeeDataForTenant } from "@/3-entities/what_to_see/api/fetchWhatToSeeDataForTenant";
 
-import AccommodationSection from "@/2-features/tenant/sections/ui/AccommodationSection";
-import ContactSection from "@/2-features/tenant/sections/ui/ContactSection";
-import DetailsSection from "@/2-features/tenant/sections/ui/DetailsSection";
-import HeroSection from "@/2-features/tenant/sections/ui/HeroSection";
-import ProgramSectionComponent from "@/2-features/tenant/sections/ui/ProgramSection";
-import WeddingGiftSection from "@/2-features/tenant/sections/ui/WeddingGiftSection";
-import WhatElseSection from "@/2-features/tenant/sections/ui/WhatElseSection";
-
-import { LanguageToggle } from "@/2-features/tenant/language-toggle/ui/LanguageToggle";
-import TopMenu from "@/2-features/tenant/top-menu/ui/TopMenu";
+import TenantHeroShell from "@/1-widgets/tenant/page/ui/TenantHeroShell";
+import TenantNotFoundState from "@/1-widgets/tenant/page/ui/TenantNotFoundState";
+import TenantSectionsContent from "@/1-widgets/tenant/page/ui/TenantSectionsContent";
 import { isValidLanguage } from "@/4-shared/helpers/isValidLanguage";
 import { getMergedTranslations } from "@/4-shared/lib/i18n";
 import { ProgramSection } from "@/4-shared/types";
-import Heading from "@/4-shared/ui/commons/typography/Heading";
 import { headers } from "next/headers";
 
 // --- MAIN MULTILINGUAL TENANT PAGE COMPONENT ---
@@ -47,18 +39,7 @@ export default async function TenantPageComponent({
   const translations = await getMergedTranslations(siteId, lang, "en");
 
   if (!siteId) {
-    return (
-      <div className="w-full flex flex-col items-center justify-center min-h-[60vh] p-8">
-        <Heading as="h1" className="text-3xl md:text-4xl mb-4 text-red-700">
-          {translations["event_not_found_title"] ?? "Wedding Event Not Found"}
-        </Heading>
-        <p className="text-lg text-gray-600 max-w-lg text-center">
-          {translations["event_not_found_body"] ??
-            "This wedding website is not yet published or available for this domain:"}{" "}
-          <strong>{host}</strong>
-        </p>
-      </div>
-    );
+    return <TenantNotFoundState host={host} translations={translations} />;
   }
 
   // for hero-section
@@ -153,82 +134,31 @@ export default async function TenantPageComponent({
       {/* JSON-LD SEO */}
       <JsonLd data={eventSchema} />
 
-      <div className="relative">
-        {/* Top-left: menu */}
-        <div className="absolute top-3 left-3 z-50 pointer-events-auto">
-          <div className="backdrop-blur-sm rounded-md p-1 shadow-sm">
-            <TopMenu
-              lang={lang}
-              translations={translations}
-              visibleSectionIds={visibleSectionIds}
-            />
-          </div>
-        </div>
+      <TenantHeroShell
+        lang={lang}
+        translations={translations}
+        visibleSectionIds={visibleSectionIds}
+        availableLangs={availableLangs}
+        hero={heroFromi18n}
+        heroImage={heroImage}
+      />
 
-        {/* Top-right: language toggle */}
-        <header
-          aria-label="Page controls"
-          className="absolute top-3 right-3 z-50 pointer-events-auto"
-        >
-          <div className="backdrop-blur-sm rounded-md p-1 shadow-sm">
-            <LanguageToggle activeLang={lang} availableLangs={availableLangs} />
-          </div>
-        </header>
-
-        {/* Hero */}
-        {heroFromi18n && (
-          <HeroSection hero={heroFromi18n} backgroundImage={heroImage} />
-        )}
-      </div>
-
-      <main className="flex flex-col gap-0">
-        {/* Program Main */}
-        <ProgramSectionComponent
-          mainEvent={mainEvent}
-          lang={lang}
-          translations={translations}
-        />
-        {/* Details - Full timeline all events */}
-        {shouldRenderDetails && (
-          <DetailsSection
-            events={normalizedEvents}
-            lang={lang}
-            translations={translations}
-          />
-        )}
-
-        {/* Accommodation */}
-        {shouldRenderAccommodation && (
-          <AccommodationSection
-            hotels={accommodations}
-            translations={translations}
-          />
-        )}
-
-        {/* What else */}
-        {shouldRenderWhatElse && (
-          <WhatElseSection
-            items={whatelse}
-            lang={lang}
-            translations={translations}
-          />
-        )}
-
-        {/* Wedding Gift */}
-        {shouldRenderWeddingGift && (
-          <WeddingGiftSection data={weddingGift} translations={translations} />
-        )}
-
-        {/* Contact */}
-        {shouldRenderContact && (
-          <ContactSection
-            data={contact}
-            lang={lang}
-            translations={translations}
-            backgroundImage={contactImage}
-          />
-        )}
-      </main>
+      <TenantSectionsContent
+        mainEvent={mainEvent}
+        lang={lang}
+        translations={translations}
+        normalizedEvents={normalizedEvents}
+        accommodations={accommodations}
+        whatelse={whatelse}
+        weddingGift={weddingGift}
+        contact={contact}
+        contactImage={contactImage}
+        shouldRenderDetails={shouldRenderDetails}
+        shouldRenderAccommodation={shouldRenderAccommodation}
+        shouldRenderWhatElse={shouldRenderWhatElse}
+        shouldRenderWeddingGift={shouldRenderWeddingGift}
+        shouldRenderContact={shouldRenderContact}
+      />
     </>
   );
 }
