@@ -31,7 +31,7 @@ export default function HeroSection({
           fill
           loading="eager"
           priority
-          className="object-cover object-center brightness-[.84] contrast-125 sepia hue-rotate-[350deg] saturate-140"
+          className="object-cover object-center brightness-[.84] contrast-125 sepia hue-rotate-350 saturate-140"
           style={{
             filter:
               "grayscale(0.07) sepia(0.18) contrast(1.15) brightness(0.84) hue-rotate(-10deg) saturate(1.4)",
