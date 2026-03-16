@@ -13,6 +13,20 @@ export interface VercelDomainStatusResult {
   dnsInstructions?: string;
 }
 
+export interface VercelProjectDomainResult {
+  name: string;
+  apexName?: string;
+  projectId?: string;
+  redirect?: string;
+  redirectStatusCode?: number;
+  verified?: boolean;
+}
+
+interface AddProjectDomainOptions {
+  redirect?: string;
+  redirectStatusCode?: number;
+}
+
 interface VercelVerificationInstruction {
   type: string;
   domain: string;
@@ -24,6 +38,8 @@ interface VercelVerificationInstruction {
 interface VercelDomainApiResponse {
   name: string;
   verified: boolean;
+  redirect?: string;
+  redirectStatusCode?: number;
   verification?: {
     status?: string;
     reason?: string;
@@ -31,11 +47,73 @@ interface VercelDomainApiResponse {
   };
 }
 
+function normalizeDomain(domain: string): string {
+  return domain.toLowerCase().trim();
+}
+
+function extractVercelErrorMessage(data: unknown): string {
+  if (data && typeof data === "object") {
+    const maybeError = (data as { error?: { message?: string } }).error;
+    if (maybeError?.message) {
+      return maybeError.message;
+    }
+
+    const maybeMessage = (data as { message?: string }).message;
+    if (maybeMessage) {
+      return maybeMessage;
+    }
+  }
+
+  return "Vercel API request failed";
+}
+
+function isAlreadyExistsError(status: number, message: string): boolean {
+  if (status === 409) {
+    return true;
+  }
+
+  return (
+    status === 400 &&
+    /already exists|already assigned|already added|already configured/i.test(
+      message,
+    )
+  );
+}
+
+export async function getVercelProjectDomain(
+  domain: string,
+): Promise<VercelProjectDomainResult | null> {
+  const normalizedDomain = normalizeDomain(domain);
+  const url = `https://api.vercel.com/v9/projects/${VERCEL_PROJECT_ID}/domains/${normalizedDomain}`;
+
+  const res = await fetch(url, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${VERCEL_TOKEN}`,
+      "Content-Type": "application/json",
+    },
+    cache: "no-store",
+  });
+
+  if (res.status === 404) {
+    return null;
+  }
+
+  const data = await res.json().catch(() => null);
+
+  if (!res.ok) {
+    throw new Error(extractVercelErrorMessage(data));
+  }
+
+  return data as VercelProjectDomainResult;
+}
+
 export async function getVercelDomainStatus(
   domain: string,
 ): Promise<VercelDomainStatusResult> {
   try {
-    const url = `https://api.vercel.com/v10/projects/${VERCEL_PROJECT_ID}/domains/${domain}`;
+    const normalizedDomain = normalizeDomain(domain);
+    const url = `https://api.vercel.com/v10/projects/${VERCEL_PROJECT_ID}/domains/${normalizedDomain}`;
     const res = await fetch(url, {
       method: "GET",
       headers: {
@@ -50,12 +128,7 @@ export async function getVercelDomainStatus(
     }
 
     const data: VercelDomainApiResponse = await res.json();
-    // console.log(
-    //   "_____Vercel raw domain API result:",
-    //   JSON.stringify(data, null, 2),
-    // );
 
-    // Highest priority: any instructions means DNS is NOT ready!
     if (
       data.verification &&
       Array.isArray(data.verification.instructions) &&
@@ -68,7 +141,6 @@ export async function getVercelDomainStatus(
             : JSON.stringify(step),
         )
         .join("\n");
-      // Show as pending/error no matter what `verified` claims
       const status: VercelDomainStatus =
         data.verification.status === "failed" ? "error" : "pending_validation";
       return {
@@ -78,7 +150,6 @@ export async function getVercelDomainStatus(
       };
     }
 
-    // Only consider truly 'valid' if ALL of these:
     if (
       data.verified === true &&
       (!data.verification ||
@@ -88,7 +159,6 @@ export async function getVercelDomainStatus(
       return { status: "valid" };
     }
 
-    // Fallback: treat as pending if we can't verify readiness
     return {
       status: "pending_validation",
       dnsInstructions:
@@ -102,34 +172,41 @@ export async function getVercelDomainStatus(
 
 export async function addDomainToVercelProject(
   domain: string,
+  options: AddProjectDomainOptions = {},
 ): Promise<{ status: string; error?: string }> {
-  const VERCEL_TOKEN = process.env.VERCEL_TOKEN!;
-  const VERCEL_PROJECT_ID = process.env.VERCEL_PROJECT_ID!;
   const url = `https://api.vercel.com/v10/projects/${VERCEL_PROJECT_ID}/domains`;
   try {
+    const normalizedDomain = normalizeDomain(domain);
     const res = await fetch(url, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${VERCEL_TOKEN}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ name: domain.toLowerCase().trim() }),
+      body: JSON.stringify({
+        name: normalizedDomain,
+        ...(options.redirect
+          ? {
+              redirect: normalizeDomain(options.redirect),
+              redirectStatusCode: options.redirectStatusCode ?? 308,
+            }
+          : {}),
+      }),
     });
 
-    const data = await res.json();
+    const data = await res.json().catch(() => null);
+    const errorMessage = extractVercelErrorMessage(data);
 
-    if (res.status === 409) {
-      // Conflict: already exists
+    if (isAlreadyExistsError(res.status, errorMessage)) {
       return { status: "already_exists" };
     }
     if (res.status >= 400) {
       return {
         status: "error",
-        error: data.error?.message || data.message || "Failed to add domain",
+        error: errorMessage || "Failed to add domain",
       };
     }
 
-    // Success!
     return { status: "added" };
   } catch (err: unknown) {
     const errorMessage =
@@ -144,10 +221,8 @@ export async function addDomainToVercelProject(
 export async function removeDomainFromVercelProject(
   domain: string,
 ): Promise<{ status: "deleted" | "not_found" | "error"; error?: string }> {
-  const VERCEL_TOKEN = process.env.VERCEL_TOKEN!;
-  const VERCEL_PROJECT_ID = process.env.VERCEL_PROJECT_ID!;
-
-  const url = `https://api.vercel.com/v10/projects/${VERCEL_PROJECT_ID}/domains/${domain}`;
+  const normalizedDomain = normalizeDomain(domain);
+  const url = `https://api.vercel.com/v10/projects/${VERCEL_PROJECT_ID}/domains/${normalizedDomain}`;
   try {
     const res = await fetch(url, {
       method: "DELETE",
@@ -161,10 +236,11 @@ export async function removeDomainFromVercelProject(
       return { status: "not_found" };
     }
     if (res.status >= 400) {
-      const data = await res.json();
+      const data = await res.json().catch(() => null);
       return {
         status: "error",
-        error: data.error?.message || data.message || "Failed to delete domain",
+        error:
+          extractVercelErrorMessage(data) || "Failed to delete domain",
       };
     }
 

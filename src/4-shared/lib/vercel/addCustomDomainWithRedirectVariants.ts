@@ -119,11 +119,27 @@ export async function addCustomDomainWithRedirectVariants(
   }
 
   if (existingCustomRoots.has(apexDomain)) {
+    let redirectConfigured = true;
+    let redirectWarning: string | undefined;
+
+    try {
+      await patchDomainToRedirect(wwwDomain, apexDomain);
+    } catch (error) {
+      redirectConfigured = false;
+      redirectWarning =
+        error instanceof Error
+          ? error.message
+          : "Redirect configuration failed";
+      console.warn("[domain] redirect repair failed:", redirectWarning);
+    }
+
     return {
       success: true,
       already_exists: true,
       domain: apexDomain,
       domains: [apexDomain, wwwDomain],
+      redirect_configured: redirectConfigured,
+      ...(redirectWarning ? { redirect_warning: redirectWarning } : {}),
     };
   }
 
@@ -163,7 +179,10 @@ export async function addCustomDomainWithRedirectVariants(
       addedOnVercel.push(apexDomain);
     }
 
-    const wwwResult = await addDomainToVercelProject(wwwDomain);
+    const wwwResult = await addDomainToVercelProject(wwwDomain, {
+      redirect: apexDomain,
+      redirectStatusCode: 308,
+    });
     if (wwwResult.status === "error") {
       throw new Error(wwwResult.error || "Failed to add www domain to Vercel");
     }
@@ -173,16 +192,17 @@ export async function addCustomDomainWithRedirectVariants(
 
     let redirectConfigured = true;
     let redirectWarning: string | undefined;
-    try {
-      await patchDomainToRedirect(wwwDomain, apexDomain);
-    } catch (error) {
-      // Redirect setup should not block domain provisioning.
-      redirectConfigured = false;
-      redirectWarning =
-        error instanceof Error
-          ? error.message
-          : "Redirect configuration failed";
-      console.warn("[domain] redirect setup failed:", redirectWarning);
+    if (wwwResult.status === "already_exists") {
+      try {
+        await patchDomainToRedirect(wwwDomain, apexDomain);
+      } catch (error) {
+        redirectConfigured = false;
+        redirectWarning =
+          error instanceof Error
+            ? error.message
+            : "Redirect configuration failed";
+        console.warn("[domain] redirect setup failed:", redirectWarning);
+      }
     }
 
     return {
