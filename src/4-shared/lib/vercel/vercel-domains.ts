@@ -239,8 +239,7 @@ export async function removeDomainFromVercelProject(
       const data = await res.json().catch(() => null);
       return {
         status: "error",
-        error:
-          extractVercelErrorMessage(data) || "Failed to delete domain",
+        error: extractVercelErrorMessage(data) || "Failed to delete domain",
       };
     }
 

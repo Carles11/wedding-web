@@ -27,7 +27,9 @@ export async function patchDomainToRedirect(
   if (existing) {
     const removeResult = await removeDomainFromVercelProject(source);
     if (removeResult.status === "error") {
-      throw new Error(removeResult.error || "Failed to replace redirect domain");
+      throw new Error(
+        removeResult.error || "Failed to replace redirect domain",
+      );
     }
   }
 
