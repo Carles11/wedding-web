@@ -42,7 +42,7 @@ export default function MembershipSection({
       </h4>
 
       <div
-        className="relative border border-gray-200 rounded-2xl bg-gradient-to-br from-white via-gray-50 to-gray-100 p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-6 shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden"
+        className="relative border border-gray-200 rounded-2xl bg-linear-to-br from-white via-gray-50 to-gray-100 p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-6 shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden"
         onMouseEnter={() => setIsHovered(true)} // ✅ always fires, for both plan types
         onMouseLeave={() => setIsHovered(false)}
       >

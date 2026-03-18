@@ -7,6 +7,7 @@ import { useRef, useState } from "react";
 
 type Props = {
   translations: Record<string, string>;
+  lang: string;
 };
 
 function tr(
@@ -17,7 +18,7 @@ function tr(
   return translations[key] ?? fallback;
 }
 
-export default function SignupForm({ translations }: Props) {
+export default function SignupForm({ translations, lang }: Props) {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -25,11 +26,10 @@ export default function SignupForm({ translations }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
-  // TODO: Replace with actual lang from route context
-  const currentLang = "en";
+  // Use lang prop from page
   const notifiedStatus = useRef<string | null>(null);
 
-  // ...existing code...
+  // Remove placeholder, use lang prop everywhere
 
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -84,7 +84,7 @@ export default function SignupForm({ translations }: Props) {
         email,
         password,
         fullName || undefined,
-        currentLang,
+        lang,
       );
       if (result.error) {
         setError(result.error);
@@ -133,7 +133,7 @@ export default function SignupForm({ translations }: Props) {
               "We&apos;ve sent you a verification link. Please check your email and click the link to activate your account.",
             )}
           </p>
-          <Link href={`/${currentLang}/auth/login`} className="marketing-link">
+          <Link href={`/${lang}/auth/login`} className="marketing-link">
             {tr(translations, "auth.common.return_to_login", "Return to Login")}
           </Link>
         </div>
@@ -272,7 +272,7 @@ export default function SignupForm({ translations }: Props) {
               "Already have an account?",
             )}{" "}
             <Link
-              href={`/${currentLang}/auth/login`}
+              href={`/${lang}/auth/login`}
               className="font-medium marketing-link"
             >
               {tr(translations, "auth.common.log_in", "Log in")}
@@ -280,7 +280,7 @@ export default function SignupForm({ translations }: Props) {
           </p>
         </div>
         <div className="mt-4 text-center">
-          <Link href={`/${currentLang}`} className="text-sm marketing-link">
+          <Link href={`/${lang}`} className="text-sm marketing-link">
             {tr(translations, "auth.common.back_to_home", "Back to home")}
           </Link>
         </div>

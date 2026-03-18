@@ -4,15 +4,13 @@ import { fetchGlobalTranslations } from "@/4-shared/lib/globalTranslations";
 import type { Metadata } from "next";
 
 export async function generateMetadata({
-  searchParams,
+  params,
 }: {
-  searchParams: Promise<{ lang?: string }>;
+  params: Promise<{ lang: string }>;
 }): Promise<Metadata> {
-  const params = await searchParams;
-  const requested = params?.lang;
-  const lang = isValidLanguage(requested) ? requested : "en";
+  const realParams = await params;
+  const lang = isValidLanguage(realParams?.lang) ? realParams.lang : "en";
   const translations = await fetchGlobalTranslations(lang, "en");
-
   return {
     title: translations["auth.reset.page_title"] ?? "Reset Password | WeddWeb",
     description:
@@ -21,14 +19,12 @@ export async function generateMetadata({
 }
 
 export default async function ResetPasswordPage({
-  searchParams,
+  params,
 }: {
-  searchParams: Promise<{ lang?: string }>;
+  params: Promise<{ lang: string }>;
 }) {
-  const params = await searchParams;
-  const requested = params?.lang;
-  const lang = isValidLanguage(requested) ? requested : "en";
+  const realParams = await params;
+  const lang = isValidLanguage(realParams?.lang) ? realParams.lang : "en";
   const translations = await fetchGlobalTranslations(lang, "en");
-
-  return <ResetPasswordForm translations={translations} />;
+  return <ResetPasswordForm translations={translations} lang={lang} />;
 }

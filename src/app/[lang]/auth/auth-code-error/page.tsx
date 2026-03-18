@@ -5,15 +5,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export async function generateMetadata({
-  searchParams,
+  params,
 }: {
-  searchParams: Promise<{ lang?: string }>;
+  params: Promise<{ lang: string }>;
 }): Promise<Metadata> {
-  const params = await searchParams;
-  const requested = params?.lang;
-  const lang = isValidLanguage(requested) ? requested : "en";
+  const realParams = await params;
+  const lang = isValidLanguage(realParams?.lang) ? realParams.lang : "en";
   const translations = await fetchGlobalTranslations(lang, "en");
-
   return {
     title:
       translations["auth.error.page_title"] ?? "Authentication Error | WeddWeb",
@@ -21,16 +19,14 @@ export async function generateMetadata({
 }
 
 export default async function AuthErrorPage({
-  searchParams,
+  params,
 }: {
-  searchParams: Promise<{ lang?: string }>;
+  params: Promise<{ lang: string }>;
 }) {
-  const params = await searchParams;
-  const requested = params?.lang;
-  const lang = isValidLanguage(requested) ? requested : "en";
+  const realParams = await params;
+  const lang = isValidLanguage(realParams?.lang) ? realParams.lang : "en";
   const translations = await fetchGlobalTranslations(lang, "en");
   // Language-prefixed routing only; langQuery is not used.
-
   return (
     <main className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-md">

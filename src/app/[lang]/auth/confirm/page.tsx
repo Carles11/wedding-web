@@ -3,14 +3,12 @@ import { fetchGlobalTranslations } from "@/4-shared/lib/globalTranslations";
 import AuthConfirmClient from "./AuthConfirmClient";
 
 export default async function AuthConfirmPage({
-  searchParams,
+  params,
 }: {
-  searchParams: Promise<{ lang?: string }>;
+  params: Promise<{ lang: string }>;
 }) {
-  const params = await searchParams;
-  const requested = params?.lang;
-  const lang = isValidLanguage(requested) ? requested : "en";
+  const realParams = await params;
+  const lang = isValidLanguage(realParams?.lang) ? realParams.lang : "en";
   const translations = await fetchGlobalTranslations(lang, "en");
-
-  return <AuthConfirmClient translations={translations} />;
+  return <AuthConfirmClient translations={translations} lang={lang} />;
 }

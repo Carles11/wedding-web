@@ -5,15 +5,13 @@ import { Heading } from "@/4-shared/ui/commons/typography/Heading";
 import type { Metadata } from "next";
 
 export async function generateMetadata({
-  searchParams,
+  params,
 }: {
-  searchParams: Promise<{ lang?: string }>;
+  params: Promise<{ lang: string }>;
 }): Promise<Metadata> {
-  const params = await searchParams;
-  const requested = params?.lang;
-  const lang = isValidLanguage(requested) ? requested : "en";
+  const realParams = await params;
+  const lang = isValidLanguage(realParams?.lang) ? realParams.lang : "en";
   const translations = await fetchGlobalTranslations(lang, "en");
-
   return {
     title: translations["auth.signup.page_title"] ?? "Sign Up | WeddWeb",
     description:
@@ -23,24 +21,22 @@ export async function generateMetadata({
 }
 
 export default async function SignupPage({
-  searchParams,
+  params,
 }: {
-  searchParams: Promise<{ lang?: string }>;
+  params: Promise<{ lang: string }>;
 }) {
-  const params = await searchParams;
-  const requested = params?.lang;
-  const lang = isValidLanguage(requested) ? requested : "en";
+  const realParams = await params;
+  const lang = isValidLanguage(realParams?.lang) ? realParams.lang : "en";
   const translations = await fetchGlobalTranslations(lang, "en");
-
   return (
     <main className="min-h-screen flex items-center justify-center ">
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-[80%]">
         <div className="text-center mt-8">
           <Heading as="h1">
             {translations["auth.signup.welcome"] ?? "Welcome"}
           </Heading>
         </div>
-        <SignupForm translations={translations} />{" "}
+        <SignupForm translations={translations} lang={lang} />{" "}
       </div>
     </main>
   );

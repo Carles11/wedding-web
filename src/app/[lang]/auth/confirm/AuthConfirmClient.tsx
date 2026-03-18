@@ -8,6 +8,7 @@ import { useEffect, useMemo, useState } from "react";
 
 type Props = {
   translations: Record<string, string>;
+  lang: string;
 };
 
 function tr(
@@ -18,7 +19,7 @@ function tr(
   return translations[key] ?? fallback;
 }
 
-export default function AuthConfirmClient({ translations }: Props) {
+export default function AuthConfirmClient({ translations, lang }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const supabase = useMemo(() => createClient(), []);
@@ -32,7 +33,7 @@ export default function AuthConfirmClient({ translations }: Props) {
 
   useEffect(() => {
     let cancelled = false;
-    const requestedLang = searchParams.get("lang") ?? "en";
+    const requestedLang = lang;
     const nextRaw = searchParams.get("next") ?? "builder/onboarding";
     // Ensure 'next' is always language-prefixed
     const langPrefix = `/${requestedLang}/`;
@@ -125,7 +126,6 @@ export default function AuthConfirmClient({ translations }: Props) {
         throw new Error("Missing authentication tokens");
       } catch {
         if (!cancelled) {
-          const requestedLang = searchParams.get("lang") ?? "en";
           setMessage(
             tr(
               translations,
@@ -133,7 +133,7 @@ export default function AuthConfirmClient({ translations }: Props) {
               "We could not complete your email confirmation.",
             ),
           );
-          router.replace(`/${requestedLang}/auth/auth-code-error`);
+          router.replace(`/${lang}/auth/auth-code-error`);
         }
       }
     }

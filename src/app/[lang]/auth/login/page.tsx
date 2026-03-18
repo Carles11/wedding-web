@@ -5,15 +5,13 @@ import { Heading } from "@/4-shared/ui/commons/typography/Heading";
 import type { Metadata } from "next";
 
 export async function generateMetadata({
-  searchParams,
+  params,
 }: {
-  searchParams: Promise<{ lang?: string }>;
+  params: Promise<{ lang: string }>;
 }): Promise<Metadata> {
-  const params = await searchParams;
-  const requested = params?.lang;
-  const lang = isValidLanguage(requested) ? requested : "en";
+  const realParams = await params;
+  const lang = isValidLanguage(realParams?.lang) ? realParams.lang : "en";
   const translations = await fetchGlobalTranslations(lang, "en");
-
   return {
     title: translations["auth.login.page_title"] ?? "Login | WeddWeb",
     description:
@@ -23,15 +21,13 @@ export async function generateMetadata({
 }
 
 export default async function LoginPage({
-  searchParams,
+  params,
 }: {
-  searchParams: Promise<{ lang?: string }>;
+  params: Promise<{ lang: string }>;
 }) {
-  const params = await searchParams;
-  const requested = params?.lang;
-  const lang = isValidLanguage(requested) ? requested : "en";
+  const realParams = await params;
+  const lang = isValidLanguage(realParams?.lang) ? realParams.lang : "en";
   const translations = await fetchGlobalTranslations(lang, "en");
-
   return (
     <main className="min-h-screen flex items-center justify-center ">
       <div className="w-full max-w-md">
@@ -40,7 +36,8 @@ export default async function LoginPage({
             {translations["auth.login.welcome_back"] ?? "Welcome Back"}
           </Heading>
         </div>
-        <LoginForm translations={translations} />
+        {/* Removed duplicate LoginForm without lang prop */}
+        <LoginForm translations={translations} lang={lang} />
       </div>
     </main>
   );

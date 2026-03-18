@@ -7,6 +7,7 @@ import { useState } from "react";
 
 type Props = {
   translations: Record<string, string>;
+  lang: string;
 };
 
 function tr(
@@ -17,13 +18,12 @@ function tr(
   return translations[key] ?? fallback;
 }
 
-export default function ForgotPasswordForm({ translations }: Props) {
+export default function ForgotPasswordForm({ translations, lang }: Props) {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
-  // TODO: Replace with actual lang from route context
-  const currentLang = "en";
+  const currentLang = lang;
 
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

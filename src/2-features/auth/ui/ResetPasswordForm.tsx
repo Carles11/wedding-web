@@ -8,6 +8,7 @@ import { useState } from "react";
 
 type Props = {
   translations: Record<string, string>;
+  lang: string;
 };
 
 function tr(
@@ -18,15 +19,14 @@ function tr(
   return translations[key] ?? fallback;
 }
 
-export default function ResetPasswordForm({ translations }: Props) {
+export default function ResetPasswordForm({ translations, lang }: Props) {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const router = useRouter();
-  // TODO: Replace with actual lang from route context
-  const currentLang = "en";
+  const currentLang = lang;
 
   const validatePassword = (password: string) => {
     return password.length >= 8;
