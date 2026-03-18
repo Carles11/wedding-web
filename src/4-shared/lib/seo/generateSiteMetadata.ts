@@ -1,5 +1,20 @@
 import type { Metadata } from "next";
 
+/**
+ * Generates SEO metadata for marketing and tenant pages.
+ *
+ * - For tenant pages, canonical and hreflang always use the current domain (subdomain or custom domain).
+ * - For marketing pages, canonical and hreflang use weddweb.com.
+ * - Only one domain per tenant is supported (the current host).
+ * - All language variants are included in hreflang.
+ *
+ * @param site - Site object (tenant or marketing)
+ * @param lang - Current language
+ * @param translations - Translation dictionary
+ * @param baseUrl - Current domain (host) for canonical/hreflang
+ * @param pageKind - 'tenant' or 'marketing'
+ * @returns Metadata object for Next.js
+ */
 export function generateSiteMetadata({
   site,
   lang,
@@ -13,10 +28,8 @@ export function generateSiteMetadata({
   baseUrl: string;
   pageKind?: "tenant" | "marketing";
 }): Metadata {
-  // shape title/description algorithmically or switch by pageKind
-  // ...transformation logic...
+  // Title and description logic
   const isTenant = pageKind === "tenant";
-  // Example for demo -- you should adjust
   const title = isTenant
     ? translations["sections.hero.title"] || site?.name || "Wedding"
     : translations["meta.marketing_title"] || "Welcome";
@@ -24,7 +37,9 @@ export function generateSiteMetadata({
     ? translations["sections.hero.description"] || ""
     : translations["meta.marketing_description"] || "";
 
-  // Compute languages/hreflang
+  // Compute languages/hreflang for SEO
+  // For tenants: use current domain for all language variants
+  // For marketing: use weddweb.com for all language variants
   let languages: Record<string, string> = {};
   const availableLangs =
     Array.isArray(site?.languages) && site.languages.length > 0
@@ -37,6 +52,7 @@ export function generateSiteMetadata({
         : `${baseUrl}/${l === "en" ? "" : l}`; // customize per root/lang
   }
 
+  // Return structured metadata for Next.js
   return {
     title,
     description,
