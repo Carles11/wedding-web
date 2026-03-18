@@ -1,12 +1,9 @@
 "use client";
 
 import { signupWithEmail } from "@/2-features/auth/api";
-import { isValidLanguage } from "@/4-shared/helpers/isValidLanguage";
-import { notify } from "@/4-shared/lib/toast/toast";
 import { MarketingButton } from "@/4-shared/ui/marketing";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 
 type Props = {
   translations: Record<string, string>;
@@ -28,28 +25,11 @@ export default function SignupForm({ translations }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
-  const searchParams = useSearchParams();
+  // TODO: Replace with actual lang from route context
+  const currentLang = "en";
   const notifiedStatus = useRef<string | null>(null);
-  const requestedLang = searchParams.get("lang") ?? undefined;
-  const currentLang = isValidLanguage(requestedLang) ? requestedLang : "en";
-  const langQuery = `?lang=${encodeURIComponent(currentLang)}`;
 
-  useEffect(() => {
-    const status = searchParams.get("status");
-    if (!status || notifiedStatus.current === status) return;
-
-    notifiedStatus.current = status;
-
-    if (status === "verify-email") {
-      notify.info(
-        tr(
-          translations,
-          "auth.common.verify_email_required",
-          "Please verify your email before accessing the builder. Check your inbox for the confirmation link.",
-        ),
-      );
-    }
-  }, [searchParams, translations]);
+  // ...existing code...
 
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -153,7 +133,7 @@ export default function SignupForm({ translations }: Props) {
               "We&apos;ve sent you a verification link. Please check your email and click the link to activate your account.",
             )}
           </p>
-          <Link href={`/auth/login${langQuery}`} className="marketing-link">
+          <Link href={`/${currentLang}/auth/login`} className="marketing-link">
             {tr(translations, "auth.common.return_to_login", "Return to Login")}
           </Link>
         </div>
@@ -162,12 +142,12 @@ export default function SignupForm({ translations }: Props) {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50">
+    <div className="flex items-center justify-center min-h-screen">
       <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-md">
         <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
           {tr(translations, "auth.signup.title", "Create Your Account")}
         </h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 mt-6">
           <div>
             <label
               htmlFor="fullName"
@@ -292,7 +272,7 @@ export default function SignupForm({ translations }: Props) {
               "Already have an account?",
             )}{" "}
             <Link
-              href={`/auth/login${langQuery}`}
+              href={`/${currentLang}/auth/login`}
               className="font-medium marketing-link"
             >
               {tr(translations, "auth.common.log_in", "Log in")}
@@ -300,10 +280,7 @@ export default function SignupForm({ translations }: Props) {
           </p>
         </div>
         <div className="mt-4 text-center">
-          <Link
-            href={`/marketing${langQuery}`}
-            className="text-sm marketing-link"
-          >
+          <Link href={`/${currentLang}`} className="text-sm marketing-link">
             {tr(translations, "auth.common.back_to_home", "Back to home")}
           </Link>
         </div>

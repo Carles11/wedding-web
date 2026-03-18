@@ -18,10 +18,8 @@ export async function sendPasswordReset(
   const selectedLang = isValidLanguage(preferredLanguage)
     ? preferredLanguage
     : "en";
-  const langQuery = `?lang=${encodeURIComponent(selectedLang)}`;
-
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/reset-password${langQuery}`,
+    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/${selectedLang}/auth/reset-password`,
   });
 
   if (error) {

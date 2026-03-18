@@ -15,8 +15,8 @@ export default function PricingCTATable({
   const router = useRouter();
 
   function handleSelect(plan: PlanType) {
-    // Route to /checkout?plan=xyz&lang=...
-    router.push(`/builder/checkout?plan=${plan}&lang=${lang}`);
+    // Route to /[lang]/builder/checkout?plan=xyz
+    router.push(`/${lang}/builder/checkout?plan=${plan}`);
   }
 
   return (

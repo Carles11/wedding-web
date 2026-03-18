@@ -58,10 +58,11 @@ export async function POST(req: NextRequest) {
         );
       }
 
+      // Use language-prefixed routing for redirect
       return NextResponse.json({
         success: true,
         planType: "free",
-        redirectTo: `/builder?lang=${language}`,
+        redirectTo: `/${language}/builder`,
       });
     }
 

@@ -1,5 +1,7 @@
 "use client";
 
+import { PricingSectionProps } from "@/4-shared/types";
+import { CheckIcon } from "@/4-shared/ui/commons/icons/checkIcon";
 import { MarketingButton } from "@/4-shared/ui/marketing";
 
 /**
@@ -17,24 +19,6 @@ import { MarketingButton } from "@/4-shared/ui/marketing";
  * @prop onFreePlanClick - Optional callback when free plan CTA is clicked
  * @prop onPremiumPlanClick - Optional callback when premium plan CTA is clicked
  */
-export interface PricingSectionProps {
-  sectionTitle: string;
-  freePlanName: string;
-  freePlanPrice: string;
-  /** CTA for free plan button */
-  freePlanCTA?: string;
-  /** Feature texts for free plan */
-  freePlanFeatures?: string[];
-  premiumPlanName: string;
-  premiumPlanPrice: string;
-  premiumPlanCTA: string;
-  /** Feature texts for premium plan */
-  premiumPlanFeatures?: string[];
-  onFreePlanClick?: () => void;
-  onPremiumPlanClick?: () => void;
-  comingSoonText?: string;
-  perSiteText?: string;
-}
 
 /**
  * PricingSection component
@@ -52,27 +36,13 @@ export default function PricingSection({
   onFreePlanClick,
   onPremiumPlanClick,
   comingSoonText,
+  popularBadgeLabel,
   perSiteText,
 }: PricingSectionProps) {
   const premiumComingSoon = premiumPlanPrice.toLowerCase().includes("coming");
 
-  const defaultFreeFeatures = [
-    "Free subdomain (yourname.weddweb.com)",
-    "1 language",
-    "2 accommodation tips",
-    "2 activity suggestions",
-  ];
-
-  const defaultPremiumFeatures = [
-    "Custom domain",
-    "Unlimited languages",
-    "Unlimited content",
-    "Gift registry (coming soon)",
-    "Priority support (future)",
-  ];
-
-  const freeFeaturesList = freePlanFeatures ?? defaultFreeFeatures;
-  const premiumFeaturesList = premiumPlanFeatures ?? defaultPremiumFeatures;
+  const freeFeaturesList = freePlanFeatures ?? [];
+  const premiumFeaturesList = premiumPlanFeatures ?? [];
   const freeCTA = freePlanCTA ?? "Get Started Free";
 
   return (
@@ -98,10 +68,13 @@ export default function PricingSection({
               </div>
 
               <ul className="mt-6 space-y-3 text-sm text-gray-700">
-                {freeFeaturesList.map((f) => (
-                  <li key={f} className="flex items-start">
-                    <span className="text-[#6ABDA6] mr-3 mt-0.5">✔</span>
-                    <span>{f}</span>
+                {freeFeaturesList.map((f, index) => (
+                  <li
+                    key={`free-feature-${index}-${f}`}
+                    className="flex items-start"
+                  >
+                    <CheckIcon />
+                    <span className="ml-2">{f}</span>
                   </li>
                 ))}
               </ul>
@@ -121,7 +94,13 @@ export default function PricingSection({
           </div>
 
           {/* Premium Plan */}
-          <div className="flex flex-col h-full bg-white rounded-lg shadow-lg border-2 border-[#6ABDA6] p-6 transform transition duration-150 hover:scale-[1.01]">
+          <div className="relative flex flex-col h-full bg-white rounded-lg shadow-lg border-2 border-[#6ABDA6] p-6 transform transition duration-150 hover:scale-[1.01]">
+            <div
+              className="absolute -top-3 right-4 px-3 py-1 rounded-full text-xs font-semibold text-white"
+              style={{ background: "var(--marketing-color-primary)" }}
+            >
+              {popularBadgeLabel}
+            </div>{" "}
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-xl md:text-2xl font-bold">
@@ -134,7 +113,6 @@ export default function PricingSection({
                 </span>
               )}
             </div>
-
             <div className="mt-6 flex-1">
               <div className="text-4xl md:text-5xl font-extrabold text-gray-900">
                 {premiumPlanPrice}
@@ -144,15 +122,17 @@ export default function PricingSection({
               </div>
 
               <ul className="mt-6 space-y-3 text-sm text-gray-700">
-                {premiumFeaturesList.map((f) => (
-                  <li key={f} className="flex items-start">
-                    <span className="text-[#6ABDA6] mr-3 mt-0.5">✔</span>
-                    <span>{f}</span>
+                {premiumFeaturesList.map((f, index) => (
+                  <li
+                    key={`premium-feature-${index}-${f}`}
+                    className="flex items-start"
+                  >
+                    <CheckIcon />
+                    <span className="ml-2">{f}</span>
                   </li>
                 ))}
               </ul>
             </div>
-
             <div className="mt-6">
               <MarketingButton
                 variant="primary"

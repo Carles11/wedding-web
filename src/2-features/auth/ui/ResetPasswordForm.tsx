@@ -1,9 +1,9 @@
 "use client";
 
 import { resetPassword } from "@/2-features/auth/api";
-import { isValidLanguage } from "@/4-shared/helpers/isValidLanguage";
+import { Heading } from "@/4-shared/ui/commons/typography/Heading";
 import { MarketingButton } from "@/4-shared/ui/marketing";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 type Props = {
@@ -25,10 +25,8 @@ export default function ResetPasswordForm({ translations }: Props) {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const requestedLang = searchParams.get("lang") ?? undefined;
-  const currentLang = isValidLanguage(requestedLang) ? requestedLang : "en";
-  const langQuery = `?lang=${encodeURIComponent(currentLang)}`;
+  // TODO: Replace with actual lang from route context
+  const currentLang = "en";
 
   const validatePassword = (password: string) => {
     return password.length >= 8;
@@ -69,7 +67,7 @@ export default function ResetPasswordForm({ translations }: Props) {
       } else {
         setSuccess(true);
         setTimeout(() => {
-          router.push(`/auth/login${langQuery}`);
+          router.push(`/${currentLang}/auth/login`);
         }, 2000);
       }
     } catch {
@@ -104,13 +102,14 @@ export default function ResetPasswordForm({ translations }: Props) {
               />
             </svg>
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+          <Heading as="h2">
             {tr(
               translations,
               "auth.reset.success_title",
               "Password Reset Successful",
             )}
-          </h2>
+          </Heading>
+
           <p className="text-gray-600 mb-6">
             {tr(
               translations,

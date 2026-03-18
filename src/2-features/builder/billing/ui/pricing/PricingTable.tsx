@@ -1,4 +1,5 @@
 import { PLAN_DEFINITIONS } from "@/4-shared/config/plans/planDefinitions";
+import { getLocalizedPlanFeatureTitles } from "@/4-shared/helpers/billing/entitlements";
 import type { PlanType } from "@/4-shared/types";
 
 function formatLimit(val: number, t: Record<string, string>, prop: string) {
@@ -52,8 +53,9 @@ export default function PricingTable({
           def.name,
         );
 
-        const localizedFeatures = def.featuresList.map((feat, index) =>
-          tr(translations, `pricing.plan.${plan}.feature_${index + 1}`, feat),
+        const localizedFeatures = getLocalizedPlanFeatureTitles(
+          plan,
+          translations,
         );
 
         const billingKey = `pricing.billing.${String(def.billing).replace("-", "_")}`;

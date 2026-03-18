@@ -1,3 +1,5 @@
+import { Feature, FeatureTier } from "./marketingPage";
+
 /**
  * Language code literals supported by the marketing types.
  * Restricting to the 10 supported languages gives better type-safety
@@ -32,32 +34,6 @@ export type HeroContent = {
   ctaPrimary: I18nText;
   /** Optional secondary CTA button text mapped by language code */
   ctaSecondary?: I18nText;
-  [key: string]: unknown;
-};
-
-/**
- * Single feature item used in the features list and tiers.
- */
-export type Feature = {
-  /** Emoji or icon identifier (string) */
-  icon: string;
-  /** Feature title mapped by language code */
-  title: I18nText;
-  /** Feature description mapped by language code */
-  description: I18nText;
-  [key: string]: unknown;
-};
-
-/**
- * Free vs Paid tier comparison item.
- */
-export type FeatureTier = {
-  /** Tier name (e.g., "Free Plan", "Premium Plan") */
-  name: I18nText;
-  /** Features included in this tier */
-  features: Feature[];
-  /** Whether this tier should be visually highlighted (premium) */
-  highlighted: boolean;
   [key: string]: unknown;
 };
 

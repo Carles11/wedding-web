@@ -16,6 +16,7 @@ export type Site = {
     string,
     "idle" | "saving" | "success" | "error" | "pending" | "verified"
   > | null;
+  seo_enabled?: boolean | null;
   // Add other fields present in the `sites` table as needed.
 };
 

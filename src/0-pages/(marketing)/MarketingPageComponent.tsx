@@ -1,11 +1,5 @@
 "use client";
-import {
-  buildBuilderUrl,
-  buildLangQuery,
-  buildMarketingPageViewModel,
-  buildPathWithQuery,
-  buildSignupUrl,
-} from "@/1-widgets/marketing/model";
+import { buildMarketingPageViewModel } from "@/1-widgets/marketing/model";
 import HeroMarketing, {
   CTASection,
   FeaturesGrid,
@@ -16,7 +10,7 @@ import HeroMarketing, {
 import { useSupabaseAuth } from "@/4-shared/hooks/useSupabaseAuth";
 import type { MarketingPageProps } from "@/4-shared/types";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function MarketingPageComponent({
   initialLang = "en",
@@ -26,50 +20,83 @@ export default function MarketingPageComponent({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { user, supabase } = useSupabaseAuth();
-  const [currentLang, setCurrentLang] = useState(initialLang || "en");
 
+  // SSR-safe: initialize from initialLang, then sync with path segment on client
+  const [currentLang, setCurrentLang] = useState(initialLang || "en");
+  const [currentTranslations, setCurrentTranslations] = useState(translations);
+
+  // Sync currentLang with path segment on client only
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const pathLang =
+        window.location.pathname.split("/")[1] || initialLang || "en";
+      setCurrentLang(pathLang);
+    } else {
+      setCurrentLang(initialLang || "en");
+    }
+    setCurrentTranslations(translations);
+  }, [initialLang, translations]);
+
+  // Fetch translations when currentLang changes
+  useEffect(() => {
+    if (currentLang === initialLang) return;
+    async function fetchTranslations() {
+      const { fetchMarketingTranslations } =
+        await import("@/4-shared/api/marketing");
+      const newTranslations = await fetchMarketingTranslations(
+        currentLang,
+        "en",
+      );
+      setCurrentTranslations(newTranslations);
+    }
+    fetchTranslations();
+  }, [currentLang, initialLang]);
+
+  // Handler for primary CTA click
+  const handlePrimaryClick = async () => {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    if (user || session?.user) {
+      router.push(`/${currentLang}/builder`);
+      return;
+    }
+    router.push(`/${currentLang}/auth/signup`);
+  };
+
+  // Handler for secondary CTA click
   const handleSecondaryClick = () => {
     window.open("https://www.inesundcarles.dog", "_blank");
   };
 
+  // Handler for language selector
   const handleLanguageChange = (lang: string) => {
     setCurrentLang(lang);
-    const langQuery = buildLangQuery(
-      new URLSearchParams(searchParams.toString()),
-      lang,
-    );
-    router.push(buildPathWithQuery(pathname, langQuery));
+    router.push(`/${lang}`);
   };
 
-  const handlePrimaryClick = async () => {
-    const langQuery = buildLangQuery(
-      new URLSearchParams(searchParams.toString()),
-      currentLang,
-    );
-
-    // Re-check session at click time to avoid stale/null client state after back navigation.
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-
-    if (user || session?.user) {
-      router.push(buildBuilderUrl(langQuery));
-      return;
-    }
-
-    router.push(buildSignupUrl(langQuery));
-  };
-
-  const viewModel = buildMarketingPageViewModel(translations, {
+  const viewModel = buildMarketingPageViewModel(currentTranslations, {
     onPrimaryClick: handlePrimaryClick,
     onSecondaryClick: handleSecondaryClick,
   });
+
+  // Optional: client-only debug info
+  const [clientDebug, setClientDebug] = useState({ href: "", langParam: "" });
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setClientDebug({
+        href: window.location.href,
+        langParam:
+          new URLSearchParams(window.location.search).get("lang") || "",
+      });
+    }
+  }, []);
 
   return (
     <>
       <MarketingFloatingLanguageSelector
         currentLang={currentLang}
-        label={translations["marketing.lang_selector.label"]}
+        label={currentTranslations["marketing.lang_selector.label"]}
         onLanguageChange={handleLanguageChange}
       />
 

@@ -1,10 +1,8 @@
 "use client";
 
 import { sendPasswordReset } from "@/2-features/auth/api";
-import { isValidLanguage } from "@/4-shared/helpers/isValidLanguage";
 import { MarketingButton } from "@/4-shared/ui/marketing";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 type Props = {
@@ -24,10 +22,8 @@ export default function ForgotPasswordForm({ translations }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
-  const searchParams = useSearchParams();
-  const requestedLang = searchParams.get("lang") ?? undefined;
-  const currentLang = isValidLanguage(requestedLang) ? requestedLang : "en";
-  const langQuery = `?lang=${encodeURIComponent(currentLang)}`;
+  // TODO: Replace with actual lang from route context
+  const currentLang = "en";
 
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -100,7 +96,7 @@ export default function ForgotPasswordForm({ translations }: Props) {
               "We&apos;ve sent you a password reset link. Please check your email and click the link to reset your password.",
             )}
           </p>
-          <Link href={`/auth/login${langQuery}`} className="marketing-link">
+          <Link href={`/${currentLang}/auth/login`} className="marketing-link">
             {tr(translations, "auth.common.return_to_login", "Return to Login")}
           </Link>
         </div>
@@ -168,7 +164,7 @@ export default function ForgotPasswordForm({ translations }: Props) {
               "Remember your password?",
             )}{" "}
             <Link
-              href={`/auth/login${langQuery}`}
+              href={`/${currentLang}/auth/login`}
               className="font-medium marketing-link"
             >
               {tr(translations, "auth.common.log_in", "Log in")}

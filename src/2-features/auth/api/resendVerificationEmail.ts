@@ -18,7 +18,7 @@ export async function resendVerificationEmail(
     ? preferredLanguage
     : "en";
   const onboardingNext = encodeURIComponent(
-    `/builder/onboarding?lang=${selectedLang}`,
+    `/${selectedLang}/builder/onboarding`,
   );
 
   const supabase = await createSupabaseSSRClient();
@@ -26,7 +26,7 @@ export async function resendVerificationEmail(
     type: "signup",
     email: trimmedEmail,
     options: {
-      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/confirm?lang=${selectedLang}&next=${onboardingNext}`,
+      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/${selectedLang}/auth/confirm?next=${onboardingNext}`,
     },
   });
 

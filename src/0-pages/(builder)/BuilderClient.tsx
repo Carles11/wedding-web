@@ -57,11 +57,10 @@ function hasAnyGiftPaymentMethod(
 
 export default function BuilderClient({
   initialLang = "en",
-  translations,
+  translations: initialTranslations,
 }: Props) {
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const { user } = useSupabaseAuth();
   const {
     site,
@@ -71,8 +70,21 @@ export default function BuilderClient({
   } = useSite(user ?? null);
   const { planType } = usePlan();
 
-  const [active, setActive] = useState(0);
+  // Initialize active step from URL query param
+  const searchParams = useSearchParams();
+  const initialStep = parseInt(searchParams.get("step") ?? "0", 10);
+  const [active, setActive] = useState(isNaN(initialStep) ? 0 : initialStep);
   const [currentLang, setCurrentLang] = useState(initialLang);
+  // Sync currentLang from the [lang] path segment in the URL
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const pathLang =
+      window.location.pathname.split("/")[1] || initialLang || "en";
+    if (pathLang !== currentLang) {
+      setCurrentLang(pathLang);
+    }
+  }, [pathname]);
+  const [translations, setTranslations] = useState(initialTranslations);
 
   // --- step completeness state ---
   const [hasHeroContent, setHasHeroContent] = useState(false);
@@ -146,10 +158,21 @@ export default function BuilderClient({
 
   const handleLanguageChange = (lang: string) => {
     setCurrentLang(lang);
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("lang", lang);
-    router.push(`${pathname}?${params.toString()}`);
+    // preserve step in URL
+    router.push(`/${lang}/builder?step=${active}`);
   };
+
+  // Fetch builder translations when currentLang changes
+  useEffect(() => {
+    if (currentLang === initialLang) return;
+    async function fetchTranslations() {
+      const { fetchBuilderTranslations } =
+        await import("@/4-shared/api/builder/getTranslations");
+      const newTranslations = await fetchBuilderTranslations(currentLang, "en");
+      setTranslations(newTranslations);
+    }
+    fetchTranslations();
+  }, [currentLang, initialLang]);
 
   // "done" → green check | "pending" → red dot (mandatory) | "optional" → gray circle
   const STEP_STATUS: StepStatus[] = [
@@ -180,7 +203,12 @@ export default function BuilderClient({
             stepKeys={STEP_KEYS}
             stepStatuses={STEP_STATUS}
             active={active}
-            onSelect={setActive}
+            onSelect={(step) => {
+              setActive(step);
+              // update step in URL
+              const url = `/${currentLang}/builder?step=${step}`;
+              router.push(url);
+            }}
             translations={translations}
           />
           <BuilderStepContent

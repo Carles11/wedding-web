@@ -24,7 +24,7 @@ export async function signupWithEmail(
     ? preferredLanguage
     : "en";
   const onboardingNext = encodeURIComponent(
-    `/builder/onboarding?lang=${selectedLang}`,
+    `/${selectedLang}/builder/onboarding`,
   );
 
   const { error, data } = await supabase.auth.signUp({
@@ -32,7 +32,7 @@ export async function signupWithEmail(
     password,
     options: {
       data: fullName ? { full_name: fullName } : undefined,
-      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/confirm?lang=${selectedLang}&next=${onboardingNext}`,
+      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/${selectedLang}/auth/confirm?next=${onboardingNext}`,
     },
   });
 

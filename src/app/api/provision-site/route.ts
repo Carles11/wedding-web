@@ -1,3 +1,5 @@
+"use server";
+
 import { getCurrentUser } from "@/3-entities/user/api/getCurrentUser";
 import { createSiteForUser } from "@/4-shared/api/builder/createSiteForUser";
 import { supabaseAdmin } from "@/4-shared/lib/supabase/supabaseServer";

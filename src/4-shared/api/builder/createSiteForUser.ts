@@ -1,3 +1,5 @@
+"use server";
+
 import { isValidLanguage } from "@/4-shared/helpers/isValidLanguage";
 import { supabaseAdmin } from "@/4-shared/lib/supabase/supabaseServer";
 import type { Site } from "@/4-shared/types";

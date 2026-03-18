@@ -366,7 +366,7 @@ export default function GeneralSiteForm({
               "Upgrade to Premium"
             }
             onClose={() => setShowUpgradeCTA(false)}
-            onUpgrade={() => router.push(`/marketing/pricing?lang=${lang}`)}
+            onUpgrade={() => router.push(`/${lang}/pricing`)}
           />
         </div>
 

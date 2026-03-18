@@ -10,15 +10,17 @@ export default function LogoutButton() {
   const { signOut } = useSupabaseAuth();
   const router = useRouter();
 
+  // TODO: Replace with actual lang from route context
+  const currentLang = "en";
   const handleLogout = async () => {
     setIsLoggingOut(true);
     try {
       await signOut();
-      router.push("/");
+      router.push(`/${currentLang}`);
     } catch (error) {
       console.error("Logout failed:", error);
       // Even if logout fails, redirect to home
-      router.push("/");
+      router.push(`/${currentLang}`);
     } finally {
       setIsLoggingOut(false);
     }

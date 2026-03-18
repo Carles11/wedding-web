@@ -1,3 +1,7 @@
+import {
+  getLocalizedMarketingPlanFeatures,
+  getLocalizedPlanFeatureTitles,
+} from "@/4-shared/helpers/billing/entitlements";
 import type {
   MarketingPageViewModel,
   MarketingTranslations,
@@ -11,7 +15,7 @@ const MARKETING_EXAMPLE_SITES = [
   },
   {
     siteName: "Carles & Ines",
-    siteUrl: "https://carlesundines.weddweb.com",
+    siteUrl: "https://inesundcarles.weddweb.com",
     isPremium: false,
   },
 ] as const;
@@ -25,6 +29,12 @@ export function buildMarketingPageViewModel(
   translations: MarketingTranslations,
   handlers: Handlers,
 ): MarketingPageViewModel {
+  const freeFeatures = getLocalizedMarketingPlanFeatures("free", translations);
+  const premiumFeatures = getLocalizedMarketingPlanFeatures(
+    "premium",
+    translations,
+  );
+
   return {
     hero: {
       headline: translations["marketing.hero.headline"],
@@ -38,60 +48,8 @@ export function buildMarketingPageViewModel(
       sectionTitle: translations["marketing.features.section_title"],
       freeTierName: translations["marketing.features.free_tier_name"],
       premiumTierName: translations["marketing.features.premium_tier_name"],
-      freeFeatures: [
-        {
-          icon: "🌐",
-          title: translations["marketing.features.free_plan_feature_1"],
-          description: translations["marketing.features.free_plan_feature_1"],
-        },
-        {
-          icon: "🗣️",
-          title: translations["marketing.features.free_plan_feature_2"],
-          description: translations["marketing.features.free_plan_feature_2"],
-        },
-        {
-          icon: "🏨",
-          title: translations["marketing.features.free_plan_feature_3"],
-          description: translations["marketing.features.free_plan_feature_3"],
-        },
-        {
-          icon: "🎭",
-          title: translations["marketing.features.free_plan_feature_4"],
-          description: translations["marketing.features.free_plan_feature_4"],
-        },
-      ],
-      premiumFeatures: [
-        {
-          icon: "🔗",
-          title: translations["marketing.features.premium_plan_feature_1"],
-          description:
-            translations["marketing.features.premium_plan_feature_1"],
-        },
-        {
-          icon: "🌍",
-          title: translations["marketing.features.premium_plan_feature_2"],
-          description:
-            translations["marketing.features.premium_plan_feature_2"],
-        },
-        {
-          icon: "♾️",
-          title: translations["marketing.features.premium_plan_feature_3"],
-          description:
-            translations["marketing.features.premium_plan_feature_3"],
-        },
-        {
-          icon: "🎁",
-          title: translations["marketing.features.premium_plan_feature_4"],
-          description:
-            translations["marketing.features.premium_plan_feature_4"],
-        },
-        {
-          icon: "🎁",
-          title: translations["marketing.features.premium_plan_feature_5"],
-          description:
-            translations["marketing.features.premium_plan_feature_5"],
-        },
-      ],
+      freeFeatures,
+      premiumFeatures,
       popularBadgeLabel: translations["marketing.features.popular_badge"],
     },
     testimonials: {
@@ -110,26 +68,18 @@ export function buildMarketingPageViewModel(
       freePlanName: translations["marketing.pricing.free_plan_name"],
       freePlanPrice: translations["marketing.pricing.free_plan_price"],
       freePlanCTA: translations["marketing.pricing.free_plan_cta"],
-      freePlanFeatures: [
-        translations["marketing.pricing.free.feature_1"],
-        translations["marketing.pricing.free.feature_2"],
-        translations["marketing.pricing.free.feature_3"],
-        translations["marketing.pricing.free.feature_4"],
-      ],
+      freePlanFeatures: getLocalizedPlanFeatureTitles("free", translations),
       premiumPlanName: translations["marketing.pricing.premium_plan_name"],
       premiumPlanPrice: translations["marketing.pricing.premium_plan_price"],
-      comingSoonText: translations["marketing.pricing.premium_coming_soon"],
       perSiteText: translations["marketing.pricing.per_site"],
       premiumPlanCTA: translations["marketing.pricing.premium_plan_cta"],
-      premiumPlanFeatures: [
-        translations["marketing.pricing.premium.feature_1"],
-        translations["marketing.pricing.premium.feature_2"],
-        translations["marketing.pricing.premium.feature_3"],
-        translations["marketing.pricing.premium.feature_4"],
-        translations["marketing.pricing.premium.feature_5"],
-      ],
+      premiumPlanFeatures: getLocalizedPlanFeatureTitles(
+        "premium",
+        translations,
+      ),
       onFreePlanClick: handlers.onPrimaryClick,
       onPremiumPlanClick: handlers.onPrimaryClick,
+      popularBadgeLabel: translations["marketing.features.popular_badge"],
     },
     cta: {
       headline: translations["marketing.cta.headline"],

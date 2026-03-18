@@ -1,3 +1,5 @@
+"use server";
+
 import { supabaseAdmin } from "@/4-shared/lib/supabase/supabaseServer"; // ← CHANGED!
 
 export async function getSiteIdForDomainOrSubdomain(

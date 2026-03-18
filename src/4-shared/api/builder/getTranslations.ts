@@ -1,6 +1,8 @@
+"use server";
+
+import { fetchGlobalTranslations } from "@/4-shared/lib/globalTranslations";
 import { supabaseAdmin } from "@/4-shared/lib/supabase/supabaseServer";
 import type { TranslationDictionary } from "@/4-shared/types";
-import { fetchGlobalTranslations } from "@/4-shared/lib/globalTranslations";
 
 // 5-minute in-memory cache for builder translations
 const BUILDER_CACHE_TTL_MS = 1000 * 60 * 5;
@@ -85,6 +87,43 @@ export async function fetchBuilderTranslations(
       if (rowLocale === locale) map[key].preferred = value;
       else map[key].fallback = value;
     });
+
+    // Plan feature title keys may be defined in marketing namespace as
+    // fallback options in the central plan catalog. Merge them here so
+    // builder pages can localize those titles too.
+    try {
+      const { data: marketingData, error: marketingError } = await supabaseAdmin
+        .from("global_translations_marketing")
+        .select("key, locale, value")
+        .in("locale", localesToQuery)
+        .like("key", "marketing.features.%_title");
+
+      if (!marketingError) {
+        (marketingData ?? []).forEach((row: unknown) => {
+          const r = row as { key?: string; locale?: string; value?: string };
+          if (!r || !r.key) return;
+
+          const {
+            key,
+            locale: rowLocale,
+            value,
+          } = r as {
+            key: string;
+            locale: string;
+            value: string;
+          };
+
+          if (!map[key]) map[key] = {};
+          if (rowLocale === locale) {
+            if (!map[key].preferred) map[key].preferred = value;
+          } else {
+            if (!map[key].fallback) map[key].fallback = value;
+          }
+        });
+      }
+    } catch (e) {
+      // Ignore optional merge and continue with builder/global payload only.
+    }
 
     const result: TranslationDictionary = {};
     Object.keys(map).forEach((k) => {

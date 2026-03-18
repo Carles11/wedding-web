@@ -2,21 +2,23 @@
 
 /* Color and font variables */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #ffffff; /* blanco nieve */
+  --foreground: #292d41; /* azul acero */
 }
 
 /* Primary tokens and font fallbacks.
    If you use next/font with the `variable` option, it will inject
-   --font-roboto and --font-niconne into :root. We map those to
+  --font-roboto, --font-niconne, --font-lora, --font-playfair-display
+  and --font-plus-jakarta-sans
+   into :root. We map those to
    semantic variables used across the app.
 */
 :root {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
 
-  /* Keep existing geist variables as fallbacks but prefer next/font vars if present */
-  --font-sans: var(
+  /* Base font stacks per family so they can be switched from one place later. */
+  --font-sans-roboto: var(
     --font-roboto,
     var(--font-geist-sans),
     system-ui,
@@ -26,6 +28,22 @@
     "Helvetica Neue",
     Arial
   );
+  --font-sans-plus-jakarta: var(
+    --font-plus-jakarta-sans,
+    var(--font-geist-sans),
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    "Plus Jakarta Sans",
+    "Helvetica Neue",
+    Arial
+  );
+  --font-serif-lora: var(--font-lora, Georgia, "Times New Roman", serif);
+  --font-display-playfair: var(--font-playfair-display, var(--font-serif-lora));
+
+  /* Active semantic fonts (defaults kept as before). */
+  --font-sans: var(--font-sans-roboto);
+  --font-sans-secondary: var(--font-sans-plus-jakarta);
   --font-mono: var(
     --font-geist-mono,
     ui-monospace,
@@ -37,15 +55,15 @@
     monospace
   );
 
-  /* Display font for headings/titles — falls back to --font-serif if Niconne isn't present */
-  --font-display: var(--font-niconne, var(--font-serif));
+  /* Display font defaults to Playfair, with Niconne as fallback option. */
+  --font-display: var(--font-display-playfair, var(--font-niconne));
 }
 
 /* Dark mode token overrides */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #292d41; /* azul acero */
+    --foreground: #ffffff; /* blanco nieve */
   }
 }
 
@@ -58,7 +76,7 @@ body,
 
 body {
   margin: 0;
-  font-family: var(--font-sans);
+  font-family: var(--font-sans-secondary);
   color: var(--color-foreground);
   background: var(--color-background);
   -webkit-font-smoothing: antialiased;
@@ -66,26 +84,50 @@ body {
   line-height: 1.5;
 }
 
-/* Typography: use the display font (Niconne) for headings and titles.
-   Niconne is a script/display face — keep weight light and line-height tight.
+/* Typography: use the display font (Playfair) for headings and titles.
+   Playfair is a serif/display face — keep weight light and line-height tight.
 */
 .heading,
 .title,
 .display,
-h1 {
+h1,
+h2,
+h3 {
   font-family: var(--font-display);
-  font-weight: 400; /* Niconne is generally single-weight; adjust if you load more weights */
+  font-weight: 400; /* Playfair is generally single-weight; adjust if you load more weights */
   line-height: 1.1;
   margin: 0;
 }
 
 /* Responsive sizes */
 h1 {
-  font-size: clamp(6vw, 4vw, 3rem);
+  font-size: clamp(5vw, 3.5vw, 3rem);
+}
+
+@media screen and (max-width: 468px) {
+  h1 {
+    font-size: clamp(8vw, 6vw, 3rem);
+  }
 }
 
 h2 {
-  font-size: clamp(1.5rem, 4.5vw, 1rem);
+  font-size: clamp(2rem, 5vw, 1.2rem);
+}
+
+@media screen and (max-width: 468px) {
+  h2 {
+    font-size: clamp(1.5rem, 4.5vw, 1rem);
+  }
+}
+
+h3 {
+  font-size: clamp(1.5rem, 3vw, 1.7rem);
+}
+
+@media screen and (max-width: 468px) {
+  h3 {
+    font-size: clamp(1.2rem, 2.5vw, 1.5rem);
+  }
 }
 
 /* Small inline title used in hero sections */
@@ -97,6 +139,30 @@ h2 {
 /* Utility class to specifically apply display font when needed */
 .font-display {
   font-family: var(--font-display) !important;
+}
+
+.font-roboto {
+  font-family: var(--font-sans-roboto) !important;
+}
+
+.font-plus-jakarta {
+  font-family: var(--font-sans-plus-jakarta) !important;
+}
+
+.font-text-secondary {
+  font-family: var(--font-sans-secondary) !important;
+}
+
+.font-lora {
+  font-family: var(--font-serif-lora) !important;
+}
+
+.font-niconne {
+  font-family: var(--font-niconne, cursive) !important;
+}
+
+.font-playfair {
+  font-family: var(--font-display-playfair) !important;
 }
 
 /* Accessibility: visually hidden (screen-reader only) */
@@ -120,7 +186,7 @@ h2 {
   --builder-color-page-bg: #f1f5f9;
   --builder-color-surface: #ffffff;
   --builder-color-muted-surface: #f8fafc;
-  --builder-color-text: #0f172a;
+  --builder-color-text: var(--color-foreground);
   --builder-color-text-muted: #64748b;
   --builder-color-border: #dbe2ea;
   --builder-color-primary: #2563eb;
@@ -190,7 +256,7 @@ h2 {
 
 .builder-btn-primary {
   background: var(--builder-color-primary);
-  color: #fff;
+  color: var(--color-foreground);
 }
 
 .builder-btn-primary:hover:not(:disabled) {
@@ -276,12 +342,6 @@ h2 {
   background: var(--builder-color-muted-surface);
 }
 
-@media screen and (max-width: 468px) {
-  h1 {
-    font-size: clamp(8vw, 6vw, 3rem);
-  }
-}
-
 /* ── Marketing + Auth Theme ─────────────────────────────────────────────
    Tokens defined at :root so they work across marketing pages AND auth
    routes (which have no shared layout wrapper).
@@ -299,6 +359,19 @@ h2 {
   --marketing-radius-rect: 0.375rem;
   --marketing-shadow-btn:
     0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --marketing-bg-gradient: linear-gradient(
+    to bottom right,
+    #e6faf4,
+    #ffffff,
+    #fff5eb
+  );
+  --marketing-bg-light-gradient: linear-gradient(
+    to bottom right,
+    #f5fdfb,
+    #ffffff,
+    #fffaf5
+  );
+  --marketing-bg-subtle-gradient: linear-gradient(to bottom, #ffffff, #f9fafb);
 }
 
 /* Button base */

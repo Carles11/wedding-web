@@ -1,24 +1,8 @@
 "use client";
 
+import { HeroMarketingProps } from "@/4-shared/types";
+import { Heading } from "@/4-shared/ui/commons/typography/Heading";
 import { MarketingButton } from "@/4-shared/ui/marketing";
-
-/**
- * Props for `HeroMarketing` component.
- */
-export interface HeroMarketingProps {
-  /** Headline text (e.g., translations['marketing.hero.headline']) */
-  headline: string;
-  /** Subheadline text (e.g., translations['marketing.hero.subheadline']) */
-  subheadline: string;
-  /** Primary CTA button text (e.g., translations['marketing.hero.cta_primary']) */
-  ctaPrimary: string;
-  /** Optional secondary CTA button text (e.g., translations['marketing.hero.cta_secondary']) */
-  ctaSecondary?: string;
-  /** Optional callback for primary CTA button */
-  onPrimaryClick?: () => void;
-  /** Optional callback for secondary CTA button */
-  onSecondaryClick?: () => void;
-}
 
 /**
  * Full-width marketing hero section.
@@ -39,11 +23,12 @@ export default function HeroMarketing({
       className="w-full min-h-[80vh] flex items-center"
       aria-label="Marketing hero"
     >
-      <div className="w-full bg-gradient-to-br from-[#E6FAF4] via-white to-[#FFF5EB] py-20 h-[-webkit-fill-available]">
+      <div
+        className="w-full py-20 h-[-webkit-fill-available]"
+        style={{ background: "var(--marketing-bg-gradient)" }}
+      >
         <div className="mx-auto max-w-4xl px-6 text-center">
-          <h1 className="text-4xl md:text-6xl font-extrabold text-gray-900 leading-tight">
-            {headline}
-          </h1>
+          <Heading as="h1">{headline}</Heading>
           <p className="mt-6 text-xl md:text-2xl text-gray-600">
             {subheadline}
           </p>

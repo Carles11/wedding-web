@@ -56,7 +56,8 @@ export default function WeddingGiftBuilderStep({
   const giftMethodLimit = getPlanLimit(planType, "weddingGiftMethods");
 
   function goToPricing() {
-    router.push(`/marketing/pricing?lang=${lang || "en"}`);
+    // Use language-prefixed routing, not query param
+    router.push(`/${lang || "en"}/pricing`);
   }
 
   function giftSignature(row: Partial<WeddingGift> | null | undefined): string {

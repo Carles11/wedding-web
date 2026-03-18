@@ -83,8 +83,8 @@ export async function createCheckoutSession(
       userId,
       planType,
     },
-    success_url: `${baseUrl}/builder/checkout?success=true&session_id={CHECKOUT_SESSION_ID}&lang=${language}`,
-    cancel_url: `${baseUrl}/marketing/pricing?lang=${language}`,
+    success_url: `${baseUrl}/${language}/builder/checkout?success=true&session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${baseUrl}/${language}/pricing`,
   });
 
   if (!session.id || !session.url) {

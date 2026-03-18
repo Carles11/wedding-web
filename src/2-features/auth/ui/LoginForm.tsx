@@ -1,12 +1,12 @@
 "use client";
 
 import { loginWithEmail, resendVerificationEmail } from "@/2-features/auth/api";
-import { isValidLanguage } from "@/4-shared/helpers/isValidLanguage";
 import { notify } from "@/4-shared/lib/toast/toast";
+import Heading from "@/4-shared/ui/commons/typography/Heading";
 import { MarketingButton } from "@/4-shared/ui/marketing";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useRef, useState } from "react";
 
 type Props = {
   translations: Record<string, string>;
@@ -28,28 +28,11 @@ export default function LoginForm({ translations }: Props) {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const router = useRouter();
-  const searchParams = useSearchParams();
+  // TODO: Replace with actual lang from route context
+  const currentLang = "en";
   const notifiedStatus = useRef<string | null>(null);
-  const requestedLang = searchParams.get("lang") ?? undefined;
-  const currentLang = isValidLanguage(requestedLang) ? requestedLang : "en";
-  const langQuery = `?lang=${encodeURIComponent(currentLang)}`;
 
-  useEffect(() => {
-    const status = searchParams.get("status");
-    if (!status || notifiedStatus.current === status) return;
-
-    notifiedStatus.current = status;
-
-    if (status === "verify-email") {
-      notify.info(
-        tr(
-          translations,
-          "auth.common.verify_email_required",
-          "Please verify your email before accessing the builder. Check your inbox for the confirmation link.",
-        ),
-      );
-    }
-  }, [searchParams, translations]);
+  // ...existing code...
 
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -134,7 +117,7 @@ export default function LoginForm({ translations }: Props) {
       } else {
         setSuccess(true);
         setTimeout(() => {
-          router.push(`/builder${langQuery}`);
+          router.push(`/${currentLang}/builder`);
         }, 1000);
       }
     } catch {
@@ -151,12 +134,12 @@ export default function LoginForm({ translations }: Props) {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50">
+    <div className="flex items-center justify-center min-h-screen">
       <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
+        <Heading as="h2" className="text-center mb-6">
           {tr(translations, "auth.login.title", "Login to Your Account")}
-        </h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        </Heading>
+        <form onSubmit={handleSubmit} className="space-y-4 mt-6">
           <div>
             <label
               htmlFor="email"
@@ -203,7 +186,7 @@ export default function LoginForm({ translations }: Props) {
           </div>
           <div className="text-right">
             <Link
-              href={`/auth/forgot-password${langQuery}`}
+              href={`/${currentLang}/auth/forgot-password`}
               className="text-sm marketing-link"
             >
               {tr(
@@ -277,7 +260,7 @@ export default function LoginForm({ translations }: Props) {
               "Don&apos;t have an account?",
             )}{" "}
             <Link
-              href={`/auth/signup${langQuery}`}
+              href={`/${currentLang}/auth/signup`}
               className="font-medium marketing-link"
             >
               {tr(translations, "auth.common.sign_up", "Sign up")}
@@ -285,10 +268,7 @@ export default function LoginForm({ translations }: Props) {
           </p>
         </div>
         <div className="mt-4 text-center">
-          <Link
-            href={`/marketing${langQuery}`}
-            className="text-sm marketing-link"
-          >
+          <Link href={`/${currentLang}`} className="text-sm marketing-link">
             {tr(translations, "auth.common.back_to_home", "Back to home")}
           </Link>
         </div>

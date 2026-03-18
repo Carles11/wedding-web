@@ -165,29 +165,73 @@ This architecture ensures that all public-facing experiences—including tenant 
 
 ## Plan Feature Update Guide
 
-Plan feature strings are currently sourced from the plan catalog and optionally overridden by translation keys in the database.
+Plan features are now centralized and key-mapped. Do not treat them as simple index-only labels anymore.
 
-### How Rendering Works Today
+### Source of Truth
 
-1. Plan structure comes from `src/4-shared/config/plans/planCatalog.ts`.
-2. UI components read each plan feature by index (feature 1, feature 2, etc.).
-3. For each feature, UI first tries DB translation key `pricing.plan.<plan>.feature_<index>`.
-4. If the DB key is missing, UI falls back to the value in `planCatalog.ts`.
+Plan feature metadata is defined in:
 
-### How To Update Features Safely
+- `src/4-shared/config/plans/planCatalog.ts`
 
-When you change a feature text in `planCatalog.ts` (for example `Unlimited events` -> `Unlimited program events`):
+Each feature has:
 
-1. Update the feature string in `src/4-shared/config/plans/planCatalog.ts`.
-2. Update matching translation keys in the SQL seed script(s), for all locales:
+- `title`: fallback text used if no translation key resolves
+- `titleTranslationKeys`: ordered list of possible keys to resolve from translations
+- `marketingDescription`: fallback description
+- `marketingDescriptionTranslationKey`: key for marketing description text
 
-- `pricing.plan.free.feature_N`
-- `pricing.plan.premium.feature_N`
+`src/4-shared/config/plans/planDefinitions.ts` simply exports `PLAN_CATALOG`, so all billing/feature logic reads from the same centralized source.
 
-3. Run the SQL script in Supabase (idempotent with `ON CONFLICT DO UPDATE`).
-4. Reload the UI.
+### How Rendering Works Now
+
+The localization helpers are in:
+
+- `src/4-shared/helpers/billing/entitlements.ts`
+
+Resolution behavior:
+
+1. **Feature titles** use `getLocalizedPlanFeatureTitles(planType, translations)`.
+2. For each feature title, the helper checks `titleTranslationKeys` in order and uses the first available key.
+3. If no key resolves, it falls back to the feature `title` in `planCatalog.ts`.
+4. **Marketing feature cards** use `getLocalizedMarketingPlanFeatures(planType, translations)`.
+5. Marketing descriptions resolve via `marketingDescriptionTranslationKey` and fallback to `marketingDescription` if missing.
+
+Marketing page usage:
+
+- `src/1-widgets/marketing/model/buildMarketingPageViewModel.ts`
+
+### How To Update Features (Current Workflow)
+
+When changing any Free/Premium feature title or description:
+
+1. Update the feature object in `src/4-shared/config/plans/planCatalog.ts`.
+2. Keep translation key mappings correct:
+
+- For title: update `titleTranslationKeys` only if key mapping changes.
+- For marketing description: update `marketingDescriptionTranslationKey` only if key mapping changes.
+
+3. Update translation values in SQL for **all locales**:
+
+- Builder/global plan title keys: `pricing.plan.free.feature_*`, `pricing.plan.premium.feature_*`
+- Marketing description keys: `marketing.features.free_plan_feature_*_description`, `marketing.features.premium_plan_feature_*_description`
+
+4. Run migration in Supabase:
+
+- `MIGRATION-UPDATE-TRANSLATIONS-FIXED.sql`
+
+5. Reload UI and verify both pricing lists and marketing feature cards.
+
+### Verification Checklist
+
+After running SQL:
+
+1. Confirm feature titles in builder/pricing pages (Free and Premium).
+2. Confirm marketing feature descriptions match the intended feature (no key mismatch).
+3. Validate at least EN + ES + CA manually.
+4. If values seem stale, wait for cache TTL (translation fetchers cache for a few minutes) and reload.
 
 ### Important Notes
 
-- Feature keys are index-based (`feature_1`, `feature_2`, ...), so reordering features requires updating translation keys accordingly.
-- Builder translations are cached in memory for a short TTL, so changes may take a few minutes to appear if cache is warm.
+- The feature display order comes from `planCatalog.ts`, but translation keys are explicit mappings; do not assume index alignment if you remap keys.
+- Reordering features is safe only if key mappings are reviewed carefully.
+- Prefer upsert-style SQL (`ON CONFLICT (key, locale) DO UPDATE`) for repeatable fixes.

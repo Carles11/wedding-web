@@ -46,11 +46,12 @@ export async function updateSession(request: NextRequest) {
   // Protected routes: redirect to login if not authenticated
   if (
     !user &&
-    (request.nextUrl.pathname.startsWith("/builder") ||
-      request.nextUrl.pathname.startsWith("/dashboard"))
+    /^\/[a-z]{2}\/(builder|dashboard)/.test(request.nextUrl.pathname)
   ) {
+    // Use language-prefixed routing for login redirect
+    const lang = request.nextUrl.pathname.split("/")[1] || "en";
     const url = request.nextUrl.clone();
-    url.pathname = "/auth/login";
+    url.pathname = `/${lang}/auth/login`;
     url.searchParams.set("redirectTo", request.nextUrl.pathname);
     return NextResponse.redirect(url);
   }

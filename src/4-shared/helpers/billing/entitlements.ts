@@ -32,6 +32,44 @@ export function getPlanFeatures(planType: PlanType): PlanFeatures {
   };
 }
 
+function resolveTranslationByKeys(
+  translations: Record<string, string>,
+  keys: readonly string[],
+): string | undefined {
+  for (const key of keys) {
+    const value = translations[key];
+    if (value) return value;
+  }
+  return undefined;
+}
+
+export function getLocalizedPlanFeatureTitles(
+  planType: PlanType,
+  translations: Record<string, string>,
+): string[] {
+  const def = getPlanDefinition(planType);
+  return def.features.map(
+    (feature) =>
+      resolveTranslationByKeys(translations, feature.titleTranslationKeys) ??
+      feature.title,
+  );
+}
+
+export function getLocalizedMarketingPlanFeatures(
+  planType: PlanType,
+  translations: Record<string, string>,
+): Array<{ title: string; description: string }> {
+  const def = getPlanDefinition(planType);
+  return def.features.map((feature) => ({
+    title:
+      resolveTranslationByKeys(translations, feature.titleTranslationKeys) ??
+      feature.title,
+    description:
+      translations[feature.marketingDescriptionTranslationKey] ??
+      feature.marketingDescription,
+  }));
+}
+
 export function getPlanLimit(planType: PlanType, key: PlanLimitKey): number {
   return getPlanDefinition(planType).limits[key];
 }

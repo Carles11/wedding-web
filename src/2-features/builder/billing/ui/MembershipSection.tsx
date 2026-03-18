@@ -1,5 +1,5 @@
 "use client";
-import { PLAN_DEFINITIONS } from "@/4-shared/config/plans/planDefinitions";
+import { getLocalizedPlanFeatureTitles } from "@/4-shared/helpers/billing/entitlements";
 import { isValidLanguage } from "@/4-shared/helpers/isValidLanguage";
 import type { PlanType } from "@/4-shared/types";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -27,13 +27,9 @@ export default function MembershipSection({
     premium: translations["builder.billing.current_plan_premium"],
   }[planType];
 
-  const planDefinition = PLAN_DEFINITIONS[planType];
-  const localizedFeatures = planDefinition.featuresList.map(
-    (feature, index) => {
-      return (
-        translations[`pricing.plan.${planType}.feature_${index + 1}`] || feature
-      );
-    },
+  const localizedFeatures = getLocalizedPlanFeatureTitles(
+    planType,
+    translations,
   );
 
   const canUpgrade = planType === "free";
@@ -65,10 +61,8 @@ export default function MembershipSection({
                 className="cursor-pointer"
                 onClick={() =>
                   canUpgrade
-                    ? router.push(`/marketing/pricing?lang=${lang}`)
-                    : router.push(
-                        `/builder/${siteId}/account/billing?lang=${lang}`,
-                      )
+                    ? router.push(`/${lang}/pricing`)
+                    : router.push(`/${lang}/builder/${siteId}/domain-billing`)
                 }
               >
                 ✦{" "}
@@ -123,7 +117,7 @@ export default function MembershipSection({
 
       <div
         className="mt-3 text-sm text-blue-700 underline cursor-pointer hover:text-blue-800 transition"
-        onClick={() => router.push(`/marketing/pricing?lang=${lang}`)}
+        onClick={() => router.push(`/${lang}/pricing`)}
       >
         {translations["builder.billing.learn_more"]}
       </div>

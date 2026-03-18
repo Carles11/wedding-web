@@ -172,7 +172,8 @@ export default function WhatToSeeBuilderStep({
   }
 
   function goToPricing() {
-    router.push(`/marketing/pricing?lang=${lang || "en"}`);
+    // Use language-prefixed routing, not query param
+    router.push(`/${lang || "en"}/pricing`);
   }
 
   // Form state for the currently editing/creating item

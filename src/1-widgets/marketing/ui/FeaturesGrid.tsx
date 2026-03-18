@@ -1,40 +1,10 @@
 "use client";
 
-/**
- * Single feature item displayed in the grid.
- */
-export type Feature = {
-  /** Emoji or icon identifier (e.g., "🌐") */
-  icon: string;
-  /** Feature title */
-  title: string;
-  /** Feature description */
-  description: string;
-};
+import { FeaturesGridProps } from "@/4-shared/types";
+import Heading from "@/4-shared/ui/commons/typography/Heading";
 
-/**
- * Props for `FeaturesGrid` component.
- */
-export interface FeaturesGridProps {
-  /** Section heading text */
-  sectionTitle: string;
-  /** Free tier display name */
-  freeTierName: string;
-  /** Premium tier display name */
-  premiumTierName: string;
-  /** Features included in the free tier */
-  freeFeatures: Feature[];
-  /** Features included in the premium tier */
-  premiumFeatures: Feature[];
-  /** Label for the premium badge (e.g., "Popular") */
-  popularBadgeLabel?: string;
-}
+import { CheckIcon } from "@/4-shared/ui/commons/icons/checkIcon";
 
-/**
- * FeaturesGrid
- *
- * Compares Free vs Premium features in a responsive two-column layout.
- */
 export default function FeaturesGrid({
   sectionTitle,
   freeTierName,
@@ -46,70 +16,96 @@ export default function FeaturesGrid({
   return (
     <section
       aria-labelledby="marketing-features-title"
-      className="py-16 bg-gradient-to-b from-white to-gray-50"
+      className="py-16"
+      style={{ background: "var(--marketing-bg-subtle-gradient)" }}
     >
       <div className="max-w-5xl mx-auto px-6 text-center">
-        <h2
-          id="marketing-features-title"
-          className="text-3xl md:text-4xl font-bold"
-        >
+        <Heading as="h2" id="marketing-features-title">
           {sectionTitle}
-        </h2>
+        </Heading>
 
         <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
-          {/* Free Tier Card */}
-          <article className="flex flex-col h-full p-6 bg-white border border-gray-200 shadow-md rounded-lg">
-            <header className="mb-4">
-              <h3 className="text-lg md:text-xl font-semibold uppercase">
+          {/* Free Tier */}
+          <article
+            className="flex flex-col h-full p-8 rounded-2xl shadow-sm"
+            style={{
+              background: "var(--color-background)",
+              border: "1px solid var(--builder-color-border)",
+            }}
+          >
+            <header
+              className="mb-6 pb-4"
+              style={{ borderBottom: "1px solid var(--builder-color-border)" }}
+            >
+              <Heading
+                as="h3"
+                className="text-base font-semibold uppercase tracking-widest opacity-60"
+              >
                 {freeTierName}
-              </h3>
+              </Heading>
             </header>
 
             <ul
-              className="mt-2 space-y-6 text-left flex-1"
+              className="space-y-5 text-left flex-1"
               aria-label="Free tier features"
             >
               {freeFeatures.map((f, idx) => (
-                <li key={idx} className="flex gap-4">
-                  <div className="flex-shrink-0 text-3xl md:text-4xl">
-                    {f.icon}
-                  </div>
+                <li key={idx} className="flex gap-3 items-start">
+                  <CheckIcon />
                   <div>
-                    <div className="text-lg font-semibold">{f.title}</div>
-                    <div className="text-sm text-gray-600 mt-1">
-                      {f.description}
-                    </div>
+                    <div className="text-md font-semibold">{f.title}</div>
+                    {f.description ? (
+                      <div className="text-sm mt-0.5 opacity-55">
+                        {f.description}
+                      </div>
+                    ) : null}
                   </div>
                 </li>
               ))}
             </ul>
           </article>
 
-          {/* Premium Tier Card */}
-          <article className="flex flex-col h-full p-6 bg-white border-2 border-[#6ABDA6] shadow-lg rounded-lg relative">
-            <div className="absolute -top-3 right-3 bg-[#6ABDA6] text-white px-3 py-1 rounded-full text-sm font-semibold">
+          {/* Premium Tier */}
+          <article
+            className="flex flex-col h-full p-8 rounded-2xl shadow-md relative"
+            style={{
+              background: "var(--color-background)",
+              border: "2px solid var(--marketing-color-primary)",
+            }}
+          >
+            <div
+              className="absolute -top-3 right-4 px-3 py-1 rounded-full text-xs font-semibold text-white"
+              style={{ background: "var(--marketing-color-primary)" }}
+            >
               {popularBadgeLabel}
             </div>
-            <header className="mb-4">
-              <h3 className="text-lg md:text-xl font-semibold uppercase">
+
+            <header
+              className="mb-6 pb-4"
+              style={{ borderBottom: "1px solid var(--builder-color-border)" }}
+            >
+              <Heading
+                as="h3"
+                className="text-base font-semibold uppercase tracking-widest opacity-60"
+              >
                 {premiumTierName}
-              </h3>
+              </Heading>
             </header>
 
             <ul
-              className="mt-2 space-y-6 text-left flex-1"
+              className="space-y-5 text-left flex-1"
               aria-label="Premium tier features"
             >
               {premiumFeatures.map((f, idx) => (
-                <li key={idx} className="flex gap-4">
-                  <div className="flex-shrink-0 text-3xl md:text-4xl">
-                    {f.icon}
-                  </div>
+                <li key={idx} className="flex gap-3 items-start">
+                  <CheckIcon />
                   <div>
-                    <div className="text-lg font-semibold">{f.title}</div>
-                    <div className="text-sm text-gray-600 mt-1">
-                      {f.description}
-                    </div>
+                    <div className="text-md font-semibold">{f.title}</div>
+                    {f.description ? (
+                      <div className="text-sm mt-0.5 opacity-55">
+                        {f.description}
+                      </div>
+                    ) : null}
                   </div>
                 </li>
               ))}

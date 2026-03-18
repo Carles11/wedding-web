@@ -26,6 +26,7 @@ export default async function TenantPageComponent({
   const realParams = await params;
   const lang = isValidLanguage(realParams.lang) ? realParams.lang : "en";
   const host = ((await headers()).get("host") ?? "").toLowerCase().trim();
+  console.log("[TenantPageComponent] entry, host:", host);
   const site = await getSiteByDomain(host);
   const siteId = site?.id ?? null;
 

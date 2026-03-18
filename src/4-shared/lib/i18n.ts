@@ -1,7 +1,9 @@
+"use server";
+
 import { supabaseAdmin } from "@/4-shared/lib/supabase/supabaseServer";
 import {
-  TranslationDictionary,
   GlobalTranslationRow,
+  TranslationDictionary,
   TranslationRow,
 } from "../types";
 
@@ -44,7 +46,7 @@ function getGlobalCache(): Map<string, GlobalCacheEntry> {
  * Clears the in-memory global translations cache.
  * Useful for testing or admin-triggered invalidation.
  */
-export function clearGlobalTranslationsCache() {
+export async function clearGlobalTranslationsCache() {
   getGlobalCache().clear();
 }
 
@@ -211,7 +213,7 @@ export async function t(
 /**
  * Invalidate per-site+locale merge cache. Does not touch global translations cache.
  */
-export function invalidateTranslationsCache(
+export async function invalidateTranslationsCache(
   siteId: string | null,
   locale?: string,
 ) {

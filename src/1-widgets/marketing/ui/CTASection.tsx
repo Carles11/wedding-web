@@ -1,20 +1,9 @@
 "use client";
 
+import { CTASectionProps } from "@/4-shared/types";
+import Heading from "@/4-shared/ui/commons/typography/Heading";
 import { MarketingButton } from "@/4-shared/ui/marketing";
 
-/**
- * Props for CTASection
- */
-export interface CTASectionProps {
-  headline: string;
-  description: string;
-  buttonText: string;
-  onButtonClick?: () => void;
-}
-
-/**
- * CTASection - final call-to-action section for marketing page
- */
 export default function CTASection({
   headline,
   description,
@@ -24,23 +13,41 @@ export default function CTASection({
   return (
     <section
       aria-label="Call to action"
-      className="py-16 md:py-24 bg-gradient-to-r from-[#6ABDA6] to-[#F4A261]"
+      className="py-20 md:py-28 relative overflow-hidden"
+      style={{ background: "var(--marketing-bg-gradient)" }}
     >
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h2 className="text-3xl md:text-5xl font-bold text-white">
-          {headline}
-        </h2>
-        <p className="mt-4 text-lg md:text-xl text-white/90">{description}</p>
+      {/* Decorative blobs */}
+      <div
+        className="absolute -top-16 -left-16 w-72 h-72 rounded-full opacity-20 blur-3xl pointer-events-none"
+        style={{ background: "var(--marketing-color-primary)" }}
+      />
+      <div
+        className="absolute -bottom-16 -right-16 w-72 h-72 rounded-full opacity-20 blur-3xl pointer-events-none"
+        style={{ background: "var(--marketing-color-accent)" }}
+      />
 
-        <div className="mt-8">
+      <div className="relative max-w-3xl mx-auto px-6 text-center">
+        <Heading
+          as="h2"
+          className="text-3xl md:text-5xl font-bold leading-tight"
+          style={{ color: "var(--marketing-color-on-gradient-text)" }}
+        >
+          {headline}
+        </Heading>
+
+        <p className="mt-5 text-base md:text-lg text-gray-500 max-w-xl mx-auto leading-relaxed">
+          {description}.
+        </p>
+
+        <div className="mt-10">
           <MarketingButton
-            variant="on-gradient"
+            variant="primary"
             size="lg"
             onClick={onButtonClick}
             aria-label={buttonText}
             className="w-full md:w-auto"
           >
-            {buttonText}
+            {buttonText} →
           </MarketingButton>
         </div>
       </div>

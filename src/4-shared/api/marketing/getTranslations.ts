@@ -1,6 +1,8 @@
+"use server";
+
+import { fetchGlobalTranslations } from "@/4-shared/lib/globalTranslations";
 import { supabaseAdmin } from "@/4-shared/lib/supabase/supabaseServer";
 import type { TranslationDictionary } from "@/4-shared/types";
-import { fetchGlobalTranslations } from "@/4-shared/lib/globalTranslations";
 
 const MARKETING_CACHE_TTL_MS = 1000 * 60 * 5; // 5 minutes
 
@@ -107,6 +109,42 @@ export async function fetchMarketingTranslations(
       if (rowLocale === locale) map[key].preferred = value;
       else map[key].fallback = value;
     });
+
+    // Bring in shared plan title keys from builder translations so
+    // marketing can reuse planCatalog feature title translation keys.
+    try {
+      const { data: builderData, error: builderError } = await supabaseAdmin
+        .from("global_translations_builder")
+        .select("key, locale, value")
+        .in("locale", localesToQuery)
+        .like("key", "pricing.plan.%");
+
+      if (!builderError) {
+        (builderData ?? []).forEach((row: unknown) => {
+          const r = row as { key?: string; locale?: string; value?: string };
+          if (!r || !r.key) return;
+
+          const {
+            key,
+            locale: rowLocale,
+            value,
+          } = r as {
+            key: string;
+            locale: string;
+            value: string;
+          };
+
+          if (!map[key]) map[key] = {};
+          if (rowLocale === locale) {
+            if (!map[key].preferred) map[key].preferred = value;
+          } else {
+            if (!map[key].fallback) map[key].fallback = value;
+          }
+        });
+      }
+    } catch (e) {
+      // Ignore this optional merge and continue with available translations.
+    }
 
     const result: TranslationDictionary = {};
     Object.keys(map).forEach((k) => {

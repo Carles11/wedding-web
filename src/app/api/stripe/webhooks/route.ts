@@ -1,3 +1,5 @@
+"use server";
+
 import { resolvePlanTypeFromStripePriceId } from "@/4-shared/lib/stripe/stripeCheckout";
 import {
   STRIPE_MODE,

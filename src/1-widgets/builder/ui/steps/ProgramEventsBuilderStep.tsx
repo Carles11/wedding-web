@@ -236,7 +236,8 @@ export default function ProgramEventsBuilderStep({
   }
 
   function goToPricing() {
-    router.push(`/marketing/pricing?lang=${lang || "en"}`);
+    // Use language-prefixed routing, not query param
+    router.push(`/${lang || "en"}/pricing`);
   }
 
   function startCreate() {
