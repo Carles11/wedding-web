@@ -44,7 +44,7 @@ export function generateSiteMetadata({
   const availableLangs =
     Array.isArray(site?.languages) && site.languages.length > 0
       ? site.languages
-      : [site?.default_lang || "ca"];
+      : [site?.default_lang || "en"];
   for (const l of availableLangs) {
     languages[l] =
       pageKind === "tenant"
@@ -63,11 +63,23 @@ export function generateSiteMetadata({
       locale: lang === "ca" ? "ca_ES" : lang === "es" ? "es_ES" : "en_US",
       url: `${baseUrl}/${pageKind === "tenant" ? lang : ""}`,
       siteName: title,
+      images:
+        pageKind === "marketing"
+          ? [`${baseUrl}/assets/og/weddweb-OG.png`]
+          : site?.ogImage
+            ? [site.ogImage]
+            : [`${baseUrl}/assets/og/weddweb-OG.png`],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
+      images:
+        pageKind === "marketing"
+          ? [`${baseUrl}/assets/og/weddweb-OG.png`]
+          : site?.ogImage
+            ? [site.ogImage]
+            : [`${baseUrl}/assets/og/weddweb-OG.png`],
     },
     alternates: {
       canonical: `${baseUrl}/${pageKind === "tenant" ? lang : ""}`,

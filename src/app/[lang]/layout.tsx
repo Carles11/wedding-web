@@ -7,7 +7,7 @@ const ORGANIZATION_JSONLD = {
   "@type": "Organization",
   name: "WeddWeb",
   url: "https://weddweb.com",
-  logo: "https://weddweb.com/logo.png",
+  logo: "https://weddweb.com/android-chrome-192x192.png",
   sameAs: [
     "https://www.facebook.com/weddweb",
     "https://www.instagram.com/weddweb",
