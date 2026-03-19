@@ -1,7 +1,9 @@
 "use client";
 
 import { sendPasswordReset } from "@/2-features/auth/api";
+import { BuilderTextInput } from "@/4-shared/ui/builder/inputs";
 import { MarketingButton } from "@/4-shared/ui/marketing";
+import { EMAIL_RE } from "@/4-shared/utils/validations";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -21,22 +23,23 @@ function tr(
 export default function ForgotPasswordForm({ translations, lang }: Props) {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [genericError, setGenericError] = useState("");
   const [success, setSuccess] = useState(false);
   const currentLang = lang;
 
   const validateEmail = (email: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
+    return EMAIL_RE.test(email);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
+    setEmailError("");
+    setGenericError("");
     setSuccess(false);
 
     if (!validateEmail(email)) {
-      setError(
+      setEmailError(
         tr(
           translations,
           "auth.common.email_invalid",
@@ -50,12 +53,12 @@ export default function ForgotPasswordForm({ translations, lang }: Props) {
     try {
       const result = await sendPasswordReset(email, currentLang);
       if (result.error) {
-        setError(result.error);
+        setGenericError(result.error);
       } else {
         setSuccess(true);
       }
     } catch {
-      setError(
+      setGenericError(
         tr(
           translations,
           "auth.common.unexpected_error",
@@ -105,34 +108,24 @@ export default function ForgotPasswordForm({ translations, lang }: Props) {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50">
+    <div className="flex items-center justify-center min-h-screen">
       <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-md">
         <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
           {tr(translations, "auth.forgot.title", "Reset Your Password")}
         </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              {tr(translations, "auth.common.email", "Email")}
-            </label>
-            <input
-              type="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="marketing-input"
-              placeholder={tr(
-                translations,
-                "auth.common.email_placeholder",
-                "Enter your email",
-              )}
-              required
-              aria-describedby={error ? "error-message" : undefined}
-            />
-          </div>
+          <BuilderTextInput
+            label={tr(translations, "auth.common.email", "Email")}
+            value={email}
+            onChange={setEmail}
+            placeholder={tr(
+              translations,
+              "auth.common.email_placeholder",
+              "Enter your email",
+            )}
+            autoComplete="email"
+            error={emailError}
+          />
           <MarketingButton
             type="submit"
             variant="auth"
@@ -147,13 +140,13 @@ export default function ForgotPasswordForm({ translations, lang }: Props) {
             {tr(translations, "auth.forgot.submit", "Send Reset Link")}
           </MarketingButton>
         </form>
-        {error && (
+        {genericError && (
           <p
             id="error-message"
             className="mt-4 text-sm text-[var(--builder-color-danger)] text-center"
             role="alert"
           >
-            {error}
+            {genericError}
           </p>
         )}
         <div className="mt-6 text-center">

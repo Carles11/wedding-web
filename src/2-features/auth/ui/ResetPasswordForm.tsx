@@ -1,8 +1,10 @@
 "use client";
 
 import { resetPassword } from "@/2-features/auth/api";
+import { BuilderTextInput } from "@/4-shared/ui/builder/inputs";
 import { Heading } from "@/4-shared/ui/commons/typography/Heading";
 import { MarketingButton } from "@/4-shared/ui/marketing";
+import { EMAIL_RE } from "@/4-shared/utils/validations";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -20,10 +22,14 @@ function tr(
 }
 
 export default function ResetPasswordForm({ translations, lang }: Props) {
+  const [email, setEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [confirmPasswordError, setConfirmPasswordError] = useState("");
   const [success, setSuccess] = useState(false);
   const router = useRouter();
   const currentLang = lang;
@@ -35,29 +41,43 @@ export default function ResetPasswordForm({ translations, lang }: Props) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setEmailError("");
+    setPasswordError("");
+    setConfirmPasswordError("");
     setSuccess(false);
 
+    let hasError = false;
+    if (!EMAIL_RE.test(email)) {
+      setEmailError(
+        tr(
+          translations,
+          "auth.common.email_invalid",
+          "Please enter a valid email address.",
+        ),
+      );
+      hasError = true;
+    }
     if (!validatePassword(newPassword)) {
-      setError(
+      setPasswordError(
         tr(
           translations,
           "auth.common.password_min_length",
           "Password must be at least 8 characters long.",
         ),
       );
-      return;
+      hasError = true;
     }
-
     if (newPassword !== confirmPassword) {
-      setError(
+      setConfirmPasswordError(
         tr(
           translations,
           "auth.common.passwords_do_not_match",
           "Passwords do not match.",
         ),
       );
-      return;
+      hasError = true;
     }
+    if (hasError) return;
 
     setLoading(true);
     try {
@@ -123,60 +143,55 @@ export default function ResetPasswordForm({ translations, lang }: Props) {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50">
+    <div className="flex items-center justify-center min-h-screen ">
       <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-md">
         <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
           {tr(translations, "auth.reset.title", "Reset Your Password")}
         </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label
-              htmlFor="newPassword"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              {tr(translations, "auth.reset.new_password", "New Password")}
-            </label>
-            <input
-              type="password"
-              id="newPassword"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              className="marketing-input"
-              placeholder={tr(
-                translations,
-                "auth.reset.new_password_placeholder",
-                "Enter your new password (min 8 characters)",
-              )}
-              required
-              aria-describedby={error ? "error-message" : undefined}
-            />
-          </div>
-          <div>
-            <label
-              htmlFor="confirmPassword"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              {tr(
-                translations,
-                "auth.reset.confirm_new_password",
-                "Confirm New Password",
-              )}
-            </label>
-            <input
-              type="password"
-              id="confirmPassword"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              className="marketing-input"
-              placeholder={tr(
-                translations,
-                "auth.reset.confirm_new_password_placeholder",
-                "Confirm your new password",
-              )}
-              required
-              aria-describedby={error ? "error-message" : undefined}
-            />
-          </div>
+          <BuilderTextInput
+            label={tr(translations, "auth.common.email", "Email")}
+            value={email}
+            onChange={setEmail}
+            type="email"
+            placeholder={tr(
+              translations,
+              "auth.common.email_placeholder",
+              "Enter your email",
+            )}
+            autoComplete="email"
+            error={emailError}
+          />
+          <BuilderTextInput
+            label={tr(translations, "auth.reset.new_password", "New Password")}
+            value={newPassword}
+            onChange={setNewPassword}
+            type="password"
+            autoComplete="new-password"
+            placeholder={tr(
+              translations,
+              "auth.reset.new_password_placeholder",
+              "Enter your new password (min 8 characters)",
+            )}
+            error={passwordError}
+          />
+          <BuilderTextInput
+            label={tr(
+              translations,
+              "auth.reset.confirm_new_password",
+              "Confirm New Password",
+            )}
+            value={confirmPassword}
+            onChange={setConfirmPassword}
+            type="password"
+            autoComplete="new-password"
+            placeholder={tr(
+              translations,
+              "auth.reset.confirm_new_password_placeholder",
+              "Confirm your new password",
+            )}
+            error={confirmPasswordError}
+          />
           <MarketingButton
             type="submit"
             variant="auth"
