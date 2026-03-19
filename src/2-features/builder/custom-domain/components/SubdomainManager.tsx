@@ -153,7 +153,7 @@ export default function SubdomainManager({
           </p>
           {status !== "idle" && (
             <p
-              className={`text-xs mt-1 ${status.startsWith("error") ? "text-[var(--builder-color-danger)]" : "text-green-700"}`}
+              className={`text-xs mt-1 ${status.startsWith("error") ? "text-(--builder-color-danger)" : "text-green-700"}`}
             >
               {helpText}
             </p>

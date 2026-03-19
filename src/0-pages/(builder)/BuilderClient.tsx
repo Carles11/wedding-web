@@ -210,6 +210,7 @@ export default function BuilderClient({
               router.push(url);
             }}
             translations={translations}
+            currentLang={currentLang}
           />
           <BuilderStepContent
             active={active}

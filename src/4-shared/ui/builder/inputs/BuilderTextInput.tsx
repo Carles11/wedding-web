@@ -68,7 +68,10 @@ export function BuilderTextInput({
         )}
       </div>
       {error && (
-        <div id={`${label}-error`} className="text-xs text-red-600 mt-1">
+        <div
+          id={`${label}-error`}
+          className="text-xs text-(--builder-color-danger) mt-1"
+        >
           {error}
         </div>
       )}

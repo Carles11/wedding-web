@@ -15,6 +15,7 @@ export interface BuilderStepNavProps {
   active: number;
   onSelect: (index: number) => void;
   translations: Record<string, string>;
+  currentLang: string;
 }
 
 function StatusIcon({ status }: { status: StepStatus }) {
@@ -32,7 +33,9 @@ export default function BuilderStepNav({
   active,
   onSelect,
   translations,
+  currentLang,
 }: BuilderStepNavProps) {
+  console.log("Current language in BuilderStepNav:", currentLang);
   return (
     <div className="lg:flex">
       {/* MOBILE STEP SCROLLER */}
@@ -85,6 +88,21 @@ export default function BuilderStepNav({
               </li>
             </Fragment>
           ))}
+          {/* Account link, visually separated */}
+          <li className="my-3 px-3" aria-hidden="true">
+            <div className="builder-step-divider h-px" />
+          </li>
+          <li>
+            <a
+              href={`/${currentLang}/builder/account`}
+              className="flex items-center px-3 py-2 rounded whitespace-nowrap md:w-full md:text-left builder-step-nav-desktop-idle hover:builder-step-nav-desktop-active transition"
+            >
+              <span className="w-6 flex justify-center items-center">
+                <GrayCircleIcon />
+              </span>
+              {translations["builder.nav.account"] || "Account"}
+            </a>
+          </li>
         </ul>
       </nav>
     </div>

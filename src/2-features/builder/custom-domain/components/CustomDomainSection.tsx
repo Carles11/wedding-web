@@ -438,7 +438,7 @@ export const CustomDomainSection: React.FC<Props> = ({
                               <div key={idx}>{line}</div>
                             ))}
                           {domainInfo[domain]?.error && (
-                            <div className="text-[var(--builder-color-danger)] mt-2">
+                            <div className="text-(--builder-color-danger) mt-2">
                               {translations["builder.domain.dns_error"] ||
                                 "Error:"}{" "}
                               {domainInfo[domain].error}

@@ -50,4 +50,18 @@ FROM expanded
 ON CONFLICT ("key", locale)
 DO UPDATE SET value = EXCLUDED.value;
 
+-- Inserts for builder.nav.step.account in all 11 platform languages
+INSERT INTO global_translations (key, value, language) VALUES
+  ('builder.nav.step.account', 'Account', 'en'),
+  ('builder.nav.step.account', 'Cuenta', 'es'),
+  ('builder.nav.step.account', 'Konto', 'de'),
+  ('builder.nav.step.account', 'Compte', 'fr'),
+  ('builder.nav.step.account', 'Account', 'it'),
+  ('builder.nav.step.account', 'Account', 'pt'),
+  ('builder.nav.step.account', 'Account', 'nl'),
+  ('builder.nav.step.account', 'Account', 'pl'),
+  ('builder.nav.step.account', 'Account', 'sv'),
+  ('builder.nav.step.account', 'Account', 'da'),
+  ('builder.nav.step.account', 'Account', 'fi');
+
 COMMIT;

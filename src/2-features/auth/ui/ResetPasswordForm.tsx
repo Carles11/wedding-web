@@ -209,7 +209,7 @@ export default function ResetPasswordForm({ translations, lang }: Props) {
         {error && (
           <p
             id="error-message"
-            className="mt-4 text-sm text-[var(--builder-color-danger)] text-center"
+            className="mt-4 text-sm text-(--builder-color-danger) text-center"
             role="alert"
           >
             {error}

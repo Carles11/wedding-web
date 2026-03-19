@@ -116,8 +116,8 @@ export default function BuilderStepContent({
               refresh={refresh}
               lang={currentLang}
               translations={translations}
-              planType={planType}
               setHasMainProgramEvent={setHasMainProgramEvent}
+              planType={planType}
             />
           </div>
           <div className={active !== 3 ? "hidden" : undefined}>
@@ -126,8 +126,8 @@ export default function BuilderStepContent({
               refresh={refresh}
               lang={currentLang}
               translations={translations}
-              planType={planType}
               setItemCount={setAccommodationCount}
+              planType={planType}
             />
           </div>
           <div className={active !== 4 ? "hidden" : undefined}>
@@ -136,8 +136,8 @@ export default function BuilderStepContent({
               refresh={refresh}
               lang={currentLang}
               translations={translations}
-              planType={planType}
               setItemCount={setWhatToSeeCount}
+              planType={planType}
             />
           </div>
           <div className={active !== 5 ? "hidden" : undefined}>
@@ -146,8 +146,8 @@ export default function BuilderStepContent({
               refresh={refresh}
               lang={currentLang}
               translations={translations}
-              planType={planType}
               setHasData={setHasWeddingGiftData}
+              planType={planType}
             />
           </div>
           <div className={active !== 6 ? "hidden" : undefined}>
@@ -168,6 +168,7 @@ export default function BuilderStepContent({
               planType={planType}
             />
           </div>
+          {/* Account step removed: now only accessible as standalone dashboard page */}
         </div>
       </div>
     </section>

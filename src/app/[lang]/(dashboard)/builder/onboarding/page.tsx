@@ -1,6 +1,6 @@
+import OnboardingClient from "@/0-pages/(builder)/onboarding/OnboardingClient";
 import { fetchBuilderTranslations } from "@/4-shared/api/builder/getTranslations";
 import { isValidLanguage } from "@/4-shared/helpers/isValidLanguage";
-import OnboardingClient from "./OnboardingClient";
 
 export default async function OnboardingPage({
   searchParams,

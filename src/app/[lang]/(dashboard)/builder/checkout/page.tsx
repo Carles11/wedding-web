@@ -1,6 +1,6 @@
+import CheckoutClient from "@/0-pages/(builder)/checkout/CheckoutClient";
 import { fetchBuilderTranslations } from "@/4-shared/api/builder/getTranslations";
 import { isValidLanguage } from "@/4-shared/helpers/isValidLanguage";
-import CheckoutClient from "./CheckoutClient";
 
 type CheckoutPageProps = {
   searchParams?:

@@ -1,3 +1,4 @@
+// AccountBuilderStep removed: now only accessible as standalone dashboard page
 export { default as AccommodationBuilderStep } from "./AccommodationBuilderStep";
 export { default as ContactBuilderStep } from "./ContactBuilderStep";
 export { default as DomainAndBillingBuilderStep } from "./DomainAndBillingBuilderStep";
