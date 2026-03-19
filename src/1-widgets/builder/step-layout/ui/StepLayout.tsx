@@ -43,7 +43,7 @@ export function StepLayout({
     translations["builder.actions.save"] || nextLabel || "Save";
 
   return (
-    <div className="flex min-h-screen flex-col bg-white">
+    <div className="flex min-h-screen flex-col">
       {/* CONTENT */}
       <main className="flex-1 pb-28 md:pb-8">{children}</main>
 

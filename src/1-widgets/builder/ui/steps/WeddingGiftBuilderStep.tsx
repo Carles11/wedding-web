@@ -19,14 +19,17 @@ import type {
   TranslationDictionary,
   WeddingGift,
 } from "@/4-shared/types";
+import { PlanLimitNotice, UpgradeCTAModal } from "@/4-shared/ui/builder";
 import {
-  GiftMethodCard,
-  PlanLimitNotice,
-  UpgradeCTAModal,
-} from "@/4-shared/ui/builder";
-import { BuilderTextInput } from "@/4-shared/ui/builder/inputs";
+  isValidIBAN,
+  isValidPhone,
+  isValidSWIFT,
+  isValidURL,
+  isValidVenmoUsername,
+} from "@/4-shared/utils/validations/weddingGift";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { WeddingGiftForm, WeddingGiftFormErrors } from "./WeddingGiftForm";
 
 type Props = {
   site: Site;
@@ -52,6 +55,8 @@ export default function WeddingGiftBuilderStep({
   const [saving, setSaving] = useState(false);
   const [showUpgradeCTA, setShowUpgradeCTA] = useState(false);
   const { confirm: confirmDelete, confirmDialog } = useAlertConfirm();
+
+  const [errors, setErrors] = useState<WeddingGiftFormErrors>({});
 
   const giftMethodLimit = getPlanLimit(planType, "weddingGiftMethods");
 
@@ -159,12 +164,95 @@ export default function WeddingGiftBuilderStep({
     value: WeddingGift[keyof WeddingGift],
   ) {
     setGift((g) => ({ ...(g ?? {}), [field]: value }));
+    setErrors((prev) => ({ ...prev, [field]: undefined }));
+  }
+
+  function validateGift(gift: Partial<WeddingGift>): WeddingGiftFormErrors {
+    const errs: WeddingGiftFormErrors = {};
+    // IBAN
+    if (gift.bank_account_iban && !isValidIBAN(gift.bank_account_iban)) {
+      errs.bank_account_iban = t(
+        translations,
+        "builder.gift.error.iban",
+        "Invalid IBAN",
+      );
+    }
+    // SWIFT
+    if (gift.bank_account_swift && !isValidSWIFT(gift.bank_account_swift)) {
+      errs.bank_account_swift = t(
+        translations,
+        "builder.gift.error.swift",
+        "Invalid SWIFT/BIC",
+      );
+    }
+    // PayPal URL
+    if (gift.paypal_url && !isValidURL(gift.paypal_url)) {
+      errs.paypal_url = t(
+        translations,
+        "builder.gift.error.url",
+        "Invalid URL",
+      );
+    }
+    // Bizum phone
+    if (gift.bizum_phone && !isValidPhone(gift.bizum_phone)) {
+      errs.bizum_phone = t(
+        translations,
+        "builder.gift.error.phone",
+        "Invalid phone number",
+      );
+    }
+    // Venmo username
+    if (gift.venmo_username && !isValidVenmoUsername(gift.venmo_username)) {
+      errs.venmo_username = t(
+        translations,
+        "builder.gift.error.venmo",
+        "Invalid Venmo username",
+      );
+    }
+    // Giftlist URL
+    if (gift.giftlist_url && !isValidURL(gift.giftlist_url)) {
+      errs.giftlist_url = t(
+        translations,
+        "builder.gift.error.url",
+        "Invalid URL",
+      );
+    }
+    // Honeymoon fund URL
+    if (gift.honeymoon_fund_url && !isValidURL(gift.honeymoon_fund_url)) {
+      errs.honeymoon_fund_url = t(
+        translations,
+        "builder.gift.error.url",
+        "Invalid URL",
+      );
+    }
+    // Other method URL
+    if (gift.other_method_url && !isValidURL(gift.other_method_url)) {
+      errs.other_method_url = t(
+        translations,
+        "builder.gift.error.url",
+        "Invalid URL",
+      );
+    }
+    return errs;
   }
 
   async function handleSave(e?: React.FormEvent) {
     if (e) e.preventDefault();
 
     const draftGift = gift ?? {};
+    const validationErrors = validateGift(draftGift);
+    setErrors(validationErrors);
+    if (Object.keys(validationErrors).length > 0) {
+      notify.error(
+        t(
+          translations,
+          "builder.general.form.error",
+          "Please fix the errors above.",
+        ),
+      );
+      return;
+    }
+
     const methodsCount = countWeddingGiftMethods(draftGift);
     if (giftMethodLimit !== -1 && methodsCount > giftMethodLimit) {
       notify.error(
@@ -284,194 +372,16 @@ export default function WeddingGiftBuilderStep({
         <div>{t(translations, "builder.what_to_see.loading", "Loading…")}</div>
       ) : (
         <form
-          className="max-w-2xl bg-gray-50 rounded-xl border p-6 space-y-5"
+          className="max-w-2xl bg-(--builder-color-muted-surface) p-6 space-y-5"
           onSubmit={handleSave}
         >
-          {/* ---- BANK TRANSFER GROUP ---- */}
-          <GiftMethodCard
-            icon="🏦"
-            title={t(translations, "builder.gift.bank", "Bank Transfer")}
-            description={t(
-              translations,
-              "builder.gift.bank.desc",
-              "For classic bank transfers (SEPA, IBAN, SWIFT): guests will see these bank details.",
-            )}
-          >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <BuilderTextInput
-                label={t(translations, "builder.gift.iban", "IBAN")}
-                value={gift?.bank_account_iban ?? ""}
-                onChange={(v) => updateField("bank_account_iban", v)}
-                placeholder="DE00 0000 0000 0000 0000 00"
-                autoComplete="off"
-              />
-              <BuilderTextInput
-                label={t(translations, "builder.gift.swift", "SWIFT/BIC")}
-                value={gift?.bank_account_swift ?? ""}
-                onChange={(v) => updateField("bank_account_swift", v)}
-                placeholder="SWIFT/BIC code"
-                autoComplete="off"
-              />
-              <BuilderTextInput
-                label={t(translations, "builder.gift.holder", "Account Holder")}
-                value={gift?.bank_account_holder ?? ""}
-                onChange={(v) => updateField("bank_account_holder", v)}
-                placeholder={t(
-                  translations,
-                  "builder.gift.holder",
-                  "Account holder name",
-                )}
-                autoComplete="off"
-              />
-              <BuilderTextInput
-                label={t(translations, "builder.gift.bankname", "Bank Name")}
-                value={gift?.bank_name ?? ""}
-                onChange={(v) => updateField("bank_name", v)}
-                placeholder={t(
-                  translations,
-                  "builder.gift.bankname",
-                  "Deutsche Kreditbank",
-                )}
-                autoComplete="off"
-              />
-            </div>
-          </GiftMethodCard>
-          {/* ---- PAYPAL ---- */}
-          <GiftMethodCard
-            icon="💸"
-            title={t(translations, "builder.gift.paypal", "PayPal")}
-            description={t(
-              translations,
-              "builder.gift.paypal.desc",
-              "Guests can contribute with PayPal or payment card at this URL.",
-            )}
-          >
-            <BuilderTextInput
-              label={t(translations, "builder.gift.paypal.url", "PayPal URL")}
-              type="url"
-              value={gift?.paypal_url ?? ""}
-              onChange={(v) => updateField("paypal_url", v)}
-              placeholder="https://paypal.me/guestgift"
-              autoComplete="off"
-            />
-          </GiftMethodCard>
-          {/* ---- BIZUM & VENMO ---- */}
-          <GiftMethodCard
-            icon="📱"
-            title={t(translations, "builder.gift.mobile", "Bizum / Venmo")}
-            description={t(
-              translations,
-              "builder.gift.mobile.desc",
-              "Modern money transfer options for Spain (Bizum) or the US (Venmo).",
-            )}
-          >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <BuilderTextInput
-                label={t(
-                  translations,
-                  "builder.gift.bizum_phone",
-                  "Bizum Phone",
-                )}
-                value={gift?.bizum_phone ?? ""}
-                onChange={(v) => updateField("bizum_phone", v)}
-                placeholder="e.g. +34 611 222 333"
-                autoComplete="off"
-              />
-              <BuilderTextInput
-                label={t(
-                  translations,
-                  "builder.gift.venmo_username",
-                  "Venmo Username",
-                )}
-                value={gift?.venmo_username ?? ""}
-                onChange={(v) => updateField("venmo_username", v)}
-                placeholder="@username"
-                autoComplete="off"
-              />
-            </div>
-          </GiftMethodCard>
-          {/* ---- GIFTLIST/REGISTRY ---- */}
-          <GiftMethodCard
-            icon="🎁"
-            title={t(
-              translations,
-              "builder.gift.giftlist",
-              "Gift Registry/List",
-            )}
-            description={t(
-              translations,
-              "builder.gift.giftlist.desc",
-              "Paste a URL from your preferred wedding registry (Amazon, El Corte Inglés, Etsy, etc).",
-            )}
-          >
-            <BuilderTextInput
-              label={t(
-                translations,
-                "builder.gift.giftlist.url",
-                "Giftlist/Registry URL",
-              )}
-              type="url"
-              value={gift?.giftlist_url ?? ""}
-              onChange={(v) => updateField("giftlist_url", v)}
-              placeholder="https://yourregistry.com"
-              autoComplete="off"
-            />
-          </GiftMethodCard>
-          {/* ---- HONEYMOON FUND ---- */}
-          <GiftMethodCard
-            icon="🌴"
-            title={t(translations, "builder.gift.honeymoon", "Honeymoon Fund")}
-            description={t(
-              translations,
-              "builder.gift.honeymoon.desc",
-              "Link to a honeymoon fund platform (Zankyou, Honeyfund, etc) or detail your custom contribution page.",
-            )}
-          >
-            <BuilderTextInput
-              label={t(
-                translations,
-                "builder.gift.honeymoon.url",
-                "Honeymoon Fund URL",
-              )}
-              type="url"
-              value={gift?.honeymoon_fund_url ?? ""}
-              onChange={(v) => updateField("honeymoon_fund_url", v)}
-              placeholder="https://your-honeymoonfund.com"
-              autoComplete="off"
-            />
-          </GiftMethodCard>
-          {/* ---- OTHER OPTIONS ---- */}
-          <GiftMethodCard
-            icon="✨"
-            title={t(translations, "builder.gift.other", "Other Options")}
-            description={t(
-              translations,
-              "builder.gift.other.desc",
-              "Link to any other gift/contribution method, or describe alternatives here (e.g. charity, bring cash...).",
-            )}
-          >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <BuilderTextInput
-                label={t(translations, "builder.gift.other.url", "Option URL")}
-                type="url"
-                value={gift?.other_method_url ?? ""}
-                onChange={(v) => updateField("other_method_url", v)}
-                placeholder="Other online contribution link"
-                autoComplete="off"
-              />
-              <BuilderTextInput
-                label={t(
-                  translations,
-                  "builder.gift.other.descfield",
-                  "Option Description",
-                )}
-                value={gift?.other_method_desc ?? ""}
-                onChange={(v) => updateField("other_method_desc", v)}
-                placeholder="E.g. Donate to charity, bring cash, etc"
-                autoComplete="off"
-              />
-            </div>
-          </GiftMethodCard>
+          <WeddingGiftForm
+            gift={gift ?? {}}
+            errors={errors}
+            translations={translations}
+            onChange={updateField}
+            disabled={saving}
+          />
         </form>
       )}
 
