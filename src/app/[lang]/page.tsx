@@ -11,12 +11,13 @@ import {
 import { generateSiteMetadata } from "@/4-shared/lib/seo/generateSiteMetadata";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
+
 export async function generateMetadata({
   params,
 }: {
   params?: { lang?: string };
 }): Promise<Metadata> {
-  const lang = params?.lang ?? "en";
+  const lang = (await params?.lang) ?? "en";
   const host = ((await headers()).get("host") ?? "").toLowerCase().trim();
   const site = await getSiteByDomain(host);
 
@@ -64,7 +65,6 @@ export default async function Page({
   const resolvedParams = await params;
   let lang = resolvedParams?.lang || "en";
   if (!SUPPORTED_LANGUAGES.includes(lang as SupportedLanguage)) lang = "en";
-  const langTyped = lang as SupportedLanguage;
 
   const host = ((await headers()).get("host") ?? "").toLowerCase().trim();
   const site = await getSiteByDomain(host);
