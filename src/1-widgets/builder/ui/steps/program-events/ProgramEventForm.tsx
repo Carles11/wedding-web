@@ -9,6 +9,7 @@ import {
 import { DateInput } from "@/4-shared/ui/builder/inputs/DateInput";
 import { TimeInput } from "@/4-shared/ui/builder/inputs/TimeInput";
 import { Toggle } from "@/4-shared/ui/commons/buttons/Toggle";
+import { isValidURL } from "@/4-shared/utils/validations";
 import type { RefObject } from "react";
 import { getLanguageDisplay, type DayTagOption } from "./dayTags";
 
@@ -50,6 +51,12 @@ export function ProgramEventForm({
   onUpdateI18nField,
   onToggleFormMain,
 }: ProgramEventFormProps) {
+  // URL validation for location_url
+  const locationUrl = form.location_url ?? "";
+  const locationUrlError =
+    locationUrl && !isValidURL(locationUrl)
+      ? t(translations, "builder.program_events.error.url", "Invalid URL")
+      : undefined;
   const formTitle = editingId
     ? t(translations, "builder.program_events.form.edit", "Edit event")
     : t(translations, "builder.program_events.form.create", "Create event");
@@ -64,10 +71,14 @@ export function ProgramEventForm({
   return (
     <div ref={formRef}>
       <BuilderFormCard title={formTitle} error={error}>
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-12">
-          <div className="md:col-span-5">
-            <label className="block text-xs text-gray-600">{dayLabel}</label>
-            <div className="relative mt-1">
+        {/* Responsive row for Day, Date, Time */}
+        <div className="flex flex-col gap-3 md:flex-row md:items-start">
+          {/* Day select */}
+          <div className="flex-1 min-w-0 flex flex-col">
+            <label className="block text-xs text-gray-600 mb-1">
+              {dayLabel}
+            </label>
+            <div className="relative">
               <select
                 value={form.day_tag ?? "wedding_day"}
                 onChange={(e) =>
@@ -76,7 +87,18 @@ export function ProgramEventForm({
                     e.target.value as ProgramEvent["day_tag"],
                   )
                 }
-                className="w-full cursor-pointer appearance-none rounded-md border border-gray-300 bg-white px-3 py-2 pr-9 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="
+    w-full cursor-pointer appearance-none
+    rounded-(--builder-radius)
+    border border-(--builder-color-border)
+    bg-(--builder-color-surface)
+    px-3 py-2 pr-9
+    shadow-(--builder-shadow)
+    text-(--builder-color-text)
+    focus:border-(--builder-color-primary)
+    focus:outline-none
+    focus:ring-2 focus:ring-(--builder-color-primary)
+  "
               >
                 {dayTags.map((d) => (
                   <option key={d.key ?? "wedding_day"} value={d.key ?? ""}>
@@ -89,57 +111,56 @@ export function ProgramEventForm({
               </span>
             </div>
           </div>
-
-          <div className="md:col-span-7">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-[18rem_10rem] md:justify-end">
-              <DateInput
-                value={form.date ?? ""}
-                onChange={(newDate: string) =>
-                  onUpdateFormField("date", newDate)
-                }
-                label={dateLabel}
-                required
-              />
-
-              <TimeInput
-                value={form.time ?? ""}
-                onChange={(newTime: string) =>
-                  onUpdateFormField("time", newTime)
-                }
-                label={t(
-                  translations,
-                  "builder.program_events.field.time",
-                  "Time",
-                )}
-                required
-              />
-            </div>
-          </div>
-
-          {form.day_tag === "wedding_day" && weddingDayReferenceDate && (
-            <p className="text-xs text-gray-500 md:col-span-12">
-              {interpolate(
-                t(
-                  translations,
-                  "builder.program_events.hint.wedding_day_same_date",
-                  "Wedding Day events share one date. Use {date} for this event.",
-                ),
-                { date: weddingDayReferenceDate },
-              )}
-            </p>
-          )}
-
-          <div className="md:col-span-6">
-            <BuilderTextInput
-              label={t(
-                translations,
-                "builder.program_events.field.location_url",
-                "Location URL (optional)",
-              )}
-              value={form.location_url ?? ""}
-              onChange={(v) => onUpdateFormField("location_url", v)}
+          {/* Date input */}
+          <div className="flex-1 min-w-0 flex flex-col">
+            <label className="block text-xs text-gray-600 mb-1">
+              {dateLabel} *
+            </label>
+            <DateInput
+              value={form.date ?? ""}
+              onChange={(newDate: string) => onUpdateFormField("date", newDate)}
+              required
             />
           </div>
+          {/* Time input */}
+          <div className="flex-1 min-w-0 flex flex-col">
+            <label className="block text-xs text-gray-600 mb-1">
+              {t(translations, "builder.program_events.field.time", "Time")} *
+            </label>
+            <TimeInput
+              value={form.time ?? ""}
+              onChange={(newTime: string) => onUpdateFormField("time", newTime)}
+              required
+            />
+          </div>
+        </div>
+
+        {/* All other fields below the row */}
+
+        {form.day_tag === "wedding_day" && weddingDayReferenceDate && (
+          <p className="text-xs text-gray-500 mt-2">
+            {interpolate(
+              t(
+                translations,
+                "builder.program_events.hint.wedding_day_same_date",
+                "Wedding Day events share one date. Use {date} for this event.",
+              ),
+              { date: weddingDayReferenceDate },
+            )}
+          </p>
+        )}
+
+        <div className="mt-2 md:w-1/2">
+          <BuilderTextInput
+            label={t(
+              translations,
+              "builder.program_events.field.location_url",
+              "Location URL (optional)",
+            )}
+            value={locationUrl}
+            onChange={(v) => onUpdateFormField("location_url", v)}
+            error={locationUrlError}
+          />
         </div>
 
         {form.day_tag === "wedding_day" && (

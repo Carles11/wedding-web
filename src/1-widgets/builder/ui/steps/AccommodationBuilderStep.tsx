@@ -25,13 +25,14 @@ import {
   PlanLimitNotice,
   UpgradeCTAModal,
 } from "@/4-shared/ui/builder";
-import {
-  BuilderTextInput,
-  BuilderTextarea,
-} from "@/4-shared/ui/builder/inputs";
+import { isValidURL } from "@/4-shared/utils/validations";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { StepLayout } from "../../step-layout";
+import {
+  AccommodationForm,
+  AccommodationFormErrors,
+} from "./accommodation/AccommodationForm";
 
 type Props = {
   site: Site | null;
@@ -186,21 +187,43 @@ export default function AccommodationBuilderStep({
     email: "",
     sort_order: undefined,
   });
+  const [errors, setErrors] = useState<AccommodationFormErrors>({});
 
   function updateField<K extends keyof AccommodationFormValues>(
     field: K,
     value: AccommodationFormValues[K],
   ) {
     setForm({ ...form, [field]: value });
+    setErrors((prev) => ({ ...prev, [field]: undefined }));
+  }
+
+  function validateForm(
+    form: AccommodationFormValues,
+  ): AccommodationFormErrors {
+    const errs: AccommodationFormErrors = {};
+    if (!form.name || form.name.trim() === "") {
+      errs.name =
+        translations["builder.accommodation.error.name_required"] ||
+        "Name is required.";
+    }
+    if (form.website && !isValidURL(form.website)) {
+      errs.website =
+        translations["builder.accommodation.error.website"] ||
+        "Invalid website URL.";
+    }
+    // Optionally: validate email/phone here if needed
+    return errs;
   }
 
   async function handleSave() {
     if (!site?.id) return;
 
-    if (!form.name || form.name.trim() === "") {
+    const validationErrors = validateForm(form);
+    setErrors(validationErrors);
+    if (Object.keys(validationErrors).length > 0) {
       setError(
-        translations["builder.accommodation.error.name_required"] ||
-          "Name is required.",
+        translations["builder.general.form.error"] ||
+          "Please fix the errors above.",
       );
       return;
     }
@@ -466,57 +489,12 @@ export default function AccommodationBuilderStep({
             }
             error={error}
           >
-            <BuilderTextInput
-              label={translations["builder.accommodation.field.name"] || "Name"}
-              value={form.name}
-              onChange={(v) => updateField("name", v)}
-              required
-            />
-
-            <BuilderTextInput
-              label={
-                translations["builder.accommodation.field.address"] ||
-                "Address (optional)"
-              }
-              value={form.address ?? ""}
-              onChange={(v) => updateField("address", v)}
-            />
-
-            <BuilderTextarea
-              label={
-                translations["builder.accommodation.field.notes"] ||
-                "Notes (optional)"
-              }
-              value={form.notes ?? ""}
-              onChange={(v) => updateField("notes", v)}
-              rows={2}
-            />
-
-            <BuilderTextInput
-              label={
-                translations["builder.accommodation.field.website"] ||
-                "Website (optional)"
-              }
-              value={form.website ?? ""}
-              onChange={(v) => updateField("website", v)}
-            />
-
-            <BuilderTextInput
-              label={
-                translations["builder.accommodation.field.phone"] ||
-                "Phone (optional)"
-              }
-              value={form.phone ?? ""}
-              onChange={(v) => updateField("phone", v)}
-            />
-
-            <BuilderTextInput
-              label={
-                translations["builder.accommodation.field.email"] ||
-                "Email (optional)"
-              }
-              value={form.email ?? ""}
-              onChange={(v) => updateField("email", v)}
+            <AccommodationForm
+              form={form}
+              errors={errors}
+              translations={translations}
+              onChange={updateField}
+              disabled={saving}
             />
           </BuilderFormCard>
         </div>

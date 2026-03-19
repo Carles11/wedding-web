@@ -29,7 +29,10 @@ import {
 } from "@/4-shared/utils/validations/weddingGift";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { WeddingGiftForm, WeddingGiftFormErrors } from "./WeddingGiftForm";
+import {
+  WeddingGiftForm,
+  WeddingGiftFormErrors,
+} from "./wedding-gifts/WeddingGiftForm";
 
 type Props = {
   site: Site;
