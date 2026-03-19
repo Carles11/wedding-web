@@ -55,6 +55,7 @@ export const CustomDomainSection: React.FC<Props> = ({
     "" | "saving" | "success" | "error"
   >("");
   const [localMsg, setLocalMsg] = useState<string | null>(null);
+  const [domainError, setDomainError] = useState<string | null>(null);
   const [domainInfo, setDomainInfo] = useState<
     Record<
       string,
@@ -98,7 +99,21 @@ export const CustomDomainSection: React.FC<Props> = ({
     e.preventDefault();
     setLocalStatus("saving");
     setLocalMsg(null);
+    setDomainError(null);
     let addSucceeded = false;
+
+    // Domain format validation
+    // Import isValidDomain from validations
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { isValidDomain } = require("@/4-shared/utils/validations/domain");
+    if (!isValidDomain(inputDomain)) {
+      setLocalStatus("error");
+      setDomainError(
+        translations["builder.domain.invalid_domain"] ||
+          "Invalid domain format. Please enter a valid domain.",
+      );
+      return;
+    }
 
     const { apex } = getDomainVariants(inputDomain);
 
@@ -257,6 +272,7 @@ export const CustomDomainSection: React.FC<Props> = ({
                 setInputDomain(e.target.value.trim());
                 setLocalStatus("");
                 setLocalMsg(null);
+                setDomainError(null);
               }}
               aria-label={
                 translations["builder.domain.custom_domain_placeholder"]
@@ -269,11 +285,16 @@ export const CustomDomainSection: React.FC<Props> = ({
                   localStatus === "success"
                     ? "text-green-700"
                     : localStatus === "error"
-                      ? "text-[var(--builder-color-danger)]"
+                      ? "text-(--builder-color-danger)"
                       : ""
                 }`}
               >
                 {localMsg}
+              </div>
+            )}
+            {!!domainError && (
+              <div className="text-xs mt-1 text-(--builder-color-danger)">
+                {domainError}
               </div>
             )}
             <BuilderButton

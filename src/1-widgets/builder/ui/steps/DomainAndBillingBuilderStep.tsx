@@ -81,12 +81,10 @@ export default function DomainAndBillingBuilderStep({
         <Toggle
           checked={seoEnabled}
           onChange={handleSeoToggle}
-          label={
-            translations["builder.domain.seo_visibility_label"] ||
-            "Allow search engines to index this site"
-          }
+          label={`SEO: ${translations["builder.domain.seo_visibility_label"] || "  SEO: Allow search engines to index this site"}`}
           disabled={seoLoading}
         />
+
         {seoLoading && <span className="text-xs text-gray-500">Saving...</span>}
       </div>
       <SubdomainManager

@@ -4,12 +4,13 @@ import { getSiteGeneralContent } from "@/4-shared/api/builder/getSiteGeneralCont
 import { saveSiteGeneralContent } from "@/4-shared/api/builder/saveSiteGeneralContent";
 import type { SupportedLanguage } from "@/4-shared/config/i18n";
 import {
-  SUPPORTED_LANGUAGES,
   SUPPORTED_LANGUAGE_LABELS,
+  SUPPORTED_LANGUAGES,
 } from "@/4-shared/config/i18n";
 import { notify } from "@/4-shared/lib/toast/toast";
 import type { PlanType, Site } from "@/4-shared/types";
 import { BuilderLangTabs, UpgradeCTAModal } from "@/4-shared/ui/builder";
+import { isValidSubdomain, RESERVED } from "@/4-shared/utils/validations";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 import { StepLayout } from "../../step-layout";
@@ -50,6 +51,11 @@ export default function GeneralSiteForm({
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  // Extra error states
+  const [subdomainError, setSubdomainError] = useState<string | null>(null);
+  const [titleError, setTitleError] = useState<string | null>(null);
+  const [subtitleError, setSubtitleError] = useState<string | null>(null);
+  const [languageError, setLanguageError] = useState<string | null>(null);
   const [showUpgradeCTA, setShowUpgradeCTA] = useState(false);
 
   function arraysEqual<T>(a: T[], b: T[]) {
@@ -242,6 +248,10 @@ export default function GeneralSiteForm({
     e?.preventDefault();
     if (saving) return;
     setError(null);
+    setSubdomainError(null);
+    setTitleError(null);
+    setSubtitleError(null);
+    setLanguageError(null);
 
     if (!site) {
       notify.error(
@@ -250,20 +260,91 @@ export default function GeneralSiteForm({
       return;
     }
 
+    // Import subdomain validation
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+
     const val = content[activeLang] || {
       title: "",
       subtitle: "",
     };
 
+    // Title validation
     if (!val.title?.trim()) {
-      setError(
+      setTitleError(
         translations["builder.errors.missing_title"] ||
           "Please enter a site title.",
       );
       return;
     }
+    if (val.title.trim().length < 3) {
+      setTitleError(
+        translations["builder.errors.title_too_short"] ||
+          "Site title must be at least 3 characters.",
+      );
+      return;
+    }
+    if (val.title.trim().length > 100) {
+      setTitleError(
+        translations["builder.errors.title_too_long"] ||
+          "Site title must be less than 100 characters.",
+      );
+      return;
+    }
 
+    // Subtitle validation
+    if (val.subtitle && val.subtitle.length > 200) {
+      setSubtitleError(
+        translations["builder.errors.subtitle_too_long"] ||
+          "Subtitle must be less than 200 characters.",
+      );
+      return;
+    }
+
+    // Language validation
+    if (!languages.length) {
+      setLanguageError(
+        translations["builder.errors.missing_language"] ||
+          "Please select at least one language.",
+      );
+      return;
+    }
+    // Prevent duplicates
+    if (new Set(languages).size !== languages.length) {
+      setLanguageError(
+        translations["builder.errors.duplicate_language"] ||
+          "Duplicate languages selected.",
+      );
+      return;
+    }
+    // Ensure all are supported
+    if (!languages.every((l) => SUPPORTED_LANGUAGES.includes(l))) {
+      setLanguageError(
+        translations["builder.errors.unsupported_language"] ||
+          "Unsupported language selected.",
+      );
+      return;
+    }
+
+    // Subdomain validation (only if editable)
     const nextSubdomain = !site.subdomain ? subdomain.trim().toLowerCase() : "";
+    if (!site.subdomain && nextSubdomain) {
+      if (!isValidSubdomain(nextSubdomain)) {
+        setSubdomainError(
+          translations["builder.errors.invalid_subdomain"] ||
+            "Invalid subdomain format.",
+        );
+        return;
+      }
+      if (RESERVED.includes(nextSubdomain)) {
+        setSubdomainError(
+          translations["builder.errors.reserved_subdomain"] ||
+            "This subdomain is reserved.",
+        );
+        return;
+      }
+      // TODO: uniqueness check (requires backend or context)
+    }
+
     const existingLanguages = (site.languages ?? []) as SupportedLanguage[];
     const languagesChanged = !arraysEqual(existingLanguages, languages);
     const defaultLangChanged = (site.default_lang ?? "en") !== defaultLang;
@@ -422,10 +503,28 @@ export default function GeneralSiteForm({
         </div>
 
         {/* Status */}
-        {error && (
-          <div className="text-sm text-[var(--builder-color-danger)]">
-            {error}
+        {titleError && (
+          <div className="text-sm text-(--builder-color-danger)">
+            {titleError}
           </div>
+        )}
+        {subtitleError && (
+          <div className="text-sm text-(--builder-color-danger)">
+            {subtitleError}
+          </div>
+        )}
+        {subdomainError && (
+          <div className="text-sm text-(--builder-color-danger)">
+            {subdomainError}
+          </div>
+        )}
+        {languageError && (
+          <div className="text-sm text-(--builder-color-danger)">
+            {languageError}
+          </div>
+        )}
+        {error && (
+          <div className="text-sm text-(--builder-color-danger)">{error}</div>
         )}
       </form>
     </StepLayout>

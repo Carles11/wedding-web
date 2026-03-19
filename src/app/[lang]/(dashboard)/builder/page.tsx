@@ -9,13 +9,12 @@ import { redirect } from "next/navigation";
 
 export default async function BuilderPage({
   params,
-  searchParams,
 }: {
-  params: { lang: string };
-  searchParams: { lang?: string };
+  params?: Promise<{ lang?: string }>;
 }) {
   // Use the [lang] path segment for language
-  const langFromPath = params?.lang;
+  const resolvedParams = params ? await params : { lang: "en" };
+  const langFromPath = resolvedParams.lang ?? "en";
   const lang = isValidLanguage(langFromPath) ? langFromPath : "en";
 
   // Check if user has completed onboarding

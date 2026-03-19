@@ -15,6 +15,7 @@ export function BuilderLanguageCard({
   defaultBadgeLabel,
   children,
 }: BuilderLanguageCardProps) {
+  console.log({ languageCode, title });
   return (
     <section
       className={`rounded-xl border bg-white p-4 shadow-sm transition sm:p-5 ${
@@ -23,7 +24,7 @@ export function BuilderLanguageCard({
     >
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <div className="flex items-center gap-2">
-          <span className="font-normal text-xs text-slate-800">{title}</span>
+          <span className="font-normal text-xs">{title}</span>
           <span className="uppercase text-xs tracking-widest text-blue-500">
             ({languageCode})
           </span>

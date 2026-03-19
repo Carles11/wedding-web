@@ -1,9 +1,5 @@
 "use client";
 
-import {
-  SUPPORTED_LANGUAGE_LABELS,
-  type SupportedLanguage,
-} from "@/4-shared/config/i18n";
 import { interpolate } from "@/4-shared/helpers/interpolateVars";
 import type {
   CreateWhatToSeePayload,
@@ -30,16 +26,12 @@ import { notify } from "@/4-shared/lib/toast/toast";
 import {
   BuilderButton,
   BuilderFormCard,
-  BuilderLanguageCard,
   PlanLimitNotice,
   UpgradeCTAModal,
 } from "@/4-shared/ui/builder";
-import {
-  BuilderTextInput,
-  BuilderTextarea,
-} from "@/4-shared/ui/builder/inputs";
 import { useRouter } from "next/navigation";
 import { StepLayout } from "../../step-layout";
+import { WhatToSeeForm } from "./what-to-see/WhatToSeeForm";
 
 type Props = {
   site: Site | null;
@@ -178,6 +170,7 @@ export default function WhatToSeeBuilderStep({
 
   // Form state for the currently editing/creating item
   const [form, setForm] = useState<Partial<WhatToSeeEntryFull>>({});
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
   function scrollToForm() {
     setTimeout(() => {
@@ -214,6 +207,10 @@ export default function WhatToSeeBuilderStep({
         [field]: { ...prev, [lang]: value },
       } as Partial<WhatToSeeEntryFull>;
     });
+    setFormErrors((errs) => {
+      const { [field]: _removed, ...rest } = errs;
+      return rest;
+    });
   }
 
   function updateField(
@@ -221,31 +218,41 @@ export default function WhatToSeeBuilderStep({
     value: WhatToSeeEntryFull[keyof WhatToSeeEntryFull],
   ) {
     setForm((s) => ({ ...(s ?? {}), [field]: value }));
+    setFormErrors((errs) => {
+      const { [field]: _removed, ...rest } = errs;
+      return rest;
+    });
   }
 
   async function handleSave() {
     if (!site?.id) return;
 
     const name = (form.name as Record<string, string> | undefined) ?? {};
+    const errors: Record<string, string> = {};
     if (!name[defaultLang]) {
-      setError(
+      errors.name = interpolate(
         t(
           translations,
           "builder.what_to_see.error.required_name",
           `Name is required in ${defaultLang}`,
         ),
+        { defaultLang },
       );
-      return;
     }
-
+    // Validate location_url if present
+    if (form.location_url && typeof form.location_url === "string") {
+      // Use centralized validation if needed (already in WhatToSeeForm)
+    }
     if (!canAddMore() && !editingId) {
-      setError(
-        t(
-          translations,
-          "builder.what_to_see.error.limit",
-          "Free limit reached. Upgrade to add more entries.",
-        ),
+      errors.limit = t(
+        translations,
+        "builder.what_to_see.error.limit",
+        "Free limit reached. Upgrade to add more entries.",
       );
+    }
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      setError(errors.name || errors.limit || "");
       return;
     }
 
@@ -344,9 +351,11 @@ export default function WhatToSeeBuilderStep({
       setForm({});
       setEditingId(null);
       setCollapsed(false);
+      setFormErrors({});
       // No refresh() here: doesn't change the sites table; local state is authoritative.
     } catch (err: unknown) {
       setError((err as Error)?.message ?? String(err));
+      setFormErrors({});
     } finally {
       setSaving(false);
     }
@@ -433,11 +442,17 @@ export default function WhatToSeeBuilderStep({
           t(
             translations,
             "builder.what_to_see.limit_info",
-            `Add up to ${whatToSeeLimit} recommended places.`,
+            `Add up to ${whatToSeeLimit === -1 ? t(translations, "common.interpolate.unlimited", "unlimited") : whatToSeeLimit} recommended places.`,
           ),
           {
-            limit: whatToSeeLimit,
-            FREE_WHATTOSEE_LIMIT: whatToSeeLimit,
+            limit:
+              whatToSeeLimit === -1
+                ? t(translations, "common.interpolate.unlimited", "unlimited")
+                : whatToSeeLimit,
+            FREE_WHATTOSEE_LIMIT:
+              whatToSeeLimit === -1
+                ? t(translations, "common.interpolate.unlimited", "unlimited")
+                : whatToSeeLimit,
           },
         )}
       </div>
@@ -550,84 +565,15 @@ export default function WhatToSeeBuilderStep({
             }
             error={error}
           >
-            {languages.map((locale) => (
-              <BuilderLanguageCard
-                key={locale}
-                languageCode={locale.toUpperCase()}
-                title={interpolate(
-                  t(
-                    translations,
-                    "builder.general.form.language_fields_for",
-                    "Fields for {language}",
-                  ),
-                  {
-                    language: `${SUPPORTED_LANGUAGE_LABELS[locale as SupportedLanguage] ?? locale} (${locale})`,
-                  },
-                )}
-                isDefault={locale === defaultLang}
-                defaultBadgeLabel={t(
-                  translations,
-                  "builder.what_to_see.badge.default",
-                  "Default",
-                )}
-              >
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <BuilderTextInput
-                    label={`${t(translations, "builder.what_to_see.field.name", "Name")}${locale === defaultLang ? " *" : ""}`}
-                    value={
-                      (form.name as Record<string, string> | undefined)?.[
-                        locale
-                      ] ?? ""
-                    }
-                    onChange={(v) => updateI18n("name", locale, v)}
-                    autoComplete="off"
-                  />
-
-                  <BuilderTextarea
-                    label={t(
-                      translations,
-                      "builder.what_to_see.field.description",
-                      "Description",
-                    )}
-                    value={
-                      (
-                        form.description as Record<string, string> | undefined
-                      )?.[locale] ?? ""
-                    }
-                    onChange={(v) => updateI18n("description", locale, v)}
-                    rows={2}
-                  />
-
-                  <div className="sm:col-span-2">
-                    <BuilderTextarea
-                      label={t(
-                        translations,
-                        "builder.what_to_see.field.notes",
-                        "Notes",
-                      )}
-                      value={
-                        (form.notes as Record<string, string> | undefined)?.[
-                          locale
-                        ] ?? ""
-                      }
-                      onChange={(v) => updateI18n("notes", locale, v)}
-                      rows={2}
-                    />
-                  </div>
-                </div>
-              </BuilderLanguageCard>
-            ))}
-
-            <BuilderTextInput
-              label={t(
-                translations,
-                "builder.what_to_see.field.location_url",
-                "Location URL (Google Maps, etc)",
-              )}
-              value={form.location_url ?? ""}
-              onChange={(v) => updateField("location_url", v)}
-              placeholder="https://maps.example.com/location"
-              autoComplete="off"
+            <WhatToSeeForm
+              form={form}
+              errors={formErrors}
+              languages={languages}
+              defaultLang={defaultLang}
+              translations={translations}
+              onChange={updateField}
+              onChangeI18n={updateI18n}
+              disabled={saving}
             />
           </BuilderFormCard>
         </div>

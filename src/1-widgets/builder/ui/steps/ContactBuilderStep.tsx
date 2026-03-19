@@ -9,9 +9,9 @@ import {
 import { fetchContactSection } from "@/3-entities/sections/api/fetchContactSection";
 import { notify } from "@/4-shared/lib/toast/toast";
 import type { ContactSection, Site } from "@/4-shared/types";
-import { BuilderTextInput } from "@/4-shared/ui/builder/inputs";
-import { EMAIL_RE } from "@/4-shared/utils/validations";
+import { isValidEmail, isValidPhone } from "@/4-shared/utils/validations";
 import { useEffect, useRef, useState } from "react";
+import { ContactForm } from "./contact/ContactForm";
 
 type Props = {
   site: Site | null;
@@ -32,6 +32,7 @@ export default function ContactBuilderStep({
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
   function sectionSignature(nextSection: ContactSection | null): string {
     if (!nextSection) return "empty";
@@ -128,7 +129,7 @@ export default function ContactBuilderStep({
 
   function updatePartner(
     partner: "bride" | "groom",
-    field: keyof Partner,
+    field: string,
     value: string | null,
   ) {
     setForm((f) => {
@@ -142,13 +143,18 @@ export default function ContactBuilderStep({
         [partner]: { ...prev, [field]: value },
       } as ContactSection["content"];
     });
+    setFormErrors((errs) => {
+      const key = `${partner}_${field}`;
+      const { [key]: _removed, ...rest } = errs;
+      return rest;
+    });
   }
 
   // Contact completeness logic
   function validContact(pt: Partner) {
     if (!pt?.name && !pt?.email) return false;
     if (!pt?.name || !pt?.email) return false;
-    if (!EMAIL_RE.test(pt.email || "")) return false;
+    if (!isValidEmail(pt.email || "")) return false;
     return true;
   }
 
@@ -164,29 +170,57 @@ export default function ContactBuilderStep({
   async function handleSave() {
     if (!site?.id) return;
     setError(null);
-
     const bride = (form?.bride as Partner | undefined) ?? {};
     const groom = (form?.groom as Partner | undefined) ?? {};
+    const errors: Record<string, string> = {};
 
-    if (!validContact(bride) && !validContact(groom)) {
+    // Bride validations
+    if (!bride.name) {
+      errors.bride_name =
+        translations["builder.contact.error.name_required"] ||
+        "Name is required";
+    }
+    if (bride.email && !isValidEmail(bride.email)) {
+      errors.bride_email =
+        translations["builder.contact.error.email_invalid"] || "Invalid email";
+    }
+    if (bride.phone && !isValidPhone(bride.phone)) {
+      errors.bride_phone =
+        translations["builder.contact.error.phone_invalid"] ||
+        "Invalid phone number";
+    }
+
+    // Groom validations
+    if (!groom.name) {
+      errors.groom_name =
+        translations["builder.contact.error.name_required"] ||
+        "Name is required";
+    }
+    if (groom.email && !isValidEmail(groom.email)) {
+      errors.groom_email =
+        translations["builder.contact.error.email_invalid"] || "Invalid email";
+    }
+    if (groom.phone && !isValidPhone(groom.phone)) {
+      errors.groom_phone =
+        translations["builder.contact.error.phone_invalid"] ||
+        "Invalid phone number";
+    }
+
+    // At least one partner must have valid name and email
+    const brideValid = bride.name && bride.email && isValidEmail(bride.email);
+    const groomValid = groom.name && groom.email && isValidEmail(groom.email);
+    if (!brideValid && !groomValid) {
       setError(
         translations["builder.contact.error.at_least_one"] ||
           "At least one partner must have a name and a valid email",
       );
+      setFormErrors(errors);
       return;
     }
 
-    const phoneCheck = (p?: string | null) => {
-      if (!p) return true;
-      const digits = p.replace(/\D/g, "");
-      return digits.length >= 7 && digits.length <= 15;
-    };
-
-    if (!phoneCheck(bride?.phone) || !phoneCheck(groom?.phone)) {
-      setError(
-        translations["builder.contact.error.phone_invalid"] ||
-          "If provided, phone numbers must contain 7-15 digits",
-      );
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      setError(Object.values(errors)[0]);
       return;
     }
 
@@ -199,6 +233,7 @@ export default function ContactBuilderStep({
         translations["builder.general.form.save_success"] ||
           "Saved successfully.",
       );
+      setFormErrors({});
       // No refresh() here: doesn't change the sites table; local state is authoritative.
     } catch (err: unknown) {
       setError((err as Error)?.message ?? String(err));
@@ -262,150 +297,18 @@ export default function ContactBuilderStep({
             )}
 
             <div className="border rounded-xl p-4 bg-gray-50">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                {/* Bride */}
-                <div className="p-3 border rounded-xl bg-white">
-                  <div className="font-medium">
-                    {translations["builder.contact.bride"] || "Bride"}
-                  </div>
-                  <div className="mt-3 space-y-3">
-                    <BuilderTextInput
-                      label={
-                        translations["builder.contact.field.name"] || "Name"
-                      }
-                      value={(form?.bride as Partner | undefined)?.name ?? ""}
-                      onChange={(v: string) =>
-                        updatePartner("bride", "name", v || null)
-                      }
-                    />
-
-                    <BuilderTextInput
-                      label={
-                        translations["builder.contact.field.email"] || "Email"
-                      }
-                      value={(form?.bride as Partner | undefined)?.email ?? ""}
-                      onChange={(v: string) =>
-                        updatePartner("bride", "email", v || null)
-                      }
-                    />
-
-                    <BuilderTextInput
-                      label={
-                        translations["builder.contact.field.phone_optional"] ||
-                        "Phone (optional)"
-                      }
-                      value={(form?.bride as Partner | undefined)?.phone ?? ""}
-                      onChange={(v: string) =>
-                        updatePartner("bride", "phone", v || null)
-                      }
-                    />
-                  </div>
-                </div>
-
-                {/* Groom */}
-                <div className="p-3 border rounded-xl bg-white">
-                  <div className="font-medium">
-                    {translations["builder.contact.groom"] || "Groom"}
-                  </div>
-                  <div className="mt-3 space-y-3">
-                    <BuilderTextInput
-                      label={
-                        translations["builder.contact.field.name"] || "Name"
-                      }
-                      value={(form?.groom as Partner | undefined)?.name ?? ""}
-                      onChange={(v: string) =>
-                        updatePartner("groom", "name", v || null)
-                      }
-                    />
-
-                    <BuilderTextInput
-                      label={
-                        translations["builder.contact.field.email"] || "Email"
-                      }
-                      value={(form?.groom as Partner | undefined)?.email ?? ""}
-                      onChange={(v: string) =>
-                        updatePartner("groom", "email", v || null)
-                      }
-                    />
-
-                    <BuilderTextInput
-                      label={
-                        translations["builder.contact.field.phone_optional"] ||
-                        "Phone (optional)"
-                      }
-                      value={(form?.groom as Partner | undefined)?.phone ?? ""}
-                      onChange={(v: string) =>
-                        updatePartner("groom", "phone", v || null)
-                      }
-                    />
-                  </div>
-                </div>
-              </div>
-
+              <ContactForm
+                form={form}
+                errors={formErrors}
+                translations={translations}
+                onChangePartner={updatePartner}
+                disabled={saving}
+              />
               {error && (
                 <div className="text-[--builder-color-danger] mt-4">
                   {error}
                 </div>
               )}
-
-              {/* Preview */}
-              {/* <div className="mt-6">
-                <div className="font-medium mb-2">
-                  {translations["builder.contact.preview_title"] ||
-                    "Contact section preview"}
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {(form?.bride as Partner | undefined)?.name && (
-                    <div className="p-3 border rounded-xl bg-white">
-                      <div className="font-semibold">
-                        {translations["builder.contact.bride"] || "Bride"}
-                      </div>
-                      <div className="text-sm">
-                        {(form?.bride as Partner).name}
-                      </div>
-                      <div className="text-sm mt-1">
-                        {(form?.bride as Partner).email && (
-                          <a href={`mailto:${(form?.bride as Partner).email}`}>
-                            {(form?.bride as Partner).email}
-                          </a>
-                        )}
-                        {(form?.bride as Partner).phone && (
-                          <div>
-                            <a href={`tel:${(form?.bride as Partner).phone}`}>
-                              {(form?.bride as Partner).phone}
-                            </a>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {(form?.groom as Partner | undefined)?.name && (
-                    <div className="p-3 border rounded-xl bg-white">
-                      <div className="font-semibold">
-                        {translations["builder.contact.groom"] || "Groom"}
-                      </div>
-                      <div className="text-sm">
-                        {(form?.groom as Partner).name}
-                      </div>
-                      <div className="text-sm mt-1">
-                        {(form?.groom as Partner).email && (
-                          <a href={`mailto:${(form?.groom as Partner).email}`}>
-                            {(form?.groom as Partner).email}
-                          </a>
-                        )}
-                        {(form?.groom as Partner).phone && (
-                          <div>
-                            <a href={`tel:${(form?.groom as Partner).phone}`}>
-                              {(form?.groom as Partner).phone}
-                            </a>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div> */}
             </div>
           </div>
         )}
