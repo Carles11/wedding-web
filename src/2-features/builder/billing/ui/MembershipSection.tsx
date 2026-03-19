@@ -2,6 +2,7 @@
 import { getLocalizedPlanFeatureTitles } from "@/4-shared/helpers/billing/entitlements";
 import { isValidLanguage } from "@/4-shared/helpers/isValidLanguage";
 import type { PlanType } from "@/4-shared/types";
+import { BuilderButton } from "@/4-shared/ui/builder";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
@@ -55,24 +56,23 @@ export default function MembershipSection({
             className={`absolute inset-0 flex items-center justify-center rounded-2xl bg-blue-600/4 backdrop-blur-[1px] transition-opacity duration-200 ${isHovered ? "opacity-100" : "opacity-0"}`}
             // ✅ no pointer-events-none here — clicks must pass through
           >
-            <span className="px-4 py-2 rounded-full bg-blue-600 text-white text-xs font-semibold shadow-lg tracking-wide">
-              <button
-                type="button"
-                className="cursor-pointer"
-                onClick={() =>
-                  canUpgrade
-                    ? router.push(`/${lang}/pricing`)
-                    : router.push(`/${lang}/builder/${siteId}/domain-billing`)
-                }
-              >
-                ✦{" "}
-                {canUpgrade
-                  ? translations["builder.general.form.upgrade"] ||
-                    "Upgrade to Premium"
-                  : translations["builder.billing.manage_btn"] ||
-                    "Manage Subscription"}
-              </button>
-            </span>
+            <BuilderButton
+              type="button"
+              variant="secondary"
+              className="cursor-pointer"
+              onClick={() =>
+                canUpgrade
+                  ? router.push(`/${lang}/pricing`)
+                  : router.push(`/${lang}/builder/${siteId}/domain-billing`)
+              }
+            >
+              ✦{" "}
+              {canUpgrade
+                ? translations["builder.general.form.upgrade"] ||
+                  "Upgrade to Premium"
+                : translations["builder.billing.manage_btn"] ||
+                  "Manage Subscription"}
+            </BuilderButton>
           </div>
         )}
 

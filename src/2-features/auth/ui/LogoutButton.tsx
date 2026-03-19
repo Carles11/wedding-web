@@ -1,7 +1,7 @@
 "use client";
 
 import { useSupabaseAuth } from "@/4-shared/hooks/useSupabaseAuth";
-import { MarketingButton } from "@/4-shared/ui/marketing";
+import { BuilderButton } from "@/4-shared/ui/builder";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -27,14 +27,14 @@ export default function LogoutButton() {
   };
 
   return (
-    <MarketingButton
-      variant="auth-outline"
+    <BuilderButton
+      variant="secondary"
       loading={isLoggingOut}
       loadingLabel="Logging out..."
       onClick={handleLogout}
       aria-label={isLoggingOut ? "Logging out" : "Logout"}
     >
       {isLoggingOut ? "Logging out..." : "Logout"}
-    </MarketingButton>
+    </BuilderButton>
   );
 }

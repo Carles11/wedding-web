@@ -33,7 +33,7 @@ export default async function AuthErrorPage({
         <div className="text-center">
           <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
             <svg
-              className="h-6 w-6 text-red-600"
+              className="h-6 w-6 text-[var(--builder-color-danger)]"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"

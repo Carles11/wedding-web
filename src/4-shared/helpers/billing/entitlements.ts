@@ -1,7 +1,7 @@
-import { PLAN_DEFINITIONS } from "@/4-shared/config/plans/planDefinitions";
+import { PLAN_CATALOG } from "@/4-shared/config/plans/planCatalog";
 import type { PlanFeatures, PlanType, Subscription } from "@/4-shared/types";
 
-export type PlanLimitKey = keyof (typeof PLAN_DEFINITIONS)["free"]["limits"];
+export type PlanLimitKey = keyof (typeof PLAN_CATALOG)["free"]["limits"];
 
 export function resolvePlanType(
   data: Subscription | PlanType | null,
@@ -20,7 +20,7 @@ export function resolvePlanType(
 }
 
 export function getPlanDefinition(planType: PlanType) {
-  return PLAN_DEFINITIONS[planType] ?? PLAN_DEFINITIONS.free;
+  return PLAN_CATALOG[planType] ?? PLAN_CATALOG.free;
 }
 
 export function getPlanFeatures(planType: PlanType): PlanFeatures {

@@ -150,7 +150,7 @@ export default function ForgotPasswordForm({ translations, lang }: Props) {
         {error && (
           <p
             id="error-message"
-            className="mt-4 text-sm text-red-600 text-center"
+            className="mt-4 text-sm text-[var(--builder-color-danger)] text-center"
             role="alert"
           >
             {error}

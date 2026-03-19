@@ -42,6 +42,14 @@ const FREE_PLAN_FEATURES: readonly PlanFeatureCatalogItem[] = [
     marketingDescriptionTranslationKey:
       "marketing.features.free_plan_feature_5_description",
   },
+  {
+    title: "Subdomain live available until 2 months after wedding day",
+    titleTranslationKeys: ["pricing.plan.free.feature_9"],
+    marketingDescription:
+      "Your subdomain stays online for 2 months after your wedding day",
+    marketingDescriptionTranslationKey:
+      "marketing.features.free_plan_feature_6_description",
+  },
 ];
 
 const PREMIUM_PLAN_FEATURES: readonly PlanFeatureCatalogItem[] = [
@@ -80,6 +88,13 @@ const PREMIUM_PLAN_FEATURES: readonly PlanFeatureCatalogItem[] = [
     marketingDescription: "Create and manage multiple gift registries",
     marketingDescriptionTranslationKey:
       "marketing.features.premium_plan_feature_5_description",
+  },
+  {
+    title: "Custom domain live forever",
+    titleTranslationKeys: ["pricing.plan.premium.feature_6"],
+    marketingDescription: "Your custom domain remains online indefinitely",
+    marketingDescriptionTranslationKey:
+      "marketing.features.premium_plan_feature_6_description",
   },
 ];
 

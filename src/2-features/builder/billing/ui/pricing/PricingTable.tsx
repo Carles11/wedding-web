@@ -1,4 +1,4 @@
-import { PLAN_DEFINITIONS } from "@/4-shared/config/plans/planDefinitions";
+import { PLAN_CATALOG } from "@/4-shared/config/plans/planCatalog";
 import { getLocalizedPlanFeatureTitles } from "@/4-shared/helpers/billing/entitlements";
 import type { PlanType } from "@/4-shared/types";
 
@@ -27,7 +27,7 @@ export default function PricingTable({
   onSelect?: (plan: PlanType) => void;
   lang?: string;
 }) {
-  const planKeys = Object.keys(PLAN_DEFINITIONS) as PlanType[];
+  const planKeys = Object.keys(PLAN_CATALOG) as PlanType[];
 
   const filteredPlans = planKeys.filter((p) =>
     type === "agency" ? p.startsWith("agency") : !p.startsWith("agency"),
@@ -36,7 +36,7 @@ export default function PricingTable({
   return (
     <div className="mx-auto grid max-w-5xl gap-8 md:grid-cols-2 lg:grid-cols-2">
       {filteredPlans.map((plan) => {
-        const def = PLAN_DEFINITIONS[plan];
+        const def = PLAN_CATALOG[plan];
         const highlight = plan === "premium";
 
         const formattedPrice =

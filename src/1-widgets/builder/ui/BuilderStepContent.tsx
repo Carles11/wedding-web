@@ -77,7 +77,7 @@ export default function BuilderStepContent({
         {siteLoading ? (
           <p>{translations["builder.status.loading"]}</p>
         ) : siteError ? (
-          <p className="text-red-600">
+          <p className="text-[var(--builder-color-danger)]">
             {translations["builder.status.error"]} {siteError}
           </p>
         ) : (

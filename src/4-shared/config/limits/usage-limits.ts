@@ -1,10 +1,10 @@
-import { PLAN_DEFINITIONS } from "@/4-shared/config/plans/planDefinitions";
+import { PLAN_CATALOG } from "@/4-shared/config/plans/planCatalog";
 import type { PlanType } from "@/4-shared/types/billing";
 
-export type LimitKey = keyof (typeof PLAN_DEFINITIONS)["free"]["limits"];
+export type LimitKey = keyof (typeof PLAN_CATALOG)["free"]["limits"];
 
 export function getPlanLimit(plan: PlanType, limit: LimitKey): number {
-  const def = PLAN_DEFINITIONS[plan] ?? PLAN_DEFINITIONS.free;
+  const def = PLAN_CATALOG[plan] ?? PLAN_CATALOG.free;
   return def.limits[limit];
 }
 

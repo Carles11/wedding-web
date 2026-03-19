@@ -137,7 +137,7 @@ function ImageCard({
           type="button"
           onClick={onDelete}
           disabled={assigning || uploading}
-          className="absolute top-0 right-2 cursor-pointer mt-2 p-2 h-6 w-6 bg-white rounded-md border shadow-sm flex items-center justify-center text-red-600 text-sm font-bold hover:bg-white md:opacity-0 md:group-hover:opacity-100 transition"
+          className="absolute top-0 right-2 cursor-pointer mt-2 p-2 h-6 w-6 bg-white rounded-md border shadow-sm flex items-center justify-center text-[var(--builder-color-danger)] text-sm font-bold hover:bg-white md:opacity-0 md:group-hover:opacity-100 transition"
           aria-label="Delete image"
         >
           ×
@@ -425,7 +425,9 @@ export default function ImagesBuilderStep({
             {translations["builder.images.label.loading"] || "Loading images…"}
           </p>
         )}
-        {!loading && error && <p className="text-red-600 text-sm">{error}</p>}
+        {!loading && error && (
+          <p className="text-[var(--builder-color-danger)] text-sm">{error}</p>
+        )}
         {!loading && (
           <div className="grid gap-6 lg:grid-cols-2">
             <div className="rounded-xl border bg-white p-4 space-y-4">

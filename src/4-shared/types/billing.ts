@@ -1,8 +1,8 @@
 // Plan types must match DB AND Stripe config
-import { PLAN_DEFINITIONS } from "@/4-shared/config/plans/planDefinitions";
+import { PLAN_CATALOG } from "@/4-shared/config/plans/planCatalog";
 
-const PLAN_TYPES = Object.keys(PLAN_DEFINITIONS) as Array<
-  keyof typeof PLAN_DEFINITIONS
+const PLAN_TYPES = Object.keys(PLAN_CATALOG) as Array<
+  keyof typeof PLAN_CATALOG
 >;
 
 export type PlanType = (typeof PLAN_TYPES)[number];

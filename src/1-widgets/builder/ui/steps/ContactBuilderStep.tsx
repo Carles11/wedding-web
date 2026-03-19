@@ -274,7 +274,7 @@ export default function ContactBuilderStep({
                         translations["builder.contact.field.name"] || "Name"
                       }
                       value={(form?.bride as Partner | undefined)?.name ?? ""}
-                      onChange={(v) =>
+                      onChange={(v: string) =>
                         updatePartner("bride", "name", v || null)
                       }
                     />
@@ -284,7 +284,7 @@ export default function ContactBuilderStep({
                         translations["builder.contact.field.email"] || "Email"
                       }
                       value={(form?.bride as Partner | undefined)?.email ?? ""}
-                      onChange={(v) =>
+                      onChange={(v: string) =>
                         updatePartner("bride", "email", v || null)
                       }
                     />
@@ -295,7 +295,7 @@ export default function ContactBuilderStep({
                         "Phone (optional)"
                       }
                       value={(form?.bride as Partner | undefined)?.phone ?? ""}
-                      onChange={(v) =>
+                      onChange={(v: string) =>
                         updatePartner("bride", "phone", v || null)
                       }
                     />
@@ -313,7 +313,7 @@ export default function ContactBuilderStep({
                         translations["builder.contact.field.name"] || "Name"
                       }
                       value={(form?.groom as Partner | undefined)?.name ?? ""}
-                      onChange={(v) =>
+                      onChange={(v: string) =>
                         updatePartner("groom", "name", v || null)
                       }
                     />
@@ -323,7 +323,7 @@ export default function ContactBuilderStep({
                         translations["builder.contact.field.email"] || "Email"
                       }
                       value={(form?.groom as Partner | undefined)?.email ?? ""}
-                      onChange={(v) =>
+                      onChange={(v: string) =>
                         updatePartner("groom", "email", v || null)
                       }
                     />
@@ -334,7 +334,7 @@ export default function ContactBuilderStep({
                         "Phone (optional)"
                       }
                       value={(form?.groom as Partner | undefined)?.phone ?? ""}
-                      onChange={(v) =>
+                      onChange={(v: string) =>
                         updatePartner("groom", "phone", v || null)
                       }
                     />
@@ -342,7 +342,11 @@ export default function ContactBuilderStep({
                 </div>
               </div>
 
-              {error && <div className="text-red-600 mt-4">{error}</div>}
+              {error && (
+                <div className="text-[--builder-color-danger] mt-4">
+                  {error}
+                </div>
+              )}
 
               {/* Preview */}
               {/* <div className="mt-6">

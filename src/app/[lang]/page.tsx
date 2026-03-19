@@ -15,9 +15,11 @@ import { headers } from "next/headers";
 export async function generateMetadata({
   params,
 }: {
-  params?: { lang?: string };
+  params?: Promise<{ lang?: string }>;
 }): Promise<Metadata> {
-  const lang = (await params?.lang) ?? "en";
+  const resolvedParams = params ? await params : { lang: "en" };
+  const lang = resolvedParams.lang ?? "en";
+
   const host = ((await headers()).get("host") ?? "").toLowerCase().trim();
   const site = await getSiteByDomain(host);
 

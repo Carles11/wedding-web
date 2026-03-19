@@ -269,7 +269,7 @@ export const CustomDomainSection: React.FC<Props> = ({
                   localStatus === "success"
                     ? "text-green-700"
                     : localStatus === "error"
-                      ? "text-red-600"
+                      ? "text-[var(--builder-color-danger)]"
                       : ""
                 }`}
               >
@@ -363,15 +363,20 @@ export const CustomDomainSection: React.FC<Props> = ({
                               "Did you already add the correct DNS records at your provider?"}
                           </span>
                           <div className="flex gap-2 mt-2 sm:mt-0">
-                            <a
-                              href={`https://${domain}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="px-4 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+                            <BuilderButton
+                              type="button"
+                              variant="primary"
+                              onClick={() =>
+                                window.open(
+                                  `https://${domain}`,
+                                  "_blank",
+                                  "noopener,noreferrer",
+                                )
+                              }
                             >
                               {translations["builder.domain.go_to_domain"] ||
                                 "Yes, Visit my website"}
-                            </a>
+                            </BuilderButton>
                             <BuilderButton
                               type="button"
                               variant="secondary"
@@ -412,7 +417,7 @@ export const CustomDomainSection: React.FC<Props> = ({
                               <div key={idx}>{line}</div>
                             ))}
                           {domainInfo[domain]?.error && (
-                            <div className="text-red-600 mt-2">
+                            <div className="text-[var(--builder-color-danger)] mt-2">
                               {translations["builder.domain.dns_error"] ||
                                 "Error:"}{" "}
                               {domainInfo[domain].error}

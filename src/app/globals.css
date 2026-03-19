@@ -183,21 +183,24 @@ h3 {
    Keep this scoped so marketing can define its own theme later. */
 .builder-theme {
   --builder-font-sans: var(--font-sans);
-  --builder-color-page-bg: #f1f5f9;
-  --builder-color-surface: #ffffff;
-  --builder-color-muted-surface: #f8fafc;
-  --builder-color-text: var(--color-foreground);
-  --builder-color-text-muted: #64748b;
-  --builder-color-border: #dbe2ea;
-  --builder-color-primary: #2563eb;
-  --builder-color-primary-hover: #1d4ed8;
-  --builder-color-secondary-bg: #ffffff;
-  --builder-color-secondary-hover: #f8fafc;
+  --builder-color-page-bg: #f5f4f2;
+  --builder-color-surface: #fdfcfb;
+  --builder-color-muted-surface: #f9f8f6;
+  --builder-color-text: #1c1917;
+  --builder-color-text-muted: #78716c;
+  --builder-color-border: #e8e6e1;
+  --builder-color-primary: #4f46e5;
+  --builder-color-primary-hover: #4338ca;
+  --builder-color-secondary-bg: #fdfcfb;
+  --builder-color-secondary-hover: #f5f4f2;
   --builder-color-danger: #dc2626;
   --builder-color-danger-border: #fecaca;
   --builder-color-danger-hover-bg: #fef2f2;
   --builder-radius: 0.625rem;
-  --builder-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+  --builder-shadow: 0 10px 30px rgba(28, 25, 23, 0.07);
+
+  --builder-btn-primary-text-color: #fff;
+  --builder-btn-primary-hover-bg: #1d4ed8;
 
   font-family: var(--builder-font-sans);
   color: var(--builder-color-text);
@@ -256,7 +259,7 @@ h3 {
 
 .builder-btn-primary {
   background: var(--builder-color-primary);
-  color: var(--color-foreground);
+  color: var(--builder-btn-primary-text-color);
 }
 
 .builder-btn-primary:hover:not(:disabled) {

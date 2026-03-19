@@ -422,7 +422,11 @@ export default function GeneralSiteForm({
         </div>
 
         {/* Status */}
-        {error && <div className="text-sm text-red-600">{error}</div>}
+        {error && (
+          <div className="text-sm text-[var(--builder-color-danger)]">
+            {error}
+          </div>
+        )}
       </form>
     </StepLayout>
   );

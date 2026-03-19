@@ -1,4 +1,4 @@
-import { PLAN_DEFINITIONS } from "@/4-shared/config/plans/planDefinitions";
+import { PLAN_CATALOG } from "@/4-shared/config/plans/planCatalog";
 import type { PlanType } from "@/4-shared/types";
 import Stripe from "stripe";
 import { STRIPE_SECRET_KEY, getStripePriceIdForPlan } from "./stripeConfig";
@@ -11,7 +11,7 @@ type CheckoutSessionResult = { sessionId: string; url: string };
  * Get the Stripe price ID for a given plan type.
  */
 export function getPriceIdForPlan(planType: PlanType): string {
-  const plan = PLAN_DEFINITIONS[planType];
+  const plan = PLAN_CATALOG[planType];
   if (!plan) throw new Error(`Unknown plan type: ${planType}`);
   return getStripePriceIdForPlan(planType);
 }
@@ -24,7 +24,7 @@ export function resolvePlanTypeFromStripePriceId(
 ): PlanType | null {
   if (!priceId) return null;
 
-  const planTypes = Object.keys(PLAN_DEFINITIONS) as PlanType[];
+  const planTypes = Object.keys(PLAN_CATALOG) as PlanType[];
 
   for (const planType of planTypes) {
     try {
