@@ -15,9 +15,7 @@ export async function generateMetadata({
   params,
 }: {
   params?: { lang?: string };
-  searchParams?: { lang?: string };
 }): Promise<Metadata> {
-  // Support ?lang or [lang]
   const realParams = await params;
   const lang = realParams?.lang ?? "en";
 

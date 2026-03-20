@@ -9,13 +9,15 @@ import { NextResponse } from "next/server";
  * Exchanges the auth code for a session and redirects to the app.
  */
 export async function GET(request: Request) {
-  const { searchParams, origin } = new URL(request.url);
+  const { searchParams, origin, pathname } = new URL(request.url);
   const code = searchParams.get("code");
   const tokenHash = searchParams.get("token_hash");
   const type = searchParams.get("type") as EmailOtpType | null;
   const next = searchParams.get("next") ?? "/builder";
 
-  const requestedLang = searchParams.get("lang") ?? "en";
+  // Extract lang from the URL path segment
+  const pathSegments = pathname.split("/").filter(Boolean);
+  const requestedLang = pathSegments[0] || "en";
   const buildConfirmUrl = () => {
     const url = new URL(`/${requestedLang}/auth/confirm`, origin);
     if (next && next !== "/builder") {
@@ -32,7 +34,6 @@ export async function GET(request: Request) {
     let normalizedNext = next;
     const langPrefix = `/${requestedLang}/`;
     if (!normalizedNext.startsWith(langPrefix)) {
-      // Remove any leading slash for next
       normalizedNext = normalizedNext.replace(/^\//, "");
       normalizedNext = `${langPrefix}${normalizedNext}`;
     }

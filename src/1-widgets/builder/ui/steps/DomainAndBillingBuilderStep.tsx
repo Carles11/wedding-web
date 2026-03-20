@@ -108,6 +108,7 @@ export default function DomainAndBillingBuilderStep({
         planType={planType}
         translations={translations}
         siteId={site.id}
+        lang={lang}
       />
     </div>
   );

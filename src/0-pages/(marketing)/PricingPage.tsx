@@ -1,33 +1,21 @@
 import PricingCTATableAdapter from "@/1-widgets/marketing/ui/PricingCTATableAdapter";
 import PricingPageShell from "@/1-widgets/marketing/ui/PricingPageShell";
 import { fetchBuilderTranslations } from "@/4-shared/api/builder/getTranslations";
-import { isValidLanguage } from "@/4-shared/helpers/isValidLanguage";
-import {
-  resolveLanguageFromParams,
-  resolveSearchParams,
-} from "@/4-shared/lib/params/resolveSearchParams";
+// Removed misplaced imports
+// ...existing code...
 import type { TranslationDictionary } from "@/4-shared/types";
-import { PricingPageProps } from "@/4-shared/types/pricingPage";
 
 export default async function PricingPage({
-  lang,
-  searchParams,
-}: PricingPageProps) {
-  // Resolve async searchParams
-  const resolvedParams = await resolveSearchParams(searchParams);
-
-  // Extract language with fallback to "en"
-  const resolvedLang = resolveLanguageFromParams(
-    lang,
-    resolvedParams,
-    isValidLanguage,
-  );
+  params,
+}: {
+  params?: { lang?: string };
+}) {
+  // Use the [lang] path segment for language
+  const realParams = await params;
+  const lang = realParams?.lang ?? "en";
 
   // Fetch translations
-  const t: TranslationDictionary = await fetchBuilderTranslations(
-    resolvedLang,
-    "en",
-  );
+  const t: TranslationDictionary = await fetchBuilderTranslations(lang, "en");
 
   return (
     <PricingPageShell
@@ -41,7 +29,7 @@ export default async function PricingPage({
         "All prices include applicable taxes where required."
       }
     >
-      <PricingCTATableAdapter lang={resolvedLang} t={t} />
+      <PricingCTATableAdapter lang={lang} t={t} />
     </PricingPageShell>
   );
 }

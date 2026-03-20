@@ -1,28 +1,26 @@
 "use client";
 import { getLocalizedPlanFeatureTitles } from "@/4-shared/helpers/billing/entitlements";
-import { isValidLanguage } from "@/4-shared/helpers/isValidLanguage";
 import type { PlanType } from "@/4-shared/types";
 import { BuilderButton } from "@/4-shared/ui/builder";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 interface Props {
   planType: PlanType;
   translations: Record<string, string>;
   siteId: string;
+  lang: string;
 }
 
 export default function MembershipSection({
   planType,
   siteId,
   translations,
+  lang,
 }: Props) {
   const router = useRouter();
-  const params = useSearchParams();
-  const langRaw = params.get("lang");
-  const lang = isValidLanguage(langRaw ?? undefined) ? (langRaw ?? "en") : "en";
-  const [isHovered, setIsHovered] = useState(false);
 
+  const [isHovered, setIsHovered] = useState(false);
   const planLabel = {
     free: translations["builder.billing.current_plan_free"],
     premium: translations["builder.billing.current_plan_premium"],

@@ -35,7 +35,6 @@ export default function BuilderStepNav({
   translations,
   currentLang,
 }: BuilderStepNavProps) {
-  console.log("Current language in BuilderStepNav:", currentLang);
   return (
     <div className="lg:flex">
       {/* MOBILE STEP SCROLLER */}

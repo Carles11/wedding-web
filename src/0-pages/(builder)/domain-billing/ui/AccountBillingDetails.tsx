@@ -22,7 +22,6 @@ export default function AccountBillingDetails({
   const eventUsage = usage?.events ?? 0;
   const usagePercent =
     eventLimit === -1 ? 0 : Math.min((eventUsage / eventLimit) * 100, 100);
-
   return (
     <div className="space-y-4">
       {/* Current Plan */}
@@ -181,7 +180,7 @@ export default function AccountBillingDetails({
         {canUpgrade && (
           <button
             className="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition"
-            onClick={() => router.push(`/${lang}/marketing/upgrade`)}
+            onClick={() => router.push(`/${lang || "en"}/marketing/upgrade`)}
           >
             {t["billing.cta_upgrade"] ?? "Upgrade"}
           </button>
@@ -189,9 +188,9 @@ export default function AccountBillingDetails({
         {canManage && (
           <button
             className="px-6 py-3 bg-gray-100 text-gray-800 rounded-lg font-semibold hover:bg-gray-200 transition"
-            onClick={() => router.push(`/${lang}/pricing`)}
+            onClick={() => router.push(`/${lang || "en"}/pricing`)}
           >
-            {t["billing.cta_pricing"] ?? "See all plans"}
+            {t["billing.cta_pricing"] ?? "See all membership benefits →"}
           </button>
         )}
       </div>

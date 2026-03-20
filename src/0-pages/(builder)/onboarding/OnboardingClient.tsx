@@ -14,7 +14,6 @@ interface Props {
 
 export default function OnboardingClient({ translations, lang }: Props) {
   const router = useRouter();
-  console.log("onboarding LAAAAANG", lang);
   const [isLoading, setIsLoading] = useState(false);
 
   async function handlePlanSelect(plan: PlanType) {
