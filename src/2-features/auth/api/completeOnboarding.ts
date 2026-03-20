@@ -1,7 +1,7 @@
 "use server";
 
 import { getCurrentUser } from "@/3-entities/user/api/getCurrentUser";
-import { supabaseAdmin } from "@/4-shared/lib/supabase/supabaseServer";
+import { createClient } from "@/4-shared/lib/supabase/client";
 
 /**
  * Mark the current user as having completed onboarding
@@ -19,7 +19,8 @@ export async function completeOnboarding(): Promise<{
 
   try {
     // Update user_profiles to mark onboarding as complete
-    const { error } = await supabaseAdmin
+    const supabase = createClient();
+    const { error } = await supabase
       .from("user_profiles")
       .update({ onboarding_completed: true })
       .eq("id", user.id);

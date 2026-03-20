@@ -1,16 +1,31 @@
 import OnboardingClient from "@/0-pages/(builder)/onboarding/OnboardingClient";
 import { fetchBuilderTranslations } from "@/4-shared/api/builder/getTranslations";
 import { isValidLanguage } from "@/4-shared/helpers/isValidLanguage";
+import {
+  resolveLanguageFromParams,
+  resolveSearchParams,
+} from "@/4-shared/lib/params/resolveSearchParams";
 
 export default async function OnboardingPage({
-  searchParams,
+  params,
 }: {
-  searchParams: { lang?: string };
+  params?: { lang?: string } | Promise<{ lang?: string }>;
 }) {
-  const params = await searchParams;
-  const requested = params?.lang;
-  const lang = isValidLanguage(requested) ? requested : "en";
-  const translations = await fetchBuilderTranslations(lang, "en");
+  // Use helpers to resolve params and lang
+  const resolvedParams = await resolveSearchParams(params);
+  const langRaw = resolvedParams?.lang;
+  const langCandidate =
+    typeof langRaw === "string"
+      ? langRaw
+      : Array.isArray(langRaw) && typeof langRaw[0] === "string"
+        ? langRaw[0]
+        : undefined;
 
-  return <OnboardingClient translations={translations} />;
+  const lang = resolveLanguageFromParams(
+    langCandidate,
+    resolvedParams,
+    isValidLanguage,
+  );
+  const translations = await fetchBuilderTranslations(lang, "en");
+  return <OnboardingClient translations={translations} lang={lang} />;
 }

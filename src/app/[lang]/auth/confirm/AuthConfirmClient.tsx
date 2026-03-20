@@ -34,7 +34,8 @@ export default function AuthConfirmClient({ translations, lang }: Props) {
   useEffect(() => {
     let cancelled = false;
     const requestedLang = lang;
-    const nextRaw = searchParams.get("next") ?? "builder/onboarding";
+    const nextRaw =
+      searchParams.get("next") ?? `/${requestedLang}/builder/onboarding`;
     // Ensure 'next' is always language-prefixed
     const langPrefix = `/${requestedLang}/`;
     let next = nextRaw;

@@ -2,21 +2,19 @@
 
 import { completeOnboarding } from "@/2-features/auth/api/completeOnboarding";
 import PricingTable from "@/2-features/builder/billing/ui/pricing/PricingTable";
-import { isValidLanguage } from "@/4-shared/helpers/isValidLanguage";
 import { notify } from "@/4-shared/lib/toast/toast";
 import type { PlanType } from "@/4-shared/types";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 interface Props {
   translations: Record<string, string>;
+  lang: string;
 }
 
-export default function OnboardingClient({ translations }: Props) {
+export default function OnboardingClient({ translations, lang }: Props) {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const requestedLang = searchParams.get("lang") ?? undefined;
-  const currentLang = isValidLanguage(requestedLang) ? requestedLang : "en";
+  console.log("onboarding LAAAAANG", lang);
   const [isLoading, setIsLoading] = useState(false);
 
   async function handlePlanSelect(plan: PlanType) {
@@ -29,13 +27,12 @@ export default function OnboardingClient({ translations }: Props) {
       // Route based on plan selection
       if (plan === "free") {
         // Go straight to builder
-        router.push(`/${currentLang}/builder?onboarding=completed`);
+        router.push(`/${lang}/builder?onboarding=completed`);
       } else {
         // Go to checkout for premium/paid plans
-        router.push(`/${currentLang}/builder/checkout?plan=${plan}`);
+        router.push(`/${lang}/builder/checkout?plan=${plan}`);
       }
     } catch (err) {
-      console.error("Onboarding error:", err);
       notify.error(
         translations["error.something_went_wrong"] ?? "Something went wrong",
       );
@@ -50,7 +47,7 @@ export default function OnboardingClient({ translations }: Props) {
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900">
             {translations["onboarding.welcome"] ??
-              "Welcome to Your Wedding Website"}
+              "Welcomes to Your Wedding Website"}
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
             {translations["onboarding.subtitle"] ??
@@ -63,7 +60,7 @@ export default function OnboardingClient({ translations }: Props) {
           <PricingTable
             translations={translations}
             type="private"
-            lang={currentLang}
+            lang={lang}
             onSelect={handlePlanSelect}
           />
         </div>
@@ -104,7 +101,7 @@ export default function OnboardingClient({ translations }: Props) {
           <button
             onClick={() => handlePlanSelect("free")}
             disabled={isLoading}
-            className="text-blue-600 hover:text-blue-700 font-medium transition disabled:opacity-50"
+            className="cursor-pointer text-blue-600 hover:text-blue-700 font-medium transition disabled:opacity-50"
           >
             {isLoading
               ? (translations["loading"] ?? "Loading...")

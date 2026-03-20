@@ -9,7 +9,7 @@ import HeroMarketing, {
 } from "@/1-widgets/marketing/ui";
 import { useSupabaseAuth } from "@/4-shared/hooks/useSupabaseAuth";
 import type { MarketingPageProps } from "@/4-shared/types";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function MarketingPageComponent({
@@ -17,8 +17,7 @@ export default function MarketingPageComponent({
   translations,
 }: MarketingPageProps) {
   const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
+
   const { user, supabase } = useSupabaseAuth();
 
   // SSR-safe: initialize from initialLang, then sync with path segment on client
@@ -79,18 +78,6 @@ export default function MarketingPageComponent({
     onPrimaryClick: handlePrimaryClick,
     onSecondaryClick: handleSecondaryClick,
   });
-
-  // Optional: client-only debug info
-  const [clientDebug, setClientDebug] = useState({ href: "", langParam: "" });
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      setClientDebug({
-        href: window.location.href,
-        langParam:
-          new URLSearchParams(window.location.search).get("lang") || "",
-      });
-    }
-  }, []);
 
   return (
     <>
