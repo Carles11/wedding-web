@@ -61,7 +61,7 @@ export default function MembershipSection({
               onClick={() =>
                 canUpgrade
                   ? router.push(`/${lang}/pricing`)
-                  : router.push(`/${lang}/builder/${siteId}/domain-billing`)
+                  : router.push(`/${lang}/builder/${siteId}/billing`)
               }
             >
               ✦{" "}

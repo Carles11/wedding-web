@@ -4,41 +4,11 @@ import { createSupabaseSSRClient } from "@/4-shared/lib/supabase/server";
 import AccountBillingDetails from "./ui/AccountBillingDetails";
 
 interface PageProps {
-  params: { siteId: string };
-  searchParams?:
-    | { [key: string]: string | string[] | undefined }
-    | Promise<{ [key: string]: string | string[] | undefined }>;
+  params: { lang: string; siteId: string };
 }
 
-export default async function AccountBillingPage({
-  params,
-  searchParams,
-}: PageProps) {
-  let resolvedSearchParams = searchParams;
-
-  if (
-    resolvedSearchParams &&
-    typeof resolvedSearchParams === "object" &&
-    typeof (resolvedSearchParams as unknown as Promise<unknown>).then ===
-      "function"
-  ) {
-    resolvedSearchParams = await (resolvedSearchParams as Promise<{
-      [key: string]: string | string[] | undefined;
-    }>);
-  }
-
-  const paramsObj = resolvedSearchParams as
-    | { [key: string]: string | string[] | undefined }
-    | undefined;
-
-  const langRaw = paramsObj?.lang;
-  const lang =
-    typeof langRaw === "string"
-      ? langRaw
-      : Array.isArray(langRaw) && typeof langRaw[0] === "string"
-        ? langRaw[0]
-        : "en";
-
+export default async function AccountBillingPage({ params }: PageProps) {
+  const { lang, siteId } = params;
   const supabase = await createSupabaseSSRClient();
   const t = await fetchBuilderTranslations(supabase, lang, "en");
   const user = await getCurrentUser();
