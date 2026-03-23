@@ -36,12 +36,32 @@ export async function POST() {
       .eq("id", user.id)
       .maybeSingle();
 
-    const site = await createSiteForUser({
-      id: user.id,
-      email: user.email ?? null,
-      preferredLanguage: profileData?.preferred_language ?? null,
-    });
-    return NextResponse.json({ site }, { status: 201 });
+    try {
+      const site = await createSiteForUser({
+        id: user.id,
+        email: user.email ?? null,
+        preferredLanguage: profileData?.preferred_language ?? null,
+      });
+      return NextResponse.json({ site }, { status: 201 });
+    } catch (e: any) {
+      // If unique violation, fetch and return existing site
+      if (e && e.code === "23505") {
+        // Postgres unique_violation
+        const { data: existingSitesAgain } = await supabase
+          .from("sites")
+          .select("id")
+          .eq("owner_user_id", user.id)
+          .limit(1);
+        if (existingSitesAgain && existingSitesAgain.length > 0) {
+          return NextResponse.json(
+            { site: existingSitesAgain[0] },
+            { status: 200 },
+          );
+        }
+      }
+      const errorMessage = e instanceof Error ? e.message : "Server error";
+      return NextResponse.json({ error: errorMessage }, { status: 500 });
+    }
   } catch (e: unknown) {
     const errorMessage = e instanceof Error ? e.message : "Server error";
     return NextResponse.json({ error: errorMessage }, { status: 500 });

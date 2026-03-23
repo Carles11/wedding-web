@@ -1,5 +1,9 @@
+import { useSupabaseAuth } from "@/4-shared/hooks/useSupabaseAuth";
 import { notify } from "@/4-shared/lib/toast/toast";
 import { BuilderButton } from "@/4-shared/ui/builder/BuilderButton";
+import { isValidPassword, passwordsMatch } from "@/4-shared/utils/validations";
+import { useState } from "react";
+import { PasswordChangeModal } from "../PasswordChangeModal";
 
 interface SecurityTabProps {
   translations: Record<string, string>;
@@ -7,6 +11,78 @@ interface SecurityTabProps {
 }
 
 export function SecurityTab({ translations, cardClass }: SecurityTabProps) {
+  const { user } = useSupabaseAuth();
+  const [showModal, setShowModal] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleChangePassword = async () => {
+    setError("");
+    if (!isValidPassword(newPassword)) {
+      setError(
+        translations["auth.common.password_invalid"] ||
+          "Password must be at least 8 characters, include a letter and a number.",
+      );
+      return;
+    }
+    if (!passwordsMatch(newPassword, confirmPassword)) {
+      setError(
+        translations["auth.common.passwords_do_not_match"] ||
+          "Passwords do not match.",
+      );
+      return;
+    }
+    setLoading(true);
+    try {
+      // Re-authenticate
+      const supabase = (
+        await import("@/4-shared/lib/supabase/client")
+      ).createClient();
+      if (!user?.email) {
+        setError("No email found for user.");
+        setLoading(false);
+        notify.error("No email found for user.");
+        return;
+      }
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: user?.email,
+        password: currentPassword,
+      });
+      if (signInError) {
+        setError(
+          translations["auth.common.password_incorrect"] ||
+            "Current password is incorrect.",
+        );
+        setLoading(false);
+        return;
+      }
+      // Update password
+      const { error: updateError } = await supabase.auth.updateUser({
+        password: newPassword,
+      });
+      if (updateError) {
+        setError(updateError.message);
+        setLoading(false);
+        return;
+      }
+      setShowModal(false);
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      notify.success(
+        translations["auth.common.password_change_success"] ||
+          "Password changed successfully.",
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-6 animate-fadeIn">
       <div className={cardClass}>
@@ -40,23 +116,12 @@ export function SecurityTab({ translations, cardClass }: SecurityTabProps) {
                     "builder.account.tabs.security.password_label"
                   ] || "Password"}
                 </p>
-                <p className="text-xs text-(--builder-color-text-muted) mt-0.5">
-                  {translations[
-                    "builder.account.tabs.security.password_hint"
-                  ] || "Last changed: 30 days ago"}
-                </p>
               </div>
             </div>
             <BuilderButton
               type="button"
               variant="secondary"
-              onClick={() => {
-                notify.info(
-                  translations[
-                    "builder.account.tabs.security.password_coming_soon"
-                  ] || "Password change feature coming soon!",
-                );
-              }}
+              onClick={() => setShowModal(true)}
               className="px-4! py-2!"
             >
               {translations[
@@ -66,6 +131,15 @@ export function SecurityTab({ translations, cardClass }: SecurityTabProps) {
           </div>
         </div>
       </div>
+
+      {/* Change Password Modal */}
+      {showModal && (
+        <PasswordChangeModal
+          open={showModal}
+          onClose={() => setShowModal(false)}
+          translations={translations}
+        />
+      )}
     </div>
   );
 }

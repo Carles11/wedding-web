@@ -1,13 +1,15 @@
 "use client";
 
 import { StepLayout } from "@/1-widgets/builder/step-layout/ui/StepLayout";
-import {
-  deleteAccount,
-  updateAccountInfo,
-} from "@/3-entities/account/api/accountCrud";
 
+import { deleteAccountAction } from "@/3-entities/account/actions/deleteAccount";
+import { updateAccountInfo } from "@/3-entities/account/api/accountCrud";
+
+import { getAccountById } from "@/3-entities/account/api/getAccountById";
+import { useSupabaseAuth } from "@/4-shared/hooks/useSupabaseAuth";
 import { notify } from "@/4-shared/lib/toast/toast";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import AccountDangerZone from "./ui/AccountDangerZone";
 import { PreferencesTab } from "./ui/tabs/PreferencesTab";
 import { ProfileTab } from "./ui/tabs/ProfileTab";
@@ -19,7 +21,41 @@ interface Props {
 }
 
 export default function AccountPage({ account, translations }: Props) {
-  if (!account) {
+  const router = useRouter();
+
+  const [currentAccount, setCurrentAccount] = useState(account);
+  const [editName, setEditName] = useState(account.full_name || "");
+  const [editEmail, setEditEmail] = useState(account.email);
+  const [saving, setSaving] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState("");
+  const [activeTab, setActiveTab] = useState<
+    "profile" | "security" | "preferences"
+  >("profile");
+  const [deleteAcknowledge, setDeleteAcknowledge] = useState(false);
+  const { user, signOut } = useSupabaseAuth();
+
+  // Refetch account data if user logs in or email changes
+  useEffect(() => {
+    async function refetchAccount() {
+      if (
+        user &&
+        user.id &&
+        user.email &&
+        user.email !== currentAccount.email
+      ) {
+        const result = await getAccountById(user.id);
+        if (result.success && result.data) {
+          setCurrentAccount(result.data);
+          setEditName(result.data.full_name || "");
+          setEditEmail(result.data.email);
+        }
+      }
+    }
+    refetchAccount();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.email]);
+
+  if (!currentAccount) {
     return (
       <div className="text-(--builder-color-danger) p-8 text-center">
         {translations["builder.account.page.error_not_found"] ||
@@ -28,25 +64,31 @@ export default function AccountPage({ account, translations }: Props) {
     );
   }
 
-  const [editName, setEditName] = useState(account.full_name || "");
-  const [editEmail, setEditEmail] = useState(account.email);
-  const [saving, setSaving] = useState(false);
-  const [deleteConfirm, setDeleteConfirm] = useState("");
-  const [activeTab, setActiveTab] = useState<
-    "profile" | "security" | "preferences"
-  >("profile");
-
+  // Only update name here; email change is handled securely in ProfileTab
   const handleSave = async () => {
     setSaving(true);
     try {
-      const result = await updateAccountInfo(account.id, {
-        full_name: editName,
-        email: editEmail,
-      });
+      // Only update full_name if it changed
+      const updates: any = {};
+      if (editName !== account.full_name) {
+        updates.full_name = editName;
+      }
+      // Do not update email here; ProfileTab handles secure email change
+      if (Object.keys(updates).length === 0) {
+        notify.success(
+          translations["builder.general.form.save_success"] ||
+            "Changes saved successfully!",
+        );
+        return;
+      }
+      const result = await updateAccountInfo(account.id, updates);
       if (result.success) {
         notify.success(
-          translations["account.save_success"] || "Changes saved successfully!",
+          translations["builder.general.form.save_success"] ||
+            "Changes saved successfully!",
         );
+        // Optionally, reset editEmail to account.email to keep UI in sync
+        setEditEmail(account.email);
       } else {
         notify.error(result.error?.message || "Update failed.");
       }
@@ -63,6 +105,13 @@ export default function AccountPage({ account, translations }: Props) {
   };
 
   const handleDelete = async () => {
+    if (!deleteAcknowledge) {
+      notify.error(
+        translations["account.delete_acknowledge_error"] ||
+          "You must acknowledge this action is permanent.",
+      );
+      return;
+    }
     if (deleteConfirm !== account.email) {
       notify.error(
         translations["account.delete_confirm_error"] ||
@@ -72,12 +121,16 @@ export default function AccountPage({ account, translations }: Props) {
     }
     setSaving(true);
     try {
-      const result = await deleteAccount(account.id);
+      const result = await deleteAccountAction(account.id);
       if (result.success) {
         notify.success(
           translations["account.delete_success"] ||
             "Account deleted successfully.",
         );
+
+        // Optionally, redirect or sign out here
+        await signOut();
+        router.push("/"); // Redirect to homepage after deletion
       } else {
         notify.error(result.error?.message || "Delete failed.");
       }
@@ -93,8 +146,8 @@ export default function AccountPage({ account, translations }: Props) {
     }
   };
 
-  const initials = account.full_name
-    ? account.full_name
+  const initials = currentAccount.full_name
+    ? currentAccount.full_name
         .split(" ")
         .map((n: string) => n[0])
         .join("")
@@ -224,7 +277,7 @@ export default function AccountPage({ account, translations }: Props) {
 
         {activeTab === "profile" && (
           <ProfileTab
-            account={account}
+            account={currentAccount}
             translations={translations}
             editName={editName}
             setEditName={setEditName}
@@ -250,11 +303,13 @@ export default function AccountPage({ account, translations }: Props) {
 
         {/* Danger zone - always visible but styled differently */}
         <AccountDangerZone
-          account={account}
+          account={currentAccount}
           translations={translations}
           saving={saving}
           deleteConfirm={deleteConfirm}
           setDeleteConfirm={setDeleteConfirm}
+          deleteAcknowledge={deleteAcknowledge}
+          setDeleteAcknowledge={setDeleteAcknowledge}
           handleDelete={handleDelete}
         />
       </div>

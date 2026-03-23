@@ -24,12 +24,3 @@ export async function deleteAccount(userId: string) {
     .eq("id", userId);
   return error ? { success: false, error } : { success: true };
 }
-
-export async function changeAccountPassword(
-  userId: string,
-  newPassword: string,
-) {
-  // Implement password change logic with your auth provider
-  // This is a stub; replace with real logic
-  return { success: false, error: "Password change not implemented." };
-}

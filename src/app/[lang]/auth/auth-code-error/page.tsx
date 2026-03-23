@@ -46,7 +46,7 @@ export default async function AuthErrorPage({
               />
             </svg>
           </div>
-          <Heading as="h1">
+          <Heading as="h2">
             {translations["auth.error.title"] ?? "Authentication Error"}{" "}
           </Heading>
 

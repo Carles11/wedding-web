@@ -1,8 +1,7 @@
 "use client";
 
-import { completeOnboarding } from "@/2-features/auth/api/completeOnboarding";
+// import { completeOnboarding } from "@/2-features/auth/api/completeOnboarding";
 import PricingTable from "@/2-features/builder/billing/ui/pricing/PricingTable";
-import { notify } from "@/4-shared/lib/toast/toast";
 import type { PlanType } from "@/4-shared/types";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -20,21 +19,33 @@ export default function OnboardingClient({ translations, lang }: Props) {
     setIsLoading(true);
 
     try {
-      // Mark onboarding as complete
-      await completeOnboarding();
-
-      // Route based on plan selection
+      console.log("[Onboarding] Plan selected:", plan);
       if (plan === "free") {
-        // Go straight to builder
-        router.push(`/${lang}/builder?onboarding=completed`);
+        console.log("[Onboarding] Calling /api/onboarding/complete...");
+        const res = await fetch("/api/onboarding/complete", { method: "POST" });
+        console.log("[Onboarding] API response status:", res.status);
+        const data = await res.json();
+        console.log("[Onboarding] API response data:", data);
+        if (!data.success) {
+          console.error(
+            "[Onboarding] Failed to complete onboarding:",
+            data.error,
+          );
+          throw new Error(data.error || "Failed to complete onboarding");
+        }
+        console.log(
+          "[Onboarding] Onboarding marked complete. Redirecting to /" +
+            lang +
+            "/builder",
+        );
+        window.location.href = `/${lang}/builder`;
       } else {
-        // Go to checkout for premium/paid plans
+        console.log("[Onboarding] Redirecting to checkout for plan:", plan);
         router.push(`/${lang}/builder/checkout?plan=${plan}`);
       }
     } catch (err) {
-      notify.error(
-        translations["error.something_went_wrong"] ?? "Something went wrong",
-      );
+      // Optionally, show error notification here
+      console.error("[Onboarding] Error in handlePlanSelect:", err);
       setIsLoading(false);
     }
   }

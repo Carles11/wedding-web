@@ -104,3 +104,24 @@ Full guides (setup, scaling, multi-tenancy, architecture, i18n, security, etc.):
 ## License
 
 MIT
+
+---
+
+## Single-Site-Per-User Enforcement (2026-03)
+
+- By default, each user can only have **one site**. This is enforced at the database level with a unique constraint on `sites.owner_user_id` and in the API logic.
+- If a user attempts to create a second site (e.g., via onboarding or builder), the backend will return the existing site instead of creating a duplicate.
+- This prevents race conditions and duplicate site rows during onboarding or rapid navigation.
+
+**How to enable multi-site (agency) support in the future:**
+
+1. **Remove or relax the unique constraint** on `sites.owner_user_id` in your database:
+   ```sql
+   ALTER TABLE sites DROP CONSTRAINT unique_owner_user_id;
+   ```
+2. **Update API logic** in `/api/provision-site` and related hooks/components to allow multiple sites per user, and implement UI for site selection/creation.
+3. **Update all queries** that assume a single site per user to handle multiple sites (e.g., show a site picker, or default to the most recent/active site).
+
+> Until these changes are made, all users (except future agency roles) are limited to one site.
+
+---

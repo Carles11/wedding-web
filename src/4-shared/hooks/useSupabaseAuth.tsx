@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { createClient } from "@/4-shared/lib/supabase/client";
 import type { Session, User } from "@supabase/supabase-js";
+import { useEffect, useState } from "react";
 
 /**
  * Client-side auth hook using cookie-based session management.
@@ -56,5 +56,39 @@ export function useSupabaseAuth() {
     setUser(null);
   };
 
-  return { session, user, loading, signOut, supabase } as const;
+  /**
+   * Securely change the user's email, requiring their current password.
+   * Returns { success, error }.
+   */
+  const changeEmailWithPassword = async (
+    currentEmail: string,
+    newEmail: string,
+    password: string,
+  ) => {
+    // Step 1: Re-authenticate
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: currentEmail,
+      password,
+    });
+    if (signInError) {
+      return { success: false, error: signInError };
+    }
+    // Step 2: Update email
+    const { error: updateError } = await supabase.auth.updateUser({
+      email: newEmail,
+    });
+    if (updateError) {
+      return { success: false, error: updateError };
+    }
+    return { success: true };
+  };
+
+  return {
+    session,
+    user,
+    loading,
+    signOut,
+    supabase,
+    changeEmailWithPassword,
+  } as const;
 }

@@ -6,6 +6,8 @@ interface AccountDangerZoneProps {
   saving: boolean;
   deleteConfirm: string;
   setDeleteConfirm: (val: string) => void;
+  deleteAcknowledge: boolean;
+  setDeleteAcknowledge: (val: boolean) => void;
   handleDelete: () => void;
 }
 
@@ -16,6 +18,8 @@ export default function AccountDangerZone({
   deleteConfirm,
   setDeleteConfirm,
   handleDelete,
+  deleteAcknowledge,
+  setDeleteAcknowledge,
 }: AccountDangerZoneProps) {
   return (
     <div
@@ -54,12 +58,12 @@ export default function AccountDangerZone({
         </div>
       </div>
 
-      <div className="pl-13">
+      <div className="pl-13 space-y-2">
         <label className="block text-sm font-medium text-(--builder-color-danger) mb-2">
           {translations["builder.account.page.delete_confirm_label"] ||
             "Type your email to confirm deletion"}
         </label>
-        <div className="flex gap-3 flex-wrap sm:flex-nowrap">
+        <div className="flex gap-3 flex-wrap sm:flex-nowrap mb-2">
           <input
             className="flex-1 rounded-lg border px-4 py-2.5 text-sm bg-white/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-red-200 transition-all duration-200"
             style={{ borderColor: "var(--builder-color-danger-border)" }}
@@ -68,19 +72,38 @@ export default function AccountDangerZone({
             type="email"
             placeholder={account.email}
           />
-          <BuilderButton
-            type="button"
-            tone="danger"
-            onClick={handleDelete}
-            disabled={saving || deleteConfirm !== account.email}
-            className="px-6! py-2.5! whitespace-nowrap"
-          >
-            {saving
-              ? translations["builder.account.page.deleting"] || "Deleting..."
-              : translations["builder.account.page.delete_btn"] ||
-                "Delete account"}
-          </BuilderButton>
         </div>
+        <div className="flex items-center gap-2 mb-2">
+          <input
+            id="delete-acknowledge"
+            type="checkbox"
+            checked={deleteAcknowledge}
+            onChange={(e) => setDeleteAcknowledge(e.target.checked)}
+            className="accent-red-600"
+            disabled={saving}
+          />
+          <label
+            htmlFor="delete-acknowledge"
+            className="text-sm text-(--builder-color-danger)"
+          >
+            {translations["builder.account.page.delete_acknowledge"] ||
+              "I understand this action is permanent and cannot be undone."}
+          </label>
+        </div>
+        <BuilderButton
+          type="button"
+          tone="danger"
+          onClick={handleDelete}
+          disabled={
+            saving || deleteConfirm !== account.email || !deleteAcknowledge
+          }
+          className="px-6! py-2.5! whitespace-nowrap"
+        >
+          {saving
+            ? translations["builder.account.page.deleting"] || "Deleting..."
+            : translations["builder.account.page.delete_btn"] ||
+              "Delete account"}
+        </BuilderButton>
       </div>
     </div>
   );

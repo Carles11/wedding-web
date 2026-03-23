@@ -4,7 +4,7 @@ import { resetPassword } from "@/2-features/auth/api";
 import { BuilderTextInput } from "@/4-shared/ui/builder/inputs";
 import { Heading } from "@/4-shared/ui/commons/typography/Heading";
 import { MarketingButton } from "@/4-shared/ui/marketing";
-import { EMAIL_RE } from "@/4-shared/utils/validations";
+import { EMAIL_RE, isValidPassword } from "@/4-shared/utils/validations";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -34,10 +34,6 @@ export default function ResetPasswordForm({ translations, lang }: Props) {
   const router = useRouter();
   const currentLang = lang;
 
-  const validatePassword = (password: string) => {
-    return password.length >= 8;
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -57,12 +53,12 @@ export default function ResetPasswordForm({ translations, lang }: Props) {
       );
       hasError = true;
     }
-    if (!validatePassword(newPassword)) {
+    if (!isValidPassword(newPassword)) {
       setPasswordError(
         tr(
           translations,
-          "auth.common.password_min_length",
-          "Password must be at least 8 characters long.",
+          "auth.common.password_invalid",
+          "Password must be at least 8 characters, include a letter and a number.",
         ),
       );
       hasError = true;
