@@ -53,9 +53,13 @@ export function ProfileTab({
             ] || "Email updated in your profile.",
           );
         } else {
-          notify.error(
-            result.error?.message || "Failed to sync email in profile.",
-          );
+          const errorMsg =
+            typeof result.error === "string"
+              ? result.error
+              : result.error && "message" in result.error
+                ? result.error.message
+                : "Failed to update language.";
+          notify.error(errorMsg);
         }
       });
     }
