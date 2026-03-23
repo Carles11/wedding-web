@@ -1,6 +1,9 @@
-import { SUPPORTED_LANGUAGE_LABELS } from "@/4-shared/config/i18n";
+import { updateAccountInfo } from "@/3-entities/account/api/accountCrud";
+import type { SupportedLanguage } from "@/4-shared/config/i18n";
+import { useSupabaseAuth } from "@/4-shared/hooks/useSupabaseAuth";
 import { notify } from "@/4-shared/lib/toast/toast";
-import { BuilderButton } from "@/4-shared/ui/builder/BuilderButton";
+import LanguageSelector from "@/4-shared/ui/builder/LanguageSelector";
+import { useState } from "react";
 
 interface PreferencesTabProps {
   account: any;
@@ -13,6 +16,41 @@ export function PreferencesTab({
   translations,
   cardClass,
 }: PreferencesTabProps) {
+  const [currentLang, setCurrentLang] = useState<SupportedLanguage>(
+    (account.preferred_language as SupportedLanguage) || "en",
+  );
+  const [loading, setLoading] = useState(false);
+  const { user } = useSupabaseAuth();
+
+  const handleLanguageChange = async (lang: string) => {
+    if (lang === currentLang) return;
+    if (!user) {
+      return;
+    }
+    setLoading(true);
+
+    const result = await updateAccountInfo(user.id, {
+      preferred_language: lang,
+    });
+    setLoading(false);
+    if (result.success) {
+      setCurrentLang(lang as SupportedLanguage);
+      notify.success(
+        translations[
+          "builder.account.tabs.preferences.language_changed_success"
+        ] || "Preferred language updated!",
+      );
+    } else {
+      const errorMsg =
+        typeof result.error === "string"
+          ? result.error
+          : result.error && "message" in result.error
+            ? result.error.message
+            : "Failed to update language.";
+      notify.error(errorMsg);
+    }
+  };
+
   return (
     <div className="space-y-6 animate-fadeIn">
       <div className={cardClass}>
@@ -47,30 +85,21 @@ export function PreferencesTab({
                     "builder.account.tabs.preferences.label_preferred_language"
                   ] || "Preferred Language"}
                 </p>
-                <p className="text-sm text-(--builder-color-primary) mt-0.5 font-medium">
-                  {account.preferred_language
-                    ? SUPPORTED_LANGUAGE_LABELS[
-                        account.preferred_language as keyof typeof SUPPORTED_LANGUAGE_LABELS
-                      ]
-                    : SUPPORTED_LANGUAGE_LABELS["en"]}
-                </p>
               </div>
             </div>
-            <BuilderButton
-              type="button"
-              variant="secondary"
-              onClick={() =>
-                notify.info(
-                  translations[
-                    "builder.account.tabs.preferences.language_coming_soon"
-                  ] || "Language preferences coming soon!",
-                )
-              }
-              className="px-4! py-2!"
-            >
-              {translations["builder.account.tabs.preferences.change_btn"] ||
-                "Change"}
-            </BuilderButton>
+            <div>
+              <LanguageSelector
+                currentLang={currentLang}
+                onLanguageChange={handleLanguageChange}
+                label={
+                  translations["builder.account.tabs.preferences.change_btn"] ||
+                  "Change"
+                }
+              />
+              {loading && (
+                <span className="ml-2 text-xs text-gray-400">Saving...</span>
+              )}
+            </div>
           </div>
         </div>
       </div>

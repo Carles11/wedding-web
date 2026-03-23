@@ -2,6 +2,7 @@ import { getCurrentUser } from "@/3-entities/user/api/getCurrentUser";
 import { getCurrentUserSubscription } from "@/3-entities/user/api/getCurrentUserSubscription";
 import { Footer } from "@/4-shared/ui/commons/footer/Footer";
 import { shouldShowFooter } from "@/4-shared/utils/shouldShowFooter";
+import "@/app/globals.css";
 import { PlanProvider, ToastProvider } from "@/app/providers";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";

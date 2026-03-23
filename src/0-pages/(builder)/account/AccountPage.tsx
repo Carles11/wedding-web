@@ -90,7 +90,13 @@ export default function AccountPage({ account, translations }: Props) {
         // Optionally, reset editEmail to account.email to keep UI in sync
         setEditEmail(account.email);
       } else {
-        notify.error(result.error?.message || "Update failed.");
+        const errorMsg =
+          typeof result.error === "string"
+            ? result.error
+            : result.error && "message" in result.error
+              ? result.error.message
+              : "Update failed.";
+        notify.error(errorMsg);
       }
     } catch (err) {
       notify.error(
@@ -229,7 +235,7 @@ export default function AccountPage({ account, translations }: Props) {
               </p>
             </div>
             <div className="flex gap-2">
-              <span
+              {/* <span
                 className="px-3 py-1.5 text-xs font-medium rounded-full"
                 style={{
                   background: "rgba(79,70,229,0.08)",
@@ -239,7 +245,7 @@ export default function AccountPage({ account, translations }: Props) {
                 {account.preferred_language?.toUpperCase() ||
                   translations["builder.account.page.default_language"] ||
                   "EN"}
-              </span>
+              </span> */}
               {account.onboarding_completed && (
                 <span className="px-3 py-1.5 text-xs font-medium rounded-full bg-green-100 text-green-700">
                   {translations["builder.account.page.onboarded"] ||

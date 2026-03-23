@@ -7,7 +7,9 @@ export async function updateAccountInfo(
     email: string;
     preferred_language: string;
   }>,
-) {
+): Promise<
+  { success: true } | { success: false; error: string | { message: string } }
+> {
   const supabase = createClient();
   const { error } = await supabase
     .from("user_profiles")
