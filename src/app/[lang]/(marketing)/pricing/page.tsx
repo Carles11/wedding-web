@@ -14,9 +14,9 @@ export default PricingPage;
 export async function generateMetadata({
   params,
 }: {
-  params?: { lang?: string };
+  params?: Promise<{ lang?: string }>;
 }): Promise<Metadata> {
-  const realParams = await params;
+  const realParams = params ? await params : { lang: "en" };
   const lang = realParams?.lang ?? "en";
 
   const host = ((await headers()).get("host") ?? "").toLowerCase().trim();
