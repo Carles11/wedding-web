@@ -5,6 +5,7 @@ import BuilderStepNav, {
   type StepStatus,
 } from "@/1-widgets/builder/ui/BuilderStepNav";
 import { fetchAccommodationEntries } from "@/3-entities/accommodation/api";
+import { updateAccountInfo } from "@/3-entities/account/api/accountCrud";
 import { fetchImagesBySite } from "@/3-entities/images/api";
 import { fetchHasMainProgramEvent } from "@/3-entities/program_events/api";
 import { fetchContactSection } from "@/3-entities/sections/api/fetchContactSection";
@@ -157,8 +158,11 @@ export default function BuilderClient({
     );
   }, [site?.id]);
 
-  const handleLanguageChange = (lang: string) => {
+  const handleLanguageChange = async (lang: string) => {
     setCurrentLang(lang);
+    if (user?.id) {
+      await updateAccountInfo(user.id, { preferred_language: lang });
+    }
     // preserve step in URL
     router.push(`/${lang}/builder?step=${active}`);
   };

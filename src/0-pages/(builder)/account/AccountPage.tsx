@@ -7,8 +7,8 @@ import {
 } from "@/3-entities/account/api/accountCrud";
 
 import { notify } from "@/4-shared/lib/toast/toast";
-import { BuilderButton } from "@/4-shared/ui/builder";
 import { useState } from "react";
+import AccountDangerZone from "./ui/AccountDangerZone";
 import { PreferencesTab } from "./ui/tabs/PreferencesTab";
 import { ProfileTab } from "./ui/tabs/ProfileTab";
 import { SecurityTab } from "./ui/tabs/SecurityTab";
@@ -111,14 +111,13 @@ export default function AccountPage({ account, translations }: Props) {
   const cardClass =
     "rounded-xl border border-(--builder-color-border) bg-(--builder-color-surface) overflow-hidden transition-all duration-200 hover:shadow-lg";
 
-  const tabClass = (tab: string) => `
-    px-4 py-2.5 text-sm font-medium transition-all duration-200 relative
-    ${
+  const tabClass = (tab: string) =>
+    [
+      "px-4 py-2.5 text-sm font-medium transition-all duration-200 relative",
       activeTab === tab
         ? "text-(--builder-color-primary) after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-(--builder-color-primary) after:rounded-t-full"
-        : "text-(--builder-color-text-muted) hover:text-(--builder-color-text)"
-    }
-  `;
+        : "text-(--builder-color-text-muted) hover:text-(--builder-color-text)",
+    ].join(" ");
 
   return (
     <StepLayout
@@ -133,7 +132,7 @@ export default function AccountPage({ account, translations }: Props) {
       <div className="max-w-4xl mx-auto space-y-6 px-4 py-6">
         {/* Header with gradient */}
         <div className="relative mb-8">
-          <div className="absolute inset-0 bg-gradient-to-r from-(--builder-color-primary)/5 to-transparent rounded-2xl" />
+          <div className="absolute inset-0 bg-linear-to-r from-(--builder-color-primary)/5 to-transparent rounded-2xl" />
           <div className="relative flex items-center gap-4 p-6">
             <div className="relative">
               {account.avatar_url ? (
@@ -147,13 +146,11 @@ export default function AccountPage({ account, translations }: Props) {
                   className="w-20 h-20 rounded-2xl flex items-center justify-center text-2xl font-semibold ring-4 ring-(--builder-color-primary)/10"
                   style={{
                     background: `linear-gradient(135deg, var(--builder-color-primary) 0%, var(--builder-color-primary)/80 100%)`,
-                    color: "white",
                   }}
                 >
                   {initials}
                 </div>
               )}
-              <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full ring-4 ring-(--builder-color-surface)" />
             </div>
             <div className="flex-1 min-w-0">
               <h1 className="text-2xl font-bold text-(--builder-color-text) truncate">
@@ -252,72 +249,14 @@ export default function AccountPage({ account, translations }: Props) {
         )}
 
         {/* Danger zone - always visible but styled differently */}
-        <div
-          className="rounded-xl border p-6 space-y-4 transition-all duration-200"
-          style={{
-            borderColor: "var(--builder-color-danger-border)",
-            background:
-              "linear-gradient(to right, var(--builder-color-danger-hover-bg), transparent)",
-          }}
-        >
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-(--builder-color-danger)/10 flex items-center justify-center">
-              <svg
-                className="w-5 h-5 text-(--builder-color-danger)"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                />
-              </svg>
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold text-(--builder-color-danger)">
-                {translations["builder.account.page.danger_zone_title"] ||
-                  "Delete Account"}
-              </h3>
-              <p className="text-sm text-(--builder-color-danger) mt-1 opacity-80">
-                {translations["builder.account.page.delete_warning"] ||
-                  "Once you delete your account, there is no going back. Please be certain."}
-              </p>
-            </div>
-          </div>
-
-          <div className="pl-13">
-            <label className="block text-sm font-medium text-(--builder-color-danger) mb-2">
-              {translations["builder.account.page.delete_confirm_label"] ||
-                "Type your email to confirm deletion"}
-            </label>
-            <div className="flex gap-3 flex-wrap sm:flex-nowrap">
-              <input
-                className="flex-1 rounded-lg border px-4 py-2.5 text-sm bg-white/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-red-200 transition-all duration-200"
-                style={{ borderColor: "var(--builder-color-danger-border)" }}
-                value={deleteConfirm}
-                onChange={(e) => setDeleteConfirm(e.target.value)}
-                type="email"
-                placeholder={account.email}
-              />
-              <BuilderButton
-                type="button"
-                tone="danger"
-                onClick={handleDelete}
-                disabled={saving || deleteConfirm !== account.email}
-                className="px-6! py-2.5! whitespace-nowrap"
-              >
-                {saving
-                  ? translations["builder.account.page.deleting"] ||
-                    "Deleting..."
-                  : translations["builder.account.page.delete_btn"] ||
-                    "Delete account"}
-              </BuilderButton>
-            </div>
-          </div>
-        </div>
+        <AccountDangerZone
+          account={account}
+          translations={translations}
+          saving={saving}
+          deleteConfirm={deleteConfirm}
+          setDeleteConfirm={setDeleteConfirm}
+          handleDelete={handleDelete}
+        />
       </div>
     </StepLayout>
   );

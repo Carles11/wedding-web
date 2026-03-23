@@ -1,3 +1,4 @@
+import { SUPPORTED_LANGUAGE_LABELS } from "@/4-shared/config/i18n";
 import { notify } from "@/4-shared/lib/toast/toast";
 import { BuilderButton } from "@/4-shared/ui/builder/BuilderButton";
 
@@ -47,11 +48,11 @@ export function PreferencesTab({
                   ] || "Preferred Language"}
                 </p>
                 <p className="text-sm text-(--builder-color-primary) mt-0.5 font-medium">
-                  {account.preferred_language?.toUpperCase() ||
-                    translations[
-                      "builder.account.tabs.preferences.default_language"
-                    ] ||
-                    "ENGLISH"}
+                  {account.preferred_language
+                    ? SUPPORTED_LANGUAGE_LABELS[
+                        account.preferred_language as keyof typeof SUPPORTED_LANGUAGE_LABELS
+                      ]
+                    : SUPPORTED_LANGUAGE_LABELS["en"]}
                 </p>
               </div>
             </div>

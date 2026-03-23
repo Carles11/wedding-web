@@ -11,12 +11,12 @@ import {
 import { createSupabaseSSRClient } from "@/4-shared/lib/supabase/server";
 
 export default async function AccountPageSSR({
-  searchParams,
+  params,
 }: {
-  searchParams: { lang?: string };
+  params: Promise<{ lang?: string }>;
 }) {
-  const resolvedParams = (await resolveSearchParams(searchParams)) ?? {};
-  let langCandidate = resolvedParams.lang;
+  const resolvedParams = await resolveSearchParams(params);
+  let langCandidate = resolvedParams?.lang;
 
   if (Array.isArray(langCandidate)) langCandidate = langCandidate[0];
   const resolvedLang = resolveLanguageFromParams(
@@ -34,6 +34,5 @@ export default async function AccountPageSSR({
 
   // Fetch account info server-side (stub userId for demo)
   const account = await getAccountInfo();
-
   return <AccountPage account={account} translations={translations} />;
 }

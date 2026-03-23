@@ -7,6 +7,7 @@ import HeroMarketing, {
   PricingSection,
   TestimonialsSection,
 } from "@/1-widgets/marketing/ui";
+import { updateAccountInfo } from "@/3-entities/account/api/accountCrud";
 import { useSupabaseAuth } from "@/4-shared/hooks/useSupabaseAuth";
 import type { MarketingPageProps } from "@/4-shared/types";
 import { useRouter } from "next/navigation";
@@ -63,8 +64,11 @@ export default function MarketingPageComponent({
   };
 
   // Handler for language selector
-  const handleLanguageChange = (lang: string) => {
+  const handleLanguageChange = async (lang: string) => {
     setCurrentLang(lang);
+    if (user?.id) {
+      await updateAccountInfo(user.id, { preferred_language: lang });
+    }
     router.push(`/${lang}`);
   };
 
