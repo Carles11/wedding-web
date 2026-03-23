@@ -5,6 +5,7 @@ import {
   resolveLanguageFromParams,
   resolveSearchParams,
 } from "@/4-shared/lib/params/resolveSearchParams";
+import { createSupabaseSSRClient } from "@/4-shared/lib/supabase/server";
 
 export default async function OnboardingPage({
   params,
@@ -26,6 +27,9 @@ export default async function OnboardingPage({
     resolvedParams,
     isValidLanguage,
   );
-  const translations = await fetchBuilderTranslations(lang, "en");
+
+  const supabase = await createSupabaseSSRClient();
+  const translations = await fetchBuilderTranslations(supabase, lang, "en");
+
   return <OnboardingClient translations={translations} lang={lang} />;
 }

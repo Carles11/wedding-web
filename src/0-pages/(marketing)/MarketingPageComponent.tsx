@@ -20,19 +20,13 @@ export default function MarketingPageComponent({
 
   const { user, supabase } = useSupabaseAuth();
 
-  // SSR-safe: initialize from initialLang, then sync with path segment on client
+  // SSR-safe: initialize from initialLang
   const [currentLang, setCurrentLang] = useState(initialLang || "en");
   const [currentTranslations, setCurrentTranslations] = useState(translations);
 
   // Sync currentLang with path segment on client only
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const pathLang =
-        window.location.pathname.split("/")[1] || initialLang || "en";
-      setCurrentLang(pathLang);
-    } else {
-      setCurrentLang(initialLang || "en");
-    }
+    // Only update currentLang on client if needed
     setCurrentTranslations(translations);
   }, [initialLang, translations]);
 

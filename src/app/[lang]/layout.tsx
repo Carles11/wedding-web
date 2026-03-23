@@ -25,9 +25,17 @@ const WEBSITE_JSONLD = {
   },
 };
 
-export default function LangLayout({ children }: { children: ReactNode }) {
+export default async function LangLayout({
+  children,
+  params,
+}: {
+  children: ReactNode;
+  params: { lang?: string };
+}) {
+  const realParams = await params;
+  const lang = realParams?.lang ?? "en";
   return (
-    <html lang="en">
+    <html lang={lang}>
       <Head>
         <link rel="icon" href="/favicon.ico" />
         <link
@@ -51,12 +59,7 @@ export default function LangLayout({ children }: { children: ReactNode }) {
         {/* Optional: Safari pinned tab icon */}
         <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5" />
         <meta name="theme-color" content="#ffffff" />
-        <meta
-          name="language"
-          content={
-            typeof window !== "undefined" ? document.documentElement.lang : "en"
-          }
-        />
+        <meta name="language" content={lang} />
         <meta
           name="google-site-verification"
           content="YOUR_GOOGLE_VERIFICATION"

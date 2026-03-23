@@ -1,8 +1,8 @@
 "use server";
 
 import { fetchGlobalTranslations } from "@/4-shared/lib/globalTranslations";
-import { supabaseAdmin } from "@/4-shared/lib/supabase/supabaseServer";
 import type { TranslationDictionary } from "@/4-shared/types";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 // 5-minute in-memory cache for builder translations
 const BUILDER_CACHE_TTL_MS = 1000 * 60 * 5;
@@ -29,6 +29,7 @@ function getBuilderCache(): Map<string, BuilderCacheEntry> {
 }
 
 export async function fetchBuilderTranslations(
+  supabase: SupabaseClient,
   locale: string,
   fallbackLocale?: string,
 ): Promise<TranslationDictionary> {
@@ -55,7 +56,7 @@ export async function fetchBuilderTranslations(
   const localesToQuery = Array.from(candidates);
 
   try {
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await supabase
       .from("global_translations_builder")
       .select("key, locale, value")
       .in("locale", localesToQuery);
@@ -92,7 +93,7 @@ export async function fetchBuilderTranslations(
     // fallback options in the central plan catalog. Merge them here so
     // builder pages can localize those titles too.
     try {
-      const { data: marketingData, error: marketingError } = await supabaseAdmin
+      const { data: marketingData, error: marketingError } = await supabase
         .from("global_translations_marketing")
         .select("key, locale, value")
         .in("locale", localesToQuery)

@@ -1,7 +1,7 @@
 "use server";
 
 import { getCurrentUser } from "@/3-entities/user/api/getCurrentUser";
-import { supabaseAdmin } from "@/4-shared/lib/supabase/supabaseServer";
+import { createSupabaseSSRClient } from "@/4-shared/lib/supabase/server";
 import { AccountInfo } from "@/4-shared/types";
 
 export async function getAccountInfo(): Promise<AccountInfo | null> {
@@ -10,8 +10,7 @@ export async function getAccountInfo(): Promise<AccountInfo | null> {
   if (!user) {
     throw new Error("Not authenticated: cannot show Account page!");
   }
-  const supabase = supabaseAdmin;
-
+  const supabase = await createSupabaseSSRClient();
   const { data, error } = await supabase
     .from("user_profiles")
     .select(

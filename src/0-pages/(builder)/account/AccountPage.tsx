@@ -5,9 +5,13 @@ import {
   deleteAccount,
   updateAccountInfo,
 } from "@/3-entities/account/api/accountCrud";
+
 import { notify } from "@/4-shared/lib/toast/toast";
-import { BuilderButton } from "@/4-shared/ui/builder/BuilderButton";
+import { BuilderButton } from "@/4-shared/ui/builder";
 import { useState } from "react";
+import { PreferencesTab } from "./ui/tabs/PreferencesTab";
+import { ProfileTab } from "./ui/tabs/ProfileTab";
+import { SecurityTab } from "./ui/tabs/SecurityTab";
 
 interface Props {
   account: any;
@@ -18,7 +22,8 @@ export default function AccountPage({ account, translations }: Props) {
   if (!account) {
     return (
       <div className="text-(--builder-color-danger) p-8 text-center">
-        {translations["account.error_not_found"] || "Account not found."}
+        {translations["builder.account.page.error_not_found"] ||
+          "Account not found."}
       </div>
     );
   }
@@ -95,7 +100,7 @@ export default function AccountPage({ account, translations }: Props) {
         .join("")
         .slice(0, 2)
         .toUpperCase()
-    : account.email.substring(0, 2).toUpperCase();
+    : translations["builder.account.page.default_language"] || "EN";
 
   const inputClass =
     "mt-1 block w-full rounded-lg border border-(--builder-color-border) bg-(--builder-color-surface) px-4 py-2.5 text-sm text-(--builder-color-text) placeholder:text-(--builder-color-text-muted) focus:outline-none focus:ring-2 focus:ring-(--builder-color-primary)/20 focus:border-(--builder-color-primary) transition-all duration-200";
@@ -152,7 +157,9 @@ export default function AccountPage({ account, translations }: Props) {
             </div>
             <div className="flex-1 min-w-0">
               <h1 className="text-2xl font-bold text-(--builder-color-text) truncate">
-                {account.full_name || "Welcome back!"}
+                {account.full_name ||
+                  translations["builder.account.page.welcome_back"] ||
+                  "Welcome back!"}
               </h1>
               <p className="text-(--builder-color-text-muted) flex items-center gap-2 mt-1">
                 <svg
@@ -179,11 +186,14 @@ export default function AccountPage({ account, translations }: Props) {
                   color: "var(--builder-color-primary)",
                 }}
               >
-                {account.preferred_language?.toUpperCase() || "EN"}
+                {account.preferred_language?.toUpperCase() ||
+                  translations["builder.account.page.default_language"] ||
+                  "EN"}
               </span>
               {account.onboarding_completed && (
                 <span className="px-3 py-1.5 text-xs font-medium rounded-full bg-green-100 text-green-700">
-                  Onboarded
+                  {translations["builder.account.page.onboarded"] ||
+                    "Onboarded"}
                 </span>
               )}
             </div>
@@ -196,248 +206,49 @@ export default function AccountPage({ account, translations }: Props) {
             className={tabClass("profile")}
             onClick={() => setActiveTab("profile")}
           >
-            Profile Information
+            {translations["builder.account.tabs.profile.tab_label"] ||
+              "Profile Information"}
           </button>
           <button
             className={tabClass("security")}
             onClick={() => setActiveTab("security")}
           >
-            Security
+            {translations["builder.account.tabs.security.tab_label"] ||
+              "Security"}
           </button>
           <button
             className={tabClass("preferences")}
             onClick={() => setActiveTab("preferences")}
           >
-            Preferences
+            {translations["builder.account.tabs.preferences.tab_label"] ||
+              "Preferences"}
           </button>
         </div>
 
-        {/* Profile Tab */}
         {activeTab === "profile" && (
-          <div className="space-y-6 animate-fadeIn">
-            {/* Editable fields card */}
-            <div className={cardClass}>
-              <div className="p-6 border-b border-(--builder-color-border) bg-(--builder-color-muted-surface)/30">
-                <h2 className="text-lg font-semibold text-(--builder-color-text)">
-                  {translations["account.section.profile"] ||
-                    "Profile Information"}
-                </h2>
-                <p className="text-sm text-(--builder-color-text-muted) mt-1">
-                  Update your personal information
-                </p>
-              </div>
-              <div className="p-6 space-y-5">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                  <div>
-                    <label className={labelClass}>
-                      {translations["account.label.full_name"] || "Full name"}
-                    </label>
-                    <div className="relative">
-                      <svg
-                        className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-(--builder-color-text-muted)"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                        />
-                      </svg>
-                      <input
-                        className={`${inputClass} pl-10`}
-                        value={editName}
-                        onChange={(e) => setEditName(e.target.value)}
-                        placeholder="John Doe"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className={labelClass}>
-                      {translations["account.label.email"] || "Email"}
-                    </label>
-                    <div className="relative">
-                      <svg
-                        className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-(--builder-color-text-muted)"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                        />
-                      </svg>
-                      <input
-                        className={`${inputClass} pl-10`}
-                        value={editEmail}
-                        onChange={(e) => setEditEmail(e.target.value)}
-                        type="email"
-                        placeholder="john@example.com"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Read-only metadata card */}
-            <div className={cardClass}>
-              <div className="p-6 border-b border-(--builder-color-border) bg-(--builder-color-muted-surface)/30">
-                <h2 className="text-lg font-semibold text-(--builder-color-text)">
-                  {translations["account.section.details"] || "Account Details"}
-                </h2>
-              </div>
-              <div className="p-6">
-                <dl className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="bg-(--builder-color-muted-surface)/20 rounded-lg p-4">
-                    <dt className="text-xs font-medium text-(--builder-color-text-muted) uppercase tracking-wider mb-1">
-                      {translations["account.label.member_since"] ||
-                        "Member since"}
-                    </dt>
-                    <dd className="text-sm font-medium text-(--builder-color-text)">
-                      {new Date(account.created_at).toLocaleDateString(
-                        "en-US",
-                        {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        },
-                      )}
-                    </dd>
-                  </div>
-                  <div className="bg-(--builder-color-muted-surface)/20 rounded-lg p-4">
-                    <dt className="text-xs font-medium text-(--builder-color-text-muted) uppercase tracking-wider mb-1">
-                      {translations["account.label.updated_at"] ||
-                        "Last updated"}
-                    </dt>
-                    <dd className="text-sm font-medium text-(--builder-color-text)">
-                      {new Date(account.updated_at).toLocaleDateString(
-                        "en-US",
-                        {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        },
-                      )}
-                    </dd>
-                  </div>
-                </dl>
-              </div>
-            </div>
-          </div>
+          <ProfileTab
+            account={account}
+            translations={translations}
+            editName={editName}
+            setEditName={setEditName}
+            editEmail={editEmail}
+            setEditEmail={setEditEmail}
+            inputClass={inputClass}
+            labelClass={labelClass}
+            cardClass={cardClass}
+          />
         )}
 
-        {/* Security Tab */}
         {activeTab === "security" && (
-          <div className="space-y-6 animate-fadeIn">
-            <div className={cardClass}>
-              <div className="p-6 border-b border-(--builder-color-border) bg-(--builder-color-muted-surface)/30">
-                <h2 className="text-lg font-semibold text-(--builder-color-text)">
-                  {translations["account.section.security"] ||
-                    "Security Settings"}
-                </h2>
-              </div>
-              <div className="p-6">
-                <div className="flex items-center justify-between p-4 bg-(--builder-color-muted-surface)/20 rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-(--builder-color-primary)/10 flex items-center justify-center">
-                      <svg
-                        className="w-5 h-5 text-(--builder-color-primary)"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                        />
-                      </svg>
-                    </div>
-                    <div>
-                      <p className="font-medium text-(--builder-color-text)">
-                        {translations["account.password_label"] || "Password"}
-                      </p>
-                      <p className="text-xs text-(--builder-color-text-muted) mt-0.5">
-                        {translations["account.password_hint"] ||
-                          "Last changed: 30 days ago"}
-                      </p>
-                    </div>
-                  </div>
-                  <BuilderButton
-                    type="button"
-                    variant="secondary"
-                    onClick={() => {
-                      notify.info("Password change feature coming soon!");
-                    }}
-                    className="!px-4 !py-2"
-                  >
-                    Change password
-                  </BuilderButton>
-                </div>
-              </div>
-            </div>
-          </div>
+          <SecurityTab translations={translations} cardClass={cardClass} />
         )}
 
-        {/* Preferences Tab */}
         {activeTab === "preferences" && (
-          <div className="space-y-6 animate-fadeIn">
-            <div className={cardClass}>
-              <div className="p-6 border-b border-(--builder-color-border) bg-(--builder-color-muted-surface)/30">
-                <h2 className="text-lg font-semibold text-(--builder-color-text)">
-                  Language & Region
-                </h2>
-              </div>
-              <div className="p-6">
-                <div className="flex items-center justify-between p-4 bg-(--builder-color-muted-surface)/20 rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-(--builder-color-primary)/10 flex items-center justify-center">
-                      <svg
-                        className="w-5 h-5 text-(--builder-color-primary)"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"
-                        />
-                      </svg>
-                    </div>
-                    <div>
-                      <p className="font-medium text-(--builder-color-text)">
-                        {translations["account.label.preferred_language"] ||
-                          "Preferred Language"}
-                      </p>
-                      <p className="text-sm text-(--builder-color-primary) mt-0.5 font-medium">
-                        {account.preferred_language?.toUpperCase() || "ENGLISH"}
-                      </p>
-                    </div>
-                  </div>
-                  <BuilderButton
-                    type="button"
-                    variant="secondary"
-                    onClick={() =>
-                      notify.info("Language preferences coming soon!")
-                    }
-                    className="!px-4 !py-2"
-                  >
-                    Change
-                  </BuilderButton>
-                </div>
-              </div>
-            </div>
-          </div>
+          <PreferencesTab
+            account={account}
+            translations={translations}
+            cardClass={cardClass}
+          />
         )}
 
         {/* Danger zone - always visible but styled differently */}
@@ -467,10 +278,11 @@ export default function AccountPage({ account, translations }: Props) {
             </div>
             <div>
               <h3 className="text-lg font-semibold text-(--builder-color-danger)">
-                {translations["account.danger_zone_title"] || "Delete Account"}
+                {translations["builder.account.page.danger_zone_title"] ||
+                  "Delete Account"}
               </h3>
               <p className="text-sm text-(--builder-color-danger) mt-1 opacity-80">
-                {translations["account.delete_warning"] ||
+                {translations["builder.account.page.delete_warning"] ||
                   "Once you delete your account, there is no going back. Please be certain."}
               </p>
             </div>
@@ -478,7 +290,7 @@ export default function AccountPage({ account, translations }: Props) {
 
           <div className="pl-13">
             <label className="block text-sm font-medium text-(--builder-color-danger) mb-2">
-              {translations["account.delete_confirm_label"] ||
+              {translations["builder.account.page.delete_confirm_label"] ||
                 "Type your email to confirm deletion"}
             </label>
             <div className="flex gap-3 flex-wrap sm:flex-nowrap">
@@ -495,11 +307,13 @@ export default function AccountPage({ account, translations }: Props) {
                 tone="danger"
                 onClick={handleDelete}
                 disabled={saving || deleteConfirm !== account.email}
-                className="!px-6 !py-2.5 whitespace-nowrap"
+                className="px-6! py-2.5! whitespace-nowrap"
               >
                 {saving
-                  ? "Deleting..."
-                  : translations["account.delete_btn"] || "Delete account"}
+                  ? translations["builder.account.page.deleting"] ||
+                    "Deleting..."
+                  : translations["builder.account.page.delete_btn"] ||
+                    "Delete account"}
               </BuilderButton>
             </div>
           </div>

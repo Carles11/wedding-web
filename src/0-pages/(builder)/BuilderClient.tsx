@@ -13,6 +13,7 @@ import { fetchWhatToSeeEntries } from "@/3-entities/what_to_see/api";
 import { getPlanLimit } from "@/4-shared/helpers/billing/entitlements";
 import { useSite } from "@/4-shared/hooks/useSite";
 import { useSupabaseAuth } from "@/4-shared/hooks/useSupabaseAuth";
+import { createClient } from "@/4-shared/lib/supabase/client";
 import { BuilderHeader } from "@/4-shared/ui/builder";
 import { EMAIL_RE } from "@/4-shared/utils/validations";
 import { usePlan } from "@/app/providers";
@@ -168,7 +169,12 @@ export default function BuilderClient({
     async function fetchTranslations() {
       const { fetchBuilderTranslations } =
         await import("@/4-shared/api/builder/getTranslations");
-      const newTranslations = await fetchBuilderTranslations(currentLang, "en");
+      const supabase = createClient();
+      const newTranslations = await fetchBuilderTranslations(
+        supabase,
+        currentLang,
+        "en",
+      );
       setTranslations(newTranslations);
     }
     fetchTranslations();

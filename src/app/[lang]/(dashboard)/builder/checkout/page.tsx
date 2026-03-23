@@ -1,6 +1,7 @@
 import CheckoutClient from "@/0-pages/(builder)/checkout/CheckoutClient";
 import { fetchBuilderTranslations } from "@/4-shared/api/builder/getTranslations";
 import { isValidLanguage } from "@/4-shared/helpers/isValidLanguage";
+import { createSupabaseSSRClient } from "@/4-shared/lib/supabase/server";
 
 type CheckoutPageProps = {
   searchParams?:
@@ -37,7 +38,8 @@ export default async function CheckoutPage({
         : "en";
 
   const lang = isValidLanguage(langCandidate) ? langCandidate : "en";
-  const t = await fetchBuilderTranslations(lang, "en");
+  const supabase = await createSupabaseSSRClient();
+  const translations = await fetchBuilderTranslations(supabase, lang, "en");
 
-  return <CheckoutClient t={t} lang={lang} />;
+  return <CheckoutClient t={translations} lang={lang} />;
 }

@@ -2,6 +2,7 @@ import { getCurrentUserSubscription } from "@/3-entities/user/api/getCurrentUser
 import { fetchBuilderTranslations } from "@/4-shared/api/builder/getTranslations";
 import { requireSiteAccess } from "@/4-shared/lib/requireSiteAccess";
 import { getParams, RouteContext } from "@/4-shared/lib/route-context";
+import { createSupabaseSSRClient } from "@/4-shared/lib/supabase/server";
 import {
   addCustomDomainWithRedirectVariants,
   DomainFlowError,
@@ -21,7 +22,8 @@ export async function POST(
 ) {
   try {
     const lang = getLang(req);
-    const translations = await fetchBuilderTranslations(lang);
+    const supabase = await createSupabaseSSRClient();
+    const translations = await fetchBuilderTranslations(supabase, lang, "en");
 
     const { id } = await getParams(context);
     const { domain } = await req.json();
@@ -75,13 +77,14 @@ export async function POST(
       );
     }
 
-    console.error("[add-domain] error:", error);
+    const supabase = await createSupabaseSSRClient();
+    const lang = getLang(req);
 
     // Conservative: error messages may not be in translations, fallback ALWAYS in English
     return NextResponse.json(
       {
         error:
-          (await fetchBuilderTranslations("en"))[
+          (await fetchBuilderTranslations(supabase, lang, "en"))[
             "builder.domain.server_error"
           ] || "Server error",
       },

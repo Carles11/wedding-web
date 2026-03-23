@@ -1,8 +1,8 @@
 import PricingCTATableAdapter from "@/1-widgets/marketing/ui/PricingCTATableAdapter";
 import PricingPageShell from "@/1-widgets/marketing/ui/PricingPageShell";
 import { fetchBuilderTranslations } from "@/4-shared/api/builder/getTranslations";
-// Removed misplaced imports
-// ...existing code...
+import { createSupabaseSSRClient } from "@/4-shared/lib/supabase/server";
+
 import type { TranslationDictionary } from "@/4-shared/types";
 
 export default async function PricingPage({
@@ -15,7 +15,12 @@ export default async function PricingPage({
   const lang = realParams?.lang ?? "en";
 
   // Fetch translations
-  const t: TranslationDictionary = await fetchBuilderTranslations(lang, "en");
+  const supabase = await createSupabaseSSRClient();
+  const t: TranslationDictionary = await fetchBuilderTranslations(
+    supabase,
+    lang,
+    "en",
+  );
 
   return (
     <PricingPageShell

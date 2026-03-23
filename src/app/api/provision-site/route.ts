@@ -2,23 +2,11 @@
 
 import { getCurrentUser } from "@/3-entities/user/api/getCurrentUser";
 import { createSiteForUser } from "@/4-shared/api/builder/createSiteForUser";
-import { supabaseAdmin } from "@/4-shared/lib/supabase/supabaseServer";
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
+import { createSupabaseSSRClient } from "@/4-shared/lib/supabase/server";
 import { NextResponse } from "next/server";
 
 export async function POST() {
-  const cookieStore = await cookies();
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-
-  const supabase = createServerClient(supabaseUrl, supabaseKey, {
-    cookies: {
-      getAll: () => cookieStore.getAll(),
-      setAll: () => {},
-    },
-  });
-
+  const supabase = await createSupabaseSSRClient();
   const user = await getCurrentUser();
 
   if (!user || !user.id) {
@@ -42,7 +30,7 @@ export async function POST() {
     }
 
     // No site exists, create one
-    const { data: profileData } = await supabaseAdmin
+    const { data: profileData } = await supabase
       .from("user_profiles")
       .select("preferred_language")
       .eq("id", user.id)

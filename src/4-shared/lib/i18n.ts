@@ -1,6 +1,6 @@
 "use server";
 
-import { supabaseAdmin } from "@/4-shared/lib/supabase/supabaseServer";
+import { createSupabaseSSRClient } from "@/4-shared/lib/supabase/server";
 import {
   GlobalTranslationRow,
   TranslationDictionary,
@@ -84,8 +84,9 @@ export async function fetchGlobalTranslations(
       : [locale];
 
   try {
+    const supabase = await createSupabaseSSRClient();
     // NOTE: avoid putting a generic type argument on .from(...) to keep compatibility across SDK versions.
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await supabase
       .from("global_translations")
       .select("key, locale, value")
       .in("locale", localesToQuery);
@@ -137,7 +138,8 @@ export async function fetchSiteTranslations(
   locale: string,
 ): Promise<TranslationDictionary> {
   try {
-    const { data, error } = await supabaseAdmin
+    const supabase = await createSupabaseSSRClient();
+    const { data, error } = await supabase
       .from("site_translations")
       .select("key, value")
       .eq("site_id", siteId)

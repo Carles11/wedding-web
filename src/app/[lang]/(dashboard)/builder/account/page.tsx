@@ -8,6 +8,7 @@ import {
   resolveLanguageFromParams,
   resolveSearchParams,
 } from "@/4-shared/lib/params/resolveSearchParams";
+import { createSupabaseSSRClient } from "@/4-shared/lib/supabase/server";
 
 export default async function AccountPageSSR({
   searchParams,
@@ -24,8 +25,10 @@ export default async function AccountPageSSR({
     isValidLanguage,
   );
 
+  const supabase = await createSupabaseSSRClient();
   const translations = await fetchBuilderTranslations(
-    resolvedLang || "en",
+    supabase,
+    resolvedLang,
     "en",
   );
 

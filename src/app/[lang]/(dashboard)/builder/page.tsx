@@ -4,7 +4,7 @@ import BuilderClient from "@/0-pages/(builder)/BuilderClient";
 import { getCurrentUser } from "@/3-entities/user/api/getCurrentUser";
 import { fetchBuilderTranslations } from "@/4-shared/api/builder/getTranslations";
 import { isValidLanguage } from "@/4-shared/helpers/isValidLanguage";
-import { supabaseAdmin } from "@/4-shared/lib/supabase/supabaseServer";
+import { createSupabaseSSRClient } from "@/4-shared/lib/supabase/server";
 import { redirect } from "next/navigation";
 
 export default async function BuilderPage({
@@ -20,7 +20,8 @@ export default async function BuilderPage({
   // Check if user has completed onboarding
   const user = await getCurrentUser();
   if (user) {
-    const { data: userProfile } = await supabaseAdmin
+    const supabase = await createSupabaseSSRClient();
+    const { data: userProfile } = await supabase
       .from("user_profiles")
       .select("onboarding_completed")
       .eq("id", user.id)
@@ -31,7 +32,8 @@ export default async function BuilderPage({
     }
   }
 
-  const translations = await fetchBuilderTranslations(lang, "en");
+  const supabase = await createSupabaseSSRClient();
+  const translations = await fetchBuilderTranslations(supabase, lang, "en");
 
   return (
     <div className="min-h-screen bg-gray-50">

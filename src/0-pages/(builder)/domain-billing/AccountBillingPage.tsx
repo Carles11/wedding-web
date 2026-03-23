@@ -1,5 +1,6 @@
 import { getCurrentUser } from "@/3-entities/user/api/getCurrentUser";
 import { fetchBuilderTranslations } from "@/4-shared/api/builder/getTranslations";
+import { createSupabaseSSRClient } from "@/4-shared/lib/supabase/server";
 import AccountBillingDetails from "./ui/AccountBillingDetails";
 
 interface PageProps {
@@ -38,7 +39,8 @@ export default async function AccountBillingPage({
         ? langRaw[0]
         : "en";
 
-  const t = await fetchBuilderTranslations(lang, "en");
+  const supabase = await createSupabaseSSRClient();
+  const t = await fetchBuilderTranslations(supabase, lang, "en");
   const user = await getCurrentUser();
 
   if (!user) {
