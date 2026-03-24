@@ -7,7 +7,7 @@ export const seoMetadata: SitewideSEO = {
       "查找关于 WeddWeb 婚礼网站、RSVP、隐私、个性化等常见问题的答案。支持多语言。",
     ogTitle: "WeddWeb FAQ - 所有婚礼网站问题解答",
     ogDescription: "获取使用 WeddWeb 构建完美婚礼网站的帮助和技巧。",
-    ogImage: "https://weddweb.com/og-images/zh-faq.jpg",
+    ogImage: "/assets/og/weddweb-OG.png",
     twitterCard: "summary_large_image",
     keywords: [
       "婚礼网站常见问题",

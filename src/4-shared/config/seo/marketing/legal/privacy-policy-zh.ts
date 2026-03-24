@@ -7,7 +7,7 @@ export const seoMetadata: SitewideSEO = {
       "阅读 WeddWeb 的隐私政策，了解我们如何保护您的数据并遵守全球法规。透明、符合 GDPR、以隐私为先。",
     ogTitle: "WeddWeb 隐私政策",
     ogDescription: "WeddWeb 如何保护您的隐私和数据。GDPR、CCPA 及全球合规性。",
-    ogImage: "https://weddweb.com/og-images/privacy-policy.jpg",
+    ogImage: "/assets/og/weddweb-OG.png",
     twitterCard: "summary_large_image",
     keywords: [
       "weddweb 隐私政策",

@@ -8,7 +8,7 @@ export const seoMetadata: SitewideSEO = {
     ogTitle: "WeddWeb 价格 - 适合每对新人的实惠婚礼网站",
     ogDescription:
       "了解使用 WeddWeb 搭建婚礼网站的费用。灵活套餐满足各种需求。",
-    ogImage: "https://weddweb.com/og-images/zh-pricing.jpg",
+    ogImage: "/assets/og/weddweb-OG.png",
     twitterCard: "summary_large_image",
     keywords: [
       "婚礼网站价格",

@@ -7,7 +7,7 @@ export const seoMetadata: SitewideSEO = {
       "通过 WeddWeb 入门流程，轻松创建您的婚礼网站，邀请宾客，自定义页面并管理 RSVP。无需编程，永久免费计划。",
     ogTitle: "WeddWeb 入门 - 婚礼网站快速搭建",
     ogDescription: "分步引导，助您快速上线婚礼网站，轻松管理婚礼信息。",
-    ogImage: "https://weddweb.com/og-images/zh-onboarding.jpg",
+    ogImage: "/assets/og/weddweb-OG.png",
     twitterCard: "summary_large_image",
     keywords: [
       "weddweb 入门",

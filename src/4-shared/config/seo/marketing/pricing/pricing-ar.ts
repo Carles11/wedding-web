@@ -8,7 +8,7 @@ export const seoMetadata: SitewideSEO = {
     ogTitle: "أسعار WeddWeb - مواقع زفاف بأسعار مناسبة لكل زوجين",
     ogDescription:
       "اكتشف تكلفة إنشاء موقع الزفاف مع WeddWeb. خطط مرنة لكل احتياج.",
-    ogImage: "https://weddweb.com/og-images/ar-pricing.jpg",
+    ogImage: "/assets/og/weddweb-OG.png",
     twitterCard: "summary_large_image",
     keywords: [
       "سعر موقع زفاف",

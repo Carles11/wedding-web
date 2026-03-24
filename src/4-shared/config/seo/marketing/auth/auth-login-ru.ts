@@ -8,7 +8,7 @@ export const seoMetadata: SitewideSEO = {
     ogTitle: "WeddWeb Вход — доступ к свадебному сайту",
     ogDescription:
       "Войдите, чтобы редактировать свадебный сайт и использовать все функции.",
-    ogImage: "https://weddweb.com/og-images/ru-login.jpg",
+    ogImage: "/assets/og/weddweb-OG.png",
     twitterCard: "summary_large_image",
     keywords: [
       "weddweb вход",

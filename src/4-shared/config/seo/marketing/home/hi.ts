@@ -7,7 +7,7 @@ export const seoMetadata: SitewideSEO = {
       "RSVP, फोटो गैलरी, कस्टम डोमेन और अन्य सुविधाओं के साथ बहुभाषी वेडिंग वेबसाइट्स बनाएं। मोबाइल-फ्रेंडली, प्राइवेसी-फर्स्ट और उपयोग में आसान। हमेशा के लिए मुफ्त प्लान उपलब्ध। कोडिंग की आवश्यकता नहीं। दुनिया भर के जोड़ों द्वारा विश्वसनीय।",
     ogTitle: "WeddWeb - खूबसूरत वेडिंग वेबसाइट्स को आसान बनाएं",
     ogDescription: "अपनी परफेक्ट वेडिंग वेबसाइट बनाने का सबसे आसान तरीका",
-    ogImage: "https://weddweb.com/og-images/hi-home.jpg",
+    ogImage: "/assets/og/weddweb-OG.png",
     twitterCard: "summary_large_image",
     keywords: [
       "शादी वेबसाइट",

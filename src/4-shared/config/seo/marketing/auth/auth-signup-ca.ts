@@ -8,7 +8,7 @@ export const seoMetadata: SitewideSEO = {
     ogTitle: "WeddWeb Registre - Compte web de casament gratuït",
     ogDescription:
       "Crea el teu compte WeddWeb per accedir a totes les funcionalitats i començar la teva aventura web de casament.",
-    ogImage: "https://weddweb.com/og-images/ca-signup.jpg",
+    ogImage: "/assets/og/weddweb-OG.png",
     twitterCard: "summary_large_image",
     keywords: [
       "weddweb registre",

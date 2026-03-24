@@ -7,7 +7,7 @@ export const seoMetadata: SitewideSEO = {
       "Создавайте многоязычные свадебные сайты с RSVP, фотогалереями, собственным доменом и другими функциями. Мобильная версия, приватность и простота использования. Бесплатный тариф навсегда. Не требуется программирование. Доверие пар по всему миру.",
     ogTitle: "WeddWeb - Красивые свадебные сайты просто",
     ogDescription: "Самый простой способ создать идеальный свадебный сайт",
-    ogImage: "https://weddweb.com/og-images/ru-home.jpg",
+    ogImage: "/assets/og/weddweb-OG.png",
     twitterCard: "summary_large_image",
     keywords: [
       "свадебный сайт",

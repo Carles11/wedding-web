@@ -8,7 +8,7 @@ export const seoMetadata: SitewideSEO = {
     ogTitle: "WeddWeb Pricing - Affordable Wedding Websites for Every Couple",
     ogDescription:
       "Discover the cost of building your wedding website with WeddWeb. Flexible plans for every need.",
-    ogImage: "https://weddweb.com/og-images/en-pricing.jpg",
+    ogImage: "/assets/og/weddweb-OG.png",
     twitterCard: "summary_large_image",
     keywords: [
       "wedding website pricing",

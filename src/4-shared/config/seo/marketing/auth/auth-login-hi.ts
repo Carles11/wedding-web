@@ -8,7 +8,7 @@ export const seoMetadata: SitewideSEO = {
     ogTitle: "WeddWeb लॉगिन - वेडिंग वेबसाइट एक्सेस",
     ogDescription:
       "लॉगिन करें और अपनी वेडिंग वेबसाइट को संपादित करें, सभी सुविधाओं का उपयोग करें।",
-    ogImage: "https://weddweb.com/og-images/hi-login.jpg",
+    ogImage: "/assets/og/weddweb-OG.png",
     twitterCard: "summary_large_image",
     keywords: [
       "weddweb लॉगिन",

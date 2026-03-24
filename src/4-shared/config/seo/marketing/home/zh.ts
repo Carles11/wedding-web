@@ -7,7 +7,7 @@ export const seoMetadata: SitewideSEO = {
       "使用 RSVP、照片库、自定义域名等功能，轻松搭建多语言婚礼网站。移动端友好，隐私优先，操作简单。永久免费计划，无需编程。全球新人信赖之选。",
     ogTitle: "WeddWeb - 轻松创建漂亮的婚礼网站",
     ogDescription: "创建完美婚礼网站的最简单方式",
-    ogImage: "https://weddweb.com/og-images/zh-home.jpg",
+    ogImage: "/assets/og/weddweb-OG.png",
     twitterCard: "summary_large_image",
     keywords: [
       "婚礼网站",

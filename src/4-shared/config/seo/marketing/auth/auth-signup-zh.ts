@@ -7,7 +7,7 @@ export const seoMetadata: SitewideSEO = {
       "免费注册 WeddWeb，立即开始创建您的婚礼网站。注册简单、安全、私密。加入全球新人，打造专属婚礼网站！",
     ogTitle: "WeddWeb 注册 - 免费婚礼网站账户",
     ogDescription: "创建 WeddWeb 账户，解锁全部功能，开启婚礼网站之旅。",
-    ogImage: "https://weddweb.com/og-images/zh-signup.jpg",
+    ogImage: "/assets/og/weddweb-OG.png",
     twitterCard: "summary_large_image",
     keywords: [
       "weddweb 注册",

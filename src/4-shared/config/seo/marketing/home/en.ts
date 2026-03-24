@@ -7,7 +7,7 @@ export const seoMetadata: SitewideSEO = {
       "Build stunning, multilingual wedding websites with RSVP, photo galleries, custom domains, and more. Mobile-friendly, privacy-first, and easy to use. Free forever plan available. No coding required. Trusted by couples worldwide.",
     ogTitle: "WeddWeb - Beautiful Wedding Websites Made Easy",
     ogDescription: "The easiest way to create your perfect wedding website",
-    ogImage: "https://weddweb.com/og-images/en-home.jpg",
+    ogImage: "/assets/og/weddweb-OG.png",
     twitterCard: "summary_large_image",
     keywords: [
       "wedding website",

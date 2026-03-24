@@ -8,7 +8,7 @@ export const seoMetadata: SitewideSEO = {
     ogTitle: "Iniciar sesión en WeddWeb - Acceso seguro a tu cuenta",
     ogDescription:
       "Accede a tu cuenta de WeddWeb para gestionar tu web de boda y la lista de invitados.",
-    ogImage: "https://weddweb.com/og-images/es-login.jpg",
+    ogImage: "/assets/og/weddweb-OG.png",
     twitterCard: "summary_large_image",
     keywords: [
       "iniciar sesión weddweb",

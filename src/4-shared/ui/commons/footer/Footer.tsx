@@ -11,7 +11,7 @@ type FooterProps = {
 
 export function Footer({
   author = "Carles11",
-  repoUrl = "https://github.com/Carles11",
+  repoUrl = "https://github.com/Carles11/wedding-web",
   siteName = "Rio Frances",
   lang = "",
   translations,
@@ -60,7 +60,9 @@ export function Footer({
               {t(translations, "marketing.footer.faq", "FAQ")}
             </a>
             <a
-              href={`${langPrefix}/docs`}
+              href="https://www.notion.so/32f83b723884451893ed83b4c4722a10?v=5bcada60b2b24b0294ab8d5f9f7702b4"
+              target="_blank"
+              rel="noopener"
               className="hover:opacity-100 opacity-70 transition-opacity"
             >
               {t(translations, "marketing.footer.docs", "Documentation")}

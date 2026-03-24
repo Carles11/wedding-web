@@ -1,3 +1,5 @@
+import PricingPage from "@/0-pages/(marketing)/PricingPage";
+import { fetchMarketingTranslations } from "@/4-shared/api/marketing";
 import { getSEOMetadata } from "@/4-shared/config/seo";
 import { isValidLanguage } from "@/4-shared/helpers/isValidLanguage";
 import type { Metadata } from "next";
@@ -24,4 +26,15 @@ export async function generateMetadata({
     },
     robots: { index: true, follow: true },
   };
+}
+
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ lang?: string }>;
+}) {
+  const realParams = await params;
+  const lang = isValidLanguage(realParams?.lang) ? realParams.lang : "en";
+  const translations = await fetchMarketingTranslations(lang, "en");
+  return <PricingPage translations={translations} lang={lang} />;
 }

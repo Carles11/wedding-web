@@ -8,7 +8,7 @@ export const seoMetadata: SitewideSEO = {
     ogTitle: "WeddWeb Onboarding - Configuració fàcil del web de casament",
     ogDescription:
       "Onboarding pas a pas per llançar el teu web de casament ràpidament i sense complicacions.",
-    ogImage: "https://weddweb.com/og-images/ca-onboarding.jpg",
+    ogImage: "/assets/og/weddweb-OG.png",
     twitterCard: "summary_large_image",
     keywords: [
       "weddweb onboarding",

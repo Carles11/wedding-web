@@ -8,7 +8,7 @@ export const seoMetadata: SitewideSEO = {
     ogTitle: "WeddWeb ऑनबोर्डिंग - वेडिंग वेबसाइट सेटअप आसान",
     ogDescription:
       "स्टेप-बाय-स्टेप ऑनबोर्डिंग से अपनी वेडिंग वेबसाइट जल्दी और आसानी से शुरू करें।",
-    ogImage: "https://weddweb.com/og-images/hi-onboarding.jpg",
+    ogImage: "/assets/og/weddweb-OG.png",
     twitterCard: "summary_large_image",
     keywords: [
       "weddweb ऑनबोर्डिंग",

@@ -9,7 +9,7 @@ export const seoMetadata: SitewideSEO = {
       "WeddWeb FAQ - Tots els teus dubtes sobre webs de casament resolts",
     ogDescription:
       "Rep ajuda i consells per crear la teva web de casament perfecta amb WeddWeb.",
-    ogImage: "https://weddweb.com/og-images/ca-faq.jpg",
+    ogImage: "/assets/og/weddweb-OG.png",
     twitterCard: "summary_large_image",
     keywords: [
       "preguntes freqüents casament",

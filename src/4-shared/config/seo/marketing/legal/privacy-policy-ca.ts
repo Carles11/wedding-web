@@ -8,7 +8,7 @@ export const seoMetadata: SitewideSEO = {
     ogTitle: "Política de Privacitat de WeddWeb",
     ogDescription:
       "Com WeddWeb protegeix la teva privacitat i dades. Compliment GDPR, CCPA i més.",
-    ogImage: "https://weddweb.com/og-images/privacy-policy.jpg",
+    ogImage: "/assets/og/weddweb-OG.png",
     twitterCard: "summary_large_image",
     keywords: [
       "weddweb política de privacitat",

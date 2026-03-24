@@ -7,7 +7,7 @@ export const seoMetadata: SitewideSEO = {
       "سجّل الدخول إلى حسابك في WeddWeb لإدارة موقع زفافك، دعوة الضيوف وتحرير الإعدادات. تسجيل دخول آمن وسريع لجميع المستخدمين.",
     ogTitle: "تسجيل الدخول WeddWeb - وصول موقع الزفاف",
     ogDescription: "سجّل الدخول لتحرير موقع زفافك واستخدام جميع الميزات.",
-    ogImage: "https://weddweb.com/og-images/ar-login.jpg",
+    ogImage: "/assets/og/weddweb-OG.png",
     twitterCard: "summary_large_image",
     keywords: [
       "تسجيل الدخول weddweb",

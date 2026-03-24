@@ -8,7 +8,7 @@ export const seoMetadata: SitewideSEO = {
     ogTitle: "WeddWeb कुकी नीति",
     ogDescription:
       "WeddWeb कुकीज़ का उपयोग कैसे करता है और आपकी गोपनीयता की रक्षा करता है। GDPR अनुपालन और पारदर्शिता।",
-    ogImage: "https://weddweb.com/og-images/cookie-policy.jpg",
+    ogImage: "/assets/og/weddweb-OG.png",
     twitterCard: "summary_large_image",
     keywords: [
       "weddweb कुकी नीति",

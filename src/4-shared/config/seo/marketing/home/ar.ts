@@ -7,7 +7,7 @@ export const seoMetadata: SitewideSEO = {
       "ابنِ مواقع زفاف متعددة اللغات مع تأكيد الحضور (RSVP)، ومعارض الصور، ونطاقات مخصصة والمزيد. متوافق مع الجوال، خاص وسهل الاستخدام. خطة مجانية دائمة. لا حاجة للبرمجة. موثوق به من قبل الأزواج حول العالم.",
     ogTitle: "WeddWeb - مواقع زفاف جميلة بسهولة",
     ogDescription: "أسهل طريقة لإنشاء موقع زفاف مثالي لك",
-    ogImage: "https://weddweb.com/og-images/ar-home.jpg",
+    ogImage: "/assets/og/weddweb-OG.png",
     twitterCard: "summary_large_image",
     keywords: [
       "موقع زفاف",

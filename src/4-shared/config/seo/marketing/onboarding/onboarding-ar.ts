@@ -7,7 +7,7 @@ export const seoMetadata: SitewideSEO = {
       "ابدأ مع WeddWeb. أنشئ موقع زفافك، ادعُ الضيوف، خصص الصفحة وادِر RSVP بسهولة. لا حاجة للبرمجة. خطة مجانية مدى الحياة.",
     ogTitle: "البدء مع WeddWeb - إعداد موقع الزفاف بسهولة",
     ogDescription: "إعداد خطوة بخطوة لإطلاق موقع زفافك بسرعة وسهولة.",
-    ogImage: "https://weddweb.com/og-images/ar-onboarding.jpg",
+    ogImage: "/assets/og/weddweb-OG.png",
     twitterCard: "summary_large_image",
     keywords: [
       "البدء weddweb",

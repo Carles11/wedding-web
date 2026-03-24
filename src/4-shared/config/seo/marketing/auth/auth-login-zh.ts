@@ -7,7 +7,7 @@ export const seoMetadata: SitewideSEO = {
       "登录您的 WeddWeb 账户，管理婚礼网站，邀请宾客，编辑设置。安全快捷的登录体验，保护您的隐私。",
     ogTitle: "WeddWeb 登录 - 婚礼网站账户入口",
     ogDescription: "登录后即可编辑婚礼网站，管理所有功能。",
-    ogImage: "https://weddweb.com/og-images/zh-login.jpg",
+    ogImage: "/assets/og/weddweb-OG.png",
     twitterCard: "summary_large_image",
     keywords: [
       "weddweb 登录",

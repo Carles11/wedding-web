@@ -8,7 +8,7 @@ export const seoMetadata: SitewideSEO = {
     ogTitle: "WeddWeb प्राइसिंग - हर जोड़े के लिए किफायती वेडिंग वेबसाइट",
     ogDescription:
       "WeddWeb के साथ अपनी वेडिंग वेबसाइट बनाने की लागत जानें। हर जरूरत के लिए लचीले प्लान।",
-    ogImage: "https://weddweb.com/og-images/hi-pricing.jpg",
+    ogImage: "/assets/og/weddweb-OG.png",
     twitterCard: "summary_large_image",
     keywords: [
       "वेडिंग वेबसाइट प्राइसिंग",

@@ -9,7 +9,7 @@ export const seoMetadata: SitewideSEO = {
       "WeddWeb FAQ - Toutes vos questions sur le site de mariage répondues",
     ogDescription:
       "Obtenez de l'aide et des conseils pour créer votre site de mariage parfait avec WeddWeb.",
-    ogImage: "https://weddweb.com/og-images/fr-faq.jpg",
+    ogImage: "/assets/og/weddweb-OG.png",
     twitterCard: "summary_large_image",
     keywords: [
       "FAQ mariage",

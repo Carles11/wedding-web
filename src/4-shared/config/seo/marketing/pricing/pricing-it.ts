@@ -8,7 +8,7 @@ export const seoMetadata: SitewideSEO = {
     ogTitle: "Prezzi WeddWeb - Siti matrimonio accessibili per tutte le coppie",
     ogDescription:
       "Scopri il costo per creare il tuo sito matrimonio con WeddWeb. Piani flessibili per ogni esigenza.",
-    ogImage: "https://weddweb.com/og-images/it-pricing.jpg",
+    ogImage: "/assets/og/weddweb-OG.png",
     twitterCard: "summary_large_image",
     keywords: [
       "prezzo sito matrimonio",

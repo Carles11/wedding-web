@@ -8,7 +8,7 @@ export const seoMetadata: SitewideSEO = {
     ogTitle: "Inscription WeddWeb - Compte site de mariage gratuit",
     ogDescription:
       "Créez votre compte WeddWeb pour accéder à toutes les fonctionnalités et commencer votre aventure site de mariage.",
-    ogImage: "https://weddweb.com/og-images/fr-signup.jpg",
+    ogImage: "/assets/og/weddweb-OG.png",
     twitterCard: "summary_large_image",
     keywords: [
       "inscription weddweb",

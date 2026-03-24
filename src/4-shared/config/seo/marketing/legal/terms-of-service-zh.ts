@@ -7,7 +7,7 @@ export const seoMetadata: SitewideSEO = {
       "查阅 WeddWeb 的服务条款，了解您在使用我们婚礼平台时的权利和责任。清晰、透明，为所有用户提供法律保护。",
     ogTitle: "WeddWeb 服务条款",
     ogDescription: "您在使用 WeddWeb 时的权利和义务。安全透明的婚礼平台。",
-    ogImage: "https://weddweb.com/og-images/terms-of-service.jpg",
+    ogImage: "/assets/og/weddweb-OG.png",
     twitterCard: "summary_large_image",
     keywords: [
       "weddweb 服务条款",

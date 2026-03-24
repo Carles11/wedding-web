@@ -8,7 +8,7 @@ export const seoMetadata: SitewideSEO = {
     ogTitle: "WeddWeb - Siti per matrimoni belli e facili",
     ogDescription:
       "Il modo più semplice per creare il sito perfetto per il tuo matrimonio",
-    ogImage: "https://weddweb.com/og-images/it-home.jpg",
+    ogImage: "/assets/og/weddweb-OG.png",
     twitterCard: "summary_large_image",
     keywords: [
       "sito matrimonio",

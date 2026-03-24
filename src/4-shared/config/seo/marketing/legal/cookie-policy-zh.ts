@@ -8,7 +8,7 @@ export const seoMetadata: SitewideSEO = {
     ogTitle: "WeddWeb Cookie 政策",
     ogDescription:
       "WeddWeb 如何使用 Cookie 并保护您的隐私。GDPR 合规与透明度。",
-    ogImage: "https://weddweb.com/og-images/cookie-policy.jpg",
+    ogImage: "/assets/og/weddweb-OG.png",
     twitterCard: "summary_large_image",
     keywords: [
       "weddweb cookie 政策",

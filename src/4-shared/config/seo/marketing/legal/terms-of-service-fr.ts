@@ -8,7 +8,7 @@ export const seoMetadata: SitewideSEO = {
     ogTitle: "Conditions d'utilisation WeddWeb",
     ogDescription:
       "Vos droits et obligations lors de l'utilisation de WeddWeb. Plateforme de mariage sécurisée et transparente.",
-    ogImage: "https://weddweb.com/og-images/terms-of-service.jpg",
+    ogImage: "/assets/og/weddweb-OG.png",
     twitterCard: "summary_large_image",
     keywords: [
       "weddweb conditions d'utilisation",

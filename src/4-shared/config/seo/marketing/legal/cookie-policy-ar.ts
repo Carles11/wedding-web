@@ -8,7 +8,7 @@ export const seoMetadata: SitewideSEO = {
     ogTitle: "سياسة ملفات تعريف الارتباط WeddWeb",
     ogDescription:
       "كيف تستخدم WeddWeb ملفات تعريف الارتباط وتحمي خصوصيتك. الامتثال لـ GDPR والشفافية.",
-    ogImage: "https://weddweb.com/og-images/cookie-policy.jpg",
+    ogImage: "/assets/og/weddweb-OG.png",
     twitterCard: "summary_large_image",
     keywords: [
       "weddweb سياسة ملفات تعريف الارتباط",

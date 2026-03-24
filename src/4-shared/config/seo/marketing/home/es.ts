@@ -7,7 +7,7 @@ export const seoMetadata: SitewideSEO = {
       "Crea sitios web de bodas impresionantes y multilingües con RSVP, galerías de fotos, dominios personalizados y más. Móvil, privado y fácil de usar. Plan gratuito para siempre. Sin necesidad de programar. Confiado por parejas en todo el mundo.",
     ogTitle: "WeddWeb - Sitios de boda hermosos y fáciles",
     ogDescription: "La forma más fácil de crear la web perfecta para tu boda",
-    ogImage: "https://weddweb.com/og-images/es-home.jpg",
+    ogImage: "/assets/og/weddweb-OG.png",
     twitterCard: "summary_large_image",
     keywords: [
       "sitio web de boda",
