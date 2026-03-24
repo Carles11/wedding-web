@@ -1,4 +1,5 @@
 import LoginForm from "@/2-features/auth/ui/LoginForm";
+import { getSEOMetadata } from "@/4-shared/config/seo";
 import { isValidLanguage } from "@/4-shared/helpers/isValidLanguage";
 import { fetchGlobalTranslations } from "@/4-shared/lib/globalTranslations";
 import { Heading } from "@/4-shared/ui/commons/typography/Heading";
@@ -11,12 +12,19 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const realParams = await params;
   const lang = isValidLanguage(realParams?.lang) ? realParams.lang : "en";
-  const translations = await fetchGlobalTranslations(lang, "en");
+  const seo = getSEOMetadata(lang, "marketing", "auth-login");
   return {
-    title: translations["auth.login.page_title"] ?? "Login | WeddWeb",
-    description:
-      translations["auth.login.page_description"] ??
-      "Login to your wedding website dashboard",
+    title: seo.title,
+    description: seo.description,
+    openGraph: {
+      title: seo.ogTitle,
+      description: seo.ogDescription,
+      images: seo.ogImage ? [seo.ogImage] : [],
+    },
+    twitter: {
+      card: seo.twitterCard || "summary_large_image",
+    },
+    robots: { index: true, follow: true },
   };
 }
 

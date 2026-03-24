@@ -6,7 +6,6 @@ interface FAQPageShellProps {
   summary: string;
   fine_print?: string;
   children: ReactNode;
-  currentLang: string;
 }
 
 export default function FAQPageShell({
@@ -14,7 +13,6 @@ export default function FAQPageShell({
   summary,
   fine_print,
   children,
-  currentLang,
 }: FAQPageShellProps) {
   return (
     <section

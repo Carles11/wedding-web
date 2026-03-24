@@ -7,7 +7,7 @@ import UnderlinedLink from "@/4-shared/ui/commons/link/UnderlinedLink";
 export default async function FAQPage({
   params,
 }: {
-  params?: { lang?: string };
+  params: Promise<{ lang?: string }>;
 }) {
   const realParams = await params;
   const lang = realParams?.lang ?? "en";
@@ -43,7 +43,6 @@ export default async function FAQPage({
           newTranslations["marketing.faq.fine_print"] ??
           "For more details or support, contact our team."
         }
-        currentLang={lang}
       >
         <FAQList t={newTranslations} />
       </FAQPageShell>

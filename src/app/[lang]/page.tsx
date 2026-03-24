@@ -3,11 +3,9 @@ import MarketingPageComponent from "@/0-pages/(marketing)/MarketingPageComponent
 import TenantPageComponent from "@/0-pages/(tenant)/TenantPageComponent";
 import { fetchMarketingTranslations } from "@/4-shared/api/marketing";
 import { SUPPORTED_LANGUAGES, SupportedLanguage } from "@/4-shared/config/i18n";
+import { getSEOMetadata } from "@/4-shared/config/seo";
 import { getSiteByDomain } from "@/4-shared/lib/getSiteByDomain";
-import {
-  fetchGlobalTranslations,
-  getMergedTranslations,
-} from "@/4-shared/lib/i18n";
+import { getMergedTranslations } from "@/4-shared/lib/i18n";
 import { generateSiteMetadata } from "@/4-shared/lib/seo/generateSiteMetadata";
 import { Footer } from "@/4-shared/ui/commons/footer/Footer";
 import type { Metadata } from "next";
@@ -46,13 +44,19 @@ export async function generateMetadata({
     }
     return meta;
   } else {
-    // Marketing page metadata
-    const globalT = await fetchGlobalTranslations(lang, "en");
+    // Marketing homepage SEO metadata from config
+    const seo = getSEOMetadata(lang, "marketing", "home");
     return {
-      title: globalT["meta.marketing_title"] || "Wedding Platform",
-      description:
-        globalT["meta.marketing_description"] ||
-        "Create your wedding website easily.",
+      title: seo.title,
+      description: seo.description,
+      openGraph: {
+        title: seo.ogTitle,
+        description: seo.ogDescription,
+        images: seo.ogImage ? [seo.ogImage] : [],
+      },
+      twitter: {
+        card: seo.twitterCard || "summary_large_image",
+      },
       robots: { index: true, follow: true },
     };
   }
@@ -85,7 +89,7 @@ export default async function Page({
           initialLang={lang}
           translations={translations}
         />
-        <Footer lang={lang} />
+        <Footer lang={lang} translations={translations} />
       </>
     );
   }

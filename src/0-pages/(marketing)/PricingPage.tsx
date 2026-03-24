@@ -8,7 +8,7 @@ import type { TranslationDictionary } from "@/4-shared/types";
 export default async function PricingPage({
   params,
 }: {
-  params?: { lang?: string };
+  params: Promise<{ lang?: string }>;
 }) {
   // Use the [lang] path segment for language
   const realParams = await params;

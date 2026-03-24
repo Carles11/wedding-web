@@ -1,9 +1,21 @@
+import { t } from "@/4-shared/helpers/t";
+import type { MarketingTranslations } from "@/4-shared/types/marketingPage";
+
+type FooterProps = {
+  author?: string;
+  repoUrl?: string;
+  siteName?: string;
+  lang?: string;
+  translations: MarketingTranslations;
+};
+
 export function Footer({
   author = "Carles11",
   repoUrl = "https://github.com/Carles11",
   siteName = "Rio Frances",
   lang = "",
-}) {
+  translations,
+}: FooterProps) {
   const currentYear = new Date().getFullYear();
   const langPrefix = lang ? `/${lang}` : "";
 
@@ -28,26 +40,30 @@ export function Footer({
               {siteName}
             </h3>
             <p className="opacity-70 text-sm leading-relaxed">
-              Crafting digital experiences with care and precision.
+              {t(
+                translations,
+                "marketing.footer.about",
+                "Crafting digital experiences with care and precision.",
+              )}
             </p>
           </div>
 
           {/* Resources Section */}
           <div className="flex flex-col gap-3 text-sm">
             <h4 className="font-semibold uppercase tracking-wider opacity-50">
-              Resources
+              {t(translations, "marketing.footer.resources", "Resources")}
             </h4>
             <a
               href={`${langPrefix}/faq`}
               className="hover:opacity-100 opacity-70 transition-opacity"
             >
-              FAQ
+              {t(translations, "marketing.footer.faq", "FAQ")}
             </a>
             <a
               href={`${langPrefix}/docs`}
               className="hover:opacity-100 opacity-70 transition-opacity"
             >
-              Documentation
+              {t(translations, "marketing.footer.docs", "Documentation")}
             </a>
             <a
               href={repoUrl}
@@ -55,32 +71,40 @@ export function Footer({
               rel="noopener"
               className="hover:opacity-100 opacity-70 transition-opacity"
             >
-              GitHub
+              {t(translations, "marketing.footer.github", "GitHub")}
             </a>
           </div>
 
           {/* Legal Section */}
           <div className="flex flex-col gap-3 text-sm">
             <h4 className="font-semibold uppercase tracking-wider opacity-50">
-              Legal
+              {t(translations, "marketing.footer.legal", "Legal")}
             </h4>
             <a
-              href={`${langPrefix}/privacy`}
+              href={`${langPrefix}/privacy-policy`}
               className="hover:opacity-100 opacity-70 transition-opacity"
             >
-              Privacy Policy
+              {t(
+                translations,
+                "marketing.legal.privacy.title",
+                "Privacy Policy",
+              )}
             </a>
             <a
-              href={`${langPrefix}/terms`}
+              href={`${langPrefix}/terms-of-service`}
               className="hover:opacity-100 opacity-70 transition-opacity"
             >
-              Terms of Service
+              {t(
+                translations,
+                "marketing.legal.terms.title",
+                "Terms of Service",
+              )}
             </a>
             <a
-              href={`${langPrefix}/cookies`}
+              href={`${langPrefix}/cookie-policy`}
               className="hover:opacity-100 opacity-70 transition-opacity"
             >
-              Cookie Policy
+              {t(translations, "marketing.legal.cookie.title", "Cookie Policy")}
             </a>
           </div>
         </div>
@@ -88,11 +112,20 @@ export function Footer({
         {/* Bottom Section: Copyright & Attribution */}
         <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 text-xs opacity-60">
           <p>
-            © {currentYear} {siteName}. All rights reserved.
+            © {currentYear} {siteName}.{" "}
+            {t(
+              translations,
+              "marketing.footer.copyright",
+              "All rights reserved.",
+            )}
           </p>
 
           <p>
-            Made with love at{" "}
+            {t(
+              translations,
+              "marketing.footer.made_with_love",
+              "Made with love at",
+            )}{" "}
             <a
               href="https://weddweb.com"
               target="_blank"
@@ -103,7 +136,7 @@ export function Footer({
               WeddWeb
             </a>
             {" • "}
-            Powered by{" "}
+            {t(translations, "marketing.footer.powered_by", "Powered by")}{" "}
             <a
               href={repoUrl}
               target="_blank"
