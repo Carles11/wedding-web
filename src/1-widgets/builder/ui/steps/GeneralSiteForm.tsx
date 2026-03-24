@@ -10,7 +10,6 @@ import {
 import { notify } from "@/4-shared/lib/toast/toast";
 import type { PlanType, Site } from "@/4-shared/types";
 import { BuilderLangTabs, UpgradeCTAModal } from "@/4-shared/ui/builder";
-import { isValidSubdomain, RESERVED } from "@/4-shared/utils/validations";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 import { StepLayout } from "../../step-layout";
@@ -52,7 +51,6 @@ export default function GeneralSiteForm({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   // Extra error states
-  const [subdomainError, setSubdomainError] = useState<string | null>(null);
   const [titleError, setTitleError] = useState<string | null>(null);
   const [subtitleError, setSubtitleError] = useState<string | null>(null);
   const [languageError, setLanguageError] = useState<string | null>(null);
@@ -248,7 +246,6 @@ export default function GeneralSiteForm({
     e?.preventDefault();
     if (saving) return;
     setError(null);
-    setSubdomainError(null);
     setTitleError(null);
     setSubtitleError(null);
     setLanguageError(null);
@@ -325,31 +322,10 @@ export default function GeneralSiteForm({
       return;
     }
 
-    // Subdomain validation (only if editable)
-    const nextSubdomain = !site.subdomain ? subdomain.trim().toLowerCase() : "";
-    if (!site.subdomain && nextSubdomain) {
-      if (!isValidSubdomain(nextSubdomain)) {
-        setSubdomainError(
-          translations["builder.errors.invalid_subdomain"] ||
-            "Invalid subdomain format.",
-        );
-        return;
-      }
-      if (RESERVED.includes(nextSubdomain)) {
-        setSubdomainError(
-          translations["builder.errors.reserved_subdomain"] ||
-            "This subdomain is reserved.",
-        );
-        return;
-      }
-      // TODO: uniqueness check (requires backend or context)
-    }
-
     const existingLanguages = (site.languages ?? []) as SupportedLanguage[];
     const languagesChanged = !arraysEqual(existingLanguages, languages);
     const defaultLangChanged = (site.default_lang ?? "en") !== defaultLang;
-    const shouldRefreshSiteMeta =
-      !!nextSubdomain || languagesChanged || defaultLangChanged;
+    const shouldRefreshSiteMeta = languagesChanged || defaultLangChanged;
 
     setSaving(true);
     try {
@@ -357,7 +333,6 @@ export default function GeneralSiteForm({
         site_id: site.id,
         heroId: heroId,
         content,
-        subdomain: nextSubdomain || undefined,
         languages,
         default_lang: defaultLang,
       });
@@ -513,11 +488,7 @@ export default function GeneralSiteForm({
             {subtitleError}
           </div>
         )}
-        {subdomainError && (
-          <div className="text-sm text-(--builder-color-danger)">
-            {subdomainError}
-          </div>
-        )}
+
         {languageError && (
           <div className="text-sm text-(--builder-color-danger)">
             {languageError}

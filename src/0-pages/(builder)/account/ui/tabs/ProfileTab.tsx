@@ -2,7 +2,9 @@ import { updateAccountInfo } from "@/3-entities/account/api/accountCrud";
 import { formatAccountDate } from "@/4-shared/helpers/formatAccountDate";
 import { useSupabaseAuth } from "@/4-shared/hooks/useSupabaseAuth";
 import { notify } from "@/4-shared/lib/toast/toast";
+import { BuilderButton } from "@/4-shared/ui/builder/BuilderButton";
 import { useEffect, useState } from "react";
+import AccountDangerZone from "../AccountDangerZone";
 import EmailChangeInstructionsModal from "../EmailChangeInstructionsModal";
 
 interface ProfileTabProps {
@@ -15,6 +17,19 @@ interface ProfileTabProps {
   inputClass: string;
   labelClass: string;
   cardClass: string;
+  saving: boolean;
+  deleteConfirm: string;
+  setDeleteConfirm: (val: string) => void;
+  deleteAcknowledge: boolean;
+  setDeleteAcknowledge: (val: boolean) => void;
+  handleDelete: () => void;
+  onNext?: () => void;
+  onBack?: () => void;
+  nextLoading?: boolean;
+  nextDisabled?: boolean;
+  backDisabled?: boolean;
+  nextLabel?: string;
+  backLabel?: string;
 }
 
 export function ProfileTab({
@@ -27,11 +42,35 @@ export function ProfileTab({
   inputClass,
   labelClass,
   cardClass,
+  saving,
+  deleteConfirm,
+  setDeleteConfirm,
+  nextLoading,
+  handleDelete,
+  deleteAcknowledge,
+  setDeleteAcknowledge,
+  onNext,
+  onBack,
+  nextDisabled,
+  backDisabled,
+  nextLabel,
+  backLabel,
 }: ProfileTabProps) {
   const { user, changeEmailWithPassword } = useSupabaseAuth();
   const [password, setPassword] = useState("");
   const [emailChanging, setEmailChanging] = useState(false);
   const [showEmailChangeModal, setShowEmailChangeModal] = useState(false);
+
+  const resolvedNext =
+    translations["builder.actions.save"] ||
+    translations["builder.actions.next"] ||
+    nextLabel ||
+    "Next";
+  const resolvedBack =
+    translations["builder.actions.discard"] ||
+    translations["builder.actions.back"] ||
+    backLabel ||
+    "Back";
 
   // --- Sync user_profiles.email with Auth user.email after confirmation ---
   // Only run if user is logged in and emails differ
@@ -244,6 +283,35 @@ export function ProfileTab({
             </dl>
           </div>
         </div>
+      </div>
+      {/* Danger zone - always visible but styled differently */}
+      <AccountDangerZone
+        account={account}
+        translations={translations}
+        saving={saving}
+        deleteConfirm={deleteConfirm}
+        setDeleteConfirm={setDeleteConfirm}
+        deleteAcknowledge={deleteAcknowledge}
+        setDeleteAcknowledge={setDeleteAcknowledge}
+        handleDelete={handleDelete}
+      />
+      <div className={`items-center justify-center gap-3 border-t px-6 py-4`}>
+        <BuilderButton
+          variant="secondary"
+          onClick={onBack}
+          disabled={backDisabled}
+        >
+          {resolvedBack}
+        </BuilderButton>
+
+        <BuilderButton
+          onClick={onNext}
+          disabled={nextDisabled}
+          loading={nextLoading}
+          loadingLabel={translations["builder.actions.saving"] || "Saving..."}
+        >
+          {resolvedNext}
+        </BuilderButton>
       </div>
     </>
   );

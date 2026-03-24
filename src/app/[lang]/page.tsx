@@ -9,6 +9,7 @@ import {
   getMergedTranslations,
 } from "@/4-shared/lib/i18n";
 import { generateSiteMetadata } from "@/4-shared/lib/seo/generateSiteMetadata";
+import { Footer } from "@/4-shared/ui/commons/footer/Footer";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 
@@ -84,6 +85,7 @@ export default async function Page({
           initialLang={lang}
           translations={translations}
         />
+        <Footer />
       </>
     );
   }

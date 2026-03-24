@@ -9,7 +9,6 @@ type SaveOpts = {
   content: Partial<
     Record<SupportedLanguage, { title: string; subtitle: string }>
   >;
-  subdomain?: string;
   languages?: SupportedLanguage[];
   default_lang?: SupportedLanguage;
 };
@@ -18,7 +17,6 @@ export async function saveSiteGeneralContent({
   site_id,
   heroId,
   content,
-  subdomain,
   languages,
   default_lang,
 }: SaveOpts): Promise<void> {
@@ -91,10 +89,9 @@ export async function saveSiteGeneralContent({
     });
   }
 
-  // 2. If site language metadata or subdomain needs updating:
-  if (subdomain || languages || default_lang) {
+  // 2. If site language metadata needs updating:
+  if (languages || default_lang) {
     const payload: Record<string, unknown> = {};
-    if (subdomain) payload.subdomain = subdomain;
     if (languages) payload.languages = languages;
     if (default_lang) payload.default_lang = default_lang;
 

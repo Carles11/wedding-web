@@ -1,16 +1,14 @@
 "use client";
 
-import { StepLayout } from "@/1-widgets/builder/step-layout/ui/StepLayout";
-
 import { deleteAccountAction } from "@/3-entities/account/actions/deleteAccount";
 import { updateAccountInfo } from "@/3-entities/account/api/accountCrud";
 
 import { getAccountById } from "@/3-entities/account/api/getAccountById";
 import { useSupabaseAuth } from "@/4-shared/hooks/useSupabaseAuth";
 import { notify } from "@/4-shared/lib/toast/toast";
+import UnderlinedLink from "@/4-shared/ui/commons/link/UnderlinedLink";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import AccountDangerZone from "./ui/AccountDangerZone";
 import { PreferencesTab } from "./ui/tabs/PreferencesTab";
 import { ProfileTab } from "./ui/tabs/ProfileTab";
 import { SecurityTab } from "./ui/tabs/SecurityTab";
@@ -179,16 +177,8 @@ export default function AccountPage({ account, translations }: Props) {
     ].join(" ");
 
   return (
-    <StepLayout
-      nextLabel={translations["account.save_btn"] || "Save changes"}
-      backLabel={translations["account.cancel_btn"] || "Cancel"}
-      onNext={handleSave}
-      nextDisabled={saving}
-      nextLoading={saving}
-      translations={translations}
-      onBack={() => {}}
-    >
-      <div className="max-w-4xl mx-auto space-y-6 px-4 py-6">
+    <>
+      <div className="builder-theme max-w-4xl mx-auto space-y-6 px-4 py-6">
         {/* Header with gradient */}
         <div className="relative mb-8">
           <div className="absolute inset-0 bg-linear-to-r from-(--builder-color-primary)/5 to-transparent rounded-2xl" />
@@ -246,6 +236,16 @@ export default function AccountPage({ account, translations }: Props) {
                   translations["builder.account.page.default_language"] ||
                   "EN"}
               </span> */}
+              <UnderlinedLink
+                href={`/${account.preferred_language?.toLowerCase() || "en"}/builder`}
+                thicknessClass="h-0.5"
+                durationMs={350}
+                ariaLabel={"Back to dashboard"}
+              >
+                {translations["builder.account.page.onboarded"] ||
+                  "Back to dashboard"}
+              </UnderlinedLink>
+
               {account.onboarding_completed && (
                 <span className="px-3 py-1.5 text-xs font-medium rounded-full bg-green-100 text-green-700">
                   {translations["builder.account.page.onboarded"] ||
@@ -292,6 +292,17 @@ export default function AccountPage({ account, translations }: Props) {
             inputClass={inputClass}
             labelClass={labelClass}
             cardClass={cardClass}
+            saving={saving}
+            deleteConfirm={deleteConfirm}
+            setDeleteConfirm={setDeleteConfirm}
+            deleteAcknowledge={deleteAcknowledge}
+            setDeleteAcknowledge={setDeleteAcknowledge}
+            handleDelete={handleDelete}
+            nextLabel={translations["account.save_btn"] || "Save changes"}
+            backLabel={translations["account.cancel_btn"] || "Cancel"}
+            onNext={handleSave}
+            nextDisabled={saving}
+            nextLoading={saving}
           />
         )}
 
@@ -306,19 +317,7 @@ export default function AccountPage({ account, translations }: Props) {
             cardClass={cardClass}
           />
         )}
-
-        {/* Danger zone - always visible but styled differently */}
-        <AccountDangerZone
-          account={currentAccount}
-          translations={translations}
-          saving={saving}
-          deleteConfirm={deleteConfirm}
-          setDeleteConfirm={setDeleteConfirm}
-          deleteAcknowledge={deleteAcknowledge}
-          setDeleteAcknowledge={setDeleteAcknowledge}
-          handleDelete={handleDelete}
-        />
       </div>
-    </StepLayout>
+    </>
   );
 }

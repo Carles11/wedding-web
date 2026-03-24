@@ -204,7 +204,6 @@ h3 {
 
   font-family: var(--builder-font-sans);
   color: var(--builder-color-text);
-  background-color: var(--builder-color-page-bg);
 }
 
 .builder-shell {

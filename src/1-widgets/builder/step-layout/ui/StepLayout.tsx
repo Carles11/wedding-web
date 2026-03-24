@@ -43,13 +43,15 @@ export function StepLayout({
     translations["builder.actions.save"] || nextLabel || "Save";
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="builder-theme flex min-h-screen flex-col">
       {/* CONTENT */}
       <main className="flex-1 pb-28 md:pb-8">{children}</main>
 
       {/* DESKTOP ACTIONS */}
       {showActions && (
-        <div className="hidden md:flex items-center justify-start gap-3 border-t builder-muted-surface px-6 py-4">
+        <div
+          className={`hidden md:flex items-center justify-start gap-3 border-t builder-muted-surface px-6 py-4`}
+        >
           <BuilderButton
             variant="secondary"
             onClick={onBack}
