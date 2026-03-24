@@ -1,9 +1,8 @@
 import FAQList from "@/1-widgets/marketing/ui/FAQList";
 import FAQPageShell from "@/1-widgets/marketing/ui/FAQPageShell";
-import { fetchBuilderTranslations } from "@/4-shared/api/builder/getTranslations";
-import { createSupabaseSSRClient } from "@/4-shared/lib/supabase/server";
-
-import type { TranslationDictionary } from "@/4-shared/types";
+import MarketingFloatingLanguageSelector from "@/1-widgets/marketing/ui/MarketingFloatingLanguageSelector";
+import { fetchMarketingTranslations } from "@/4-shared/api/marketing/getTranslations";
+import UnderlinedLink from "@/4-shared/ui/commons/link/UnderlinedLink";
 
 export default async function FAQPage({
   params,
@@ -14,25 +13,40 @@ export default async function FAQPage({
   const lang = realParams?.lang ?? "en";
 
   // Fetch translations
-  const supabase = await createSupabaseSSRClient();
-  const t: TranslationDictionary = await fetchBuilderTranslations(
-    supabase,
-    lang,
-    "en",
-  );
 
+  const newTranslations = await fetchMarketingTranslations(lang, "en");
   return (
-    <FAQPageShell
-      title={t["faq.title"] ?? "Frequently Asked Questions"}
-      summary={
-        t["faq.summary"] ??
-        "Answers to common questions about wedding websites, planning, and related services."
-      }
-      fine_print={
-        t["faq.fine_print"] ?? "For more details or support, contact our team."
-      }
-    >
-      <FAQList t={t} />
-    </FAQPageShell>
+    <>
+      <UnderlinedLink
+        href={`/${lang?.toLowerCase() || "en"}/`}
+        thicknessClass="h-0.5"
+        durationMs={350}
+        ariaLabel={"Back to dashboard"}
+        fixed={true}
+        className="left-4 top-4"
+      >
+        {newTranslations["auth.common.back_to_home"] || "Back"}
+      </UnderlinedLink>
+      <MarketingFloatingLanguageSelector
+        currentLang={lang}
+        label={newTranslations["marketing.lang_selector.label"]}
+      />
+      <FAQPageShell
+        title={
+          newTranslations["marketing.faq.title"] ?? "Frequently Asked Questions"
+        }
+        summary={
+          newTranslations["marketing.faq.summary"] ??
+          "Answers to common questions about wedding websites, planning, and related services."
+        }
+        fine_print={
+          newTranslations["marketing.faq.fine_print"] ??
+          "For more details or support, contact our team."
+        }
+        currentLang={lang}
+      >
+        <FAQList t={newTranslations} />
+      </FAQPageShell>
+    </>
   );
 }

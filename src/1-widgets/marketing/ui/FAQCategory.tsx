@@ -1,15 +1,26 @@
-import FAQItem from "@/1-widgets/marketing/ui/FAQItem";
+import FAQItem from "./FAQItem";
 
 interface FAQCategoryProps {
+  id: string;
   title: string;
   questions: { q: string; a: string }[];
 }
 
-export default function FAQCategory({ title, questions }: FAQCategoryProps) {
+export default function FAQCategory({
+  id,
+  title,
+  questions,
+}: FAQCategoryProps) {
   return (
-    <section className="mb-8">
-      <h2 className="text-xl font-semibold mb-4">{title}</h2>
-      <div className="space-y-4">
+    <section id={id} className="mb-12 scroll-mt-24">
+      <h2 className="font-display text-2xl mb-6 flex items-center gap-3">
+        <span
+          className="h-1 w-8 rounded-full"
+          style={{ background: "var(--marketing-color-accent)" }}
+        />
+        {title}
+      </h2>
+      <div className="space-y-2">
         {questions.map((qa, idx) => (
           <FAQItem key={idx} question={qa.q} answer={qa.a} />
         ))}

@@ -85,7 +85,7 @@ export default async function Page({
           initialLang={lang}
           translations={translations}
         />
-        <Footer />
+        <Footer lang={lang} />
       </>
     );
   }

@@ -1,3 +1,4 @@
+import UnderlinedLink from "@/4-shared/ui/commons/link/UnderlinedLink";
 import { ReactNode } from "react";
 
 interface FAQPageShellProps {
@@ -5,6 +6,7 @@ interface FAQPageShellProps {
   summary: string;
   fine_print?: string;
   children: ReactNode;
+  currentLang: string;
 }
 
 export default function FAQPageShell({
@@ -12,17 +14,34 @@ export default function FAQPageShell({
   summary,
   fine_print,
   children,
+  currentLang,
 }: FAQPageShellProps) {
   return (
-    <section className="max-w-4xl mx-auto px-4 py-12">
-      <header className="mb-8 text-center">
-        <h1 className="text-3xl font-bold mb-2">{title}</h1>
-        <p className="text-lg text-gray-600 mb-4">{summary}</p>
+    <section
+      className="min-h-screen pt-20 pb-12 px-4"
+      style={{ background: "var(--marketing-bg-gradient)" }}
+    >
+      <header className="max-w-4xl mx-auto mb-12 text-center animate-fadeIn">
+        <h1
+          className="font-display text-4xl md:text-5xl mb-4"
+          style={{ color: "var(--marketing-color-on-gradient-text)" }}
+        >
+          {title}
+        </h1>
+        <p className="text-lg opacity-80 max-w-2xl mx-auto mb-6">{summary}</p>
         {fine_print && (
-          <div className="text-xs text-gray-400">{fine_print}</div>
+          <UnderlinedLink
+            href={"mailto:carles@rio-frances.com"}
+            thicknessClass="h-0.5"
+            durationMs={350}
+            ariaLabel={"Contact support for more FAQ details"}
+            external
+          >
+            {fine_print}
+          </UnderlinedLink>
         )}
       </header>
-      <div>{children}</div>
+      <div className="max-w-3xl mx-auto">{children}</div>
     </section>
   );
 }

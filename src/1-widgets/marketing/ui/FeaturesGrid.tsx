@@ -12,6 +12,8 @@ export default function FeaturesGrid({
   freeFeatures,
   premiumFeatures,
   popularBadgeLabel = "Popular",
+  lang,
+  faqTitle,
 }: FeaturesGridProps) {
   return (
     <section
@@ -111,6 +113,18 @@ export default function FeaturesGrid({
               ))}
             </ul>
           </article>
+        </div>
+
+        {/* FAQ Button */}
+        <div className="mt-12">
+          <a
+            href={`${lang ? `${lang}/faq` : "/"}`}
+            className="inline-block px-6 py-3 rounded-lg font-semibold text-white shadow-md transition hover:opacity-90"
+            style={{ background: "var(--marketing-color-primary)" }}
+            aria-label="Frequently Asked Questions"
+          >
+            {faqTitle ?? "Frequently Asked Questions"}
+          </a>
         </div>
       </div>
     </section>

@@ -1,5 +1,5 @@
-import React from "react";
 import Link from "next/link";
+import React from "react";
 
 type UnderlinedLinkProps = {
   href: string;
@@ -21,6 +21,7 @@ type UnderlinedLinkProps = {
   external?: boolean;
   ariaLabel?: string;
   prefetch?: boolean;
+  fixed?: boolean; // If true, applies fixed positioning to the link (e.g. for a "Back" button)
 };
 
 export default function UnderlinedLink({
@@ -35,6 +36,7 @@ export default function UnderlinedLink({
   external = false,
   ariaLabel,
   prefetch,
+  fixed = false,
 }: UnderlinedLinkProps) {
   const rel = external ? "noopener noreferrer" : undefined;
   const target = external ? "_blank" : undefined;
@@ -46,7 +48,7 @@ export default function UnderlinedLink({
   };
 
   const baseClass =
-    "group inline-block relative focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-300 rounded " +
+    `${fixed ? " fixed" : "relative"} group inline-block  focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-300 rounded ` +
     className;
 
   // Both thicknessClass (legacy) and initialHeightClass (preferred) are applied.

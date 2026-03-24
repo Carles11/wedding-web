@@ -51,6 +51,8 @@ export interface FeaturesGridProps {
   premiumFeatures: Feature[];
   /** Label for the premium badge (e.g., "Popular") */
   popularBadgeLabel?: string;
+  lang?: string;
+  faqTitle?: string;
 }
 
 /**
@@ -115,6 +117,7 @@ export type MarketingFeaturesViewModel = {
   freeFeatures: MarketingFeatureItem[];
   premiumFeatures: MarketingFeatureItem[];
   popularBadgeLabel: string;
+  faqTitle: string;
 };
 
 export type MarketingTestimonialsViewModel = {
@@ -188,5 +191,5 @@ export type MarketingPageViewModel = {
 export type MarketingFloatingLanguageSelectorProps = {
   currentLang: string;
   label: string;
-  onLanguageChange: (lang: string) => void;
+  onLanguageChange?: (lang: string) => void;
 };

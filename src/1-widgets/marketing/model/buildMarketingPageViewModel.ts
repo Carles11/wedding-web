@@ -51,6 +51,7 @@ export function buildMarketingPageViewModel(
       freeFeatures,
       premiumFeatures,
       popularBadgeLabel: translations["marketing.features.popular_badge"],
+      faqTitle: translations["marketing.faq.title"],
     },
     testimonials: {
       sectionTitle: translations["marketing.testimonials.section_title"],

@@ -87,7 +87,7 @@ export default function MarketingPageComponent({
 
       <main className="min-h-screen">
         <HeroMarketing {...viewModel.hero} />
-        <FeaturesGrid {...viewModel.features} />
+        <FeaturesGrid lang={currentLang} {...viewModel.features} />
         <TestimonialsSection {...viewModel.testimonials} />
         <PricingSection {...viewModel.pricing} />
         <CTASection {...viewModel.cta} />
