@@ -1,5 +1,7 @@
 import { getCurrentUser } from "@/3-entities/user/api/getCurrentUser";
 import { getCurrentUserSubscription } from "@/3-entities/user/api/getCurrentUserSubscription";
+import { fetchBuilderTranslations } from "@/4-shared/api/builder/getTranslations";
+import { createSupabaseSSRClient } from "@/4-shared/lib/supabase/server";
 import { Footer } from "@/4-shared/ui/commons/footer/Footer";
 import { shouldShowFooter } from "@/4-shared/utils/shouldShowFooter";
 import { PlanProvider, ToastProvider } from "@/app/providers";
@@ -31,6 +33,10 @@ export default async function DashboardLayout({
   const host = ((await headers()).get("host") ?? "").toLowerCase().trim();
   const showFooter = await shouldShowFooter({ host, routeKind: "builder" });
 
+  const supabase = await createSupabaseSSRClient();
+
+  const translations = await fetchBuilderTranslations(supabase, lang, "en");
+
   return (
     <PlanProvider subscription={subscription}>
       {children}
@@ -40,6 +46,7 @@ export default async function DashboardLayout({
           siteName="Weddweb.com"
           author="Carles del Río Francés"
           repoUrl="https://www.rio-frances.com"
+          translations={translations}
         />
       )}
     </PlanProvider>

@@ -1,5 +1,6 @@
-import type { HeroSectionType, ProgramSection } from "@/4-shared/types";
+import { formatToISO8601 } from "@/4-shared/helpers/formatToISO8601";
 import { getTextForLang } from "@/4-shared/lib/getTextForLang";
+import type { HeroSectionType, ProgramSection } from "@/4-shared/types";
 
 /**
  * Generate Event schema (JSON-LD) for wedding sites
@@ -16,16 +17,17 @@ export function generateEventSchema(params: {
 
   if (!hero) return null;
 
-  // NEW: title and description are now simple strings!
   const eventName = hero.title || "Wedding";
   const description = hero.description || "";
 
-  // The program may still be old format—keep getTextForLang for now, refactor when migrated
-  const eventDate = getTextForLang(program?.content?.when, lang, "ca");
+  // Get the combined "date + time" string from our helper
+  const rawDate = getTextForLang(program?.content?.when, lang, "en");
+  const isoDate = formatToISO8601(rawDate);
+
   const locationName = getTextForLang(
     program?.content?.where?.wedding,
     lang,
-    "ca",
+    "en",
   );
 
   const schema = {
@@ -33,8 +35,9 @@ export function generateEventSchema(params: {
     "@type": "Event",
     name: eventName,
     description: description,
-    ...(eventDate && {
-      startDate: eventDate, // TODO: Parse to ISO 8601 if needed
+    // SUCCESS: Now using validated ISO 8601
+    ...(isoDate && {
+      startDate: isoDate,
     }),
     ...(locationName && {
       location: {
@@ -45,7 +48,6 @@ export function generateEventSchema(params: {
     eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
     eventStatus: "https://schema.org/EventScheduled",
     url: baseUrl,
-    // NEW: Use hero.backgroundImage if present
     ...(backgroundImage && {
       image: backgroundImage,
     }),

@@ -1,11 +1,14 @@
 import SignupForm from "@/2-features/auth/ui/SignupForm";
+import { getSEOMetadata } from "@/4-shared/config/seo";
 import { isValidLanguage } from "@/4-shared/helpers/isValidLanguage";
 import { fetchGlobalTranslations } from "@/4-shared/lib/globalTranslations";
 import { Heading } from "@/4-shared/ui/commons/typography/Heading";
-
-import { getSEOMetadata } from "@/4-shared/config/seo";
 import type { Metadata } from "next";
 
+/**
+ * Signup Page Metadata
+ * SHIELDED: Prevents "Thin Content" indexing to protect Crawl Budget.
+ */
 export async function generateMetadata({
   params,
 }: {
@@ -14,18 +17,23 @@ export async function generateMetadata({
   const realParams = await params;
   const lang = isValidLanguage(realParams?.lang) ? realParams.lang : "en";
   const seo = getSEOMetadata(lang, "marketing", "auth-signup");
+
   return {
     title: seo.title,
     description: seo.description,
+    // THE SHIELD: Hard signal to bots to stay away
+    robots: {
+      index: false,
+      follow: false,
+      nocache: true,
+    },
     openGraph: {
       title: seo.ogTitle,
       description: seo.ogDescription,
-      images: seo.ogImage ? [seo.ogImage] : [],
+      images: seo.ogImage
+        ? [seo.ogImage]
+        : [`https://weddweb.com/assets/og/weddweb-OG.png`],
     },
-    twitter: {
-      card: seo.twitterCard || "summary_large_image",
-    },
-    robots: { index: true, follow: true },
   };
 }
 
@@ -37,15 +45,16 @@ export default async function SignupPage({
   const realParams = await params;
   const lang = isValidLanguage(realParams?.lang) ? realParams.lang : "en";
   const translations = await fetchGlobalTranslations(lang, "en");
+
   return (
-    <main className="min-h-screen flex items-center justify-center ">
+    <main className="min-h-screen flex items-center justify-center">
       <div className="w-full max-w-[80%]">
         <div className="text-center mt-8">
           <Heading as="h1">
             {translations["auth.signup.welcome"] ?? "Welcome"}
           </Heading>
         </div>
-        <SignupForm translations={translations} lang={lang} />{" "}
+        <SignupForm translations={translations} lang={lang} />
       </div>
     </main>
   );

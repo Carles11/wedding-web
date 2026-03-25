@@ -16,7 +16,7 @@ export default function FAQPage({ translations, lang }: Props) {
         href={`/${lang?.toLowerCase() || "en"}/`}
         thicknessClass="h-0.5"
         durationMs={350}
-        ariaLabel={"Back to dashboard"}
+        ariaLabel={"Back to home"}
         fixed={true}
         className="left-4 top-4"
       >

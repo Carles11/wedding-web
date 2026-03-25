@@ -41,7 +41,7 @@ export default function TestimonialsSection({
           }}
         >
           {/* Image side */}
-          <div className="w-full md:w-1/2 rounded-2xl overflow-hidden shadow-lg relative aspect-[4/3] shrink-0">
+          <div className="w-full md:w-1/2 rounded-2xl overflow-hidden shadow-lg relative aspect-4/3 shrink-0">
             <Image
               src="/assets/images/ines-und-carles-hero-image.jpg"
               alt="Example wedding site preview"

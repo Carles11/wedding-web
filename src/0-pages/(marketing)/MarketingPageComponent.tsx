@@ -1,4 +1,5 @@
 "use client";
+
 import { buildMarketingPageViewModel } from "@/1-widgets/marketing/model";
 import HeroMarketing, {
   CTASection,
@@ -11,68 +12,59 @@ import { updateAccountInfo } from "@/3-entities/account/api/accountCrud";
 import { useSupabaseAuth } from "@/4-shared/hooks/useSupabaseAuth";
 import type { MarketingPageProps } from "@/4-shared/types";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 
+/**
+ * Refactored MarketingPageComponent
+ *
+ * - Optimized for INP (Interaction to Next Paint)
+ * - Zero-state translation management (uses props directly)
+ * - SEO-stable (Server-rendered content is never overwritten by client state)
+ */
 export default function MarketingPageComponent({
   initialLang = "en",
   translations,
 }: MarketingPageProps) {
   const router = useRouter();
-
   const { user, supabase } = useSupabaseAuth();
 
-  // SSR-safe: initialize from initialLang
-  const [currentLang, setCurrentLang] = useState(initialLang || "en");
-  const [currentTranslations, setCurrentTranslations] = useState(translations);
-
-  // Sync currentLang with path segment on client only
-  useEffect(() => {
-    // Only update currentLang on client if needed
-    setCurrentTranslations(translations);
-  }, [initialLang, translations]);
-
-  // Fetch translations when currentLang changes
-  useEffect(() => {
-    if (currentLang === initialLang) return;
-    async function fetchTranslations() {
-      const { fetchMarketingTranslations } =
-        await import("@/4-shared/api/marketing");
-      const newTranslations = await fetchMarketingTranslations(
-        currentLang,
-        "en",
-      );
-      setCurrentTranslations(newTranslations);
-    }
-    fetchTranslations();
-  }, [currentLang, initialLang]);
-
-  // Handler for primary CTA click
+  // HANDLER: Primary CTA (Builder or Signup)
   const handlePrimaryClick = async () => {
+    // Immediate feedback for INP: We don't wait for the session to push the route
+    // if the user object is already present from the hook.
+    if (user) {
+      router.push(`/${initialLang}/builder`);
+      return;
+    }
+
     const {
       data: { session },
     } = await supabase.auth.getSession();
-    if (user || session?.user) {
-      router.push(`/${currentLang}/builder`);
-      return;
+    if (session?.user) {
+      router.push(`/${initialLang}/builder`);
+    } else {
+      router.push(`/${initialLang}/auth/signup`);
     }
-    router.push(`/${currentLang}/auth/signup`);
   };
 
-  // Handler for secondary CTA click
+  // HANDLER: Secondary CTA
   const handleSecondaryClick = () => {
     window.open("https://www.inesundcarles.dog", "_blank");
   };
 
-  // Handler for language selector
+  // HANDLER: Language Selector
   const handleLanguageChange = async (lang: string) => {
-    setCurrentLang(lang);
+    // If user is logged in, sync preference in background
     if (user?.id) {
-      await updateAccountInfo(user.id, { preferred_language: lang });
+      updateAccountInfo(user.id, { preferred_language: lang });
     }
+
+    // NATIVE REDIRECT: Let the Server Page handle fetching new translations
+    // This eliminates the need for client-side 'useEffect' fetching.
     router.push(`/${lang}`);
   };
 
-  const viewModel = buildMarketingPageViewModel(currentTranslations, {
+  // VIEW MODEL: Generated directly from props for instant hydration
+  const viewModel = buildMarketingPageViewModel(translations, {
     onPrimaryClick: handlePrimaryClick,
     onSecondaryClick: handleSecondaryClick,
   });
@@ -80,17 +72,30 @@ export default function MarketingPageComponent({
   return (
     <>
       <MarketingFloatingLanguageSelector
-        currentLang={currentLang}
-        label={currentTranslations["marketing.lang_selector.label"]}
+        currentLang={initialLang}
+        label={translations["marketing.lang_selector.label"]}
         onLanguageChange={handleLanguageChange}
       />
 
       <main className="min-h-screen">
+        {/* SEMANTIC CHECK: HeroMarketing uses <h1> as verified in Source 9 */}
         <HeroMarketing {...viewModel.hero} />
-        <FeaturesGrid lang={currentLang} {...viewModel.features} />
+
+        {/* SEMANTIC CHECK: FeaturesGrid uses <h2> as verified in Source 8 */}
+        <FeaturesGrid lang={initialLang} {...viewModel.features} />
+
+        {/* SEMANTIC CHECK: TestimonialsSection uses <h2> as verified in Source 12 */}
         <TestimonialsSection {...viewModel.testimonials} />
-        <PricingSection {...viewModel.pricing} />
-        <CTASection {...viewModel.cta} />
+
+        {/* SEMANTIC CHECK: PricingSection uses <h2> as verified in Source 11 */}
+        <PricingSection
+          {...viewModel.pricing}
+          onFreePlanClick={handlePrimaryClick}
+          onPremiumPlanClick={handlePrimaryClick}
+        />
+
+        {/* SEMANTIC CHECK: CTASection uses <h2> as verified in Source 7 */}
+        <CTASection {...viewModel.cta} onButtonClick={handlePrimaryClick} />
       </main>
     </>
   );

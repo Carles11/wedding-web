@@ -4,42 +4,33 @@ import { isValidLanguage } from "@/4-shared/helpers/isValidLanguage";
 import { createSupabaseSSRClient } from "@/4-shared/lib/supabase/server";
 
 type CheckoutPageProps = {
-  searchParams?:
-    | { [key: string]: string | string[] | undefined }
-    | Promise<{ [key: string]: string | string[] | undefined }>;
+  params: Promise<{ lang: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
 export default async function CheckoutPage({
+  params,
   searchParams,
 }: CheckoutPageProps) {
-  let resolvedSearchParams = searchParams;
+  // Next.js 15 requires awaiting both params and searchParams
+  const { lang: langParam } = await params;
+  const resolvedSearchParams = await searchParams;
 
-  if (
-    resolvedSearchParams &&
-    typeof resolvedSearchParams === "object" &&
-    typeof (resolvedSearchParams as unknown as Promise<unknown>).then ===
-      "function"
-  ) {
-    resolvedSearchParams = await (resolvedSearchParams as Promise<{
-      [key: string]: string | string[] | undefined;
-    }>);
-  }
+  const plan = resolvedSearchParams.plan as string | undefined;
+  const success = resolvedSearchParams.success === "true";
+  const sessionId = resolvedSearchParams.session_id as string | undefined;
 
-  const paramsObj = resolvedSearchParams as
-    | { [key: string]: string | string[] | undefined }
-    | undefined;
-
-  const langRaw = paramsObj?.lang;
-  const langCandidate =
-    typeof langRaw === "string"
-      ? langRaw
-      : Array.isArray(langRaw) && typeof langRaw[0] === "string"
-        ? langRaw[0]
-        : "en";
-
-  const lang = isValidLanguage(langCandidate) ? langCandidate : "en";
+  const lang = isValidLanguage(langParam) ? langParam : "en";
   const supabase = await createSupabaseSSRClient();
   const translations = await fetchBuilderTranslations(supabase, lang, "en");
 
-  return <CheckoutClient t={translations} lang={lang} />;
+  return (
+    <CheckoutClient
+      t={translations}
+      lang={lang}
+      initialPlan={plan}
+      isSuccess={success}
+      sessionId={sessionId}
+    />
+  );
 }

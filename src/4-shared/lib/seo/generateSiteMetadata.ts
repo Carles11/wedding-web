@@ -37,22 +37,25 @@ export function generateSiteMetadata({
     ? translations["sections.hero.description"] || ""
     : translations["meta.marketing_description"] || "";
 
-  // Compute languages/hreflang for SEO
-  // For tenants: use current domain for all language variants
-  // For marketing: use weddweb.com for all language variants
-  let languages: Record<string, string> = {};
+  // Canonical logic: prioritize custom domain for tenants
+  let canonicalHost = baseUrl.replace(/^https?:\/\//, "");
+  if (pageKind === "tenant" && site?.custom_domain) {
+    canonicalHost = site.custom_domain;
+  }
+  const canonicalUrl = `https://${canonicalHost}/${lang}`;
+
+  // Hreflang/alternates logic
   const availableLangs =
     Array.isArray(site?.languages) && site.languages.length > 0
       ? site.languages
       : [site?.default_lang || "en"];
+  let languages: Record<string, string> = {};
   for (const l of availableLangs) {
-    languages[l] =
-      pageKind === "tenant"
-        ? `${baseUrl}/${l}`
-        : `${baseUrl}/${l === "en" ? "" : l}`; // customize per root/lang
+    languages[l] = `https://${canonicalHost}/${l}`;
   }
+  // Always add x-default
+  languages["x-default"] = `https://${canonicalHost}/en`;
 
-  // Return structured metadata for Next.js
   return {
     title,
     description,
@@ -61,7 +64,7 @@ export function generateSiteMetadata({
       description,
       type: "website",
       locale: lang === "ca" ? "ca_ES" : lang === "es" ? "es_ES" : "en_US",
-      url: `${baseUrl}/${pageKind === "tenant" ? lang : ""}`,
+      url: canonicalUrl,
       siteName: title,
       images:
         pageKind === "marketing"
@@ -82,7 +85,7 @@ export function generateSiteMetadata({
             : [`${baseUrl}/assets/og/weddweb-OG.png`],
     },
     alternates: {
-      canonical: `${baseUrl}/${pageKind === "tenant" ? lang : ""}`,
+      canonical: canonicalUrl,
       languages,
     },
     robots: { index: true, follow: true },

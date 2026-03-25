@@ -1,40 +1,50 @@
 "use server";
 
-import { getCurrentUser } from "@/3-entities/user/api/getCurrentUser";
 import { createSupabaseSSRClient } from "@/4-shared/lib/supabase/server";
 
 /**
- * Mark the current user as having completed onboarding
- * Called after user selects a plan (free or premium)
+ * Mark the current user as having completed onboarding.
+ * Optimized for Next.js 15 Server Actions.
  */
 export async function completeOnboarding(): Promise<{
-  success?: boolean;
+  success: boolean;
   error?: string;
 }> {
-  const user = await getCurrentUser();
+  const supabase = await createSupabaseSSRClient();
 
-  if (!user) {
-    return { error: "Not authenticated" };
+  // 1. Get User from the existing client instance
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    console.error("[Onboarding] Auth verification failed:", authError);
+    return { success: false, error: "Not authenticated" };
   }
 
   try {
-    // Update user_profiles to mark onboarding as complete
-    const supabase = await createSupabaseSSRClient();
-    const { error } = await supabase
+    // 2. Update user_profiles
+    // We use .select() at the end to confirm the update actually happened
+    const { error: dbError } = await supabase
       .from("user_profiles")
-      .update({ onboarding_completed: true })
+      .update({
+        onboarding_completed: true,
+        // Pro-tip: Store the timestamp of when they finished onboarding
+        updated_at: new Date().toISOString(),
+      })
       .eq("id", user.id);
 
-    if (error) {
-      console.error("Error completing onboarding:", error);
-      // Don't throw - column might not exist yet, but we'll still allow redirect
-      return { success: true };
+    if (dbError) {
+      console.error("[Onboarding] Database update failed:", dbError);
+      // We return false here to prevent redirect loops if Middleware
+      // depends on this flag.
+      return { success: false, error: "Database update failed" };
     }
 
     return { success: true };
   } catch (err) {
-    console.error("Onboarding completion error:", err);
-    // Fail silently - let the redirect happen anyway
-    return { success: true };
+    console.error("[Onboarding] Unexpected system error:", err);
+    return { success: false, error: "An unexpected error occurred" };
   }
 }

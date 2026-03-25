@@ -12,12 +12,13 @@ type CheckoutSessionResult = { sessionId: string; url: string };
  */
 export function getPriceIdForPlan(planType: PlanType): string {
   const plan = PLAN_CATALOG[planType];
-  if (!plan) throw new Error(`Unknown plan type: ${planType}`);
+  if (!plan) throw new Error(`[Stripe] Unknown plan type: ${planType}`);
   return getStripePriceIdForPlan(planType);
 }
 
 /**
  * Resolve internal plan type from Stripe price ID.
+ * Useful for webhooks where you only have the price ID.
  */
 export function resolvePlanTypeFromStripePriceId(
   priceId: string | null | undefined,
@@ -32,7 +33,7 @@ export function resolvePlanTypeFromStripePriceId(
         return planType;
       }
     } catch {
-      // Ignore non-Stripe plans until they are explicitly mapped.
+      continue; // Skip plans not mapped in stripeConfig
     }
   }
 
@@ -40,18 +41,8 @@ export function resolvePlanTypeFromStripePriceId(
 }
 
 /**
- * Create a Stripe checkout session for the given user and plan.
- *
- * For FREE plan: returns null (no session needed)
- * For PREMIUM plan: creates and returns Stripe checkout session
- *
- * @param userId - Authenticated user ID
- * @param email - User's email for Stripe customer reference
- * @param planType - "free" or "premium"
- * @param baseUrl - Base URL for success/cancel redirects (e.g., https://weddweb.com)
- * @param language - Language code for redirect URLs
- *
- * @returns { sessionId: string; url: string } or null for free plan
+ * Create a Stripe checkout session.
+ * For "free" plan, it returns null as no Stripe interaction is needed.
  */
 export async function createCheckoutSession(
   userId: string,
@@ -60,19 +51,16 @@ export async function createCheckoutSession(
   baseUrl: string,
   language: string = "en",
 ): Promise<CheckoutSessionResult | null> {
-  // Free plan doesn't need Stripe
-  if (planType === "free") {
-    return null;
-  }
+  if (planType === "free") return null;
 
   const priceId = getPriceIdForPlan(planType);
 
-  // Create one-time checkout session for MVP premium purchases.
+  // We use customer_email so Stripe pre-fills the checkout page.
+  // We set customer_creation to 'always' to ensure we get a Customer ID in the webhook.
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ["card"],
     mode: "payment",
     customer_email: email,
-    customer_creation: "always",
     line_items: [
       {
         price: priceId,
@@ -83,12 +71,13 @@ export async function createCheckoutSession(
       userId,
       planType,
     },
+    // Adding the language to the success URL ensures the user returns to the right UI
     success_url: `${baseUrl}/${language}/builder/checkout?success=true&session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${baseUrl}/${language}/pricing`,
   });
 
   if (!session.id || !session.url) {
-    throw new Error("Failed to create Stripe checkout session");
+    throw new Error("[Stripe] Failed to create checkout session");
   }
 
   return {
@@ -98,49 +87,49 @@ export async function createCheckoutSession(
 }
 
 /**
- * Retrieve the status of a Stripe checkout session.
- * Used to verify payment after redirect from Stripe.
- *
- * @param sessionId - Stripe checkout session ID
- * @returns Session details including payment status and customer ID
+ * Retrieve session details to verify payment status.
  */
 export async function getCheckoutSessionStatus(sessionId: string) {
-  const session = await stripe.checkout.sessions.retrieve(sessionId);
+  try {
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
 
-  return {
-    id: session.id,
-    payment_status: session.payment_status, // "paid", "unpaid", "no_payment_required"
-    customer_id: session.customer as string | null,
-    customer_email: session.customer_email,
-    metadata: session.metadata,
-    amountTotal: session.amount_total,
-    currency: session.currency,
-    createdAt: new Date(session.created * 1000),
-  };
+    return {
+      id: session.id,
+      payment_status: session.payment_status, // "paid", "unpaid", "no_payment_required"
+      customer_id: session.customer as string | null,
+      customer_email: session.customer_email,
+      metadata: session.metadata,
+      amountTotal: session.amount_total,
+      currency: session.currency,
+      createdAt: new Date(session.created * 1000),
+    };
+  } catch (error) {
+    console.error("[Stripe] Session retrieval error:", error);
+    throw error;
+  }
 }
 
 /**
- * Get or create a Stripe customer for a user.
- * Useful for tracking subscriptions and payment history.
- *
- * @param email - User's email
- * @param metadata - Additional metadata (e.g., { userId: "..." })
+ * Find or create a Stripe customer.
  */
 export async function getOrCreateStripeCustomer(
   email: string,
   metadata?: Record<string, string>,
 ) {
-  // Search for existing customer by email
   const customers = await stripe.customers.list({
     email,
     limit: 1,
   });
 
   if (customers.data.length > 0) {
-    return customers.data[0];
+    const customer = customers.data[0];
+    // Sync metadata if provided
+    if (metadata) {
+      await stripe.customers.update(customer.id, { metadata });
+    }
+    return customer;
   }
 
-  // Create new customer
   return stripe.customers.create({
     email,
     metadata,
@@ -148,16 +137,12 @@ export async function getOrCreateStripeCustomer(
 }
 
 /**
- * Helper to verify a payment was successful before updating DB.
- * Returns true if session payment_status is "paid" or "no_payment_required".
+ * Boolean helper for payment success.
  */
 export function isPaymentSuccessful(
   paymentStatus: string,
   planType: PlanType,
 ): boolean {
-  // Free plans don't require payment
   if (planType === "free") return true;
-
-  // Premium requires payment
   return paymentStatus === "paid" || paymentStatus === "no_payment_required";
 }

@@ -1,11 +1,11 @@
-import { ReactNode } from "react";
 import {
   GOOGLE_SITE_VERIFICATION,
   ICONS,
   ORGANIZATION_JSONLD,
   THEME_COLOR,
   WEBSITE_JSONLD,
-} from "../../4-shared/config/seo/meta";
+} from "@/4-shared/config/seo/meta";
+import { ReactNode } from "react";
 import "../globals.css";
 
 export default async function LangLayout({

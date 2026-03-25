@@ -2,7 +2,6 @@
 
 import { resolvePlanTypeFromStripePriceId } from "@/4-shared/lib/stripe/stripeCheckout";
 import {
-  STRIPE_MODE,
   STRIPE_SECRET_KEY,
   STRIPE_WEBHOOK_SECRET,
 } from "@/4-shared/lib/stripe/stripeConfig";
@@ -13,17 +12,16 @@ import Stripe from "stripe";
 
 const stripe = new Stripe(STRIPE_SECRET_KEY);
 
+/**
+ * STRIPE WEBHOOK HANDLER
+ * Processes asynchronous events from Stripe (Payments, Subscriptions, etc.)
+ */
 export async function POST(req: NextRequest) {
   const webhookSecret = STRIPE_WEBHOOK_SECRET;
 
   if (!webhookSecret) {
-    console.error(
-      `[stripe-webhook] Webhook secret not configured for ${STRIPE_MODE} mode`,
-    );
-    return NextResponse.json(
-      { error: "Webhook secret not configured" },
-      { status: 500 },
-    );
+    console.error("[Stripe Webhook] Error: WEBHOOK_SECRET is not defined.");
+    return NextResponse.json({ error: "Configuration Error" }, { status: 500 });
   }
 
   try {
@@ -31,82 +29,83 @@ export async function POST(req: NextRequest) {
     const signature = req.headers.get("stripe-signature");
 
     if (!signature) {
-      return NextResponse.json(
-        { error: "Missing stripe-signature header" },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: "No signature" }, { status: 400 });
     }
 
+    // 1. Verify the event came from Stripe
     let event: Stripe.Event;
     try {
       event = stripe.webhooks.constructEvent(rawBody, signature, webhookSecret);
-    } catch (error) {
-      console.error("[stripe-webhook] Signature verification failed:", error);
-      return NextResponse.json(
-        { error: "Signature verification failed" },
-        { status: 400 },
-      );
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Unknown error";
+      console.error(`[Stripe Webhook] Signature verification failed: ${msg}`);
+      return NextResponse.json({ error: "Invalid Signature" }, { status: 400 });
     }
 
-    if (event.type === "checkout.session.completed") {
-      const session = event.data.object as Stripe.Checkout.Session;
-      await handleCheckoutSessionCompleted(session);
+    // 2. Route the event
+    switch (event.type) {
+      case "checkout.session.completed":
+        const session = event.data.object as Stripe.Checkout.Session;
+        await handleCheckoutSessionCompleted(session);
+        break;
+
+      // Optional: Add more cases here as you scale (e.g., invoice.payment_failed)
+      default:
+        console.log(`[Stripe Webhook] Unhandled event type: ${event.type}`);
     }
 
     return NextResponse.json({ received: true }, { status: 200 });
   } catch (error) {
-    console.error("[stripe-webhook] Unexpected error:", error);
+    console.error("[Stripe Webhook] Critical Error:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "Internal Server Error" },
       { status: 500 },
     );
   }
 }
 
+/**
+ * Handle successful checkout completion
+ */
 async function handleCheckoutSessionCompleted(
   session: Stripe.Checkout.Session,
 ) {
   const userId = session.metadata?.userId;
+
   if (!userId) {
-    console.warn(
-      "[stripe-webhook] Missing userId in session metadata",
+    console.error(
+      "[Stripe Webhook] Missing userId in session metadata:",
       session.id,
     );
     return;
   }
 
+  // Verification check: Only process if paid
   if (
     session.payment_status !== "paid" &&
     session.payment_status !== "no_payment_required"
   ) {
+    console.warn("[Stripe Webhook] Session not paid:", session.id);
     return;
   }
 
+  // Fetch line items to get the Price ID and amount
   const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
   const firstItem = lineItems.data[0];
-
   const stripePriceId = firstItem?.price?.id ?? null;
+
+  // Determine Plan Type
   const planType: PlanType =
     (session.metadata?.planType as PlanType | undefined) ??
     resolvePlanTypeFromStripePriceId(stripePriceId) ??
     "premium";
 
-  const { data: existingRows, error: selectError } = await supabaseAdmin
-    .from("subscriptions")
-    .select("id")
-    .eq("user_id", userId)
-    .order("updated_at", { ascending: false })
-    .limit(1);
-
-  if (selectError) {
-    throw selectError;
-  }
-
-  const payload = {
+  // Construct the payload for our DB
+  const subscriptionPayload = {
     user_id: userId,
     plan_type: planType,
     status: "active",
-    price_amount: (firstItem?.price?.unit_amount ?? 0) / 100 || 0,
+    price_amount: (firstItem?.price?.unit_amount ?? 0) / 100,
     currency: (
       firstItem?.price?.currency ??
       session.currency ??
@@ -115,26 +114,29 @@ async function handleCheckoutSessionCompleted(
     started_at: new Date().toISOString(),
     stripe_customer_id:
       typeof session.customer === "string" ? session.customer : null,
-    stripe_subscription_id: null,
+    stripe_subscription_id: null, // null for 'payment' mode (one-time)
     stripe_price_id: stripePriceId,
     updated_at: new Date().toISOString(),
   };
 
-  const existing = existingRows?.[0];
-  if (existing) {
-    const { error } = await supabaseAdmin
-      .from("subscriptions")
-      .update(payload)
-      .eq("id", existing.id);
-    if (error) throw error;
-    return;
-  }
-
-  const { error: insertError } = await supabaseAdmin
+  /**
+   * UPSERT LOGIC
+   * We use .upsert() targeting 'user_id' to ensure a user only ever has
+   * one active subscription record in the table.
+   */
+  const { error } = await supabaseAdmin
     .from("subscriptions")
-    .insert([payload]);
+    .upsert(subscriptionPayload, {
+      onConflict: "user_id",
+      ignoreDuplicates: false,
+    });
 
-  if (insertError) {
-    throw insertError;
+  if (error) {
+    console.error("[Stripe Webhook] DB Update Error:", error);
+    throw error; // Re-throwing sends a 500 to Stripe, so they retry later
   }
+
+  console.log(
+    `[Stripe Webhook] Successfully activated ${planType} for user ${userId}`,
+  );
 }

@@ -1,15 +1,10 @@
 export { default as CTASection } from "./CTASection";
-export type { CTASectionProps } from "./CTASection";
 export { default as FeaturesGrid } from "./FeaturesGrid";
-export type { Feature, FeaturesGridProps } from "./FeaturesGrid";
 export { default } from "./HeroMarketing";
-export type { HeroMarketingProps } from "./HeroMarketing";
 export { default as MarketingFloatingLanguageSelector } from "./MarketingFloatingLanguageSelector";
 export { default as PricingCTATableAdapter } from "./PricingCTATableAdapter";
 export type { PricingCTATableAdapterProps } from "./PricingCTATableAdapter";
 export { default as PricingPageShell } from "./PricingPageShell";
 export type { PricingPageShellProps } from "./PricingPageShell";
 export { default as PricingSection } from "./PricingSection";
-export type { PricingSectionProps } from "./PricingSection";
 export { default as TestimonialsSection } from "./TestimonialsSection";
-export type { ExampleSite } from "./TestimonialsSection";

@@ -5,6 +5,10 @@ import { fetchGlobalTranslations } from "@/4-shared/lib/globalTranslations";
 import { Heading } from "@/4-shared/ui/commons/typography/Heading";
 import type { Metadata } from "next";
 
+/**
+ * Login Page Metadata
+ * SHIELDED: Explicitly tells bots NOT to index this page.
+ */
 export async function generateMetadata({
   params,
 }: {
@@ -13,18 +17,23 @@ export async function generateMetadata({
   const realParams = await params;
   const lang = isValidLanguage(realParams?.lang) ? realParams.lang : "en";
   const seo = getSEOMetadata(lang, "marketing", "auth-login");
+
   return {
     title: seo.title,
     description: seo.description,
+    // THE SHIELD: Preventing "Thin Content" indexing
+    robots: {
+      index: false,
+      follow: false,
+      nocache: true,
+    },
     openGraph: {
       title: seo.ogTitle,
       description: seo.ogDescription,
-      images: seo.ogImage ? [seo.ogImage] : [],
+      images: seo.ogImage
+        ? [seo.ogImage]
+        : [`https://weddweb.com/assets/og/weddweb-OG.png`],
     },
-    twitter: {
-      card: seo.twitterCard || "summary_large_image",
-    },
-    robots: { index: true, follow: true },
   };
 }
 
@@ -36,15 +45,15 @@ export default async function LoginPage({
   const realParams = await params;
   const lang = isValidLanguage(realParams?.lang) ? realParams.lang : "en";
   const translations = await fetchGlobalTranslations(lang, "en");
+
   return (
-    <main className="min-h-screen flex items-center justify-center ">
+    <main className="min-h-screen flex items-center justify-center">
       <div className="w-full max-w-md">
         <div className="text-center mt-8">
           <Heading as="h1">
             {translations["auth.login.welcome_back"] ?? "Welcome Back"}
           </Heading>
         </div>
-        {/* Removed duplicate LoginForm without lang prop */}
         <LoginForm translations={translations} lang={lang} />
       </div>
     </main>

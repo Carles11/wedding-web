@@ -33,6 +33,14 @@ export function faqCategories(t: TranslationDictionary): FAQCategory[] {
         },
         {
           q:
+            t["marketing.faq.general.site_lifetime"] ??
+            "How long will my site remain online?",
+          a:
+            t["marketing.faq.general.site_lifetime.answer"] ??
+            "Free websites (with subdomains) and premium websites with a custom domain will remain online as long as weddweb.com exists.",
+        },
+        {
+          q:
             t["marketing.faq.general.features"] ??
             "What features does WeddWeb offer?",
           a:
@@ -166,22 +174,22 @@ export function faqCategories(t: TranslationDictionary): FAQCategory[] {
             t["marketing.faq.services.digital_invites.answer"] ??
             "No, we do not offer this feature yet.",
         },
-        {
-          q:
-            t["marketing.faq.services.book_vendor"] ??
-            "Can I book a photographer or vendor through WeddWeb?",
-          a:
-            t["marketing.faq.services.book_vendor.answer"] ??
-            "WeddWeb does not directly book vendors, and does not offer vendor recommendation features.",
-        },
-        {
-          q:
-            t["marketing.faq.services.add_vendor"] ??
-            "Can I add a videomaker or other service?",
-          a:
-            t["marketing.faq.services.add_vendor.answer"] ??
-            "Currently, you cannot add vendor or service info for your guests to see.",
-        },
+        // {
+        //   q:
+        //     t["marketing.faq.services.book_vendor"] ??
+        //     "Can I book a photographer or vendor through WeddWeb?",
+        //   a:
+        //     t["marketing.faq.services.book_vendor.answer"] ??
+        //     "WeddWeb does not directly book vendors, and does not offer vendor recommendation features.",
+        // },
+        // {
+        //   q:
+        //     t["marketing.faq.services.add_vendor"] ??
+        //     "Can I add a videomaker or other service?",
+        //   a:
+        //     t["marketing.faq.services.add_vendor.answer"] ??
+        //     "Currently, you cannot add vendor or service info for your guests to see.",
+        // },
       ],
     },
     {

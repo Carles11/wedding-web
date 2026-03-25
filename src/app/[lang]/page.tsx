@@ -1,4 +1,3 @@
-import ClientLanguageAutoRedirect from "@/0-pages/(marketing)/LanguageAutoRedirect";
 import MarketingPageComponent from "@/0-pages/(marketing)/MarketingPageComponent";
 import TenantPageComponent from "@/0-pages/(tenant)/TenantPageComponent";
 import { fetchMarketingTranslations } from "@/4-shared/api/marketing";
@@ -17,13 +16,13 @@ export async function generateMetadata({
   params?: Promise<{ lang?: string }>;
 }): Promise<Metadata> {
   const resolvedParams = params ? await params : { lang: "en" };
-  const lang = resolvedParams.lang ?? "en";
+  const lang = (resolvedParams.lang as SupportedLanguage) ?? "en";
 
   const host = ((await headers()).get("host") ?? "").toLowerCase().trim();
   const site = await getSiteByDomain(host);
 
   if (site) {
-    // Tenant page metadata
+    // --- TENANT METADATA ---
     const translations = await getMergedTranslations(site.id, lang, "en");
     const baseUrl = `https://${host}`;
     const meta = generateSiteMetadata({
@@ -33,8 +32,8 @@ export async function generateMetadata({
       baseUrl,
       pageKind: "tenant",
     });
+
     if (site.seo_enabled === false) {
-      // Override robots for noindex
       return {
         ...meta,
         robots: { index: false, follow: false },
@@ -44,18 +43,43 @@ export async function generateMetadata({
     }
     return meta;
   } else {
-    // Marketing homepage SEO metadata from config
+    // --- MARKETING METADATA ---
     const seo = getSEOMetadata(lang, "marketing", "home");
+    const baseUrl = "https://weddweb.com";
+
+    // Build hreflang alternates for Marketing
+    const languages: Record<string, string> = {};
+    SUPPORTED_LANGUAGES.forEach((l) => {
+      languages[l] = `${baseUrl}/${l}`;
+    });
+
     return {
       title: seo.title,
       description: seo.description,
+      alternates: {
+        canonical: `${baseUrl}/${lang}`,
+        languages: {
+          ...languages,
+          "x-default": `${baseUrl}/en`,
+        },
+      },
       openGraph: {
         title: seo.ogTitle,
         description: seo.ogDescription,
-        images: seo.ogImage ? [seo.ogImage] : [],
+        url: `${baseUrl}/${lang}`,
+        siteName: "WeddWeb",
+        images: seo.ogImage
+          ? [seo.ogImage]
+          : [`${baseUrl}/assets/og/weddweb-OG.png`],
+        type: "website",
       },
       twitter: {
-        card: seo.twitterCard || "summary_large_image",
+        card: "summary_large_image",
+        title: seo.ogTitle,
+        description: seo.ogDescription,
+        images: seo.ogImage
+          ? [seo.ogImage]
+          : [`${baseUrl}/assets/og/weddweb-OG.png`],
       },
       robots: { index: true, follow: true },
     };
@@ -77,14 +101,14 @@ export default async function Page({
   const site = await getSiteByDomain(host);
 
   if (site) {
-    // Render tenant page
+    // Render tenant wedding page
     return <TenantPageComponent params={{ lang }} />;
   } else {
-    // Render marketing page
+    // Render marketing landing page
     const translations = await fetchMarketingTranslations(lang, "en");
     return (
       <>
-        <ClientLanguageAutoRedirect />
+        {/* ClientLanguageAutoRedirect removed: Redundant with Server-side redirection */}
         <MarketingPageComponent
           initialLang={lang}
           translations={translations}

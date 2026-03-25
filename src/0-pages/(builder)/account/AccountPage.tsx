@@ -242,8 +242,7 @@ export default function AccountPage({ account, translations }: Props) {
                 durationMs={350}
                 ariaLabel={"Back to dashboard"}
               >
-                {translations["builder.account.page.onboarded"] ||
-                  "Back to dashboard"}
+                {translations["builder.actions.back"] || "Back to dashboard"}
               </UnderlinedLink>
 
               {account.onboarding_completed && (

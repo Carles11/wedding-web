@@ -1,6 +1,5 @@
 "use client";
 
-// import { completeOnboarding } from "@/2-features/auth/api/completeOnboarding";
 import PricingTable from "@/2-features/builder/billing/ui/pricing/PricingTable";
 import type { PlanType } from "@/4-shared/types";
 import { useRouter } from "next/navigation";
@@ -16,36 +15,39 @@ export default function OnboardingClient({ translations, lang }: Props) {
   const [isLoading, setIsLoading] = useState(false);
 
   async function handlePlanSelect(plan: PlanType) {
+    if (isLoading) return;
     setIsLoading(true);
 
     try {
-      console.log("[Onboarding] Plan selected:", plan);
       if (plan === "free") {
-        console.log("[Onboarding] Calling /api/onboarding/complete...");
         const res = await fetch("/api/onboarding/complete", { method: "POST" });
-        console.log("[Onboarding] API response status:", res.status);
         const data = await res.json();
-        console.log("[Onboarding] API response data:", data);
+
         if (!data.success) {
-          console.error(
-            "[Onboarding] Failed to complete onboarding:",
-            data.error,
-          );
           throw new Error(data.error || "Failed to complete onboarding");
         }
-        console.log(
-          "[Onboarding] Onboarding marked complete. Redirecting to /" +
-            lang +
-            "/builder",
-        );
-        window.location.href = `/${lang}/builder`;
+
+        /**
+         * 1. Refresh the current route to sync Server Component state
+         * (e.g., updating the 'onboarded' status in layouts/middleware)
+         */
+        router.refresh();
+
+        /**
+         * 2. Use .replace() so the onboarding page is removed from
+         * the browser history. Users can't "back" into onboarding.
+         */
+        router.replace(`/${lang}/builder`);
       } else {
-        console.log("[Onboarding] Redirecting to checkout for plan:", plan);
+        // Premium flows go to checkout
         router.push(`/${lang}/builder/checkout?plan=${plan}`);
       }
     } catch (err) {
-      // Optionally, show error notification here
-      console.error("[Onboarding] Error in handlePlanSelect:", err);
+      console.error("[Onboarding] Error:", err);
+      alert(
+        translations["error.onboarding_failed"] ??
+          "Something went wrong. Please try again.",
+      );
       setIsLoading(false);
     }
   }
@@ -57,11 +59,11 @@ export default function OnboardingClient({ translations, lang }: Props) {
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900">
             {translations["onboarding.welcome"] ??
-              "Welcomes to Your Wedding Website"}
+              "Welcome to Your Wedding Website"}
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
             {translations["onboarding.subtitle"] ??
-              "Choose a plan that works for you. Start free and upgrade anytime as you add more features."}
+              "Choose a plan that works for you. Start free and upgrade anytime."}
           </p>
         </div>
 
@@ -72,46 +74,34 @@ export default function OnboardingClient({ translations, lang }: Props) {
             type="private"
             lang={lang}
             onSelect={handlePlanSelect}
+            isLoading={isLoading}
+            // Logic note: Ensure PricingTable internal buttons are
+            // also disabled if you pass 'isLoading' down.
           />
         </div>
 
-        {/* Free plan info */}
+        {/* Free plan info box */}
         <div className="max-w-3xl mx-auto bg-white rounded-lg border border-gray-200 p-8 shadow-sm">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">
             {translations["onboarding.free_plan_note"] ??
               "Ready to start free?"}
           </h3>
           <ul className="space-y-3 text-gray-700">
-            <li className="flex items-start gap-3">
-              <span className="text-blue-600 font-bold">✓</span>
-              <span>
-                {translations["onboarding.free_feature_1"] ??
-                  "Create your beautiful wedding website with your custom subdomain"}
-              </span>
-            </li>
-            <li className="flex items-start gap-3">
-              <span className="text-blue-600 font-bold">✓</span>
-              <span>
-                {translations["onboarding.free_feature_2"] ??
-                  "Upgrade to premium anytime to unlock more features"}
-              </span>
-            </li>
-            <li className="flex items-start gap-3">
-              <span className="text-blue-600 font-bold">✓</span>
-              <span>
-                {translations["onboarding.free_feature_3"] ??
-                  "Add upgrade prompts at key moments when you need them"}
-              </span>
-            </li>
+            {[1, 2, 3].map((num) => (
+              <li key={num} className="flex items-start gap-3">
+                <span className="text-blue-600 font-bold">✓</span>
+                <span>{translations[`onboarding.free_feature_${num}`]}</span>
+              </li>
+            ))}
           </ul>
         </div>
 
-        {/* Skip button - only for free plan */}
+        {/* Action Footer */}
         <div className="text-center mt-12">
           <button
             onClick={() => handlePlanSelect("free")}
             disabled={isLoading}
-            className="cursor-pointer text-blue-600 hover:text-blue-700 font-medium transition disabled:opacity-50"
+            className="cursor-pointer text-blue-600 hover:text-blue-700 font-medium transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoading
               ? (translations["loading"] ?? "Loading...")

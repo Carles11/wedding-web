@@ -21,89 +21,97 @@ export default function AccountDangerZone({
   deleteAcknowledge,
   setDeleteAcknowledge,
 }: AccountDangerZoneProps) {
+  const isConfirmDisabled =
+    saving || deleteConfirm !== account.email || !deleteAcknowledge;
+
   return (
-    <div
-      className="rounded-xl border p-6 space-y-4 transition-all duration-200"
-      style={{
-        borderColor: "var(--builder-color-danger-border)",
-        background:
-          "linear-gradient(to right, var(--builder-color-danger-hover-bg), transparent)",
-      }}
-    >
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-full bg-(--builder-color-danger)/10 flex items-center justify-center">
-          <svg
-            className="w-5 h-5 text-(--builder-color-danger)"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-            />
-          </svg>
-        </div>
-        <div>
-          <h3 className="text-lg font-semibold text-(--builder-color-danger)">
-            {translations["builder.account.page.danger_zone_title"] ||
-              "Delete Account"}
-          </h3>
-          <p className="text-sm text-(--builder-color-danger) mt-1 opacity-80">
-            {translations["builder.account.page.delete_warning"] ||
-              "Once you delete your account, there is no going back. Please be certain."}
-          </p>
+    <div className="rounded-xl border border-red-300 bg-white overflow-hidden shadow-sm transition-all duration-200">
+      {/* Top Header - The "Alert" feel */}
+      <div className="p-6 border-b border-gray-50 bg-gray-50/30">
+        <div className="flex items-center gap-4">
+          <div className="shrink-0 w-12 h-12 rounded-lg bg-red-50 flex items-center justify-center border border-red-100">
+            <svg
+              className="w-6 h-6 text-(--builder-color-danger)"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={1.5}
+                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+              />
+            </svg>
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900">
+              {translations["builder.account.page.danger_zone_title"] ||
+                "Delete Account"}
+            </h3>
+            <p className="text-sm text-gray-500 mt-1 max-w-md">
+              {translations["builder.account.page.delete_warning"] ||
+                "Once you delete your account, there is no going back. All your data will be permanently removed."}
+            </p>
+          </div>
         </div>
       </div>
 
-      <div className="pl-13 space-y-2">
-        <label className="block text-sm font-medium text-(--builder-color-danger) mb-2">
-          {translations["builder.account.page.delete_confirm_label"] ||
-            "Type your email to confirm deletion"}
-        </label>
-        <div className="flex gap-3 flex-wrap sm:flex-nowrap mb-2">
+      {/* Confirmation Area */}
+      <div className="p-6 space-y-5">
+        <div className="max-w-md">
+          <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">
+            {translations["builder.account.page.delete_confirm_label"] ||
+              "Confirm by typing your email"}
+          </label>
           <input
-            className="flex-1 rounded-lg border px-4 py-2.5 text-sm bg-white/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-red-200 transition-all duration-200"
-            style={{ borderColor: "var(--builder-color-danger-border)" }}
+            className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-red-300 transition-all duration-200"
             value={deleteConfirm}
             onChange={(e) => setDeleteConfirm(e.target.value)}
             type="email"
             placeholder={account.email}
           />
         </div>
-        <div className="flex items-center gap-2 mb-2">
-          <input
-            id="delete-acknowledge"
-            type="checkbox"
-            checked={deleteAcknowledge}
-            onChange={(e) => setDeleteAcknowledge(e.target.checked)}
-            className="accent-red-600"
-            disabled={saving}
-          />
+
+        <div className="flex items-start gap-3">
+          <div className="flex items-center h-5">
+            <input
+              id="delete-acknowledge"
+              type="checkbox"
+              checked={deleteAcknowledge}
+              onChange={(e) => setDeleteAcknowledge(e.target.checked)}
+              className="w-4 h-4 rounded border-gray-300 text-(--builder-color-danger) focus:ring-(--builder-color-danger) cursor-pointer"
+              disabled={saving}
+            />
+          </div>
           <label
             htmlFor="delete-acknowledge"
-            className="text-sm text-(--builder-color-danger)"
+            className="text-sm text-gray-600 cursor-pointer leading-tight"
           >
             {translations["builder.account.page.delete_acknowledge"] ||
               "I understand this action is permanent and cannot be undone."}
           </label>
         </div>
-        <BuilderButton
-          type="button"
-          tone="danger"
-          onClick={handleDelete}
-          disabled={
-            saving || deleteConfirm !== account.email || !deleteAcknowledge
-          }
-          className="px-6! py-2.5! whitespace-nowrap"
-        >
-          {saving
-            ? translations["builder.account.page.deleting"] || "Deleting..."
-            : translations["builder.account.page.delete_btn"] ||
-              "Delete account"}
-        </BuilderButton>
+
+        <div className="pt-2">
+          <BuilderButton
+            type="button"
+            tone="danger"
+            onClick={handleDelete}
+            disabled={isConfirmDisabled}
+            className={`px-8 py-3 rounded-lg font-medium transition-all duration-200 ${
+              isConfirmDisabled
+                ? "grayscale opacity-50"
+                : "shadow-lg shadow-red-100 hover:shadow-red-200"
+            }`}
+          >
+            {saving
+              ? translations["builder.account.page.deleting"] ||
+                "Deleting Account..."
+              : translations["builder.account.page.delete_btn"] ||
+                "Permanently Delete Account"}
+          </BuilderButton>
+        </div>
       </div>
     </div>
   );

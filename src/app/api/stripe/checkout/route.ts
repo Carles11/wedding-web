@@ -4,23 +4,26 @@ import { createCheckoutSession } from "@/4-shared/lib/stripe/stripeCheckout";
 import type { PlanType } from "@/4-shared/types";
 import { NextRequest, NextResponse } from "next/server";
 
+/**
+ * Handles Stripe Checkout session creation or Free plan redirection.
+ */
 export async function POST(req: NextRequest) {
   try {
+    // 1. Auth Validation
     const user = await getCurrentUser();
-    if (!user) {
+    if (!user || !user.email) {
       return NextResponse.json(
-        { success: false, message: "Unauthorized" },
-        { status: 401 },
+        {
+          success: false,
+          message: !user
+            ? "Unauthorized"
+            : "Missing user email for Stripe checkout",
+        },
+        { status: !user ? 401 : 400 },
       );
     }
 
-    if (!user.email) {
-      return NextResponse.json(
-        { success: false, message: "Missing user email for Stripe checkout" },
-        { status: 400 },
-      );
-    }
-
+    // 2. Request Validation
     const body = await req.json();
     const { planType, language = "en" } = body as {
       planType?: string;
@@ -34,38 +37,45 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const protocol = req.headers.get("x-forwarded-proto") || "http";
+    // 3. Environment & URL Setup
+    // Ensure https on production, fallback to host header
+    const protocol =
+      process.env.NODE_HOST === "production"
+        ? "https"
+        : req.headers.get("x-forwarded-proto") || "http";
     const host = req.headers.get("host") || "localhost:3000";
     const baseUrl = `${protocol}://${host}`;
 
+    // 4. Subscription State Check
     const subscription = await getCurrentUserSubscription(user.id);
+    const isCurrentlyPaid =
+      !!subscription &&
+      subscription.plan_type !== "free" &&
+      ["active", "trialing"].includes(subscription.status ?? "");
 
+    // 5. Logic: Handle "Free" Plan Request
     if (planType === "free") {
-      const hasActivePaidPlan =
-        !!subscription &&
-        subscription.plan_type !== "free" &&
-        ["active", "trialing"].includes(subscription.status ?? "");
-
-      if (hasActivePaidPlan) {
+      if (isCurrentlyPaid) {
         return NextResponse.json(
           {
             success: false,
             code: "DOWNGRADE_NOT_AVAILABLE",
             message:
-              "Downgrading from your current paid plan to Free is not available yet. Your current plan remains active.",
+              "Downgrading from your current paid plan to Free is not available yet.",
           },
           { status: 409 },
         );
       }
 
-      // Use language-prefixed routing for redirect
       return NextResponse.json({
         success: true,
         planType: "free",
+        // Consistent with your localized routing
         redirectTo: `/${language}/builder`,
       });
     }
 
+    // 6. Logic: Handle "Premium" Plan Request
     const alreadyPremium =
       subscription?.plan_type === "premium" &&
       ["active", "trialing"].includes(subscription.status ?? "");
@@ -81,6 +91,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // 7. Create Stripe Session
     const result = await createCheckoutSession(
       user.id,
       user.email,

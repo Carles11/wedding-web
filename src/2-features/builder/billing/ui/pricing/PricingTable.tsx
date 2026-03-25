@@ -1,3 +1,5 @@
+"use client";
+
 import { PLAN_CATALOG } from "@/4-shared/config/plans/planCatalog";
 import { getLocalizedPlanFeatureTitles } from "@/4-shared/helpers/billing/entitlements";
 import type { PlanType } from "@/4-shared/types";
@@ -21,11 +23,13 @@ export default function PricingTable({
   type,
   onSelect,
   lang = "en",
+  isLoading = false,
 }: {
   translations: Record<string, string>;
   type: "private" | "agency";
   onSelect?: (plan: PlanType) => void;
   lang?: string;
+  isLoading?: boolean;
 }) {
   const planKeys = Object.keys(PLAN_CATALOG) as PlanType[];
 
@@ -39,6 +43,7 @@ export default function PricingTable({
         const def = PLAN_CATALOG[plan];
         const highlight = plan === "premium";
 
+        // PRICE FORMATTING
         const formattedPrice =
           def.price === -1
             ? null
@@ -47,6 +52,7 @@ export default function PricingTable({
                 currency: def.currency,
               }).format(def.price);
 
+        // TRANSLATIONS
         const planName = tr(
           translations,
           `pricing.plan.${plan}.name`,
@@ -67,7 +73,7 @@ export default function PricingTable({
             className={`
             relative flex flex-col rounded-2xl border bg-white
             p-8 shadow-sm transition
-            hover:shadow-xl hover:-translate-y-1
+            ${isLoading ? "opacity-80 pointer-events-none" : "hover:shadow-xl hover:-translate-y-1"}
             ${highlight ? "border-blue-500 shadow-lg" : "border-gray-200"}
             `}
           >
@@ -87,14 +93,11 @@ export default function PricingTable({
               {formattedPrice ? (
                 <>
                   <p className="text-4xl font-bold">{formattedPrice}</p>
-
-                  {def.billing !== "one-time" && (
-                    <p className="text-sm text-gray-500">/{billingLabel}</p>
-                  )}
-
-                  {def.billing === "one-time" && (
-                    <p className="text-sm text-gray-500">{billingLabel}</p>
-                  )}
+                  <p className="text-sm text-gray-500">
+                    {def.billing === "one-time"
+                      ? billingLabel
+                      : `/${billingLabel}`}
+                  </p>
                 </>
               ) : (
                 <p className="text-2xl font-semibold">
@@ -115,7 +118,7 @@ export default function PricingTable({
               ))}
             </ul>
 
-            {/* LIMITS */}
+            {/* LIMITS (If any) */}
             {def.limits && (
               <div className="mt-auto border-t pt-4 text-sm">
                 <div className="space-y-2">
@@ -137,13 +140,23 @@ export default function PricingTable({
               </div>
             )}
 
-            {/* CTA */}
+            {/* CTA BUTTON */}
             {onSelect && (
               <button
-                className="cursor-pointer mt-8 w-full rounded-lg bg-blue-600 py-3 text-sm font-semibold text-white hover:bg-blue-700 transition"
+                disabled={isLoading}
+                className={`
+                  mt-8 w-full rounded-lg py-3 text-sm font-semibold text-white transition
+                  ${
+                    isLoading
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-blue-600 hover:bg-blue-700 cursor-pointer"
+                  }
+                `}
                 onClick={() => onSelect(plan)}
               >
-                {translations["pricing.cta"] ?? "Select"}
+                {isLoading
+                  ? (translations["loading"] ?? "Processing...")
+                  : (translations["pricing.cta"] ?? "Select")}
               </button>
             )}
           </div>

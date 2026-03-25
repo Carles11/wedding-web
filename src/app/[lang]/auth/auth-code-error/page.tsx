@@ -4,6 +4,10 @@ import { Heading } from "@/4-shared/ui/commons/typography/Heading";
 import type { Metadata } from "next";
 import Link from "next/link";
 
+/**
+ * Auth Error Page Metadata
+ * SHIELDED: Explicitly prevents indexing of error/state-specific pages.
+ */
 export async function generateMetadata({
   params,
 }: {
@@ -12,9 +16,16 @@ export async function generateMetadata({
   const realParams = await params;
   const lang = isValidLanguage(realParams?.lang) ? realParams.lang : "en";
   const translations = await fetchGlobalTranslations(lang, "en");
+
   return {
     title:
       translations["auth.error.page_title"] ?? "Authentication Error | WeddWeb",
+    // THE SHIELD: Ensuring error states never appear in search results
+    robots: {
+      index: false,
+      follow: false,
+      nocache: true,
+    },
   };
 }
 
@@ -26,14 +37,14 @@ export default async function AuthErrorPage({
   const realParams = await params;
   const lang = isValidLanguage(realParams?.lang) ? realParams.lang : "en";
   const translations = await fetchGlobalTranslations(lang, "en");
-  // Language-prefixed routing only; langQuery is not used.
+
   return (
     <main className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-md">
         <div className="text-center">
           <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
             <svg
-              className="h-6 w-6 text-[var(--builder-color-danger)]"
+              className="h-6 w-6 text-(--builder-color-danger)"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -46,17 +57,19 @@ export default async function AuthErrorPage({
               />
             </svg>
           </div>
+
           <Heading as="h2">
-            {translations["auth.error.title"] ?? "Authentication Error"}{" "}
+            {translations["auth.error.title"] ?? "Authentication Error"}
           </Heading>
 
-          <p className="text-gray-600 mb-6">
+          <p className="text-gray-600 mb-6 mt-2">
             {translations["auth.error.message"] ??
-              "We couldn&apos;t complete your authentication. This could be due to an expired link or invalid code."}
+              "We couldn't complete your authentication. This could be due to an expired link or invalid code."}
           </p>
+
           <Link
             href={`/${lang}/auth/login`}
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
           >
             {translations["auth.common.return_to_login"] ?? "Return to Login"}
           </Link>
