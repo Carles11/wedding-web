@@ -1,4 +1,5 @@
 import MarketingPageComponent from "@/0-pages/(marketing)/MarketingPageComponent";
+import ExpiredSiteNotice from "@/0-pages/(tenant)/ExpiredSiteNotice";
 import TenantPageComponent from "@/0-pages/(tenant)/TenantPageComponent";
 import { fetchMarketingTranslations } from "@/4-shared/api/marketing";
 import { SUPPORTED_LANGUAGES, SupportedLanguage } from "@/4-shared/config/i18n";
@@ -7,6 +8,7 @@ import { getSiteByDomain } from "@/4-shared/lib/getSiteByDomain";
 import { getMergedTranslations } from "@/4-shared/lib/i18n";
 import { generateSiteMetadata } from "@/4-shared/lib/seo/generateSiteMetadata";
 import { Footer } from "@/4-shared/ui/commons/footer/Footer";
+import { shouldShowFooter } from "@/4-shared/utils/shouldShowFooter";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 
@@ -20,6 +22,15 @@ export async function generateMetadata({
 
   const host = ((await headers()).get("host") ?? "").toLowerCase().trim();
   const site = await getSiteByDomain(host);
+
+  // 1. Handle Expired Site Metadata (No-index)
+  if (site?.is_expired && site.plan_type === "free") {
+    return {
+      title: "Site Expired | WeddWeb",
+      description: "The hosting period for this wedding website has concluded.",
+      robots: { index: false, follow: false },
+    };
+  }
 
   if (site) {
     // --- TENANT METADATA ---
@@ -48,7 +59,6 @@ export async function generateMetadata({
     const baseUrl = "https://weddweb.com";
     const ogImage = seo.ogImage || `${baseUrl}/assets/og/weddweb-OG.png`;
 
-    // Build hreflang alternates dynamically
     const languages: Record<string, string> = {};
     SUPPORTED_LANGUAGES.forEach((l) => {
       languages[l] = `${baseUrl}/${l}`;
@@ -69,7 +79,6 @@ export async function generateMetadata({
         description: seo.ogDescription || seo.description,
         url: `${baseUrl}/${lang}`,
         siteName: "WeddWeb",
-        // CLEAN DYNAMIC LOCALE: Works for ca_CA, es_ES, fr_FR, etc.
         locale: `${lang}_${lang.toUpperCase()}`,
         images: [ogImage],
         type: "website",
@@ -100,14 +109,26 @@ export default async function Page({
   const site = await getSiteByDomain(host);
 
   if (site) {
-    // Render tenant wedding page
-    return <TenantPageComponent params={{ lang }} />;
+    const translations = await getMergedTranslations(site.id, lang, "en");
+
+    // Render Expired Notice UI
+    if (site.is_expired && site.plan_type === "free") {
+      return <ExpiredSiteNotice translations={translations} lang={lang} />;
+    }
+    const showFooter = await shouldShowFooter({ host, routeKind: "tenant" });
+
+    // Render normal tenant wedding page
+    return (
+      <>
+        <TenantPageComponent params={{ lang }} />
+        {showFooter && <Footer lang={lang} translations={translations} />}
+      </>
+    );
   } else {
     // Render marketing landing page
     const translations = await fetchMarketingTranslations(lang, "en");
     return (
       <>
-        {/* ClientLanguageAutoRedirect removed: Redundant with Server-side redirection */}
         <MarketingPageComponent
           initialLang={lang}
           translations={translations}

@@ -43,7 +43,7 @@ const FREE_PLAN_FEATURES: readonly PlanFeatureCatalogItem[] = [
       "marketing.features.free_plan_feature_5_description",
   },
   {
-    title: "Subdomain live available until 2 months after wedding day",
+    title: "Subdomain availability",
     titleTranslationKeys: ["pricing.plan.free.feature_9"],
     marketingDescription:
       "Your subdomain stays online for 2 months after your wedding day",

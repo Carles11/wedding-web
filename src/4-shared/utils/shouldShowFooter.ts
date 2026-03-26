@@ -17,6 +17,7 @@ export async function shouldShowFooter({
 
   // SSR: Look up site by host.
   const site = await getSiteByDomain(host);
+
   // Only for tenant subdomain (free): show footer
   if (
     routeKind === "tenant" &&
