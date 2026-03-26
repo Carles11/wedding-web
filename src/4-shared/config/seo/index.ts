@@ -114,33 +114,23 @@ export function getSEOMetadata(
     | "pricing"
     | "privacy-policy"
     | "terms-of-service"
-    | "cookie-policy"
-    | "auth-signup"
-    | "auth-login" = "home",
+    | "cookie-policy" = "home", // Default to home (root)
 ): PageSEO {
-  let seoBySection: Record<string, SitewideSEO>;
-  switch (section) {
-    case "faq":
-      seoBySection = faqSeoByLocale;
-      break;
-    case "pricing":
-      seoBySection = pricingSeoByLocale;
-      break;
-    case "privacy-policy":
-      seoBySection = privacyPolicySeoByLocale;
-      break;
-    case "terms-of-service":
-      seoBySection = termsOfServiceSeoByLocale;
-      break;
-    case "cookie-policy":
-      seoBySection = cookiePolicySeoByLocale;
-      break;
-    case "home":
-    default:
-      seoBySection = homeSeoByLocale;
-      break;
-  }
+  const sectionMap: Record<string, Record<string, SitewideSEO>> = {
+    home: homeSeoByLocale,
+    faq: faqSeoByLocale,
+    pricing: pricingSeoByLocale,
+    "privacy-policy": privacyPolicySeoByLocale,
+    "terms-of-service": termsOfServiceSeoByLocale,
+    "cookie-policy": cookiePolicySeoByLocale,
+  };
+
+  // Get the section data, fallback to home if missing
+  const seoBySection = sectionMap[section] ?? homeSeoByLocale;
+
+  // Get the locale data, fallback to English
   const sitewide = seoBySection[locale] ?? seoBySection["en"];
+
   return sitewide[page];
 }
 

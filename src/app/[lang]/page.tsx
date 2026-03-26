@@ -46,8 +46,9 @@ export async function generateMetadata({
     // --- MARKETING METADATA ---
     const seo = getSEOMetadata(lang, "marketing", "home");
     const baseUrl = "https://weddweb.com";
+    const ogImage = seo.ogImage || `${baseUrl}/assets/og/weddweb-OG.png`;
 
-    // Build hreflang alternates for Marketing
+    // Build hreflang alternates dynamically
     const languages: Record<string, string> = {};
     SUPPORTED_LANGUAGES.forEach((l) => {
       languages[l] = `${baseUrl}/${l}`;
@@ -64,22 +65,20 @@ export async function generateMetadata({
         },
       },
       openGraph: {
-        title: seo.ogTitle,
-        description: seo.ogDescription,
+        title: seo.ogTitle || seo.title,
+        description: seo.ogDescription || seo.description,
         url: `${baseUrl}/${lang}`,
         siteName: "WeddWeb",
-        images: seo.ogImage
-          ? [seo.ogImage]
-          : [`${baseUrl}/assets/og/weddweb-OG.png`],
+        // CLEAN DYNAMIC LOCALE: Works for ca_CA, es_ES, fr_FR, etc.
+        locale: `${lang}_${lang.toUpperCase()}`,
+        images: [ogImage],
         type: "website",
       },
       twitter: {
         card: "summary_large_image",
-        title: seo.ogTitle,
-        description: seo.ogDescription,
-        images: seo.ogImage
-          ? [seo.ogImage]
-          : [`${baseUrl}/assets/og/weddweb-OG.png`],
+        title: seo.ogTitle || seo.title,
+        description: seo.ogDescription || seo.description,
+        images: [ogImage],
       },
       robots: { index: true, follow: true },
     };

@@ -125,3 +125,88 @@ MIT
 > Until these changes are made, all users (except future agency roles) are limited to one site.
 
 ---
+
+## 🧪 Automated SEO, i18n & Meta Testing
+
+This project enforces **world-class automated quality for SEO, internationalization, and metadata** across all public-facing pages and all supported languages. Strict test coverage ensures that:
+
+- Search engines and AI always see the correct `<head>` content,
+- All language variants serve accurate, localized information,
+- No silent SEO or translation regressions reach production.
+
+---
+
+### 🚦 What’s Covered
+
+#### **Unit/SSR Metadata Tests (Jest)**
+
+- Each language’s SSR-rendered `<title>`, `<meta name="description">`, Open Graph, Twitter Card, canonical, and `hreflang` tags are directly verified for presence, correctness, and proper localization.
+- Matrix tests ensure no language is missing, using a fallback, or using incomplete/incorrect translations—tests compare meta output directly to translation files.
+- Any failure blocks PRs and production deploys.
+
+#### **E2E Meta Tests (Playwright)**
+
+- Using browser automation, Playwright visits every `/[lang]` marketing page.
+- Tests assert (in the real DOM, as a bot or browser would see it) that all meta/SEO tags are present, non-empty, and language-correct.
+- Covers:
+  - Title & description
+  - Canonical and hreflang links (`rel="alternate"`)
+  - Open Graph (`og:title`, `og:description`, `og:image`, `og:locale`)
+  - Twitter card tags
+  - Ensures perfect parity between SSR, deployed output, and translation data
+
+#### **Project Layout Best Practice**
+
+- Unit/SSR tests use Jest and reside in `src/**/__tests__` folders—run with `npm test`
+- Playwright E2E tests are placed in `/e2e`—run with `npx playwright test e2e/`
+- Both runners are configured to **ignore each other's test files** for isolated, rapid, and accurate feedback.
+
+---
+
+### 🟢 How to Run Tests
+
+- **Unit/SSR meta tests:**
+  ```bash
+  npm test
+  ```
+- **E2E Playwright meta/browser tests:**
+  _(Start your Next.js dev or production server first)_
+  ```bash
+  npx playwright test e2e/
+  ```
+
+---
+
+### 🛡️ What This Guarantees
+
+- **Zero SEO or i18n regression risk:** All supported languages always have correct and localized metadata.
+- **Google, Bing, and AI-friendly:** Pages are indexable and discoverable in every locale. OpenGraph and Twitter previews are always accurate for organic sharing and ads.
+- **SaaS & multi-tenant readiness:** Test structure and data logic scales to endless weddings, events, admins, and languages.
+
+---
+
+## 🛠️ Future Testing Roadmap & Ideas
+
+Keep your platform ahead of the curve by considering:
+
+- **Builder/Editor E2E Tests:**  
+  Test the wedding/event site builder UI for drag/drop, form validation, accessibility, and publish flows.
+- **Tenant Site E2E Coverage:**  
+  Add tests for custom domain routing, private event SEO (e.g., `noindex` for unlisted events), branded OpenGraph/Twitter per tenant.
+- **Guest/RSVP Form Testing:**  
+  Test multi-locale RSVP flows, invitation links, and backend data validation.
+- **Sitemap & robots.txt CI Tests:**  
+  Assert every new public page is listed in `sitemap.xml` and indexed properly; validate dynamic robots.txt policies.
+- **Lighthouse Automated Audits:**  
+  Run Core Web Vitals and accessibility scores for every deploy.
+- **Broken Link & 404 Tests:**  
+  E2E checks that every link (in nav, footer, page content) is valid, locale-correct, and non-broken.
+- **Translation Completeness CI:**  
+  Automated diffs/warnings when meta or UI strings are untranslated in any supported language.
+- **Theme/Brand Tests:**  
+  Verify custom themes, colors, and per-customer branding on all dynamic pages.
+
+---
+
+With this test discipline, your SaaS is resilient, future-proof, and trusted by global users!  
+Want a specific sample for any next roadmap item? Just ask.

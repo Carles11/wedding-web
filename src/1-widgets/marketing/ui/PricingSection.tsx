@@ -39,8 +39,6 @@ export default function PricingSection({
   popularBadgeLabel,
   perSiteText,
 }: PricingSectionProps) {
-  const premiumComingSoon = premiumPlanPrice.toLowerCase().includes("coming");
-
   const freeFeaturesList = freePlanFeatures ?? [];
   const premiumFeaturesList = premiumPlanFeatures ?? [];
   const freeCTA = freePlanCTA ?? "Get Started Free";
@@ -107,19 +105,12 @@ export default function PricingSection({
                   {premiumPlanName}
                 </h3>
               </div>
-              {premiumComingSoon && (
-                <span className="inline-flex items-center px-3 py-1 text-sm font-medium bg-[#F4A261] text-white rounded-md">
-                  Coming Soon
-                </span>
-              )}
             </div>
             <div className="mt-6 flex-1">
               <div className="text-4xl md:text-5xl font-extrabold text-gray-900">
                 {premiumPlanPrice}
               </div>
-              <div className="text-sm text-gray-600 mt-2">
-                {premiumComingSoon ? comingSoonText : perSiteText}
-              </div>
+              <div className="text-sm text-gray-600 mt-2">{perSiteText}</div>
 
               <ul className="mt-6 space-y-3 text-sm text-gray-700">
                 {premiumFeaturesList.map((f, index) => (
@@ -138,13 +129,12 @@ export default function PricingSection({
                 variant="primary"
                 size="sm"
                 fullWidth
-                disabled={premiumComingSoon}
                 onClick={() => {
-                  if (!premiumComingSoon) onPremiumPlanClick?.();
+                  onPremiumPlanClick?.();
                 }}
-                aria-label={`${premiumPlanName} - ${premiumComingSoon ? "Notify me" : premiumPlanCTA}`}
+                aria-label={`${premiumPlanName} - ${premiumPlanCTA}`}
               >
-                {premiumComingSoon ? "Notify Me" : premiumPlanCTA}
+                {premiumPlanCTA}
               </MarketingButton>
             </div>
           </div>

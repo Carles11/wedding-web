@@ -1,26 +1,38 @@
 import type { Metadata } from "next";
 
 /**
+ * Maps simple ISO language codes to the full locale format required by OpenGraph.
+ */
+function getOGLocale(lang: string): string {
+  const localeMap: Record<string, string> = {
+    en: "en_US",
+    es: "es_ES",
+    ca: "ca_ES",
+    fr: "fr_FR",
+    de: "de_DE",
+    it: "it_IT",
+    pt: "pt_PT",
+    ru: "ru_RU",
+    zh: "zh_CN",
+    ar: "ar_AR",
+    hi: "hi_IN",
+  };
+
+  return localeMap[lang] || `${lang}_${lang.toUpperCase()}`;
+}
+
+/**
  * Generates SEO metadata for marketing and tenant pages.
  *
- * - For tenant pages, canonical and hreflang always use the current domain (subdomain or custom domain).
- * - For marketing pages, canonical and hreflang use weddweb.com.
- * - Only one domain per tenant is supported (the current host).
- * - All language variants are included in hreflang.
- *
- * @param site - Site object (tenant or marketing)
- * @param lang - Current language
- * @param translations - Translation dictionary
- * @param baseUrl - Current domain (host) for canonical/hreflang
- * @param pageKind - 'tenant' or 'marketing'
- * @returns Metadata object for Next.js
+ * - Handles dynamic locale mapping for all supported languages.
+ * - Manages canonical and hreflang for custom domains vs subdomains.
  */
 export function generateSiteMetadata({
   site,
   lang,
   translations,
   baseUrl,
-  pageKind = "tenant", // or "marketing", etc.
+  pageKind = "tenant",
 }: {
   site: any;
   lang: string;
@@ -28,33 +40,43 @@ export function generateSiteMetadata({
   baseUrl: string;
   pageKind?: "tenant" | "marketing";
 }): Metadata {
-  // Title and description logic
   const isTenant = pageKind === "tenant";
+
+  // Title and description logic
   const title = isTenant
-    ? translations["sections.hero.title"] || site?.name || "Wedding"
-    : translations["meta.marketing_title"] || "Welcome";
+    ? translations["sections.hero.title"] || site?.title || "Wedding"
+    : translations["meta.marketing_title"] || "Welcome | WeddWeb";
+
   const description = isTenant
     ? translations["sections.hero.description"] || ""
     : translations["meta.marketing_description"] || "";
 
-  // Canonical logic: prioritize custom domain for tenants
+  // Canonical logic: sanitize protocol and prioritize custom domains
   let canonicalHost = baseUrl.replace(/^https?:\/\//, "");
-  if (pageKind === "tenant" && site?.custom_domain) {
+  if (isTenant && site?.custom_domain) {
     canonicalHost = site.custom_domain;
   }
   const canonicalUrl = `https://${canonicalHost}/${lang}`;
 
-  // Hreflang/alternates logic
+  // Hreflang/alternates logic: Map all languages supported by this specific site
   const availableLangs =
     Array.isArray(site?.languages) && site.languages.length > 0
       ? site.languages
       : [site?.default_lang || "en"];
+
   let languages: Record<string, string> = {};
   for (const l of availableLangs) {
     languages[l] = `https://${canonicalHost}/${l}`;
   }
-  // Always add x-default
-  languages["x-default"] = `https://${canonicalHost}/en`;
+
+  // x-default should point to the site's default language or English
+  const defaultLang = site?.default_lang || "en";
+  languages["x-default"] = `https://${canonicalHost}/${defaultLang}`;
+
+  const ogImage =
+    isTenant && site?.ogImage
+      ? site.ogImage
+      : `${baseUrl}/assets/og/weddweb-OG.png`;
 
   return {
     title,
@@ -63,31 +85,24 @@ export function generateSiteMetadata({
       title,
       description,
       type: "website",
-      locale: lang === "ca" ? "ca_ES" : lang === "es" ? "es_ES" : "en_US",
       url: canonicalUrl,
-      siteName: title,
-      images:
-        pageKind === "marketing"
-          ? [`${baseUrl}/assets/og/weddweb-OG.png`]
-          : site?.ogImage
-            ? [site.ogImage]
-            : [`${baseUrl}/assets/og/weddweb-OG.png`],
+      siteName: isTenant ? title : "WeddWeb",
+      locale: getOGLocale(lang), // Dynamic locale mapping
+      images: [ogImage],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images:
-        pageKind === "marketing"
-          ? [`${baseUrl}/assets/og/weddweb-OG.png`]
-          : site?.ogImage
-            ? [site.ogImage]
-            : [`${baseUrl}/assets/og/weddweb-OG.png`],
+      images: [ogImage],
     },
     alternates: {
       canonical: canonicalUrl,
       languages,
     },
-    robots: { index: true, follow: true },
+    robots: {
+      index: pageKind === "marketing" || isTenant, // Ensure marketing/tenants are indexed
+      follow: true,
+    },
   };
 }
