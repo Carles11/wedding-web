@@ -112,6 +112,8 @@ export function getSEOMetadata(
     | "home"
     | "faq"
     | "pricing"
+    | "auth-signup"
+    | "auth-login"
     | "privacy-policy"
     | "terms-of-service"
     | "cookie-policy" = "home", // Default to home (root)
