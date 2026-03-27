@@ -2,7 +2,6 @@
 
 import { deleteAccountAction } from "@/3-entities/account/actions/deleteAccount";
 import { updateAccountInfo } from "@/3-entities/account/api/accountCrud";
-
 import { getAccountById } from "@/3-entities/account/api/getAccountById";
 import { useSupabaseAuth } from "@/4-shared/hooks/useSupabaseAuth";
 import { notify } from "@/4-shared/lib/toast/toast";
@@ -32,15 +31,9 @@ export default function AccountPage({ account, translations }: Props) {
   const [deleteAcknowledge, setDeleteAcknowledge] = useState(false);
   const { user, signOut } = useSupabaseAuth();
 
-  // Refetch account data if user logs in or email changes
   useEffect(() => {
     async function refetchAccount() {
-      if (
-        user &&
-        user.id &&
-        user.email &&
-        user.email !== currentAccount.email
-      ) {
+      if (user?.id && user?.email && user.email !== currentAccount.email) {
         const result = await getAccountById(user.id);
         if (result.success && result.data) {
           setCurrentAccount(result.data);
@@ -50,7 +43,6 @@ export default function AccountPage({ account, translations }: Props) {
       }
     }
     refetchAccount();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.email]);
 
   if (!currentAccount) {
@@ -62,16 +54,11 @@ export default function AccountPage({ account, translations }: Props) {
     );
   }
 
-  // Only update name here; email change is handled securely in ProfileTab
   const handleSave = async () => {
     setSaving(true);
     try {
-      // Only update full_name if it changed
       const updates: any = {};
-      if (editName !== account.full_name) {
-        updates.full_name = editName;
-      }
-      // Do not update email here; ProfileTab handles secure email change
+      if (editName !== account.full_name) updates.full_name = editName;
       if (Object.keys(updates).length === 0) {
         notify.success(
           translations["builder.general.form.save_success"] ||
@@ -85,66 +72,29 @@ export default function AccountPage({ account, translations }: Props) {
           translations["builder.general.form.save_success"] ||
             "Changes saved successfully!",
         );
-        // Optionally, reset editEmail to account.email to keep UI in sync
         setEditEmail(account.email);
       } else {
-        const errorMsg =
-          typeof result.error === "string"
-            ? result.error
-            : result.error && "message" in result.error
-              ? result.error.message
-              : "Update failed.";
-        notify.error(errorMsg);
+        notify.error("Update failed.");
       }
     } catch (err) {
-      notify.error(
-        err instanceof Error
-          ? err.message
-          : translations["error.something_went_wrong"] ||
-              "Something went wrong.",
-      );
+      notify.error("Something went wrong.");
     } finally {
       setSaving(false);
     }
   };
 
   const handleDelete = async () => {
-    if (!deleteAcknowledge) {
-      notify.error(
-        translations["account.delete_acknowledge_error"] ||
-          "You must acknowledge this action is permanent.",
-      );
-      return;
-    }
-    if (deleteConfirm !== account.email) {
-      notify.error(
-        translations["account.delete_confirm_error"] ||
-          "Please type your email to confirm deletion.",
-      );
+    if (!deleteAcknowledge || deleteConfirm !== account.email) {
+      notify.error("Please verify deletion requirements.");
       return;
     }
     setSaving(true);
     try {
       const result = await deleteAccountAction(account.id);
       if (result.success) {
-        notify.success(
-          translations["account.delete_success"] ||
-            "Account deleted successfully.",
-        );
-
-        // Optionally, redirect or sign out here
         await signOut();
-        router.push("/"); // Redirect to homepage after deletion
-      } else {
-        notify.error(result.error?.message || "Delete failed.");
+        router.push("/");
       }
-    } catch (err) {
-      notify.error(
-        err instanceof Error
-          ? err.message
-          : translations["error.something_went_wrong"] ||
-              "Something went wrong.",
-      );
     } finally {
       setSaving(false);
     }
@@ -157,129 +107,129 @@ export default function AccountPage({ account, translations }: Props) {
         .join("")
         .slice(0, 2)
         .toUpperCase()
-    : translations["builder.account.page.default_language"] || "EN";
+    : "EN";
 
+  // Tailwind Classes
   const inputClass =
-    "mt-1 block w-full rounded-lg border border-(--builder-color-border) bg-(--builder-color-surface) px-4 py-2.5 text-sm text-(--builder-color-text) placeholder:text-(--builder-color-text-muted) focus:outline-none focus:ring-2 focus:ring-(--builder-color-primary)/20 focus:border-(--builder-color-primary) transition-all duration-200";
-
+    "mt-1 block w-full rounded-lg border border-(--builder-color-border) bg-(--builder-color-surface) px-4 py-2.5 text-sm text-(--builder-color-text) focus:ring-2 focus:ring-(--builder-color-primary)/20 focus:border-(--builder-color-primary) transition-all";
   const labelClass =
     "block text-sm font-medium text-(--builder-color-text-muted) mb-1.5";
-
   const cardClass =
-    "rounded-xl border border-(--builder-color-border) bg-(--builder-color-surface) overflow-hidden transition-all duration-200 hover:shadow-lg";
+    "rounded-xl border border-(--builder-color-border) bg-(--builder-color-surface) overflow-hidden transition-all hover:shadow-lg";
 
   const tabClass = (tab: string) =>
     [
-      "px-4 py-2.5 text-sm font-medium transition-all duration-200 relative",
+      "px-4 py-2.5 text-sm font-medium transition-all relative whitespace-nowrap",
       activeTab === tab
-        ? "text-(--builder-color-primary) after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-(--builder-color-primary) after:rounded-t-full"
+        ? "text-(--builder-color-primary) after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-(--builder-color-primary)"
         : "text-(--builder-color-text-muted) hover:text-(--builder-color-text)",
     ].join(" ");
 
   return (
-    <>
-      <div className="builder-theme max-w-4xl mx-auto space-y-6 px-4 py-6">
-        {/* Header with gradient */}
-        <div className="relative mb-8">
-          <div className="absolute inset-0 bg-linear-to-r from-(--builder-color-primary)/5 to-transparent rounded-2xl" />
-          <div className="relative flex items-center gap-4 p-6">
-            <div className="relative">
-              {account.avatar_url ? (
-                <img
-                  src={account.avatar_url}
-                  alt="avatar"
-                  className="w-20 h-20 rounded-2xl object-cover ring-4 ring-(--builder-color-primary)/10"
-                />
-              ) : (
-                <div
-                  className="w-20 h-20 rounded-2xl flex items-center justify-center text-2xl font-semibold ring-4 ring-(--builder-color-primary)/10"
-                  style={{
-                    background: `linear-gradient(135deg, var(--builder-color-primary) 0%, var(--builder-color-primary)/80 100%)`,
-                  }}
-                >
-                  {initials}
+    <div className="builder-theme max-w-4xl mx-auto space-y-6 px-4 py-6">
+      {/* Header Section */}
+      <div className="relative overflow-hidden rounded-2xl border border-(--builder-color-border) bg-(--builder-color-surface) p-6 sm:p-8">
+        <div className="absolute inset-0 bg-linear-to-br from-(--builder-color-primary)/5 to-transparent" />
+
+        <div className="relative flex flex-col sm:flex-row items-center sm:items-start gap-6">
+          {/* Avatar */}
+          <div className="shrink-0">
+            {account.avatar_url ? (
+              <img
+                src={account.avatar_url}
+                alt="avatar"
+                className="w-24 h-24 rounded-2xl object-cover ring-4 ring-(--builder-color-primary)/10"
+              />
+            ) : (
+              <div
+                className="w-24 h-24 rounded-2xl flex items-center justify-center text-3xl font-bold text-white shadow-lg"
+                style={{
+                  background: `linear-gradient(135deg, var(--builder-color-primary) 0%, #6366f1 100%)`,
+                }}
+              >
+                {initials}
+              </div>
+            )}
+          </div>
+
+          {/* Identity & Badges */}
+          <div className="flex-1 text-center sm:text-left min-w-0">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
+              <h1 className="text-2xl sm:text-3xl font-bold text-(--builder-color-text) truncate">
+                {account.full_name ||
+                  translations["builder.account.page.welcome_back"] ||
+                  "Welcome!"}
+              </h1>
+              {account.onboarding_completed && (
+                <div className="flex justify-center">
+                  <span className="px-2.5 py-0.5 text-[10px] uppercase tracking-wider font-bold rounded-full bg-green-100 text-green-700 border border-green-200">
+                    {translations["builder.account.page.onboarded"] ||
+                      "Onboarded"}
+                  </span>
                 </div>
               )}
             </div>
-            <div className="flex-1 min-w-0">
-              <h1 className="text-2xl font-bold text-(--builder-color-text) truncate">
-                {account.full_name ||
-                  translations["builder.account.page.welcome_back"] ||
-                  "Welcome back!"}
-              </h1>
-              <p className="text-(--builder-color-text-muted) flex items-center gap-2 mt-1">
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                  />
-                </svg>
-                {account.email}
-              </p>
-            </div>
-            <div className="flex gap-2">
-              {/* <span
-                className="px-3 py-1.5 text-xs font-medium rounded-full"
-                style={{
-                  background: "rgba(79,70,229,0.08)",
-                  color: "var(--builder-color-primary)",
-                }}
+
+            <p className="text-(--builder-color-text-muted) flex items-center justify-center sm:justify-start gap-2 text-sm sm:text-base mb-4">
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
               >
-                {account.preferred_language?.toUpperCase() ||
-                  translations["builder.account.page.default_language"] ||
-                  "EN"}
-              </span> */}
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                />
+              </svg>
+              <span className="truncate">{account.email}</span>
+            </p>
+
+            <div className="pt-2 border-t border-(--builder-color-border) inline-block">
               <UnderlinedLink
                 href={`/${account.preferred_language?.toLowerCase() || "en"}/builder`}
                 thicknessClass="h-0.5"
                 durationMs={350}
-                ariaLabel={"Back to dashboard"}
+                ariaLabel="Back to dashboard"
               >
-                {translations["builder.actions.back"] || "Back to dashboard"}
-              </UnderlinedLink>
-
-              {account.onboarding_completed && (
-                <span className="px-3 py-1.5 text-xs font-medium rounded-full bg-green-100 text-green-700">
-                  {translations["builder.account.page.onboarded"] ||
-                    "Onboarded"}
+                <span className="text-sm font-medium uppercase tracking-wide">
+                  ←{" "}
+                  {translations["builder.actions.back"] || "Back to dashboard"}
                 </span>
-              )}
+              </UnderlinedLink>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Modern tabs navigation */}
-        <div className="border-b border-(--builder-color-border) flex gap-6">
-          <button
-            className={tabClass("profile")}
-            onClick={() => setActiveTab("profile")}
-          >
-            {translations["builder.account.tabs.profile.tab_label"] ||
-              "Profile Information"}
-          </button>
-          <button
-            className={tabClass("security")}
-            onClick={() => setActiveTab("security")}
-          >
-            {translations["builder.account.tabs.security.tab_label"] ||
-              "Security"}
-          </button>
-          <button
-            className={tabClass("preferences")}
-            onClick={() => setActiveTab("preferences")}
-          >
-            {translations["builder.account.tabs.preferences.tab_label"] ||
-              "Preferences"}
-          </button>
-        </div>
+      {/* Tabs Navigation - Scrollable on mobile */}
+      <div className="flex border-b border-(--builder-color-border) overflow-x-auto scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0">
+        <button
+          className={tabClass("profile")}
+          onClick={() => setActiveTab("profile")}
+        >
+          {translations["builder.account.tabs.profile.tab_label"] || "Profile"}
+        </button>
+        <button
+          className={tabClass("security")}
+          onClick={() => setActiveTab("security")}
+        >
+          {translations["builder.account.tabs.security.tab_label"] ||
+            "Security"}
+        </button>
+        <button
+          className={tabClass("preferences")}
+          onClick={() => setActiveTab("preferences")}
+        >
+          {translations["builder.account.tabs.preferences.tab_label"] ||
+            "Preferences"}
+        </button>
+      </div>
 
+      {/* Content Rendering */}
+      <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
         {activeTab === "profile" && (
           <ProfileTab
             account={currentAccount}
@@ -304,11 +254,9 @@ export default function AccountPage({ account, translations }: Props) {
             nextLoading={saving}
           />
         )}
-
         {activeTab === "security" && (
           <SecurityTab translations={translations} cardClass={cardClass} />
         )}
-
         {activeTab === "preferences" && (
           <PreferencesTab
             account={account}
@@ -317,6 +265,6 @@ export default function AccountPage({ account, translations }: Props) {
           />
         )}
       </div>
-    </>
+    </div>
   );
 }

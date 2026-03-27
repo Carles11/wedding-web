@@ -54,6 +54,19 @@ export default function BuilderStepNav({
               <span className="text-sm">{translations[k]}</span>
             </button>
           ))}
+          {/* Account tab for mobile */}
+          <a
+            href={`/${currentLang}/builder/account`}
+            className="shrink-0 flex items-center gap-2 px-3 py-2 rounded whitespace-nowrap border builder-step-nav-mobile-idle hover:builder-step-nav-mobile-active transition"
+            style={{ textDecoration: "none" }}
+          >
+            <span className="w-6 flex justify-center items-center">
+              <GrayCircleIcon />
+            </span>
+            <span className="text-sm">
+              {translations["builder.nav.account"] || "Account"}
+            </span>
+          </a>
         </div>
       </div>
 
