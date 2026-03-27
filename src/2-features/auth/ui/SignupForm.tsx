@@ -1,6 +1,7 @@
 "use client";
 
 import { signupWithEmail } from "@/2-features/auth/api";
+import { TERMS_VERSION } from "@/4-shared/config/consents/versions";
 import { interpolate } from "@/4-shared/helpers/interpolateVars";
 import { BuilderTextInput } from "@/4-shared/ui/builder/inputs";
 import { MarketingButton } from "@/4-shared/ui/marketing";
@@ -41,7 +42,6 @@ export default function SignupForm({ translations, lang }: Props) {
   // Remove placeholder, use lang prop everywhere
 
   // Centralized validation
-  const TERMS_VERSION = "2026-03-27";
   const validate = () => {
     let hasError = false;
     setEmailError("");

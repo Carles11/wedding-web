@@ -11,6 +11,7 @@ import HeroMarketing, {
 import { updateAccountInfo } from "@/3-entities/account/api/accountCrud";
 import { useSupabaseAuth } from "@/4-shared/hooks/useSupabaseAuth";
 import type { MarketingPageProps } from "@/4-shared/types";
+import { CookiesConsentBanner } from "@/4-shared/ui/CookiesConsentBanner";
 import { useRouter } from "next/navigation";
 
 /**
@@ -97,6 +98,12 @@ export default function MarketingPageComponent({
         {/* SEMANTIC CHECK: CTASection uses <h2> as verified in Source 7 */}
         <CTASection {...viewModel.cta} onButtonClick={handlePrimaryClick} />
       </main>
+
+      <CookiesConsentBanner
+        translations={translations}
+        lang={initialLang}
+        userId={user?.id}
+      />
     </>
   );
 }

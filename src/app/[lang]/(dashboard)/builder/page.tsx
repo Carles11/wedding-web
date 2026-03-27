@@ -20,13 +20,19 @@ export default async function BuilderPage({
   const supabase = await createSupabaseSSRClient();
   // Check if user has completed onboarding
   const user = await getCurrentUser();
+
+  let userProfile: any = null;
+  let userId: string | null = null;
   if (user) {
-    const { data: userProfile } = await supabase
+    userId = user.id;
+    const { data } = await supabase
       .from("user_profiles")
-      .select("onboarding_completed")
+      .select(
+        "onboarding_completed, cookie_consent, cookie_consent_at, cookie_consent_version",
+      )
       .eq("id", user.id)
       .maybeSingle();
-
+    userProfile = data;
     if (userProfile && userProfile.onboarding_completed === false) {
       redirect(`/${lang}/builder/onboarding`);
     }
@@ -36,7 +42,12 @@ export default async function BuilderPage({
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <BuilderClient initialLang={lang} translations={translations} />
+      <BuilderClient
+        initialLang={lang}
+        translations={translations}
+        userId={userId}
+        userProfile={userProfile}
+      />
     </div>
   );
 }

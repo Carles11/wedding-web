@@ -16,6 +16,7 @@ import { useSite } from "@/4-shared/hooks/useSite";
 import { useSupabaseAuth } from "@/4-shared/hooks/useSupabaseAuth";
 import { createClient } from "@/4-shared/lib/supabase/client";
 import { BuilderHeader } from "@/4-shared/ui/builder";
+import { CookiesConsentBanner } from "@/4-shared/ui/CookiesConsentBanner";
 import { EMAIL_RE } from "@/4-shared/utils/validations";
 import { usePlan } from "@/app/providers";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -29,6 +30,13 @@ interface ImageSection {
 interface Props {
   initialLang?: string;
   translations: Record<string, string>;
+  userId?: string | null;
+  userProfile?: {
+    cookie_consent?: boolean | null;
+    cookie_consent_at?: string | null;
+    cookie_consent_version?: string | null;
+    [key: string]: any;
+  } | null;
 }
 
 const STEP_KEYS = [
@@ -60,6 +68,8 @@ function hasAnyGiftPaymentMethod(
 export default function BuilderClient({
   initialLang = "en",
   translations: initialTranslations,
+  userId,
+  userProfile,
 }: Props) {
   const router = useRouter();
   const pathname = usePathname();
@@ -201,6 +211,12 @@ export default function BuilderClient({
 
   return (
     <div className="builder-theme min-h-screen">
+      <CookiesConsentBanner
+        translations={translations}
+        lang={currentLang}
+        userId={userId}
+        userProfile={userProfile}
+      />
       <BuilderHeader
         translations={translations}
         site={site}
