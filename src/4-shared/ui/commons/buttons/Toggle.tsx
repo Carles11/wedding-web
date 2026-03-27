@@ -31,8 +31,8 @@ export const Toggle: React.FC<ToggleProps> = ({
         aria-label={ariaLabel || label || "Toggle"}
         className={`
           w-10 h-6 rounded-full transition-colors duration-200 
-          focus:outline-none focus:ring-2 focus:ring-blue-500
-          ${checked ? "bg-blue-600" : "bg-gray-300"}
+          focus:outline-none focus:ring-2 focus:ring-(--builder-color-primary)
+          ${checked ? "bg-(--builder-color-primary)" : "bg-(--builder-color-text-muted)"}
           ${disabled ? "opacity-60 cursor-not-allowed" : ""}
           relative
         `}

@@ -18,7 +18,6 @@ export const SecurityTab = ({ translations, cardClass }: SecurityTabProps) => {
   const { site } = useSite(user ?? null);
 
   const [showModal, setShowModal] = useState(false);
-  // SEO toggle state
   const [seoEnabled, setSeoEnabled] = useState(site?.seo_enabled ?? true);
   const [seoLoading, setSeoLoading] = useState(false);
 
@@ -27,13 +26,12 @@ export const SecurityTab = ({ translations, cardClass }: SecurityTabProps) => {
     setSeoLoading(true);
     setSeoEnabled(value);
     try {
-      const supabase = await import("@/4-shared/lib/supabase/client");
-      const client = supabase.createClient();
-      const { error } = await client
+      const { createClient } = await import("@/4-shared/lib/supabase/client");
+      const client = createClient();
+      await client
         .from("sites")
         .update({ seo_enabled: value })
         .eq("id", site.id);
-      // Optionally, you could refetch site info here if needed
     } finally {
       setSeoLoading(false);
     }
@@ -48,21 +46,54 @@ export const SecurityTab = ({ translations, cardClass }: SecurityTabProps) => {
               "Security Settings"}
           </h2>
         </div>
-        <div className="p-6 space-y-6">
-          {/* SEO Visibility Switcher */}
-          <div className="mb-4 flex items-center gap-4">
-            <Toggle
-              checked={seoEnabled}
-              onChange={handleSeoToggle}
-              label={`SEO: ${translations["builder.domain.seo_visibility_label"] || "SEO: Allow search engines to index this site"}`}
-              disabled={seoLoading}
-            />
-            {seoLoading && (
-              <span className="text-xs text-gray-500">Saving...</span>
-            )}
+
+        <div className="p-6 space-y-4">
+          {/* SEO Visibility Row (Matches Password Row Style) */}
+          <div className="flex items-center justify-between p-4 bg-(--builder-color-muted-surface)/20 rounded-lg border border-transparent hover:border-(--builder-color-primary)/10 transition-colors">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center">
+                <svg
+                  className="w-5 h-5 text-blue-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
+              </div>
+              <div className="max-w-[200px] sm:max-w-none">
+                <p className="font-medium text-(--builder-color-text)">
+                  {translations["builder.domain.seo_visibility_title"] ||
+                    "Search Engine Indexing"}
+                </p>
+                <p className="text-xs text-(--builder-color-text-muted)">
+                  {translations["builder.domain.seo_visibility_desc"] ||
+                    "Allow Google and other engines to find this site."}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              {seoLoading && (
+                <span className="text-[10px] uppercase tracking-widest text-gray-400 animate-pulse">
+                  Saving...
+                </span>
+              )}
+              <Toggle
+                checked={seoEnabled}
+                onChange={handleSeoToggle}
+                disabled={seoLoading}
+                aria-label="Toggle SEO"
+              />
+            </div>
           </div>
-          {/* Password section */}
-          <div className="flex items-center justify-between p-4 bg-(--builder-color-muted-surface)/20 rounded-lg">
+
+          {/* Password Row */}
+          <div className="flex items-center justify-between p-4 bg-(--builder-color-muted-surface)/20 rounded-lg border border-transparent hover:border-(--builder-color-primary)/10 transition-colors">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-(--builder-color-primary)/10 flex items-center justify-center">
                 <svg
@@ -85,13 +116,16 @@ export const SecurityTab = ({ translations, cardClass }: SecurityTabProps) => {
                     "builder.account.tabs.security.password_label"
                   ] || "Password"}
                 </p>
+                <p className="text-xs text-(--builder-color-text-muted)">
+                  Last updated recently
+                </p>
               </div>
             </div>
             <BuilderButton
               type="button"
               variant="secondary"
               onClick={() => setShowModal(true)}
-              className="px-4! py-2!"
+              className="px-4! py-2! text-xs!"
             >
               {translations[
                 "builder.account.tabs.security.change_password_btn"
@@ -101,7 +135,6 @@ export const SecurityTab = ({ translations, cardClass }: SecurityTabProps) => {
         </div>
       </div>
 
-      {/* Change Password Modal */}
       {showModal && (
         <PasswordChangeModal
           open={showModal}
