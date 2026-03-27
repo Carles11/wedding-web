@@ -12,12 +12,14 @@ interface SecurityTabProps {
   translations: Record<string, string>;
   cardClass: string;
   router?: any;
+  lang?: string;
 }
 
 export const SecurityTab = ({
   translations,
   cardClass,
   router,
+  lang,
 }: SecurityTabProps) => {
   const { user } = useSupabaseAuth();
   const { site } = useSite(user ?? null);
@@ -32,7 +34,7 @@ export const SecurityTab = ({
   function goToPricing() {
     console.log("site?.default_lang", site?.default_lang);
     // Use language-prefixed routing, not query param
-    router.push(`/${site?.default_lang || "en"}/pricing`);
+    router.push(`/${lang || "en"}/pricing`);
   }
 
   const handleSeoToggle = async (value: boolean) => {
@@ -120,6 +122,11 @@ export const SecurityTab = ({
                   translations["builder.account.upgrade_cta_desc"] ||
                   "SEO visibility is a premium feature. Upgrade to enable search engine indexing."
                 }
+                upgradeLabel={
+                  translations["builder.account.upgrade_cta_title"] ||
+                  "Upgrade to Premium"
+                }
+                cancelLabel={translations["builder.actions.cancel"] || "Cancel"}
               />
             </div>
           </div>
@@ -149,7 +156,9 @@ export const SecurityTab = ({
                   ] || "Password"}
                 </p>
                 <p className="text-xs text-(--builder-color-text-muted)">
-                  Last updated recently
+                  {translations[
+                    "builder.account.tabs.security.password_update_recent"
+                  ] || "Last updated recently"}
                 </p>
               </div>
             </div>

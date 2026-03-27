@@ -22,7 +22,6 @@ export default function PricingCTATable({
     // Route to /[lang]/builder/checkout?plan=xyz
     router.push(`/${lang}/builder/checkout?plan=${plan}`);
   }
-
   return (
     <>
       <div className="mb-12">

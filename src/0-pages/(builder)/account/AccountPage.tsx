@@ -262,6 +262,7 @@ export default function AccountPage({ account, translations, site }: Props) {
             translations={translations}
             cardClass={cardClass}
             router={router}
+            lang={account.preferred_language?.toLowerCase() || "en"}
           />
         )}
         {activeTab === "preferences" && (
