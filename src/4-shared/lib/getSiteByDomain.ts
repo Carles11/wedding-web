@@ -15,8 +15,7 @@ export async function getSiteByDomain(host: string | null) {
   try {
     const supabase = await createSupabaseSSRClient();
 
-    // We use a join to get the plan_type from subscriptions
-    // and the wedding date from program_events in one hit.
+    // Joining through user_profiles because subscriptions are linked to users, not sites directly.
     const query = supabase
       .from("sites")
       .select(
@@ -28,16 +27,17 @@ export async function getSiteByDomain(host: string | null) {
         languages, 
         domains, 
         seo_enabled,
-        subscriptions!inner (
-          plan_type
+        user_profiles!owner_user_id (
+          subscriptions (
+            plan_type
+          )
         ),
         program_events (
-          date
+          date,
+          is_main_event
         )
       `,
       )
-      // Filter for the main wedding event date
-      .eq("program_events.is_main_event", true)
       .or(
         `domains.cs.{${normalized}},domains.cs.{${stripped}},subdomain.eq.${stripped}`,
       )
@@ -52,12 +52,19 @@ export async function getSiteByDomain(host: string | null) {
 
     if (!data) return null;
 
-    // Extract values for easier consumption
-    const planType = data.subscriptions?.[0]?.plan_type || "free";
-    const weddingDateStr = data.program_events?.[0]?.date;
+    // 1. Extract Plan Type via the User Profile relationship
+    // Note: We access subscriptions via user_profiles
+    const planType =
+      (data.user_profiles as any)?.subscriptions?.[0]?.plan_type || "free";
 
+    // 2. Extract Wedding Date (find the is_main_event in the array)
+    const mainEvent = (data.program_events as any[])?.find(
+      (e) => e.is_main_event === true,
+    );
+    const weddingDateStr = mainEvent?.date;
+
+    // 3. Calculate Expiry
     let isExpired = false;
-
     if (planType === "free" && weddingDateStr) {
       const weddingDate = new Date(weddingDateStr);
       const expiryDate = new Date(weddingDate);
