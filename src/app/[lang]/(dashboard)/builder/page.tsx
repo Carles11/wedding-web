@@ -17,10 +17,10 @@ export default async function BuilderPage({
   const langFromPath = resolvedParams.lang ?? "en";
   const lang = isValidLanguage(langFromPath) ? langFromPath : "en";
 
+  const supabase = await createSupabaseSSRClient();
   // Check if user has completed onboarding
   const user = await getCurrentUser();
   if (user) {
-    const supabase = await createSupabaseSSRClient();
     const { data: userProfile } = await supabase
       .from("user_profiles")
       .select("onboarding_completed")
@@ -32,7 +32,6 @@ export default async function BuilderPage({
     }
   }
 
-  const supabase = await createSupabaseSSRClient();
   const translations = await fetchBuilderTranslations(supabase, lang, "en");
 
   return (
