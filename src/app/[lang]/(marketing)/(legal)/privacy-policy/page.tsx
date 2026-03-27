@@ -3,6 +3,7 @@ import { fetchMarketingTranslations } from "@/4-shared/api/marketing/getTranslat
 import { SUPPORTED_LANGUAGES } from "@/4-shared/config/i18n";
 import { getSEOMetadata } from "@/4-shared/config/seo";
 import { isValidLanguage } from "@/4-shared/helpers/isValidLanguage";
+import { Footer } from "@/4-shared/ui/commons/footer/Footer";
 import type { Metadata } from "next";
 
 /**
@@ -67,5 +68,10 @@ export default async function Page({
   // Server-side fetch for zero-hydration flicker
   const translations = await fetchMarketingTranslations(lang, "en");
 
-  return <PrivacyPolicyPage translations={translations} lang={lang} />;
+  return (
+    <>
+      <PrivacyPolicyPage translations={translations} lang={lang} />;
+      <Footer lang={lang} translations={translations} />
+    </>
+  );
 }
