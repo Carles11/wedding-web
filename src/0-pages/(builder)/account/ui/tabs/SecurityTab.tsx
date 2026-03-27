@@ -1,85 +1,41 @@
-import { useSupabaseAuth } from "@/4-shared/hooks/useSupabaseAuth";
-import { notify } from "@/4-shared/lib/toast/toast";
 import { BuilderButton } from "@/4-shared/ui/builder/BuilderButton";
-import { isValidPassword, passwordsMatch } from "@/4-shared/utils/validations";
+import { Toggle } from "@/4-shared/ui/commons/buttons/Toggle";
 import { useState } from "react";
 import { PasswordChangeModal } from "../PasswordChangeModal";
+
+import { useSite } from "@/4-shared/hooks/useSite";
+import { useSupabaseAuth } from "@/4-shared/hooks/useSupabaseAuth";
+import type { Site } from "@/4-shared/types";
 
 interface SecurityTabProps {
   translations: Record<string, string>;
   cardClass: string;
+  site?: Site;
 }
 
-export function SecurityTab({ translations, cardClass }: SecurityTabProps) {
+export const SecurityTab = ({ translations, cardClass }: SecurityTabProps) => {
   const { user } = useSupabaseAuth();
-  const [showModal, setShowModal] = useState(false);
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const { site } = useSite(user ?? null);
 
-  const handleChangePassword = async () => {
-    setError("");
-    if (!isValidPassword(newPassword)) {
-      setError(
-        translations["auth.common.password_invalid"] ||
-          "Password must be at least 8 characters, include a letter and a number.",
-      );
-      return;
-    }
-    if (!passwordsMatch(newPassword, confirmPassword)) {
-      setError(
-        translations["auth.common.passwords_do_not_match"] ||
-          "Passwords do not match.",
-      );
-      return;
-    }
-    setLoading(true);
+  const [showModal, setShowModal] = useState(false);
+  // SEO toggle state
+  const [seoEnabled, setSeoEnabled] = useState(site?.seo_enabled ?? true);
+  const [seoLoading, setSeoLoading] = useState(false);
+
+  const handleSeoToggle = async (value: boolean) => {
+    if (!site) return;
+    setSeoLoading(true);
+    setSeoEnabled(value);
     try {
-      // Re-authenticate
-      const supabase = (
-        await import("@/4-shared/lib/supabase/client")
-      ).createClient();
-      if (!user?.email) {
-        setError("No email found for user.");
-        setLoading(false);
-        notify.error("No email found for user.");
-        return;
-      }
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: user?.email,
-        password: currentPassword,
-      });
-      if (signInError) {
-        setError(
-          translations["auth.common.password_incorrect"] ||
-            "Current password is incorrect.",
-        );
-        setLoading(false);
-        return;
-      }
-      // Update password
-      const { error: updateError } = await supabase.auth.updateUser({
-        password: newPassword,
-      });
-      if (updateError) {
-        setError(updateError.message);
-        setLoading(false);
-        return;
-      }
-      setShowModal(false);
-      setCurrentPassword("");
-      setNewPassword("");
-      setConfirmPassword("");
-      notify.success(
-        translations["auth.common.password_change_success"] ||
-          "Password changed successfully.",
-      );
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong.");
+      const supabase = await import("@/4-shared/lib/supabase/client");
+      const client = supabase.createClient();
+      const { error } = await client
+        .from("sites")
+        .update({ seo_enabled: value })
+        .eq("id", site.id);
+      // Optionally, you could refetch site info here if needed
     } finally {
-      setLoading(false);
+      setSeoLoading(false);
     }
   };
 
@@ -92,7 +48,20 @@ export function SecurityTab({ translations, cardClass }: SecurityTabProps) {
               "Security Settings"}
           </h2>
         </div>
-        <div className="p-6">
+        <div className="p-6 space-y-6">
+          {/* SEO Visibility Switcher */}
+          <div className="mb-4 flex items-center gap-4">
+            <Toggle
+              checked={seoEnabled}
+              onChange={handleSeoToggle}
+              label={`SEO: ${translations["builder.domain.seo_visibility_label"] || "SEO: Allow search engines to index this site"}`}
+              disabled={seoLoading}
+            />
+            {seoLoading && (
+              <span className="text-xs text-gray-500">Saving...</span>
+            )}
+          </div>
+          {/* Password section */}
           <div className="flex items-center justify-between p-4 bg-(--builder-color-muted-surface)/20 rounded-lg">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-(--builder-color-primary)/10 flex items-center justify-center">
@@ -142,4 +111,4 @@ export function SecurityTab({ translations, cardClass }: SecurityTabProps) {
       )}
     </div>
   );
-}
+};

@@ -12,12 +12,15 @@ import { PreferencesTab } from "./ui/tabs/PreferencesTab";
 import { ProfileTab } from "./ui/tabs/ProfileTab";
 import { SecurityTab } from "./ui/tabs/SecurityTab";
 
+import type { Site } from "@/4-shared/types";
+
 interface Props {
   account: any;
   translations: Record<string, string>;
+  site?: Site;
 }
 
-export default function AccountPage({ account, translations }: Props) {
+export default function AccountPage({ account, translations, site }: Props) {
   const router = useRouter();
 
   const [currentAccount, setCurrentAccount] = useState(account);
@@ -217,7 +220,7 @@ export default function AccountPage({ account, translations }: Props) {
           onClick={() => setActiveTab("security")}
         >
           {translations["builder.account.tabs.security.tab_label"] ||
-            "Security"}
+            "Security and Privacy"}
         </button>
         <button
           className={tabClass("preferences")}
@@ -255,7 +258,11 @@ export default function AccountPage({ account, translations }: Props) {
           />
         )}
         {activeTab === "security" && (
-          <SecurityTab translations={translations} cardClass={cardClass} />
+          <SecurityTab
+            translations={translations}
+            cardClass={cardClass}
+            site={site}
+          />
         )}
         {activeTab === "preferences" && (
           <PreferencesTab

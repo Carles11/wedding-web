@@ -69,7 +69,9 @@ export function CookiesConsentBanner({
     }
 
     // Otherwise, show banner if not accepted
-    setVisible(localConsent !== "true" || localVersion !== COOKIE_CONSENT_VERSION);
+    setVisible(
+      localConsent !== "true" || localVersion !== COOKIE_CONSENT_VERSION,
+    );
     setSynced(true);
   }, [userId, userProfile]);
 
