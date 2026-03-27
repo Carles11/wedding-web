@@ -4,22 +4,30 @@ import "server-only";
 type StripeMode = "live" | "test";
 
 function shouldUseTestStripeMode(): boolean {
-  // 1. Manual override takes absolute priority
+  // 1. Manual override - check for BOTH string and boolean-like values
   const forced = process.env.STRIPE_USE_TEST_KEYS;
   if (forced === "true") return true;
   if (forced === "false") return false;
 
-  // 2. Vercel specific logic:
-  // 'production' = Live keys
-  // 'preview' or 'development' = Test keys
-  const vercelEnv = process.env.VERCEL_ENV; // 'production', 'preview', or 'development'
+  // 2. Vercel System Variable
+  const vercelEnv = process.env.VERCEL_ENV;
 
-  if (vercelEnv === "production") {
-    return false; // Use Live Keys
-  }
+  // 3. NODE_ENV Check (Fallback if VERCEL_ENV is missing)
+  const isProdNode = process.env.NODE_ENV === "production";
 
-  // 3. Fallback for local or preview deployments
-  return true; // Default to Test Keys for Beta/Preview/Local
+  // LOGGING: This will show up in your Vercel Function Logs!
+  console.log(
+    `[Stripe Config] Detected Env: VERCEL_ENV=${vercelEnv}, NODE_ENV=${process.env.NODE_ENV}`,
+  );
+
+  // If we are definitely in Vercel Production, use Live.
+  if (vercelEnv === "production") return false;
+
+  // If we are in a Preview deployment (beta-deploy), VERCEL_ENV will be "preview"
+  if (vercelEnv === "preview") return true;
+
+  // If Vercel env is missing, rely on NODE_ENV
+  return !isProdNode;
 }
 
 export const STRIPE_MODE: StripeMode = shouldUseTestStripeMode()
