@@ -1,27 +1,45 @@
 import { BuilderButton } from "@/4-shared/ui/builder/BuilderButton";
+import { UpgradeCTAModal } from "@/4-shared/ui/builder/UpgradeCTAModal";
 import { Toggle } from "@/4-shared/ui/commons/buttons/Toggle";
 import { useState } from "react";
 import { PasswordChangeModal } from "../PasswordChangeModal";
 
 import { useSite } from "@/4-shared/hooks/useSite";
 import { useSupabaseAuth } from "@/4-shared/hooks/useSupabaseAuth";
-import type { Site } from "@/4-shared/types";
+import { usePlan } from "@/app/providers";
 
 interface SecurityTabProps {
   translations: Record<string, string>;
   cardClass: string;
-  site?: Site;
+  router?: any;
 }
 
-export const SecurityTab = ({ translations, cardClass }: SecurityTabProps) => {
+export const SecurityTab = ({
+  translations,
+  cardClass,
+  router,
+}: SecurityTabProps) => {
   const { user } = useSupabaseAuth();
   const { site } = useSite(user ?? null);
+  const { planType } = usePlan();
+  const userIsPremium = planType === "premium";
 
   const [showModal, setShowModal] = useState(false);
   const [seoEnabled, setSeoEnabled] = useState(site?.seo_enabled ?? true);
   const [seoLoading, setSeoLoading] = useState(false);
+  const [showUpgrade, setShowUpgrade] = useState(false);
+
+  function goToPricing() {
+    console.log("site?.default_lang", site?.default_lang);
+    // Use language-prefixed routing, not query param
+    router.push(`/${site?.default_lang || "en"}/pricing`);
+  }
 
   const handleSeoToggle = async (value: boolean) => {
+    if (!userIsPremium) {
+      setShowUpgrade(true);
+      return;
+    }
     if (!site) return;
     setSeoLoading(true);
     setSeoEnabled(value);
@@ -66,7 +84,7 @@ export const SecurityTab = ({ translations, cardClass }: SecurityTabProps) => {
                   />
                 </svg>
               </div>
-              <div className="max-w-[200px] sm:max-w-none">
+              <div className="max-w-200px sm:max-w-none">
                 <p className="font-medium text-(--builder-color-text)">
                   {translations["builder.domain.seo_visibility_title"] ||
                     "Search Engine Indexing"}
@@ -88,6 +106,20 @@ export const SecurityTab = ({ translations, cardClass }: SecurityTabProps) => {
                 onChange={handleSeoToggle}
                 disabled={seoLoading}
                 aria-label="Toggle SEO"
+              />
+              {/* Upgrade Modal for Free Users */}
+              <UpgradeCTAModal
+                open={showUpgrade}
+                onClose={() => setShowUpgrade(false)}
+                onUpgrade={goToPricing}
+                title={
+                  translations["builder.account.upgrade_cta_title"] ||
+                  "Upgrade to Premium"
+                }
+                description={
+                  translations["builder.account.upgrade_cta_desc"] ||
+                  "SEO visibility is a premium feature. Upgrade to enable search engine indexing."
+                }
               />
             </div>
           </div>

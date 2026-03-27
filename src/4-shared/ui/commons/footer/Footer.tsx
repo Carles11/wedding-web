@@ -18,7 +18,6 @@ export function Footer({
 }: FooterProps) {
   const currentYear = new Date().getFullYear();
   const langPrefix = lang ? `/${lang}` : "";
-
   return (
     <footer
       className="w-full py-24 px-6"

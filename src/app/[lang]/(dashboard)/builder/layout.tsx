@@ -1,7 +1,7 @@
 import { getCurrentUser } from "@/3-entities/user/api/getCurrentUser";
 import { getCurrentUserSubscription } from "@/3-entities/user/api/getCurrentUserSubscription";
-import { fetchBuilderTranslations } from "@/4-shared/api/builder/getTranslations";
-import { createSupabaseSSRClient } from "@/4-shared/lib/supabase/server";
+import { fetchMarketingTranslations } from "@/4-shared/api/marketing";
+import { isValidLanguage } from "@/4-shared/helpers/isValidLanguage";
 import { Footer } from "@/4-shared/ui/commons/footer/Footer";
 import { shouldShowFooter } from "@/4-shared/utils/shouldShowFooter";
 import { PlanProvider, ToastProvider } from "@/app/providers";
@@ -12,14 +12,16 @@ import "../../../globals.css";
 
 type DashboardLayoutProps = {
   children: ReactNode;
+  params: Promise<{ lang: string }>;
 };
 
 export default async function DashboardLayout({
   children,
+  params,
 }: DashboardLayoutProps) {
   const user = await getCurrentUser();
-  const rawHeaders = await headers();
-  const lang = rawHeaders.get("x-lang") || "en";
+  const realParams = await params;
+  const lang = isValidLanguage(realParams?.lang) ? realParams.lang : "en";
   if (!user) {
     redirect(`/${lang}/auth/login`);
   }
@@ -33,9 +35,7 @@ export default async function DashboardLayout({
   const host = ((await headers()).get("host") ?? "").toLowerCase().trim();
   const showFooter = await shouldShowFooter({ host, routeKind: "builder" });
 
-  const supabase = await createSupabaseSSRClient();
-
-  const translations = await fetchBuilderTranslations(supabase, lang, "en");
+  const marketingTranslations = await fetchMarketingTranslations(lang, "en");
 
   return (
     <PlanProvider subscription={subscription}>
@@ -46,7 +46,8 @@ export default async function DashboardLayout({
           siteName="Weddweb.com"
           author="Carles del Río Francés"
           repoUrl="https://www.rio-frances.com"
-          translations={translations}
+          translations={marketingTranslations}
+          lang={lang}
         />
       )}
     </PlanProvider>

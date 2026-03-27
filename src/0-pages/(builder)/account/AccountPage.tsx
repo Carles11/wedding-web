@@ -261,7 +261,7 @@ export default function AccountPage({ account, translations, site }: Props) {
           <SecurityTab
             translations={translations}
             cardClass={cardClass}
-            site={site}
+            router={router}
           />
         )}
         {activeTab === "preferences" && (
