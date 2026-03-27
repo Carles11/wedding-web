@@ -21,7 +21,7 @@ export function Footer({
 
   return (
     <footer
-      className="w-full py-12 px-6"
+      className="w-full py-24 px-6"
       style={{
         background: "var(--marketing-bg-subtle-gradient)",
         borderTop: "1px solid var(--builder-color-border)",

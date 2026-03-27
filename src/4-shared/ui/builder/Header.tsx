@@ -9,45 +9,55 @@ export function BuilderHeader({
   handleLanguageChange = () => {},
 }: {
   translations: Record<string, string>;
-
   site: Site | null;
   currentLang?: string;
   handleLanguageChange?: (lang: string) => void;
 }) {
   return (
-    <header className="border-b bg-white p-4 flex items-center justify-between">
-      <div>
-        <h2 className="text-blue-600 font-semibold">
-          {translations["builder.header.title"]}
-        </h2>
-        <p className="text-sm text-gray-600">
-          {translations["builder.header.subtitle"]}
-        </p>
-      </div>
-      <div className="flex flex-col md:flex-row items-end-safe gap-4">
-        <div className="flex items-center gap-4">
-          {site?.subdomain ? (
-            <a
-              className="text-sm text-blue-600"
-              href={`https://${site.subdomain}.weddweb.com`}
-              target="_blank"
-              rel="noreferrer"
-            >
-              {translations["builder.header.site_preview"]}
-            </a>
-          ) : (
-            <span className="text-sm text-gray-500">
-              {translations["builder.header.no_site_yet"]}
-            </span>
-          )}
-          <LogoutButton />
+    <header className="border-b bg-white p-4 sm:p-6">
+      <div className="max-w-[95vw] mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
+        {/* Branding/Title Section */}
+        <div className="text-center sm:text-left">
+          <h2 className="text-xl sm:text-2xl text-blue-600 font-bold leading-tight">
+            {translations["builder.header.title"] || "Wedding-Web — Builder"}
+          </h2>
+          <p className="text-sm text-gray-500 mt-1">
+            {translations["builder.header.subtitle"] ||
+              "Manage the content of your website"}
+          </p>
         </div>
-        <div className=" top-4 right-4 z-50 bg-white/80 shadow-lg rounded-lg">
-          <LanguageSelector
-            currentLang={currentLang}
-            label={translations["marketing.lang_selector.label"] ?? "Language"}
-            onLanguageChange={handleLanguageChange}
-          />
+
+        {/* Actions Section */}
+        <div className="flex flex-col items-center sm:items-end gap-4 w-full sm:w-auto">
+          <div className="flex items-center justify-center sm:justify-end gap-4 w-full">
+            {site?.subdomain ? (
+              <a
+                className="text-sm font-medium text-blue-600 hover:underline whitespace-nowrap"
+                href={`https://${site.subdomain}.weddweb.com`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {translations["builder.header.site_preview"] ||
+                  "Open site preview"}
+              </a>
+            ) : (
+              <span className="text-sm text-gray-400">
+                {translations["builder.header.no_site_yet"]}
+              </span>
+            )}
+            <LogoutButton />
+          </div>
+
+          {/* Language Selector Container */}
+          <div className="w-full sm:w-64">
+            <LanguageSelector
+              currentLang={currentLang}
+              label={
+                translations["marketing.lang_selector.label"] ?? "Language"
+              }
+              onLanguageChange={handleLanguageChange}
+            />
+          </div>
         </div>
       </div>
     </header>
