@@ -207,7 +207,7 @@ export default function BuilderClient({
         currentLang={currentLang}
         handleLanguageChange={handleLanguageChange}
       />
-      <main className="p-4 sm:p-6 overflow-x-hidden">
+      <main className="sm:p-6 overflow-x-hidden">
         <div className="builder-shell md:max-w-[95vw] mx-auto rounded flex flex-col lg:flex-row">
           <BuilderStepNav
             stepKeys={STEP_KEYS}
