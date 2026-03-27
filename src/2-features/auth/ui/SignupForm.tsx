@@ -1,11 +1,12 @@
 "use client";
 
 import { signupWithEmail } from "@/2-features/auth/api";
+import { interpolate } from "@/4-shared/helpers/interpolateVars";
 import { BuilderTextInput } from "@/4-shared/ui/builder/inputs";
 import { MarketingButton } from "@/4-shared/ui/marketing";
 import { EMAIL_RE, passwordsMatch } from "@/4-shared/utils/validations";
 import Link from "next/link";
-import { useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 
 type Props = {
   translations: Record<string, string>;
@@ -28,6 +29,8 @@ export default function SignupForm({ translations, lang }: Props) {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [fullNameError, setFullNameError] = useState("");
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [acceptedTermsError, setAcceptedTermsError] = useState("");
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
@@ -38,6 +41,7 @@ export default function SignupForm({ translations, lang }: Props) {
   // Remove placeholder, use lang prop everywhere
 
   // Centralized validation
+  const TERMS_VERSION = "2026-03-27";
   const validate = () => {
     let hasError = false;
     setEmailError("");
@@ -45,6 +49,7 @@ export default function SignupForm({ translations, lang }: Props) {
     setConfirmPasswordError("");
     setFullNameError("");
     setGenericError("");
+    setAcceptedTermsError("");
     if (!EMAIL_RE.test(email)) {
       setEmailError(
         tr(
@@ -94,6 +99,16 @@ export default function SignupForm({ translations, lang }: Props) {
       );
       hasError = true;
     }
+    if (!acceptedTerms) {
+      setAcceptedTermsError(
+        tr(
+          translations,
+          "auth.signup.accept_terms_error",
+          "You must agree to the Privacy Policy and Terms of Service.",
+        ),
+      );
+      hasError = true;
+    }
     return hasError;
   };
 
@@ -110,6 +125,8 @@ export default function SignupForm({ translations, lang }: Props) {
         password,
         fullName || undefined,
         lang,
+        acceptedTerms,
+        TERMS_VERSION,
       );
       if (result.error) {
         // Try to assign error to input if possible
@@ -271,6 +288,44 @@ export default function SignupForm({ translations, lang }: Props) {
           >
             {tr(translations, "auth.common.sign_up", "Sign Up")}
           </MarketingButton>
+          <div className="flex items-center mt-2">
+            <input
+              id="accept-terms"
+              type="checkbox"
+              checked={acceptedTerms}
+              onChange={(e) => setAcceptedTerms(e.target.checked)}
+              className="mr-2 h-4 w-4 border-gray-300 rounded"
+              required
+            />
+            <label
+              htmlFor="accept-terms"
+              className="text-sm text-gray-700 select-none"
+            >
+              <span
+                dangerouslySetInnerHTML={{
+                  __html: interpolate(
+                    tr(
+                      translations,
+                      "auth.signup.accept_terms_label",
+                      "I agree to the weddweb.com {privacy} and {terms}.",
+                    ),
+                    {
+                      privacy: `<a href='/${lang}/privacy-policy' target='_blank' class='underline text-primary'>${tr(translations, "auth.signup.privacy_policy", "Privacy Policy")}</a>`,
+                      terms: `<a href='/${lang}/terms-of-service' target='_blank' class='underline text-primary'>${tr(translations, "auth.signup.terms_of_service", "Terms of Service")}</a>`,
+                    },
+                  ),
+                }}
+              />
+            </label>
+          </div>
+          {acceptedTermsError && (
+            <p
+              className="text-xs text-(--builder-color-danger) mt-1"
+              role="alert"
+            >
+              {acceptedTermsError}
+            </p>
+          )}
         </form>
         {genericError && (
           <p

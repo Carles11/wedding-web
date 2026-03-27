@@ -97,12 +97,6 @@ export function CookieTypesSection({ translations }: SectionProps) {
 }
 
 export function CookieUsageSection({ translations }: SectionProps) {
-  const usageKeys = [
-    "marketing.legal.cookie.usage.auth",
-    "marketing.legal.cookie.usage.analytics",
-    "marketing.legal.cookie.usage.prefs",
-    "marketing.legal.cookie.usage.performance",
-  ];
   return (
     <section id="usage" className="mb-16 scroll-mt-24">
       <h2 className="font-display text-3xl mb-6">
@@ -115,21 +109,10 @@ export function CookieUsageSection({ translations }: SectionProps) {
       <p className="mb-6 text-gray-700">
         {t(
           translations,
-          "marketing.legal.cookie.usage.intro",
-          "We use cookies to:",
+          "marketing.legal.cookie.usage.current",
+          "Currently, we only use essential cookies required for authentication and security (such as Supabase session cookies). No analytics or preference cookies are set at this time. In the future, we may use Google Analytics cookies to help us understand site usage, but you will be notified and able to consent before these are set.",
         )}
       </p>
-      <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {usageKeys.map((key, i) => (
-          <li
-            key={i}
-            className="flex items-center gap-3 p-4 rounded-xl bg-teal-50/50 text-sm text-teal-800 border border-teal-100/50"
-          >
-            <span className="text-teal-500 font-bold">✓</span>
-            {t(translations, key, "Site function")}
-          </li>
-        ))}
-      </ul>
     </section>
   );
 }
@@ -147,8 +130,8 @@ export function CookieManageSection({ translations }: SectionProps) {
       <p className="text-gray-700 leading-relaxed opacity-90">
         {t(
           translations,
-          "marketing.legal.cookie.manage.desc",
-          "Policy details.",
+          "marketing.legal.cookie.manage.current",
+          "Because we only use essential cookies for authentication, there are currently no preferences to manage. When we introduce analytics cookies (such as Google Analytics), you will be able to manage your preferences and provide consent via a cookie banner.",
         )}
       </p>
     </section>
@@ -168,8 +151,8 @@ export function CookieThirdPartySection({ translations }: SectionProps) {
       <p className="text-gray-700 leading-relaxed opacity-90">
         {t(
           translations,
-          "marketing.legal.cookie.third_party.desc",
-          "Policy details.",
+          "marketing.legal.cookie.third_party.current",
+          "We do not currently use any third-party analytics or advertising cookies. In the future, we plan to use Google Analytics to help us understand how visitors use our site. You will be notified and able to consent before any such cookies are set.",
         )}
       </p>
     </section>

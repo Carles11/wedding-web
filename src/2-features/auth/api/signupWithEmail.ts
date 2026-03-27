@@ -18,6 +18,8 @@ export async function signupWithEmail(
   password: string,
   fullName?: string,
   preferredLanguage?: string,
+  acceptedTerms?: boolean,
+  acceptedTermsVersion?: string,
 ): Promise<{ error?: string; success?: boolean; needsVerification?: boolean }> {
   const supabase = await createSupabaseSSRClient();
   const selectedLang = isValidLanguage(preferredLanguage)
@@ -56,6 +58,9 @@ export async function signupWithEmail(
         email,
         full_name: fullName || null,
         preferred_language: selectedLang,
+        accepted_terms: !!acceptedTerms,
+        accepted_terms_at: acceptedTerms ? new Date().toISOString() : null,
+        accepted_terms_version: acceptedTermsVersion || null,
       },
     ]);
 
