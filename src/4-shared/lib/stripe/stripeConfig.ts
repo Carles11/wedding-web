@@ -4,16 +4,22 @@ import "server-only";
 type StripeMode = "live" | "test";
 
 function shouldUseTestStripeMode(): boolean {
+  // 1. Manual override takes absolute priority
   const forced = process.env.STRIPE_USE_TEST_KEYS;
-
   if (forced === "true") return true;
   if (forced === "false") return false;
 
-  // Default to sandbox in local/dev when test secret key exists.
-  return (
-    process.env.NODE_ENV !== "production" &&
-    Boolean(process.env.STRIPE_SECRET_KEY_TEST)
-  );
+  // 2. Vercel specific logic:
+  // 'production' = Live keys
+  // 'preview' or 'development' = Test keys
+  const vercelEnv = process.env.VERCEL_ENV; // 'production', 'preview', or 'development'
+
+  if (vercelEnv === "production") {
+    return false; // Use Live Keys
+  }
+
+  // 3. Fallback for local or preview deployments
+  return true; // Default to Test Keys for Beta/Preview/Local
 }
 
 export const STRIPE_MODE: StripeMode = shouldUseTestStripeMode()
