@@ -9,7 +9,7 @@ export interface LanguageSelectorProps {
   currentLang: string;
   label?: string;
   onLanguageChange: (lang: string) => void;
-  preferencesTab: boolean; // New prop to indicate if we're in the preferences tab
+  preferencesTab?: boolean; // prop to indicate if we're in the preferences tab
 }
 
 /**
