@@ -1,0 +1,47 @@
+# Supabase Email Confirmation Redirect Best Practices
+
+## 1. Email Template
+
+- Use the default template:
+  ```html
+  <a href="{{ .ConfirmationURL }}">Confirm your mail</a>
+  ```
+- Do **not** hardcode a `redirect_to` in the template unless you want a fixed redirect for all users/languages.
+
+## 2. Registration Code (Frontend)
+
+- When calling `supabase.auth.signUp`, always pass the correct `redirectTo` parameter for the user's language:
+  ```js
+  supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      emailRedirectTo:
+        "https://weddwebcom-git-beta-deploy-carles-projects-5a7d39cc.vercel.app/de/auth/confirm",
+    },
+  });
+  ```
+- Replace `/de/auth/confirm` with the correct language route for each user.
+
+## 3. Supabase Dashboard Settings
+
+- In **Authentication → URL Configuration**, add all possible callback/confirm URLs you use, e.g.:
+  - https://weddwebcom-git-beta-deploy-carles-projects-5a7d39cc.vercel.app/en/auth/confirm
+  - https://weddwebcom-git-beta-deploy-carles-projects-5a7d39cc.vercel.app/es/auth/confirm
+  - ... (repeat for all supported languages)
+
+## 4. How It Works
+
+- The confirmation email will use the `redirectTo` you pass in your registration code.
+- The user will be redirected to the correct `/auth/confirm` route for their language after clicking the email link.
+- Your `/auth/confirm` route/component should handle the session/token and log the user in automatically.
+
+## 5. Best Practice
+
+- **Always pass the correct `redirectTo` in your registration code.**
+- **Keep the email template as `{{ .ConfirmationURL }}` for flexibility.**
+- **Add all used redirect URLs to Supabase dashboard.**
+
+---
+
+If you want to force a fixed redirect for all users, you can append `&redirect_to=...` in the template, but this is not recommended for multi-language apps.

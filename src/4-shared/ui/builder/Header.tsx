@@ -31,15 +31,34 @@ export function BuilderHeader({
         <div className="flex flex-col items-center sm:items-end gap-4 w-full sm:w-auto">
           <div className="flex items-center justify-center sm:justify-end gap-4 w-full">
             {site?.subdomain ? (
-              <a
-                className="text-sm font-medium text-blue-600 hover:underline whitespace-nowrap"
-                href={`https://${site.subdomain}.weddweb.com`}
-                target="_blank"
-                rel="noreferrer"
-              >
-                {translations["builder.header.site_preview"] ||
-                  "Open site preview"}
-              </a>
+              (() => {
+                let previewUrl = "";
+                if (typeof window !== "undefined") {
+                  const { hostname } = window.location;
+                  if (hostname === "localhost") {
+                    previewUrl = `http://${site.subdomain}.localhost:3000`;
+                  } else if (hostname.includes("vercel.app")) {
+                    // Use the current host as the base, replacing the first part with the subdomain
+                    // e.g. subdomain.weddwebcom-git-beta-deploy-carles-projects-5a7d39cc.vercel.app
+                    const hostParts = hostname.split(".");
+                    hostParts[0] = site.subdomain;
+                    previewUrl = `${window.location.protocol}//${hostParts.join(".")}`;
+                  } else {
+                    previewUrl = `https://${site.subdomain}.weddweb.com`;
+                  }
+                }
+                return (
+                  <a
+                    className="text-sm font-medium text-blue-600 hover:underline whitespace-nowrap"
+                    href={previewUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {translations["builder.header.site_preview"] ||
+                      "Open site preview"}
+                  </a>
+                );
+              })()
             ) : (
               <span className="text-sm text-gray-400">
                 {translations["builder.header.no_site_yet"]}

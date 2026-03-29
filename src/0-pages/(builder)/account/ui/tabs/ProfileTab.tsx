@@ -138,7 +138,7 @@ export function ProfileTab({
         onClose={() => setShowEmailChangeModal(false)}
         translations={translations}
       />
-      <div className="space-y-6 animate-fadeIn">
+      <div className="space-y-6 mb-4 md:mb-8 animate-fadeIn">
         {/* Editable fields card */}
         <div className={cardClass}>
           <div className="p-6 border-b border-(--builder-color-border) bg-(--builder-color-muted-surface)/30">

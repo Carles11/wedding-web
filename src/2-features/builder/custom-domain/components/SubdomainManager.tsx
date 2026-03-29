@@ -1,5 +1,6 @@
 "use client";
 
+import { getDomainSuffix } from "@/4-shared/helpers/subdomain/getSuffix";
 import { notify } from "@/4-shared/lib/toast/toast";
 import type { PlanType, Site } from "@/4-shared/types";
 import { BuilderButton } from "@/4-shared/ui/builder";
@@ -11,7 +12,6 @@ interface Props {
   site: Site;
   refresh: () => void;
   translations: Record<string, string>;
-  domainSuffix?: string; // "weddweb.com"
   planType: PlanType;
   canEdit?: boolean;
 }
@@ -22,7 +22,6 @@ export default function SubdomainManager({
   site,
   refresh,
   translations,
-  domainSuffix = "weddweb.com",
   planType,
   canEdit = true,
 }: Props) {
@@ -38,8 +37,7 @@ export default function SubdomainManager({
     | "error_invalid"
   >("idle");
   const [helpText, setHelpText] = useState<string>("");
-
-  // Validate the subdomain (client-side)
+  const domainSuffix = getDomainSuffix();
 
   async function handleSave() {
     if (!isValidSubdomain(subdomain)) {
@@ -119,11 +117,11 @@ export default function SubdomainManager({
             size="sm"
             onClick={() => copyToClipboard(`${site.subdomain}.${domainSuffix}`)}
           >
-            {translations["builder.domain.copy_url"]}
+            {translations["builder.domain.copy_url"] || "Copy URL"}
           </BuilderButton>
         </div>
         <div className="mt-1 text-xs text-gray-500">
-          {translations["builder.domain.example_url"]}:{" "}
+          {translations["builder.domain.example_url"] || "Example URL"}:{" "}
           <span className="font-mono">{`https://${site.subdomain}.${domainSuffix}`}</span>
         </div>
       </div>
@@ -132,7 +130,7 @@ export default function SubdomainManager({
       {canEdit && (
         <div className="space-y-1">
           <label className="block text-sm font-medium text-gray-700">
-            {translations["builder.domain.subdomain_label"]}
+            {translations["builder.domain.subdomain_label"] || "Subdomain"}
           </label>
           <input
             value={subdomain}
@@ -149,7 +147,8 @@ export default function SubdomainManager({
             spellCheck={false}
           />
           <p className="text-xs text-gray-500">
-            {translations["builder.domain.subdomain_desc"]}
+            {translations["builder.domain.subdomain_desc"] ||
+              "Enter your desired subdomain."}
           </p>
           {status !== "idle" && (
             <p
@@ -170,7 +169,7 @@ export default function SubdomainManager({
             loading={status === "saving"}
             className="mt-2"
           >
-            {translations["builder.domain.save_btn"]}
+            {translations["builder.domain.save_btn"] || "Save domain"}
           </BuilderButton>
         </div>
       )}
