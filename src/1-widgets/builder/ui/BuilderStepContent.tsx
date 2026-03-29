@@ -1,6 +1,6 @@
 "use client";
 
-import type { PlanType, Site } from "@/4-shared/types";
+import { BuilderStepContentProps } from "@/4-shared/types";
 import {
   AccommodationBuilderStep,
   ContactBuilderStep,
@@ -11,26 +11,6 @@ import {
   WeddingGiftBuilderStep,
   WhatToSeeBuilderStep,
 } from "./steps";
-
-export interface BuilderStepContentProps {
-  active: number;
-  site: Site;
-  siteLoading: boolean;
-  siteError: string | null;
-  refresh: () => void;
-  currentLang: string;
-  translations: Record<string, string>;
-  langLimit: number;
-  planType: PlanType;
-  // step completeness callbacks
-  setHasHeroContent: (v: boolean) => void;
-  setHeroImageExists: (v: boolean) => void;
-  setHasMainProgramEvent: (v: boolean) => void;
-  setAccommodationCount: (v: number) => void;
-  setWhatToSeeCount: (v: number) => void;
-  setHasWeddingGiftData: (v: boolean) => void;
-  setHasContact: (v: boolean) => void;
-}
 
 /**
  * Renders the right-hand content pane of the builder.

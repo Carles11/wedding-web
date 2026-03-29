@@ -49,6 +49,8 @@ Powered by Next.js 16+, Supabase, and strict Feature-Sliced Design.
 - Mobile-ready structure (Expo/React Native compatible)
 - Open-source, white-label ready
 
+> See [Notion docs](https://gregarious-louse-24f.notion.site/32f83b723884451893ed83b4c4722a10?v=5bcada60b2b24b0294ab8d5f9f7702b4) for deep dive.
+
 ---
 
 ## Internationalization (i18n) Architecture
@@ -104,6 +106,52 @@ Full guides (setup, scaling, multi-tenancy, architecture, i18n, security, etc.):
 ## License
 
 MIT
+
+---
+
+## Stripe Webhook Setup Checklist
+
+Follow these steps to ensure Stripe webhooks work in all environments:
+
+### 1. Local Development
+
+- [ ] **Stripe CLI:** Install and log in (`stripe login`).
+- [ ] **Start local server:** Ensure `/api/stripe/webhooks` is running locally (e.g., `localhost:3000/api/stripe/webhooks`).
+- [ ] **Forward webhooks:**
+  ```bash
+  stripe listen --forward-to localhost:3000/api/stripe/webhooks
+  ```
+- [ ] **Copy webhook secret:** Stripe CLI will show a secret (starts with `whsec_...`). Add it to your `.env.local` as `STRIPE_WEBHOOK_SECRET` (or `STRIPE_WEBHOOK_SECRET_TEST`).
+- [ ] **Test payment:** Run through your payment flow. Check your local logs for webhook events and DB updates.
+- [ ] **Debug:** If issues, check logs for signature errors, 400/500 responses, or missing env vars.
+
+### 2. Beta/Preview Deploy (e.g., Vercel Preview)
+
+- [ ] **Deploy code:** Push your latest code to your beta environment (e.g., `https://weddweb-beta.vercel.app`).
+- [ ] **Add webhook in Stripe dashboard (test mode):**
+  - Go to Developers → Webhooks.
+  - Add endpoint: `https://weddweb-beta.vercel.app/api/stripe/webhooks`
+  - Select events (at least `checkout.session.completed`).
+- [ ] **Copy webhook secret:** After adding, Stripe will show a secret. Add it to your beta environment variables as `STRIPE_WEBHOOK_SECRET`.
+- [ ] **Test payment:** Run through the payment flow on your beta site.
+- [ ] **Check Stripe dashboard:** Webhook deliveries should show 200 OK. If not, check your beta server logs for errors.
+
+### 3. Production
+
+- [ ] **Deploy code:** Make sure `/api/stripe/webhooks` is deployed to your live domain (e.g., `https://www.weddweb.com`).
+- [ ] **Add webhook in Stripe dashboard (live mode):**
+  - Switch to live mode in Stripe.
+  - Add endpoint: `https://www.weddweb.com/api/stripe/webhooks`
+  - Select events (at least `checkout.session.completed`).
+- [ ] **Copy webhook secret:** Add to your production environment as `STRIPE_WEBHOOK_SECRET`.
+- [ ] **Test with real payment:** (or use Stripe’s test mode for a final check)
+- [ ] **Monitor:** Webhook deliveries should show 200 OK. Check your production logs for any errors.
+
+**Tips:**
+
+- Always keep secrets separate for test and live.
+- Remove or update old webhook endpoints if you change URLs.
+- Use Stripe dashboard’s “Resend” feature to retry failed events after fixing issues.
 
 ---
 

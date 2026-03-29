@@ -1,9 +1,7 @@
 "use client";
 
 import BuilderStepContent from "@/1-widgets/builder/ui/BuilderStepContent";
-import BuilderStepNav, {
-  type StepStatus,
-} from "@/1-widgets/builder/ui/BuilderStepNav";
+import BuilderStepNav from "@/1-widgets/builder/ui/BuilderStepNav";
 import { fetchAccommodationEntries } from "@/3-entities/accommodation/api";
 import { updateAccountInfo } from "@/3-entities/account/api/accountCrud";
 import { fetchImagesBySite } from "@/3-entities/images/api";
@@ -15,29 +13,13 @@ import { getPlanLimit } from "@/4-shared/helpers/billing/entitlements";
 import { useSite } from "@/4-shared/hooks/useSite";
 import { useSupabaseAuth } from "@/4-shared/hooks/useSupabaseAuth";
 import { createClient } from "@/4-shared/lib/supabase/client";
+import { BuilderClientProps, ImageSection, StepStatus } from "@/4-shared/types";
 import { BuilderHeader } from "@/4-shared/ui/builder";
 import { CookiesConsentBanner } from "@/4-shared/ui/CookiesConsentBanner";
 import { EMAIL_RE } from "@/4-shared/utils/validations";
 import { usePlan } from "@/app/providers";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-
-interface ImageSection {
-  type: string;
-  [key: string]: unknown;
-}
-
-interface Props {
-  initialLang?: string;
-  translations: Record<string, string>;
-  userId?: string | null;
-  userProfile?: {
-    cookie_consent?: boolean | null;
-    cookie_consent_at?: string | null;
-    cookie_consent_version?: string | null;
-    [key: string]: any;
-  } | null;
-}
 
 const STEP_KEYS = [
   "builder.nav.step.general",
@@ -50,27 +32,12 @@ const STEP_KEYS = [
   "builder.nav.step.domain_billing",
 ];
 
-function hasAnyGiftPaymentMethod(
-  gift: Record<string, unknown> | null,
-): boolean {
-  if (!gift) return false;
-  return !!(
-    gift.paypal_url ||
-    gift.bank_account_iban ||
-    gift.bizum_phone ||
-    gift.venmo_username ||
-    gift.giftlist_url ||
-    gift.honeymoon_fund_url ||
-    gift.other_method_url
-  );
-}
-
 export default function BuilderClient({
   initialLang = "en",
   translations: initialTranslations,
   userId,
   userProfile,
-}: Props) {
+}: BuilderClientProps) {
   const router = useRouter();
   const pathname = usePathname();
   const { user } = useSupabaseAuth();
@@ -107,6 +74,21 @@ export default function BuilderClient({
   const [hasWeddingGiftData, setHasWeddingGiftData] = useState(false);
   const [hasContact, setHasContact] = useState(false);
 
+  function hasAnyGiftPaymentMethod(
+    gift: Record<string, unknown> | null,
+  ): boolean {
+    if (!gift) return false;
+    return !!(
+      gift.paypal_url ||
+      gift.bank_account_iban ||
+      gift.bizum_phone ||
+      gift.venmo_username ||
+      gift.giftlist_url ||
+      gift.honeymoon_fund_url ||
+      gift.other_method_url
+    );
+  }
+
   const langLimit = getPlanLimit(planType, "languages");
 
   const provisionSite = useCallback(async () => {
@@ -127,7 +109,6 @@ export default function BuilderClient({
     if (user && !site && !siteLoading) {
       provisionSite();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, site, siteLoading]);
 
   useEffect(() => {
@@ -229,7 +210,7 @@ export default function BuilderClient({
             stepKeys={STEP_KEYS}
             stepStatuses={STEP_STATUS}
             active={active}
-            onSelect={(step) => {
+            onSelect={(step: number) => {
               setActive(step);
               // update step in URL
               const url = `/${currentLang}/builder?step=${step}`;

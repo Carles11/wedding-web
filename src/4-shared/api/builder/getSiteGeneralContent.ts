@@ -1,15 +1,7 @@
 import type { SupportedLanguage } from "@/4-shared/config/i18n";
 import { SUPPORTED_LANGUAGES } from "@/4-shared/config/i18n";
 import { createClient } from "@/4-shared/lib/supabase/client";
-
-type GeneralContent = {
-  languages: SupportedLanguage[];
-  default_lang: SupportedLanguage;
-  subdomain: string;
-  heroId: string | null;
-  titles: Record<SupportedLanguage, string>;
-  subtitles: Record<SupportedLanguage, string>;
-};
+import { GeneralContent } from "@/4-shared/types";
 
 export async function getSiteGeneralContent(
   site_id: string,

@@ -8,22 +8,11 @@ import {
   SUPPORTED_LANGUAGES,
 } from "@/4-shared/config/i18n";
 import { notify } from "@/4-shared/lib/toast/toast";
-import type { PlanType, Site } from "@/4-shared/types";
+import { GeneralContentState, GeneralSiteFormProps } from "@/4-shared/types";
 import { BuilderLangTabs, UpgradeCTAModal } from "@/4-shared/ui/builder";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 import { StepLayout } from "../../step-layout";
-
-type Props = {
-  site: Site | null;
-  refresh: () => void;
-  lang: string;
-  translations: Record<string, string>;
-  langLimit: number;
-  planType: PlanType;
-  /** Called with true once hero title + subtitle are saved for the default language. */
-  setGeneralComplete?: (v: boolean) => void;
-};
 
 export default function GeneralSiteForm({
   site,
@@ -33,12 +22,10 @@ export default function GeneralSiteForm({
   langLimit,
   planType,
   setGeneralComplete,
-}: Props) {
+}: GeneralSiteFormProps) {
   const router = useRouter();
   const fetchCounterRef = useRef(0);
-  const lastFetchedRef = useRef<Awaited<
-    ReturnType<typeof getSiteGeneralContent>
-  > | null>(null);
+  const lastFetchedRef = useRef<GeneralContentState | null>(null);
   const [languages, setLanguages] = useState<SupportedLanguage[]>([]);
   const [defaultLang, setDefaultLang] = useState<SupportedLanguage>("en");
   const [subdomain, setSubdomain] = useState("");
@@ -60,8 +47,6 @@ export default function GeneralSiteForm({
     if (a.length !== b.length) return false;
     return a.every((v, i) => v === b[i]);
   }
-
-  type GeneralContentState = Awaited<ReturnType<typeof getSiteGeneralContent>>;
 
   function applyGeneralContent(res: GeneralContentState) {
     lastFetchedRef.current = res;

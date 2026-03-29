@@ -3,6 +3,7 @@ import { formatAccountDate } from "@/4-shared/helpers/formatAccountDate";
 import { useSupabaseAuth } from "@/4-shared/hooks/useSupabaseAuth";
 import { notify } from "@/4-shared/lib/toast/toast";
 import { BuilderButton } from "@/4-shared/ui/builder/BuilderButton";
+import Heading from "@/4-shared/ui/commons/typography/Heading";
 import { useEffect, useState } from "react";
 import AccountDangerZone from "../AccountDangerZone";
 import EmailChangeInstructionsModal from "../EmailChangeInstructionsModal";
@@ -141,10 +142,13 @@ export function ProfileTab({
         {/* Editable fields card */}
         <div className={cardClass}>
           <div className="p-6 border-b border-(--builder-color-border) bg-(--builder-color-muted-surface)/30">
-            <h2 className="text-lg font-semibold text-(--builder-color-text)">
+            <Heading
+              as="h2"
+              className="text-lg font-semibold text-(--builder-color-text)"
+            >
               {translations["builder.account.tabs.profile.section_profile"] ||
                 "Profile Information"}
-            </h2>
+            </Heading>
             <p className="text-sm text-(--builder-color-text-muted) mt-1">
               {translations["builder.account.tabs.profile.update_info"] ||
                 "Update your personal information"}

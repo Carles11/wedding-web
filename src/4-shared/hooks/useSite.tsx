@@ -65,14 +65,15 @@ export function useSite(user: User | null) {
         });
       }
 
-      if (chosenSite?.id !== lockedSiteId.current) {
-        console.log("[useSite] Active site selection changed", {
-          userId: user.id,
-          previousSiteId: lockedSiteId.current,
-          nextSiteId: chosenSite?.id ?? null,
-          availableSiteIds: rows.map((row) => row.id),
-        });
-      }
+      // debug log to verify site locking behavior (should only appear on first load or when the user changes,)
+      // if (chosenSite?.id !== lockedSiteId.current) {
+      //   console.log("[useSite] Active site selection changed", {
+      //     userId: user.id,
+      //     previousSiteId: lockedSiteId.current,
+      //     nextSiteId: chosenSite?.id ?? null,
+      //     availableSiteIds: rows.map((row) => row.id),
+      //   });
+      // }
 
       lockedSiteId.current = chosenSite?.id ?? null;
 

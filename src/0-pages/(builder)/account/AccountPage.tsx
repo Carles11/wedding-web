@@ -13,6 +13,7 @@ import { ProfileTab } from "./ui/tabs/ProfileTab";
 import { SecurityTab } from "./ui/tabs/SecurityTab";
 
 import type { Site } from "@/4-shared/types";
+import { Heading } from "@/4-shared/ui/commons/typography/Heading";
 
 interface Props {
   account: any;
@@ -80,7 +81,9 @@ export default function AccountPage({ account, translations, site }: Props) {
         notify.error("Update failed.");
       }
     } catch (err) {
-      notify.error("Something went wrong.");
+      notify.error(
+        translations["error.something_went_wrong"] ?? "Something went wrong",
+      );
     } finally {
       setSaving(false);
     }
@@ -158,11 +161,14 @@ export default function AccountPage({ account, translations, site }: Props) {
           {/* Identity & Badges */}
           <div className="flex-1 text-center sm:text-left min-w-0">
             <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
-              <h1 className="text-2xl sm:text-3xl font-bold text-(--builder-color-text) truncate">
+              <Heading
+                as="h1"
+                className="text-2xl sm:text-3xl font-bold text-(--builder-color-text) truncate"
+              >
                 {account.full_name ||
                   translations["builder.account.page.welcome_back"] ||
                   "Welcome!"}
-              </h1>
+              </Heading>
               {account.onboarding_completed && (
                 <div className="flex justify-center">
                   <span className="px-2.5 py-0.5 text-[10px] uppercase tracking-wider font-bold rounded-full bg-green-100 text-green-700 border border-green-200">

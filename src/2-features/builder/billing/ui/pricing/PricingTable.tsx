@@ -2,20 +2,13 @@
 
 import { PLAN_CATALOG } from "@/4-shared/config/plans/planCatalog";
 import { getLocalizedPlanFeatureTitles } from "@/4-shared/helpers/billing/entitlements";
+import { t } from "@/4-shared/helpers/t";
 import type { PlanType } from "@/4-shared/types";
 
 function formatLimit(val: number, t: Record<string, string>, prop: string) {
   if (val === -1) return t["pricing.unlimited"] ?? "Unlimited";
   if (val === 0 && prop === "customDomains") return t["pricing.none"] ?? "None";
   return val;
-}
-
-function tr(
-  translations: Record<string, string>,
-  key: string,
-  fallback: string,
-) {
-  return translations[key] ?? fallback;
 }
 
 export default function PricingTable({
@@ -34,6 +27,8 @@ export default function PricingTable({
   const planKeys = Object.keys(PLAN_CATALOG) as PlanType[];
 
   const filteredPlans = planKeys.filter((p) =>
+    // Agency plans start with "agency", private plans do not
+    // (AGENCY PLANS MUST BE NAMED WITH "agency" PREFIX FOR THIS TO WORK: COMMING SOON)
     type === "agency" ? p.startsWith("agency") : !p.startsWith("agency"),
   );
 
@@ -53,11 +48,7 @@ export default function PricingTable({
               }).format(def.price);
 
         // TRANSLATIONS
-        const planName = tr(
-          translations,
-          `pricing.plan.${plan}.name`,
-          def.name,
-        );
+        const planName = t(translations, `pricing.plan.${plan}.name`, def.name);
 
         const localizedFeatures = getLocalizedPlanFeatureTitles(
           plan,
@@ -65,7 +56,7 @@ export default function PricingTable({
         );
 
         const billingKey = `pricing.billing.${String(def.billing).replace("-", "_")}`;
-        const billingLabel = tr(translations, billingKey, String(def.billing));
+        const billingLabel = t(translations, billingKey, String(def.billing));
 
         return (
           <div
@@ -101,12 +92,12 @@ export default function PricingTable({
                 </>
               ) : (
                 <p className="text-2xl font-semibold">
-                  {tr(translations, "pricing.free", "Free")}
+                  {t(translations, "pricing.free", "Free")}
                 </p>
               )}
             </div>
 
-            {/* FEATURES */}
+            {/* FEATURES (comming from PLAN_CATALOG. src\4-shared\config\plans\planCatalog.ts */}
             <ul className="mb-6 space-y-3 text-sm">
               {localizedFeatures.map((feat, i) => (
                 <li key={i} className="flex items-start gap-3">
@@ -118,14 +109,14 @@ export default function PricingTable({
               ))}
             </ul>
 
-            {/* LIMITS (If any) */}
+            {/* LIMITS  (comming from PLAN_CATALOG.limits src\4-shared\config\plans\planCatalog.ts */}
             {def.limits && (
               <div className="mt-auto border-t pt-4 text-sm">
                 <div className="space-y-2">
                   {Object.entries(def.limits).map(([prop, val]) => (
                     <div key={prop} className="flex justify-between">
                       <span className="text-gray-500 capitalize">
-                        {tr(
+                        {t(
                           translations,
                           `pricing.limit.${prop}`,
                           prop.replace(/([A-Z])/g, " $1").trim(),

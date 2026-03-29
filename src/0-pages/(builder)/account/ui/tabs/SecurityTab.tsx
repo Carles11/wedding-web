@@ -6,6 +6,7 @@ import { PasswordChangeModal } from "../PasswordChangeModal";
 
 import { useSite } from "@/4-shared/hooks/useSite";
 import { useSupabaseAuth } from "@/4-shared/hooks/useSupabaseAuth";
+import Heading from "@/4-shared/ui/commons/typography/Heading";
 import { usePlan } from "@/app/providers";
 
 interface SecurityTabProps {
@@ -61,10 +62,13 @@ export const SecurityTab = ({
     <div className="space-y-6 animate-fadeIn">
       <div className={cardClass}>
         <div className="p-6 border-b border-(--builder-color-border) bg-(--builder-color-muted-surface)/30">
-          <h2 className="text-lg font-semibold text-(--builder-color-text)">
+          <Heading
+            as="h2"
+            className="text-lg font-semibold text-(--builder-color-text)"
+          >
             {translations["builder.account.tabs.security.section_security"] ||
               "Security Settings"}
-          </h2>
+          </Heading>
         </div>
 
         <div className="p-6 space-y-4">

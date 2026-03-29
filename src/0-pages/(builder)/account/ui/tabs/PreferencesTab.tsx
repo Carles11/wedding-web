@@ -3,6 +3,7 @@ import type { SupportedLanguage } from "@/4-shared/config/i18n";
 import { useSupabaseAuth } from "@/4-shared/hooks/useSupabaseAuth";
 import { notify } from "@/4-shared/lib/toast/toast";
 import LanguageSelector from "@/4-shared/ui/builder/LanguageSelector";
+import Heading from "@/4-shared/ui/commons/typography/Heading";
 import { useState } from "react";
 
 interface PreferencesTabProps {
@@ -55,11 +56,14 @@ export function PreferencesTab({
     <div className="space-y-6 animate-fadeIn">
       <div className={cardClass}>
         <div className="p-6 border-b border-(--builder-color-border) bg-(--builder-color-muted-surface)/30">
-          <h2 className="text-lg font-semibold text-(--builder-color-text)">
+          <Heading
+            as="h2"
+            className="text-lg font-semibold text-(--builder-color-text)"
+          >
             {translations[
               "builder.account.tabs.preferences.section_language_region"
             ] || "Language & Region"}
-          </h2>
+          </Heading>
         </div>
         <div className="p-6">
           <div className="flex items-center justify-between p-4 bg-(--builder-color-muted-surface)/20 rounded-lg">
@@ -95,6 +99,7 @@ export function PreferencesTab({
                   translations["builder.account.tabs.preferences.change_btn"] ||
                   "Change"
                 }
+                preferencesTab={true}
               />
               {loading && (
                 <span className="ml-2 text-xs text-gray-400">Saving...</span>

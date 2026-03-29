@@ -1,6 +1,7 @@
 "use client";
 
 import PricingTable from "@/2-features/builder/billing/ui/pricing/PricingTable";
+import { notify } from "@/4-shared/lib/toast/toast";
 import type { PlanType } from "@/4-shared/types";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -44,9 +45,8 @@ export default function OnboardingClient({ translations, lang }: Props) {
       }
     } catch (err) {
       console.error("[Onboarding] Error:", err);
-      alert(
-        translations["error.onboarding_failed"] ??
-          "Something went wrong. Please try again.",
+      notify.error(
+        translations["error.something_went_wrong"] ?? "Something went wrong",
       );
       setIsLoading(false);
     }

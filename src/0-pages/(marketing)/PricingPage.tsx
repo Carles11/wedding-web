@@ -2,6 +2,7 @@ import PricingCTATableAdapter from "@/1-widgets/marketing/ui/PricingCTATableAdap
 import PricingPageShell from "@/1-widgets/marketing/ui/PricingPageShell";
 
 import type { MarketingTranslations } from "@/4-shared/types";
+import { Footer } from "@/4-shared/ui/commons/footer/Footer";
 
 type Props = {
   translations: MarketingTranslations;
@@ -10,18 +11,21 @@ type Props = {
 
 export default function PricingPage({ translations, lang }: Props) {
   return (
-    <PricingPageShell
-      title={translations["pricing.title"] ?? "Plans & Pricing"}
-      summary={
-        translations["pricing.summary"] ??
-        "Create a beautiful wedding website and share your special day."
-      }
-      fine_print={
-        translations["pricing.fine_print"] ??
-        "All prices include applicable taxes where required."
-      }
-    >
-      <PricingCTATableAdapter lang={lang} t={translations} />
-    </PricingPageShell>
+    <>
+      <PricingPageShell
+        title={translations["pricing.title"] ?? "Plans & Pricing"}
+        summary={
+          translations["pricing.summary"] ??
+          "Create a beautiful wedding website and share your special day."
+        }
+        fine_print={
+          translations["pricing.fine_print"] ??
+          "All prices include applicable taxes where required."
+        }
+      >
+        <PricingCTATableAdapter lang={lang} t={translations} />
+      </PricingPageShell>
+      <Footer lang={lang} translations={translations} />
+    </>
   );
 }

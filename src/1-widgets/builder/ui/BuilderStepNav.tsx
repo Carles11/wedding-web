@@ -1,22 +1,12 @@
 "use client";
 
+import { BuilderStepNavProps, StepStatus } from "@/4-shared/types";
 import {
   GrayCircleIcon,
   GreenCheckIcon,
   RedDotIcon,
 } from "@/4-shared/ui/commons/icons/completenessIcons";
 import { Fragment } from "react";
-
-export type StepStatus = "done" | "pending" | "optional";
-
-export interface BuilderStepNavProps {
-  stepKeys: string[];
-  stepStatuses: StepStatus[];
-  active: number;
-  onSelect: (index: number) => void;
-  translations: Record<string, string>;
-  currentLang: string;
-}
 
 function StatusIcon({ status }: { status: StepStatus }) {
   if (status === "done") return <GreenCheckIcon />;
@@ -37,7 +27,8 @@ export default function BuilderStepNav({
 }: BuilderStepNavProps) {
   return (
     <div className="lg:flex">
-      {/* MOBILE STEP SCROLLER */}
+      {/*********************** MOBILE STEP SCROLLER ***********************/}
+
       <div className="lg:hidden border-b bg-white">
         <div className="flex overflow-x-auto gap-2 p-3">
           {stepKeys.map((k, i) => (
@@ -70,7 +61,8 @@ export default function BuilderStepNav({
         </div>
       </div>
 
-      {/* DESKTOP SIDEBAR */}
+      {/*********************** DESKTOP SIDEBAR ***********************/}
+
       <nav className="hidden lg:block w-64 border-r p-4">
         <h3 className="font-semibold text-gray-700 text-2xl">
           {translations["builder.nav.steps_title"]}

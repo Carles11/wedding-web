@@ -1,42 +1,25 @@
 "use client";
 
 import { isValidLanguage } from "@/4-shared/helpers/isValidLanguage";
+import { t } from "@/4-shared/helpers/t";
+import { CheckoutClientProps, CheckoutResponse } from "@/4-shared/types";
 import Heading from "@/4-shared/ui/commons/typography/Heading";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
-interface CheckoutResponse {
-  success: boolean;
-  code?: string;
-  planType: string;
-  sessionId?: string;
-  url?: string;
-  redirectTo?: string;
-  message?: string;
-}
-
-interface Props {
-  t: Record<string, string>;
-  lang: string;
-  initialPlan?: string;
-  isSuccess: boolean;
-  sessionId?: string;
-}
-
 export default function CheckoutClient({
-  t,
+  translations,
   lang,
   initialPlan,
   isSuccess,
   sessionId,
-}: Props) {
+}: CheckoutClientProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [errorCode, setErrorCode] = useState<string | null>(null);
 
   const validatedLang = isValidLanguage(lang) ? lang : "en";
-  const tr = (key: string, fallback: string) => t[key] ?? fallback;
 
   const handleCheckout = useCallback(async () => {
     try {
@@ -69,26 +52,33 @@ export default function CheckoutClient({
 
         if (data.code === "ALREADY_PREMIUM") {
           setError(
-            tr(
+            t(
+              translations,
               "checkout.info.already_premium",
               "You are already on a premium plan.",
             ),
           );
         } else if (data.code === "DOWNGRADE_NOT_AVAILABLE") {
           setError(
-            tr(
+            t(
+              translations,
               "checkout.info.downgrade_not_available",
               "Downgrading to Free is not available yet.",
             ),
           );
         } else if (response.status === 401) {
           setError(
-            tr("checkout.error.unauthorized", "Please sign in to continue."),
+            t(
+              translations,
+              "checkout.error.unauthorized",
+              "Please sign in to continue.",
+            ),
           );
         } else {
           setError(
             data.message ||
-              tr(
+              t(
+                translations,
                 "checkout.error.create_session",
                 "Failed to create checkout session",
               ),
@@ -127,7 +117,13 @@ export default function CheckoutClient({
       throw new Error("Invalid server response");
     } catch (err) {
       console.error("[Checkout] Error:", err);
-      setError(tr("checkout.error.unexpected", "An unexpected error occurred"));
+      setError(
+        t(
+          translations,
+          "checkout.error.unexpected",
+          "An unexpected error occurred",
+        ),
+      );
       setLoading(false);
     }
   }, [isSuccess, sessionId, initialPlan, validatedLang, router, t]);
@@ -152,13 +148,18 @@ export default function CheckoutClient({
               className={`mb-3 ${isAlreadyPremium ? "text-blue-700" : isDowngradeNotAvailable ? "text-amber-700" : "text-red-700"}`}
             >
               {isAlreadyPremium
-                ? tr("checkout.info.already_premium_title", "Already Premium")
+                ? t(
+                    translations,
+                    "checkout.info.already_premium_title",
+                    "Already Premium",
+                  )
                 : isDowngradeNotAvailable
-                  ? tr(
+                  ? t(
+                      translations,
                       "checkout.error.plan_change_not_available",
                       "Plan Change Not Available",
                     )
-                  : tr("checkout.error.title", "Checkout Error")}
+                  : t(translations, "checkout.error.title", "Checkout Error")}
             </Heading>
             <p className="text-gray-600 mb-8">{error}</p>
 
@@ -167,13 +168,21 @@ export default function CheckoutClient({
                 onClick={() => router.push(`/${validatedLang}/builder`)}
                 className="px-6 py-2 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700 transition cursor-pointer"
               >
-                {tr("checkout.action.go_to_dashboard", "Go to Dashboard")}
+                {t(
+                  translations,
+                  "checkout.action.go_to_dashboard",
+                  "Go to Dashboard",
+                )}
               </button>
               <button
                 onClick={() => router.push(`/${validatedLang}/pricing`)}
                 className="px-6 py-2 bg-gray-200 text-gray-800 rounded-md font-medium hover:bg-gray-300 transition cursor-pointer"
               >
-                {tr("checkout.action.back_to_pricing", "Back to Pricing")}
+                {t(
+                  translations,
+                  "checkout.action.back_to_pricing",
+                  "Back to Pricing",
+                )}
               </button>
             </div>
           </div>
@@ -184,7 +193,7 @@ export default function CheckoutClient({
 
   // LOADING / PROCESSING UI
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-white px-4">
+    <main className="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-50 to-white px-4">
       <div className="max-w-md w-full text-center">
         <div className="bg-white rounded-lg shadow-lg p-8 border border-gray-100">
           <div className="mb-6 inline-block">
@@ -196,25 +205,33 @@ export default function CheckoutClient({
 
           <Heading as="h2" className="text-2xl font-bold text-gray-900 mb-2">
             {isSuccess
-              ? tr(
+              ? t(
+                  translations,
                   "checkout.status.payment_success_title",
                   "Payment Successful!",
                 )
-              : tr("checkout.status.processing_title", "Processing...")}
+              : t(
+                  translations,
+                  "checkout.status.processing_title",
+                  "Processing...",
+                )}
           </Heading>
 
           <p className="text-gray-600 mb-6">
             {isSuccess
-              ? tr(
+              ? t(
+                  translations,
                   "checkout.status.payment_success_desc",
                   "Your payment has been processed. Redirecting...",
                 )
               : initialPlan === "free"
-                ? tr(
+                ? t(
+                    translations,
                     "checkout.status.setting_up_free",
                     "Setting up your free plan...",
                   )
-                : tr(
+                : t(
+                    translations,
                     "checkout.status.preparing_checkout",
                     "Preparing secure checkout...",
                   )}
@@ -222,7 +239,8 @@ export default function CheckoutClient({
 
           {loading && (
             <p className="text-sm text-gray-500">
-              {tr(
+              {t(
+                translations,
                 "checkout.status.wait",
                 "Please wait, this may take a moment.",
               )}
@@ -233,7 +251,8 @@ export default function CheckoutClient({
         <div className="mt-8 pt-6 border-t border-gray-200 text-sm text-gray-500">
           <p className="flex items-center justify-center gap-2">
             <span>🔒</span>
-            {tr(
+            {t(
+              translations,
               "checkout.badge.secure_by_stripe",
               "Secure payment processing by Stripe",
             )}

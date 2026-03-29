@@ -9,6 +9,7 @@ export interface LanguageSelectorProps {
   currentLang: string;
   label?: string;
   onLanguageChange: (lang: string) => void;
+  preferencesTab: boolean; // New prop to indicate if we're in the preferences tab
 }
 
 /**
@@ -18,6 +19,7 @@ export default function LanguageSelector({
   currentLang,
   label,
   onLanguageChange,
+  preferencesTab,
 }: LanguageSelectorProps) {
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     onLanguageChange(e.target.value);
@@ -31,7 +33,9 @@ export default function LanguageSelector({
           value={currentLang}
           onChange={handleChange}
           aria-label={label ?? "Select language"}
-          className="appearance-none px-3 py-2 pr-8 border border-gray-300 rounded-md bg-white text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#6ABDA6]"
+          className={`appearance-none px-3 py-2 pr-8 border border-gray-300 rounded-md bg-white text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#6ABDA6] ${
+            preferencesTab ? "w-full" : "w-auto"
+          }`}
         >
           {LANGUAGES.map((lng) => (
             <option key={lng.code} value={lng.code}>

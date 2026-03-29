@@ -1,9 +1,4 @@
-export type PlanFeatureCatalogItem = {
-  title: string;
-  titleTranslationKeys: readonly string[];
-  marketingDescription: string;
-  marketingDescriptionTranslationKey: string;
-};
+import { PlanFeatureCatalogItem } from "@/4-shared/types";
 
 const FREE_PLAN_FEATURES: readonly PlanFeatureCatalogItem[] = [
   {
@@ -49,6 +44,14 @@ const FREE_PLAN_FEATURES: readonly PlanFeatureCatalogItem[] = [
       "Your subdomain stays online for 2 months after your wedding day",
     marketingDescriptionTranslationKey:
       "marketing.features.free_plan_feature_6_description",
+  },
+  {
+    title: "No credit card required",
+    titleTranslationKeys: ["pricing.plan.free.feature_10"],
+    marketingDescription:
+      "Start using the free plan without providing any payment information",
+    marketingDescriptionTranslationKey:
+      "marketing.features.free_plan_feature_7_description",
   },
 ];
 
