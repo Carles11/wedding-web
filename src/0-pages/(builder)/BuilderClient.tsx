@@ -37,6 +37,7 @@ export default function BuilderClient({
   translations: initialTranslations,
   userId,
   userProfile,
+  account,
 }: BuilderClientProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -206,19 +207,37 @@ export default function BuilderClient({
       />
       <main className="sm:p-6 overflow-x-hidden">
         <div className="builder-shell md:max-w-[95vw] mx-auto rounded flex flex-col lg:flex-row">
-          <BuilderStepNav
-            stepKeys={STEP_KEYS}
-            stepStatuses={STEP_STATUS}
-            active={active}
-            onSelect={(step: number) => {
-              setActive(step);
-              // update step in URL
-              const url = `/${currentLang}/builder?step=${step}`;
-              router.push(url);
-            }}
-            translations={translations}
-            currentLang={currentLang}
-          />
+          <div className="flex flex-col">
+            <p className="text-(--builder-color-text-muted) flex items-center justify-center sm:justify-start gap-2 text-sm sm:text-base m-4">
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                />
+              </svg>
+              <span className="truncate">{account.email}</span>
+            </p>
+            <BuilderStepNav
+              stepKeys={STEP_KEYS}
+              stepStatuses={STEP_STATUS}
+              active={active}
+              onSelect={(step: number) => {
+                setActive(step);
+                // update step in URL
+                const url = `/${currentLang}/builder?step=${step}`;
+                router.push(url);
+              }}
+              translations={translations}
+              currentLang={currentLang}
+            />
+          </div>
           <BuilderStepContent
             active={active}
             site={site}

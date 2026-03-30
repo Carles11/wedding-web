@@ -10,6 +10,7 @@ export interface BuilderClientProps {
     cookie_consent_version?: string | null;
     [key: string]: any;
   } | null;
+  account: any;
 }
 
 export interface BuilderStepContentProps {

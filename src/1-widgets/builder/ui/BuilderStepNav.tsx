@@ -45,6 +45,7 @@ export default function BuilderStepNav({
               <span className="text-sm">{translations[k]}</span>
             </button>
           ))}
+
           {/* Account tab for mobile */}
           <a
             href={`/${currentLang}/builder/account`}
@@ -65,7 +66,7 @@ export default function BuilderStepNav({
 
       <nav className="hidden lg:block w-64 border-r p-4">
         <h3 className="font-semibold text-gray-700 text-2xl">
-          {translations["builder.nav.steps_title"]}
+          {translations["builder.nav.steps_title"] || "Setup Steps"}
         </h3>
         <ul className="mt-4 flex md:block gap-2 md:gap-0 space-y-0 md:space-y-2 min-w-max md:min-w-0">
           {stepKeys.map((k, i) => (
