@@ -82,29 +82,26 @@ export default function BuilderStepNav({
                     i === active
                       ? "builder-step-nav-desktop-active"
                       : "builder-step-nav-desktop-idle"
-                  }`}
+                  } cursor-pointer`}
                   onClick={() => onSelect(i)}
                 >
-                  <span className="w-6 flex justify-center items-center">
-                    <StatusIcon status={stepStatuses[i]} />
-                  </span>
+                  {i !== 7 && (
+                    <span className="w-6 flex justify-center items-center">
+                      <StatusIcon status={stepStatuses[i]} />
+                    </span>
+                  )}
                   {translations[k]}
                 </button>
               </li>
             </Fragment>
           ))}
           {/* Account link, visually separated */}
-          <li className="my-3 px-3" aria-hidden="true">
-            <div className="builder-step-divider h-px" />
-          </li>
+
           <li>
             <a
               href={`/${currentLang}/builder/account`}
               className="flex items-center px-3 py-2 rounded whitespace-nowrap md:w-full md:text-left builder-step-nav-desktop-idle hover:builder-step-nav-desktop-active transition"
             >
-              <span className="w-6 flex justify-center items-center">
-                <GrayCircleIcon />
-              </span>
               {translations["builder.nav.account"] || "Account"}
             </a>
           </li>
