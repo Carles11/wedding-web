@@ -67,7 +67,55 @@ export async function POST(
       );
     }
 
+    // 0. Get the previous custom domain, if any
+    const { data: site, error: fetchError } = await supabase
+      .from("sites")
+      .select("domains")
+      .eq("id", id)
+      .maybeSingle();
+
+    const PLATFORM_SUFFIXES = [".localhost:3000", ".weddweb.com"];
+
+    // Returns true if platform domain
+    const isPlatformDomain = (d: string) =>
+      PLATFORM_SUFFIXES.some(
+        (suffix) => d.endsWith(suffix) || d.endsWith(`www.${suffix}`),
+      );
+
+    let oldDomain: string | null = null;
+    if (site && Array.isArray(site.domains)) {
+      oldDomain =
+        site.domains.find((d: string) => !isPlatformDomain(d)) || null;
+    }
+
+    // 1. Actually add the custom domain (your business logic)
     const result = await addCustomDomainWithRedirectVariants(id, domain);
+
+    // 2. Log the action in your audit table
+    try {
+      // Sanitize the domain (your add function should ensure this is safe already)
+      const cleanDomain = domain
+        .trim()
+        .toLowerCase()
+        .replace(/^https?:\/\//, "")
+        .replace(/^www\./, "");
+      await supabase.from("domain_change_logs").insert([
+        {
+          site_id: id,
+          user_id: access.user.id,
+          old_domain: oldDomain,
+          new_domain: cleanDomain, // as before
+          event: "add",
+        },
+      ]);
+    } catch (logError) {
+      // Don't block main flow on logging error, but log for server investigation
+      // In production, use your logger service here
+      // eslint-disable-next-line no-console
+      console.error("Failed to log domain change action:", logError);
+    }
+
+    // 3. Respond to client as usual
     return NextResponse.json(result, { status: 200 });
   } catch (error) {
     if (error instanceof DomainFlowError) {

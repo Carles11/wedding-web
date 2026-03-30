@@ -30,7 +30,9 @@ export default async function TenantPageComponent({
   const site = await getSiteByDomain(host);
   const siteId = site?.id ?? null;
   const translations = await getMergedTranslations(siteId, lang, "en");
-
+  if (!site) {
+    console.error("Could not resolve tenant for host:", host);
+  }
   const availableLangs =
     Array.isArray(site?.languages) && site.languages.length > 0
       ? site.languages
