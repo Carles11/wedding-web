@@ -23,9 +23,14 @@ export async function generateMetadata({
   const host = ((await headers()).get("host") ?? "").toLowerCase().trim();
   const site = await getSiteByDomain(host);
 
+  // Define the base URL. This resolves the "metadataBase" warning.
+  const baseUrlStr = site ? `https://${host}` : "https://weddweb.com";
+  const metadataBase = new URL(baseUrlStr);
+
   // 1. Handle Expired Site Metadata (No-index)
   if (site?.is_expired && site.plan_type === "free") {
     return {
+      metadataBase,
       title: "Site Expired | WeddWeb",
       description: "The hosting period for this wedding website has concluded.",
       robots: { index: false, follow: false },
@@ -35,49 +40,57 @@ export async function generateMetadata({
   if (site) {
     // --- TENANT METADATA ---
     const translations = await getMergedTranslations(site.id, lang, "en");
-    const baseUrl = `https://${host}`;
+
+    // We pass the absolute baseUrl to your helper if it requires it for internal logic
     const meta = generateSiteMetadata({
       site,
       lang,
       translations,
-      baseUrl,
+      baseUrl: baseUrlStr,
       pageKind: "tenant",
     });
 
+    // Merge metadataBase into the helper's output
+    const finalMeta = {
+      ...meta,
+      metadataBase,
+    };
+
     if (site.seo_enabled === false) {
       return {
-        ...meta,
+        ...finalMeta,
         robots: { index: false, follow: false },
         title: "Private Wedding Site",
         description: "This wedding website is not publicly indexed.",
       };
     }
-    return meta;
+    return finalMeta;
   } else {
     // --- MARKETING METADATA ---
     const seo = getSEOMetadata(lang, "marketing", "home");
-    const baseUrl = "https://weddweb.com";
-    const ogImage = seo.ogImage || `${baseUrl}/assets/og/weddweb-OG.png`;
+    const ogImage = "/assets/og/weddweb-OG.png"; // Relative to metadataBase
 
+    // Map supported languages to relative paths
     const languages: Record<string, string> = {};
     SUPPORTED_LANGUAGES.forEach((l) => {
-      languages[l] = `${baseUrl}/${l}`;
+      languages[l] = `/${l}`;
     });
 
     return {
+      metadataBase,
       title: seo.title,
       description: seo.description,
       alternates: {
-        canonical: `${baseUrl}/${lang}`,
+        canonical: `/${lang}`,
         languages: {
           ...languages,
-          "x-default": `${baseUrl}/en`,
+          "x-default": "/en",
         },
       },
       openGraph: {
         title: seo.ogTitle || seo.title,
         description: seo.ogDescription || seo.description,
-        url: `${baseUrl}/${lang}`,
+        url: `/${lang}`,
         siteName: "WeddWeb",
         locale: `${lang}_${lang.toUpperCase()}`,
         images: [ogImage],
@@ -112,7 +125,7 @@ export default async function Page({
     const translations = await getMergedTranslations(site.id, lang, "en");
 
     // Render Expired Notice UI
-    if (true) {
+    if (site.is_expired && site.plan_type === "free") {
       return <ExpiredSiteNotice translations={translations} lang={lang} />;
     }
     const showFooter = await shouldShowFooter({ host, routeKind: "tenant" });
