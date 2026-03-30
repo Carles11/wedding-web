@@ -16,7 +16,6 @@ import { isValidLanguage } from "@/4-shared/helpers/isValidLanguage";
 import { getMergedTranslations } from "@/4-shared/lib/i18n";
 import { ProgramSection } from "@/4-shared/types";
 import { headers } from "next/headers";
-import ExpiredSiteNotice from "./ExpiredSiteNotice";
 
 // --- MAIN MULTILINGUAL TENANT PAGE COMPONENT ---
 export default async function TenantPageComponent({
@@ -29,10 +28,8 @@ export default async function TenantPageComponent({
   const host = ((await headers()).get("host") ?? "").toLowerCase().trim();
   console.log("[TenantPageComponent] entry, host:", host);
   const site = await getSiteByDomain(host);
-  if (site?.is_expired && site.plan_type === "free") {
-    return <ExpiredSiteNotice translations={{}} lang={lang} />; // Show the "Sunset" page
-  }
   const siteId = site?.id ?? null;
+  const translations = await getMergedTranslations(siteId, lang, "en");
 
   const availableLangs =
     Array.isArray(site?.languages) && site.languages.length > 0
@@ -40,8 +37,6 @@ export default async function TenantPageComponent({
       : site?.default_lang
         ? [site.default_lang]
         : ["en"];
-
-  const translations = await getMergedTranslations(siteId, lang, "en");
 
   if (!siteId) {
     return <TenantNotFoundState host={host} translations={translations} />;

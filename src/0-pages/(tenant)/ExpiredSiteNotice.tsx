@@ -7,8 +7,6 @@ interface Props {
 }
 
 export default function ExpiredSiteNotice({ translations, lang }: Props) {
-  const tr = (key: string, fallback: string) => translations[key] ?? fallback;
-
   return (
     <main className="min-h-screen flex items-center justify-center bg-white px-6 py-24">
       <div className="max-w-xl w-full text-center space-y-8">
@@ -24,33 +22,31 @@ export default function ExpiredSiteNotice({ translations, lang }: Props) {
             as="h1"
             className="text-3xl md:text-4xl font-serif text-gray-900"
           >
-            {tr("tenant.expired.title", "This celebration has moved offline")}
+            {translations["tenant.expired.title"] ??
+              "Thissssss celebration has moved offline"}
           </Heading>
 
           <p className="text-lg text-gray-500 font-light leading-relaxed">
-            {tr(
-              "tenant.expired.description",
-              "The hosting period for this wedding website has concluded. We hope you enjoyed sharing these special moments with the couple.",
-            )}
+            {translations["tenant.expired.description"] ??
+              "The hosting period for this wedding website has concluded. We hope you enjoyed sharing these special moments with the couple."}
           </p>
         </div>
 
         {/* Action for the Couple */}
         <div className="pt-12 border-t border-gray-50">
           <p className="text-xs uppercase tracking-widest text-gray-400 mb-4">
-            {tr("tenant.expired.owner_note", "Are you the owner of this site?")}
+            {translations["tenant.expired.owner_note"] ??
+              "Are you the owner of this site?"}
           </p>
           <Link
             href={`/${lang}/builder`}
             className="inline-block px-8 py-3 bg-gray-900 text-white rounded-full text-sm font-medium hover:bg-gray-800 transition-colors shadow-sm"
           >
-            {tr("tenant.expired.login_btn", "Log in to Dashboard")}
+            {translations["tenant.expired.login_btn"] ?? "Log in to Dashboard"}
           </Link>
           <p className="mt-4 text-xs text-gray-400">
-            {tr(
-              "tenant.expired.upgrade_hint",
-              "Upgrade to Premium to keep your memories online forever.",
-            )}
+            {translations["tenant.expired.upgrade_hint"] ??
+              "Upgrade to Premium to keep your memories online forever."}
           </p>
         </div>
 

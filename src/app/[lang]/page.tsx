@@ -112,7 +112,7 @@ export default async function Page({
     const translations = await getMergedTranslations(site.id, lang, "en");
 
     // Render Expired Notice UI
-    if (site.is_expired && site.plan_type === "free") {
+    if (true) {
       return <ExpiredSiteNotice translations={translations} lang={lang} />;
     }
     const showFooter = await shouldShowFooter({ host, routeKind: "tenant" });
