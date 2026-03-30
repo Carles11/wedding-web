@@ -1,35 +1,10 @@
-import { AnchorHTMLAttributes, ButtonHTMLAttributes, ReactNode } from "react";
-
-type MarketingButtonVariant =
-  | "primary"
-  | "secondary"
-  | "on-gradient"
-  | "ghost"
-  | "auth"
-  | "auth-outline";
-
-type MarketingButtonSize = "sm" | "md" | "lg";
-
-/** Shared props common to both button and anchor rendering */
-type BaseProps = {
-  children: ReactNode;
-  variant?: MarketingButtonVariant;
-  size?: MarketingButtonSize;
-  fullWidth?: boolean;
-  loading?: boolean;
-  loadingLabel?: string;
-  className?: string;
-};
-
-type AsButton = BaseProps &
-  Omit<ButtonHTMLAttributes<HTMLButtonElement>, keyof BaseProps | "href">;
-
-type AsAnchor = BaseProps &
-  Omit<AnchorHTMLAttributes<HTMLAnchorElement>, keyof BaseProps> & {
-    href: string;
-  };
-
-type MarketingButtonProps = AsButton | AsAnchor;
+import {
+  AsAnchor,
+  AsButton,
+  MarketingButtonProps,
+  MarketingButtonVariant,
+} from "@/4-shared/types";
+import Link from "next/link";
 
 function joinClasses(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
@@ -74,11 +49,29 @@ export function MarketingButton(props: MarketingButtonProps) {
   const content = loading ? loadingLabel : children;
 
   if ("href" in rest) {
-    const { href, ...anchorRest } = rest as AsAnchor & { href: string };
+    const { href, ...anchorRest } = rest as AsAnchor;
+
+    // If it's an external link (like your .dog demo), use a standard <a>
+    const isExternal = href.startsWith("http");
+
+    if (isExternal) {
+      return (
+        <a
+          href={href}
+          className={classes}
+          target="_blank"
+          rel="noopener noreferrer"
+          {...anchorRest}
+        >
+          {content}
+        </a>
+      );
+    }
+
     return (
-      <a href={href} className={classes} {...anchorRest}>
+      <Link href={href} className={classes} {...anchorRest}>
         {content}
-      </a>
+      </Link>
     );
   }
 

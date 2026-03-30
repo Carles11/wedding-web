@@ -17,6 +17,8 @@ export default function HeroMarketing({
   ctaSecondary,
   onPrimaryClick,
   onSecondaryClick,
+  primaryHref,
+  secondaryHref,
 }: HeroMarketingProps) {
   return (
     <section
@@ -36,6 +38,7 @@ export default function HeroMarketing({
           <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:justify-center sm:items-center">
             <MarketingButton
               variant="primary"
+              href={primaryHref} // Crawler now sees this!
               size="lg"
               onClick={onPrimaryClick}
               aria-label={ctaPrimary}
@@ -46,6 +49,7 @@ export default function HeroMarketing({
             {ctaSecondary ? (
               <MarketingButton
                 variant="secondary"
+                href={secondaryHref} // Crawler now sees this!
                 size="lg"
                 onClick={onSecondaryClick}
                 aria-label={ctaSecondary}

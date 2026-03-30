@@ -74,7 +74,7 @@ export default function BuilderClient({
   const [whatToSeeCount, setWhatToSeeCount] = useState(0);
   const [hasWeddingGiftData, setHasWeddingGiftData] = useState(false);
   const [hasContact, setHasContact] = useState(false);
-  console.log("BuilderClient render", { hasContact });
+
   function hasAnyGiftPaymentMethod(
     gift: Record<string, unknown> | null,
   ): boolean {

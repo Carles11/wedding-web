@@ -1,7 +1,9 @@
 import ForgotPasswordForm from "@/2-features/auth/ui/ForgotPasswordForm";
 import { isValidLanguage } from "@/4-shared/helpers/isValidLanguage";
 import { fetchGlobalTranslations } from "@/4-shared/lib/globalTranslations";
+import { getMetadataBase } from "@/4-shared/lib/seo/getMetadataBase"; // Import Helper
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 
 /**
  * Forgot Password Metadata
@@ -16,20 +18,38 @@ export async function generateMetadata({
   const lang = isValidLanguage(realParams?.lang) ? realParams.lang : "en";
   const translations = await fetchGlobalTranslations(lang, "en");
 
+  const host = (await headers()).get("host");
+  // Main app context
+  const { metadataBase } = getMetadataBase(host, false);
+
+  const ogImage = "/assets/og/weddweb-OG.png";
+
   return {
+    metadataBase,
     title:
       translations["auth.forgot.page_title"] ?? "Forgot Password | WeddWeb",
     description:
       translations["auth.forgot.page_description"] ?? "Reset your password",
     // THE SHIELD: Hard-coding no-index to keep utility pages out of SERPs
+    // Also added googleBot for consistent protection across all shielded pages.
     robots: {
       index: false,
       follow: false,
       nocache: true,
+      googleBot: {
+        index: false,
+        follow: false,
+      },
     },
     openGraph: {
       title: translations["auth.forgot.page_title"] ?? "Forgot Password",
-      images: [`https://weddweb.com/assets/og/weddweb-OG.png`],
+      description:
+        translations["auth.forgot.page_description"] ?? "Reset your password",
+      images: [ogImage],
+    },
+    twitter: {
+      card: "summary_large_image",
+      images: [ogImage],
     },
   };
 }

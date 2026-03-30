@@ -2,6 +2,7 @@ export * from "./accommodation";
 export * from "./account";
 export * from "./billing";
 export * from "./builderClient";
+export * from "./buttons";
 export * from "./contact";
 export * from "./generalSiteForm";
 export * from "./images";

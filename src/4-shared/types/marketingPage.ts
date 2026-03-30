@@ -23,6 +23,9 @@ export interface HeroMarketingProps {
   onPrimaryClick?: () => void;
   /** Optional callback for secondary CTA button */
   onSecondaryClick?: () => void;
+  lang: string;
+  primaryHref: string;
+  secondaryHref: string;
 }
 
 /**
@@ -158,7 +161,7 @@ export interface PricingSectionProps {
   premiumPlanFeatures?: string[];
   onFreePlanClick?: () => void;
   onPremiumPlanClick?: () => void;
-  comingSoonText?: string;
+  primaryHref?: string;
   perSiteText?: string;
   popularBadgeLabel: string;
 }
@@ -171,6 +174,7 @@ export interface CTASectionProps {
   description: string;
   buttonText: string;
   onButtonClick?: () => void;
+  primaryHref: string;
 }
 
 export type MarketingCtaViewModel = {

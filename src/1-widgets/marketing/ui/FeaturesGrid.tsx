@@ -1,9 +1,9 @@
 "use client";
 
 import { FeaturesGridProps } from "@/4-shared/types";
-import Heading from "@/4-shared/ui/commons/typography/Heading";
-
 import { CheckIcon } from "@/4-shared/ui/commons/icons/checkIcon";
+import Heading from "@/4-shared/ui/commons/typography/Heading";
+import Link from "next/link";
 
 export default function FeaturesGrid({
   sectionTitle,
@@ -15,6 +15,8 @@ export default function FeaturesGrid({
   lang,
   faqTitle,
 }: FeaturesGridProps) {
+  const faqHref = lang ? `/${lang}/faq` : "/en/faq";
+
   return (
     <section
       aria-labelledby="marketing-features-title"
@@ -49,18 +51,18 @@ export default function FeaturesGrid({
 
             <ul
               className="space-y-5 text-left flex-1"
-              aria-label="Free tier features"
+              aria-label={`${freeTierName} features`}
             >
               {freeFeatures.map((f, idx) => (
                 <li key={idx} className="flex gap-3 items-start">
                   <CheckIcon />
                   <div>
                     <div className="text-md font-semibold">{f.title}</div>
-                    {f.description ? (
+                    {f.description && (
                       <div className="text-sm mt-0.5 opacity-55">
                         {f.description}
                       </div>
-                    ) : null}
+                    )}
                   </div>
                 </li>
               ))}
@@ -96,18 +98,18 @@ export default function FeaturesGrid({
 
             <ul
               className="space-y-5 text-left flex-1"
-              aria-label="Premium tier features"
+              aria-label={`${premiumTierName} features`}
             >
               {premiumFeatures.map((f, idx) => (
                 <li key={idx} className="flex gap-3 items-start">
                   <CheckIcon />
                   <div>
                     <div className="text-md font-semibold">{f.title}</div>
-                    {f.description ? (
+                    {f.description && (
                       <div className="text-sm mt-0.5 opacity-55">
                         {f.description}
                       </div>
-                    ) : null}
+                    )}
                   </div>
                 </li>
               ))}
@@ -115,16 +117,15 @@ export default function FeaturesGrid({
           </article>
         </div>
 
-        {/* FAQ Button */}
+        {/* FAQ Link - Upgraded to Next.js Link for Prefetching */}
         <div className="mt-12">
-          <a
-            href={`${lang ? `${lang}/faq` : "/"}`}
+          <Link
+            href={faqHref}
             className="inline-block px-6 py-3 rounded-lg font-semibold text-white shadow-md transition hover:opacity-90"
             style={{ background: "var(--marketing-color-primary)" }}
-            aria-label="Frequently Asked Questions"
           >
             {faqTitle ?? "Frequently Asked Questions"}
-          </a>
+          </Link>
         </div>
       </div>
     </section>

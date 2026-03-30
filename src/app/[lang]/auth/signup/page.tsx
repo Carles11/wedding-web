@@ -2,8 +2,10 @@ import SignupForm from "@/2-features/auth/ui/SignupForm";
 import { getSEOMetadata } from "@/4-shared/config/seo";
 import { isValidLanguage } from "@/4-shared/helpers/isValidLanguage";
 import { fetchGlobalTranslations } from "@/4-shared/lib/globalTranslations";
+import { getMetadataBase } from "@/4-shared/lib/seo/getMetadataBase"; // Import Helper
 import { Heading } from "@/4-shared/ui/commons/typography/Heading";
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 
 /**
  * Signup Page Metadata
@@ -18,21 +20,36 @@ export async function generateMetadata({
   const lang = isValidLanguage(realParams?.lang) ? realParams.lang : "en";
   const seo = getSEOMetadata(lang, "marketing", "auth-signup");
 
+  const host = (await headers()).get("host");
+  // Marketing context
+  const { metadataBase } = getMetadataBase(host, false);
+
+  const ogImage = seo.ogImage || "/assets/og/weddweb-OG.png";
+
   return {
+    metadataBase,
     title: seo.title,
     description: seo.description,
     // THE SHIELD: Hard signal to bots to stay away
+    // Standardizing with googleBot for maximum SEO health.
     robots: {
       index: false,
       follow: false,
       nocache: true,
+      googleBot: {
+        index: false,
+        follow: false,
+      },
     },
     openGraph: {
-      title: seo.ogTitle,
-      description: seo.ogDescription,
-      images: seo.ogImage
-        ? [seo.ogImage]
-        : [`https://weddweb.com/assets/og/weddweb-OG.png`],
+      title: seo.ogTitle || seo.title,
+      description: seo.ogDescription || seo.description,
+      images: [ogImage],
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      images: [ogImage],
     },
   };
 }

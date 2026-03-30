@@ -1,6 +1,10 @@
+"use client";
+
 import FAQList from "@/1-widgets/marketing/ui/FAQList";
 import FAQPageShell from "@/1-widgets/marketing/ui/FAQPageShell";
 import MarketingFloatingLanguageSelector from "@/1-widgets/marketing/ui/MarketingFloatingLanguageSelector";
+import { JsonLd } from "@/4-shared/lib/seo/JsonLd";
+import { generateFAQSchema } from "@/4-shared/lib/seo/generateFAQSchema";
 import { MarketingTranslations } from "@/4-shared/types/marketingPage";
 import UnderlinedLink from "@/4-shared/ui/commons/link/UnderlinedLink";
 
@@ -10,8 +14,17 @@ type Props = {
 };
 
 export default function FAQPage({ translations, lang }: Props) {
+  // Generate the real schema based on the current translations
+  const faqSchema = generateFAQSchema(translations);
+
   return (
     <>
+      {/* 
+          BEST SEO EVER: This script tag makes your FAQs 
+          discoverable by both Google and AI Search Engines.
+      */}
+      <JsonLd data={faqSchema} />
+
       <UnderlinedLink
         href={`/${lang?.toLowerCase() || "en"}/`}
         thicknessClass="h-0.5"
@@ -22,10 +35,12 @@ export default function FAQPage({ translations, lang }: Props) {
       >
         {translations["auth.common.back_to_home"] || "Back"}
       </UnderlinedLink>
+
       <MarketingFloatingLanguageSelector
         currentLang={lang}
         label={translations["marketing.lang_selector.label"]}
       />
+
       <FAQPageShell
         title={
           translations["marketing.faq.title"] ?? "Frequently Asked Questions"

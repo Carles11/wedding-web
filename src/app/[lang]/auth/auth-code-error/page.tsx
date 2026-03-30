@@ -1,7 +1,9 @@
 import { isValidLanguage } from "@/4-shared/helpers/isValidLanguage";
 import { fetchGlobalTranslations } from "@/4-shared/lib/globalTranslations";
+import { getMetadataBase } from "@/4-shared/lib/seo/getMetadataBase"; // Import Helper
 import { Heading } from "@/4-shared/ui/commons/typography/Heading";
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import Link from "next/link";
 
 /**
@@ -17,14 +19,24 @@ export async function generateMetadata({
   const lang = isValidLanguage(realParams?.lang) ? realParams.lang : "en";
   const translations = await fetchGlobalTranslations(lang, "en");
 
+  const host = (await headers()).get("host");
+  // Main app context for the base URL
+  const { metadataBase } = getMetadataBase(host, false);
+
   return {
+    metadataBase,
     title:
       translations["auth.error.page_title"] ?? "Authentication Error | WeddWeb",
     // THE SHIELD: Ensuring error states never appear in search results
+    // We add googleBot specifically for maximum protection.
     robots: {
       index: false,
       follow: false,
       nocache: true,
+      googleBot: {
+        index: false,
+        follow: false,
+      },
     },
   };
 }

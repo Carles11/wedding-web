@@ -9,6 +9,7 @@ export default function CTASection({
   description,
   buttonText,
   onButtonClick,
+  primaryHref,
 }: CTASectionProps) {
   return (
     <section
@@ -42,6 +43,7 @@ export default function CTASection({
         <div className="mt-10">
           <MarketingButton
             variant="primary"
+            href={primaryHref} // Crawler now sees this!
             size="lg"
             onClick={onButtonClick}
             aria-label={buttonText}

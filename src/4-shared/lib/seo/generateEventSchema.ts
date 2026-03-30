@@ -35,6 +35,10 @@ export function generateEventSchema(params: {
     "@type": "Event",
     name: eventName,
     description: description,
+    organizer: {
+      "@type": "Person",
+      name: eventName,
+    },
     // SUCCESS: Now using validated ISO 8601
     ...(isoDate && {
       startDate: isoDate,
@@ -43,13 +47,19 @@ export function generateEventSchema(params: {
       location: {
         "@type": "Place",
         name: locationName,
+        address: {
+          "@type": "PostalAddress",
+          name: locationName,
+        },
       },
     }),
     eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
     eventStatus: "https://schema.org/EventScheduled",
     url: baseUrl,
     ...(backgroundImage && {
-      image: backgroundImage,
+      image: backgroundImage.startsWith("http")
+        ? backgroundImage
+        : `${baseUrl}${backgroundImage}`,
     }),
   };
 

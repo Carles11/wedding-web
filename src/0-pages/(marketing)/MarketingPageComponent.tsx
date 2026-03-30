@@ -10,10 +10,11 @@ import HeroMarketing, {
 } from "@/1-widgets/marketing/ui";
 import { updateAccountInfo } from "@/3-entities/account/api/accountCrud";
 import { useSupabaseAuth } from "@/4-shared/hooks/useSupabaseAuth";
+import { JsonLd } from "@/4-shared/lib/seo/JsonLd";
+import { generateSoftwareSchema } from "@/4-shared/lib/seo/generateSoftwareSchema";
 import type { MarketingPageProps } from "@/4-shared/types";
 import { CookiesConsentBanner } from "@/4-shared/ui/CookiesConsentBanner";
 import { useRouter } from "next/navigation";
-
 /**
  * Refactored MarketingPageComponent
  *
@@ -27,6 +28,11 @@ export default function MarketingPageComponent({
 }: MarketingPageProps) {
   const router = useRouter();
   const { user, supabase } = useSupabaseAuth();
+
+  const primaryHref = user
+    ? `/${initialLang}/builder`
+    : `/${initialLang}/auth/signup`;
+  const secondaryHref = "https://www.inesundcarles.dog";
 
   // HANDLER: Primary CTA (Builder or Signup)
   const handlePrimaryClick = async () => {
@@ -49,7 +55,7 @@ export default function MarketingPageComponent({
 
   // HANDLER: Secondary CTA
   const handleSecondaryClick = () => {
-    window.open("https://www.inesundcarles.dog", "_blank");
+    window.open(secondaryHref, "_blank");
   };
 
   // HANDLER: Language Selector
@@ -70,8 +76,32 @@ export default function MarketingPageComponent({
     onSecondaryClick: handleSecondaryClick,
   });
 
+  // NEW: Generate the Software Schema
+  const softwareSchema = generateSoftwareSchema(translations, initialLang);
+
+  // NEW: Generate the FAQ Schema (Optional but HIGHLY recommended for marketing)
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: [
+      {
+        "@type": "Question",
+        name: translations["marketing.faq.q1.title"] || "Is WeddWeb free?",
+        acceptedAnswer: {
+          "@type": "Answer",
+          text:
+            translations["marketing.faq.q1.text"] ||
+            "Yes, we offer a free tier with all essential features.",
+        },
+      },
+    ],
+  };
+
   return (
     <>
+      {/* SEO/AI JSON-LD Blocks */}
+      <JsonLd data={softwareSchema} />
+      <JsonLd data={faqSchema} />
       <MarketingFloatingLanguageSelector
         currentLang={initialLang}
         label={translations["marketing.lang_selector.label"]}
@@ -80,7 +110,12 @@ export default function MarketingPageComponent({
 
       <main className="min-h-screen">
         {/* SEMANTIC CHECK: HeroMarketing uses <h1> as verified in Source 9 */}
-        <HeroMarketing {...viewModel.hero} />
+        <HeroMarketing
+          {...viewModel.hero}
+          lang={initialLang}
+          primaryHref={primaryHref}
+          secondaryHref={secondaryHref}
+        />
 
         {/* SEMANTIC CHECK: FeaturesGrid uses <h2> as verified in Source 8 */}
         <FeaturesGrid lang={initialLang} {...viewModel.features} />
@@ -93,10 +128,15 @@ export default function MarketingPageComponent({
           {...viewModel.pricing}
           onFreePlanClick={handlePrimaryClick}
           onPremiumPlanClick={handlePrimaryClick}
+          primaryHref={primaryHref}
         />
 
         {/* SEMANTIC CHECK: CTASection uses <h2> as verified in Source 7 */}
-        <CTASection {...viewModel.cta} onButtonClick={handlePrimaryClick} />
+        <CTASection
+          {...viewModel.cta}
+          onButtonClick={handlePrimaryClick}
+          primaryHref={primaryHref}
+        />
       </main>
 
       <CookiesConsentBanner

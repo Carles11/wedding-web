@@ -7,6 +7,7 @@ import { getSEOMetadata } from "@/4-shared/config/seo";
 import { getSiteByDomain } from "@/4-shared/lib/getSiteByDomain";
 import { getMergedTranslations } from "@/4-shared/lib/i18n";
 import { generateSiteMetadata } from "@/4-shared/lib/seo/generateSiteMetadata";
+import { getMetadataBase } from "@/4-shared/lib/seo/getMetadataBase"; // New Helper
 import { Footer } from "@/4-shared/ui/commons/footer/Footer";
 import { shouldShowFooter } from "@/4-shared/utils/shouldShowFooter";
 import type { Metadata } from "next";
@@ -23,9 +24,8 @@ export async function generateMetadata({
   const host = ((await headers()).get("host") ?? "").toLowerCase().trim();
   const site = await getSiteByDomain(host);
 
-  // Define the base URL. This resolves the "metadataBase" warning.
-  const baseUrlStr = site ? `https://${host}` : "https://weddweb.com";
-  const metadataBase = new URL(baseUrlStr);
+  // Use the DRY helper to resolve metadataBase and baseUrl
+  const { metadataBase, baseUrl } = getMetadataBase(host, !!site);
 
   // 1. Handle Expired Site Metadata (No-index)
   if (site?.is_expired && site.plan_type === "free") {
@@ -41,16 +41,14 @@ export async function generateMetadata({
     // --- TENANT METADATA ---
     const translations = await getMergedTranslations(site.id, lang, "en");
 
-    // We pass the absolute baseUrl to your helper if it requires it for internal logic
     const meta = generateSiteMetadata({
       site,
       lang,
       translations,
-      baseUrl: baseUrlStr,
+      baseUrl: baseUrl, // Now coming from helper
       pageKind: "tenant",
     });
 
-    // Merge metadataBase into the helper's output
     const finalMeta = {
       ...meta,
       metadataBase,
@@ -68,9 +66,8 @@ export async function generateMetadata({
   } else {
     // --- MARKETING METADATA ---
     const seo = getSEOMetadata(lang, "marketing", "home");
-    const ogImage = "/assets/og/weddweb-OG.png"; // Relative to metadataBase
+    const ogImage = "/assets/og/weddweb-OG.png";
 
-    // Map supported languages to relative paths
     const languages: Record<string, string> = {};
     SUPPORTED_LANGUAGES.forEach((l) => {
       languages[l] = `/${l}`;
@@ -124,13 +121,11 @@ export default async function Page({
   if (site) {
     const translations = await getMergedTranslations(site.id, lang, "en");
 
-    // Render Expired Notice UI
     if (site.is_expired && site.plan_type === "free") {
       return <ExpiredSiteNotice translations={translations} lang={lang} />;
     }
     const showFooter = await shouldShowFooter({ host, routeKind: "tenant" });
 
-    // Render normal tenant wedding page
     return (
       <>
         <TenantPageComponent params={{ lang }} />
@@ -138,7 +133,6 @@ export default async function Page({
       </>
     );
   } else {
-    // Render marketing landing page
     const translations = await fetchMarketingTranslations(lang, "en");
     return (
       <>

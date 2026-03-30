@@ -5,8 +5,10 @@ import {
   resolveLanguageFromParams,
   resolveSearchParams,
 } from "@/4-shared/lib/params/resolveSearchParams";
+import { getMetadataBase } from "@/4-shared/lib/seo/getMetadataBase"; // Import Helper
 import { createSupabaseSSRClient } from "@/4-shared/lib/supabase/server";
 import type { Metadata } from "next";
+import { headers } from "next/headers"; // Import headers
 
 /**
  * Onboarding Metadata
@@ -20,14 +22,25 @@ export async function generateMetadata({
   const realParams = await params;
   const lang = isValidLanguage(realParams?.lang) ? realParams.lang : "en";
 
+  const host = (await headers()).get("host");
+  // We treat onboarding as a marketing/main-app state for the base URL logic
+  const { metadataBase } = getMetadataBase(host, false);
+
   return {
+    metadataBase,
     title: "Create Your Wedding Site | WeddWeb",
     description: "Start your journey with WeddWeb.",
     // THE SHIELD: Hard-coding no-index for internal app states
+    // This is critical for AI-Search too; we don't want AI citing private
+    // onboarding steps as public documentation.
     robots: {
       index: false,
       follow: false,
       nocache: true,
+      googleBot: {
+        index: false,
+        follow: false,
+      },
     },
   };
 }
