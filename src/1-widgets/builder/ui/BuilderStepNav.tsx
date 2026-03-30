@@ -32,18 +32,28 @@ export default function BuilderStepNav({
       <div className="lg:hidden border-b bg-white">
         <div className="flex overflow-x-auto gap-2 p-3">
           {stepKeys.map((k, i) => (
-            <button
-              key={k}
-              onClick={() => onSelect(i)}
-              className={`shrink-0 flex items-center gap-2 px-3 py-2 rounded whitespace-nowrap border ${
-                i === active
-                  ? "builder-step-nav-mobile-active"
-                  : "builder-step-nav-mobile-idle"
-              }`}
-            >
-              <StatusIcon status={stepStatuses[i]} />
-              <span className="text-sm">{translations[k]}</span>
-            </button>
+            <Fragment key={k}>
+              <div className="flex items-center">
+                <button
+                  onClick={() => onSelect(i)}
+                  className={`shrink-0 flex items-center gap-2 px-3 py-2 rounded whitespace-nowrap border ${
+                    i === active
+                      ? "builder-step-nav-mobile-active"
+                      : "builder-step-nav-mobile-idle"
+                  }`}
+                >
+                  {i !== 7 && <StatusIcon status={stepStatuses[i]} />}{" "}
+                  <span className="text-sm">{translations[k]}</span>
+                </button>
+              </div>
+              {i === 6 && ( // separator after the 7th (index 6), before the 8th (index 7)
+                <span
+                  aria-hidden="true"
+                  className="mx-2 h-9 border-l border-gray-300 opacity-60"
+                  style={{ display: "inline-block", verticalAlign: "middle" }}
+                />
+              )}
+            </Fragment>
           ))}
 
           {/* Account tab for mobile */}
@@ -52,9 +62,6 @@ export default function BuilderStepNav({
             className="shrink-0 flex items-center gap-2 px-3 py-2 rounded whitespace-nowrap border builder-step-nav-mobile-idle hover:builder-step-nav-mobile-active transition"
             style={{ textDecoration: "none" }}
           >
-            <span className="w-6 flex justify-center items-center">
-              <GrayCircleIcon />
-            </span>
             <span className="text-sm">
               {translations["builder.nav.account"] || "Account"}
             </span>

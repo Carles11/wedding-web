@@ -55,6 +55,31 @@
       "description": "Read our cookie policy"
     },
     {
+      "name": "Precios",
+      "url": "/es/pricing",
+      "description": "Ver planes de precios"
+    },
+    {
+      "name": "Preguntas frecuentes",
+      "url": "/es/faq",
+      "description": "Preguntas frecuentes"
+    },
+    {
+      "name": "Política de privacidad",
+      "url": "/es/privacy-policy",
+      "description": "Lee nuestra política de privacidad"
+    },
+    {
+      "name": "Términos de servicio",
+      "url": "/es/terms-of-service",
+      "description": "Lee nuestros términos de servicio"
+    },
+    {
+      "name": "Política de cookies",
+      "url": "/es/cookie-policy",
+      "description": "Lee nuestra política de cookies"
+    },
+    {
       "name": "价格方案",
       "url": "/zh/pricing",
       "description": "查看定价计划"
@@ -103,31 +128,6 @@
       "name": "कुकी नीति",
       "url": "/hi/cookie-policy",
       "description": "हमारी कुकी नीति पढ़ें"
-    },
-    {
-      "name": "Precios",
-      "url": "/es/pricing",
-      "description": "Ver planes de precios"
-    },
-    {
-      "name": "Preguntas frecuentes",
-      "url": "/es/faq",
-      "description": "Preguntas frecuentes"
-    },
-    {
-      "name": "Política de privacidad",
-      "url": "/es/privacy-policy",
-      "description": "Lee nuestra política de privacidad"
-    },
-    {
-      "name": "Términos de servicio",
-      "url": "/es/terms-of-service",
-      "description": "Lee nuestros términos de servicio"
-    },
-    {
-      "name": "Política de cookies",
-      "url": "/es/cookie-policy",
-      "description": "Lee nuestra política de cookies"
     },
     {
       "name": "Preus",

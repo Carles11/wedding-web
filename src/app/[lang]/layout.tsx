@@ -20,9 +20,16 @@ export default async function LangLayout({
   return (
     <html lang={lang}>
       <head>
-        {ICONS.map((icon, i) => (
+        {/* All icons, but NOT manifest */}
+        {ICONS.filter((icon) => icon.rel !== "manifest").map((icon, i) => (
           <link key={i} {...icon} />
         ))}
+        {/* Dynamic manifest by language */}
+        <link
+          rel="manifest"
+          href={`/manifests/${lang}/site.webmanifest`}
+          crossOrigin="use-credentials"
+        />
         <meta name="theme-color" content={THEME_COLOR} />
         <meta name="language" content={lang} />
         <meta

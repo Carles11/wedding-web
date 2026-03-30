@@ -1,0 +1,58 @@
+{
+  "name": "WeddWeb",
+  "short_name": "WeddWeb",
+  "description": "Crea facilmente il tuo sito web di matrimonio. Multilingue, personalizzabile e con design eleganti.",
+  "lang": "it",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "theme_color": "#ffffff",
+  "background_color": "#ffffff",
+  "orientation": "any",
+  "categories": [
+    "matrimonio",
+    "eventi",
+    "sito web",
+    "multilingue",
+    "personalizzabile"
+  ],
+  "icons": [
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Prezzi",
+      "url": "/it/pricing",
+      "description": "Visualizza i piani tariffari"
+    },
+    {
+      "name": "FAQ",
+      "url": "/it/faq",
+      "description": "Domande frequenti"
+    },
+    {
+      "name": "Informativa sulla privacy",
+      "url": "/it/privacy-policy",
+      "description": "Leggi la nostra informativa sulla privacy"
+    },
+    {
+      "name": "Termini di servizio",
+      "url": "/it/terms-of-service",
+      "description": "Leggi i nostri termini di servizio"
+    },
+    {
+      "name": "Politica sui cookie",
+      "url": "/it/cookie-policy",
+      "description": "Leggi la nostra politica sui cookie"
+    }
+  ]
+}

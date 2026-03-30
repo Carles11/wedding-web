@@ -74,7 +74,7 @@ export default function BuilderClient({
   const [whatToSeeCount, setWhatToSeeCount] = useState(0);
   const [hasWeddingGiftData, setHasWeddingGiftData] = useState(false);
   const [hasContact, setHasContact] = useState(false);
-
+  console.log("BuilderClient render", { hasContact });
   function hasAnyGiftPaymentMethod(
     gift: Record<string, unknown> | null,
   ): boolean {
@@ -131,6 +131,7 @@ export default function BuilderClient({
       const f = section?.content ?? {};
       const bride = (f.bride ?? {}) as { name?: string; email?: string };
       const groom = (f.groom ?? {}) as { name?: string; email?: string };
+      console.log("Contact section data:", { bride, groom });
       const validContact = (pt: { name?: string; email?: string }) =>
         !!pt?.name && !!pt?.email && EMAIL_RE.test(pt.email ?? "");
       setHasContact(validContact(bride) && validContact(groom));
