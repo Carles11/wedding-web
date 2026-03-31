@@ -22,6 +22,7 @@ import type {
 import { PlanLimitNotice, UpgradeCTAModal } from "@/4-shared/ui/builder";
 import { CustomLoader } from "@/4-shared/ui/commons/loader/CustomLoader";
 import {
+  isValidEmail,
   isValidIBAN,
   isValidPhone,
   isValidSWIFT,
@@ -44,6 +45,7 @@ type Props = {
   /** Fired when at least one payment method is saved (or cleared). */
   setHasData?: (hasData: boolean) => void;
 };
+
 export default function WeddingGiftBuilderStep({
   site,
   refresh,
@@ -65,7 +67,6 @@ export default function WeddingGiftBuilderStep({
   const giftMethodLimit = getPlanLimit(planType, "weddingGiftMethods");
 
   function goToPricing() {
-    // Use language-prefixed routing, not query param
     router.push(`/${lang || "en"}/pricing`);
   }
 
@@ -147,9 +148,8 @@ export default function WeddingGiftBuilderStep({
     };
   }, [site?.id]);
 
-  // Notify parent whether any payment method is configured
   useEffect(() => {
-    if (gift === null) return; // not yet loaded
+    if (gift === null) return;
     setHasData?.(
       !!(
         gift.paypal_url ||
@@ -173,6 +173,7 @@ export default function WeddingGiftBuilderStep({
 
   function validateGift(gift: Partial<WeddingGift>): WeddingGiftFormErrors {
     const errs: WeddingGiftFormErrors = {};
+
     // IBAN
     if (gift.bank_account_iban && !isValidIBAN(gift.bank_account_iban)) {
       errs.bank_account_iban = t(
@@ -181,6 +182,7 @@ export default function WeddingGiftBuilderStep({
         "Invalid IBAN",
       );
     }
+
     // SWIFT
     if (gift.bank_account_swift && !isValidSWIFT(gift.bank_account_swift)) {
       errs.bank_account_swift = t(
@@ -189,14 +191,20 @@ export default function WeddingGiftBuilderStep({
         "Invalid SWIFT/BIC",
       );
     }
-    // PayPal URL
-    if (gift.paypal_url && !isValidURL(gift.paypal_url)) {
-      errs.paypal_url = t(
-        translations,
-        "builder.gift.error.url",
-        "Invalid URL",
-      );
+
+    // PayPal (URL or Email)
+    if (gift.paypal_url) {
+      const isPaypalValid =
+        isValidURL(gift.paypal_url) || isValidEmail(gift.paypal_url);
+      if (!isPaypalValid) {
+        errs.paypal_url = t(
+          translations,
+          "builder.gift.error.paypal",
+          "Invalid PayPal link or email address",
+        );
+      }
     }
+
     // Bizum phone
     if (gift.bizum_phone && !isValidPhone(gift.bizum_phone)) {
       errs.bizum_phone = t(
@@ -205,6 +213,7 @@ export default function WeddingGiftBuilderStep({
         "Invalid phone number",
       );
     }
+
     // Venmo username
     if (gift.venmo_username && !isValidVenmoUsername(gift.venmo_username)) {
       errs.venmo_username = t(
@@ -213,6 +222,7 @@ export default function WeddingGiftBuilderStep({
         "Invalid Venmo username",
       );
     }
+
     // Giftlist URL
     if (gift.giftlist_url && !isValidURL(gift.giftlist_url)) {
       errs.giftlist_url = t(
@@ -221,6 +231,7 @@ export default function WeddingGiftBuilderStep({
         "Invalid URL",
       );
     }
+
     // Honeymoon fund URL
     if (gift.honeymoon_fund_url && !isValidURL(gift.honeymoon_fund_url)) {
       errs.honeymoon_fund_url = t(
@@ -229,6 +240,7 @@ export default function WeddingGiftBuilderStep({
         "Invalid URL",
       );
     }
+
     // Other method URL
     if (gift.other_method_url && !isValidURL(gift.other_method_url)) {
       errs.other_method_url = t(
@@ -237,6 +249,7 @@ export default function WeddingGiftBuilderStep({
         "Invalid URL",
       );
     }
+
     return errs;
   }
 
@@ -246,6 +259,7 @@ export default function WeddingGiftBuilderStep({
     const draftGift = gift ?? {};
     const validationErrors = validateGift(draftGift);
     setErrors(validationErrors);
+
     if (Object.keys(validationErrors).length > 0) {
       notify.error(
         t(
@@ -280,17 +294,15 @@ export default function WeddingGiftBuilderStep({
 
     try {
       if (gift?.id) {
-        // Update existing
         await updateWeddingGiftBySite(site.id, { data: gift ?? {} }, planType);
-        setGift({ ...gift }); // Keep the updated object
+        setGift({ ...gift });
       } else {
-        // Create new
         const created = await createWeddingGiftBySite(
           site.id,
           gift ?? {},
           planType,
         );
-        setGift(created); // Set the new object
+        setGift(created);
       }
       notify.success(
         translations["builder.general.form.save_success"] ||
@@ -310,7 +322,7 @@ export default function WeddingGiftBuilderStep({
       message: t(
         translations,
         "builder.gift.delete_confirm",
-        "Delete wedding gift information for this site? This action cannot be undone.",
+        "Delete wedding gift information?",
       ),
       confirmLabel: t(translations, "builder.actions.delete", "Delete"),
       cancelLabel: t(translations, "builder.actions.cancel", "Cancel"),
@@ -321,7 +333,7 @@ export default function WeddingGiftBuilderStep({
     setSaving(true);
     try {
       await deleteWeddingGiftBySite(site.id);
-      setGift(null); // Clear the UI
+      setGift(null);
       notify.success(
         translations["common.delete_success"] || "Deleted successfully.",
       );
@@ -348,9 +360,10 @@ export default function WeddingGiftBuilderStep({
         {t(
           translations,
           "builder.gift.desc",
-          "Let guests know how to make a contribution: fill out one or several options.",
+          "Let guests know how to make a contribution.",
         )}
       </div>
+
       {giftMethodLimit !== -1 && (
         <PlanLimitNotice
           message={interpolate(
@@ -372,6 +385,7 @@ export default function WeddingGiftBuilderStep({
           onUpgrade={goToPricing}
         />
       )}
+
       {loading ? (
         <CustomLoader
           message={translations["builder.status.loading"] || "Loading..."}
@@ -402,7 +416,7 @@ export default function WeddingGiftBuilderStep({
           t(
             translations,
             "builder.gift.upgrade_description",
-            "Your current plan allows up to {limit} gift method. Upgrade to Premium to add multiple payment methods.",
+            "Your current plan allows up to {limit} gift method. Upgrade to add more.",
           ),
           {
             limit: giftMethodLimit,

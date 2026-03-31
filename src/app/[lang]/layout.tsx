@@ -5,6 +5,7 @@ import {
   THEME_COLOR,
   WEBSITE_JSONLD,
 } from "@/4-shared/config/seo/meta";
+import { isValidLanguage } from "@/4-shared/helpers/isValidLanguage";
 import { ReactNode } from "react";
 
 export default async function LangLayout({
@@ -15,7 +16,7 @@ export default async function LangLayout({
   params: Promise<{ lang?: string }>;
 }) {
   const realParams = await params;
-  const lang = realParams?.lang ?? "en";
+  const lang = isValidLanguage(realParams.lang) ? realParams.lang : "en";
 
   return (
     <>

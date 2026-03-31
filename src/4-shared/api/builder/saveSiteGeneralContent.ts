@@ -59,14 +59,6 @@ export async function saveSiteGeneralContent({
       .order("created_at", { ascending: true });
     if (existingRowsError) throw existingRowsError;
 
-    console.log("[saveSiteGeneralContent] Existing rows before delete", {
-      site_id,
-      keys,
-      locales,
-      rowCount: existingRows?.length ?? 0,
-      rows: existingRows ?? [],
-    });
-
     // Defensive write path: delete current rows for these key/locale pairs first,
     // then insert exactly one row per pair. This avoids stale duplicate reads even
     // when DB unique constraints are missing or were added later.
@@ -82,11 +74,6 @@ export async function saveSiteGeneralContent({
       .from("site_translations")
       .insert(translationsToWrite);
     if (insertError) throw insertError;
-
-    console.log("[saveSiteGeneralContent] Inserted rows", {
-      site_id,
-      rows: translationsToWrite,
-    });
   }
 
   // 2. If site language metadata needs updating:

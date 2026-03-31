@@ -86,12 +86,12 @@ export default function DetailsSection({
     durationMs: 300,
   };
 
-  const locationLinkLabel = translations?.["localize"] ?? "How to get there";
+  const locationLinkLabel = translations?.["localize"] ?? "Find it";
 
   const headline =
     translations?.["menu.details"] ??
     translations?.["details.headline"] ??
-    "Detalls";
+    "Details";
 
   return (
     <SectionContainer

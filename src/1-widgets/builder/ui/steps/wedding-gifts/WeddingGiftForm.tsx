@@ -96,27 +96,25 @@ export function WeddingGiftForm({
       </GiftMethodCard>
       {/* ---- PAYPAL ---- */}
       <GiftMethodCard
-        icon={
-          <PaypalIcon
-            className="text-blue-700"
-            aria-label={
-              t(translations, "builder.gift.paypal", "PayPal") + " icon"
-            }
-          />
-        }
+        icon={<PaypalIcon className="text-blue-700" />}
         title={t(translations, "builder.gift.paypal", "PayPal")}
         description={t(
           translations,
           "builder.gift.paypal.desc",
-          "Guests can contribute with PayPal or payment card at this URL.",
+          "Guests can contribute via your PayPal.me link or by sending to your PayPal email address.",
         )}
       >
         <BuilderTextInput
-          label={t(translations, "builder.gift.paypal.url", "PayPal URL")}
-          type="url"
+          label={t(
+            translations,
+            "builder.gift.paypal.label",
+            "PayPal Link or Email",
+          )}
+          // Change type to "text" instead of "url" to allow emails without HTML5 validation blocking
+          type="text"
           value={gift.paypal_url ?? ""}
           onChange={(v) => onChange("paypal_url", v)}
-          placeholder="https://paypal.me/guestgift"
+          placeholder="https://paypal.me/yourname or your@email.com"
           autoComplete="off"
           error={errors.paypal_url}
           disabled={disabled}

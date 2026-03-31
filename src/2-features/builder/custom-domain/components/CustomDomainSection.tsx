@@ -4,42 +4,16 @@ import { addCustomDomainClient } from "@/2-features/builder/custom-domain/api/ad
 import { removeCustomDomainClient } from "@/2-features/builder/custom-domain/api/removeCustomDomain.client";
 import { verifyCustomDomainClient } from "@/2-features/builder/custom-domain/api/verifyCustomDomain.client";
 import DnsModalContent from "@/2-features/builder/custom-domain/components/DnsModalContent";
+import { getDomainVariants } from "@/4-shared/helpers/domains/getDomainVariants";
+import { toApexDomain } from "@/4-shared/helpers/domains/toApexDomain";
 import { notify } from "@/4-shared/lib/toast/toast";
-import { PlanType } from "@/4-shared/types";
+import { CustomDomainSectionProps } from "@/4-shared/types";
 import { BuilderButton } from "@/4-shared/ui/builder";
 import MainModal from "@/4-shared/ui/commons/modals/MainModal";
+import { Heading } from "@/4-shared/ui/commons/typography/Heading";
 import React, { useState } from "react";
 
-function toApexDomain(domainInput: string): string {
-  return domainInput
-    .trim()
-    .toLowerCase()
-    .replace(/^https?:\/\//, "")
-    .split("/")[0]
-    .split("?")[0]
-    .split("#")[0]
-    .replace(/\.$/, "")
-    .replace(/^www\./, "");
-}
-
-function getDomainVariants(domainInput: string): { apex: string; www: string } {
-  const apex = toApexDomain(domainInput);
-  return { apex, www: `www.${apex}` };
-}
-
-interface Props {
-  planType: PlanType;
-  translations: Record<string, string>;
-  siteId: string;
-  verifiedDomains: string[];
-  pendingDomains: string[];
-  domainStatuses: Record<string, string>;
-  onUpgradeClick: () => void;
-  refetchDomains: () => Promise<void>;
-  loading?: boolean;
-}
-
-export const CustomDomainSection: React.FC<Props> = ({
+export const CustomDomainSection: React.FC<CustomDomainSectionProps> = ({
   planType,
   translations,
   siteId,
@@ -231,9 +205,9 @@ export const CustomDomainSection: React.FC<Props> = ({
 
   return (
     <section className="mt-8">
-      <h4 className="font-semibold mb-2">
+      <Heading as="h3" className="font-semibold text-gray-900 pb-4">
         {translations["builder.domain.custom_domain_title"]}
-      </h4>
+      </Heading>
 
       {!isPaid ? (
         <div className="flex items-center gap-3 p-3 bg-gray-50 border border-gray-200 rounded text-gray-500">

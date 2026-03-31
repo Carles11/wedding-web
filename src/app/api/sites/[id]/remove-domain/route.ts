@@ -13,6 +13,7 @@ export async function POST(
   try {
     const { id } = await getParams(context);
 
+    // Multitenancy/SaaS Guard: Ensure current user owns this site
     const access = await requireSiteAccess(id);
     if (!access.ok) {
       return NextResponse.json(
@@ -21,14 +22,20 @@ export async function POST(
       );
     }
 
-    const { domain } = await req.json();
+    const body = await req.json();
+    const { domain } = body;
 
-    if (!domain || typeof domain !== "string")
+    if (!domain || typeof domain !== "string") {
       return NextResponse.json({ error: "Invalid domain" }, { status: 400 });
+    }
 
+    // Process removal (Supabase + Sequenced Vercel Removal)
     const result = await removeCustomDomain(id, domain);
+
     return NextResponse.json(result, { status: 200 });
   } catch (error) {
+    console.error("[REMOVE_DOMAIN_API_ERROR]", error);
+
     if (error instanceof RemoveDomainError) {
       return NextResponse.json(
         { error: error.message },

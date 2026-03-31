@@ -31,6 +31,34 @@ export function AccommodationForm({
   onChange,
   disabled,
 }: AccommodationFormProps) {
+  // Normalization Logic
+  const handleWebsiteBlur = () => {
+    const val = form.website?.trim();
+    if (!val) return;
+
+    // If it doesn't start with http/https but looks like a domain (e.g., google.com)
+    // and is valid according to our new permissive regex
+    if (!/^https?:\/\//i.test(val) && isValidURL(val)) {
+      onChange("website", `https://${val}`);
+    }
+  };
+
+  const handlePhoneBlur = () => {
+    let val = form.phone?.trim();
+    if (!val) return;
+
+    // Optional Normalization: Convert '00' prefix to '+'
+    if (val.startsWith("00")) {
+      val = "+" + val.slice(2);
+    }
+
+    // Optional: Strip spaces if you want a clean DB,
+    // or keep them if you want to preserve user formatting.
+    // val = val.replace(/\s+/g, '');
+
+    onChange("phone", val);
+  };
+
   // Inline validation for website, phone, email
   const websiteError =
     form.website && !isValidURL(form.website)
@@ -96,8 +124,10 @@ export function AccommodationForm({
         )}
         value={form.website ?? ""}
         onChange={(v) => onChange("website", v)}
+        onBlur={handleWebsiteBlur}
         error={websiteError}
         disabled={disabled}
+        placeholder="example.com"
       />
       <BuilderTextInput
         label={t(
@@ -107,8 +137,10 @@ export function AccommodationForm({
         )}
         value={form.phone ?? ""}
         onChange={(v) => onChange("phone", v)}
+        onBlur={handlePhoneBlur} // Add the blur handler here too
         error={phoneError}
         disabled={disabled}
+        placeholder="+34 987 61 90 00"
       />
       <BuilderTextInput
         label={t(

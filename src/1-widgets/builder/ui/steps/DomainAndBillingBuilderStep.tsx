@@ -3,18 +3,9 @@
 import MembershipSection from "@/2-features/builder/billing/ui/MembershipSection";
 import CustomDomainSection from "@/2-features/builder/custom-domain/components/CustomDomainSection";
 import SubdomainManager from "@/2-features/builder/custom-domain/components/SubdomainManager";
-import type { Site, TranslationDictionary } from "@/4-shared/types";
-import { PlanType } from "@/4-shared/types";
+import type { DomainAndBillingBuilderStepProps } from "@/4-shared/types";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-
-interface DomainAndBillingBuilderStepProps {
-  site: Site;
-  refresh: () => void;
-  lang: string;
-  translations: TranslationDictionary;
-  planType: PlanType;
-}
 
 export default function DomainAndBillingBuilderStep({
   site,
@@ -54,8 +45,21 @@ export default function DomainAndBillingBuilderStep({
 
   return (
     <div>
-      <div className="mb-4 text-md text-gray-600">
-        {translations["builder.step.domain_billing_subtitle"]}
+      {/* Conditional Subtitle based on Plan */}
+      <div className="mb-6 text-md text-gray-600">
+        {planType === "premium" ? (
+          // Premium Message: Focused on management and success
+          <span>
+            {translations["builder.step.domain_billing_subtitle_premium"] ||
+              "Manage your professional web address and billing details below."}
+          </span>
+        ) : (
+          // Free Message: Focused on the upgrade path
+          <span>
+            {translations["builder.step.domain_billing_subtitle"] ||
+              "Set up the web address of your event site. You can upgrade to unlock custom domains and access billing options."}
+          </span>
+        )}
       </div>
       <SubdomainManager
         site={site}

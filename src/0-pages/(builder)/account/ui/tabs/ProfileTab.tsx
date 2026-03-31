@@ -221,8 +221,14 @@ export function ProfileTab({
                   />
                 </div>
                 {/* Show password and change button if email changed */}
+                {/* Find this block in your code and add the cancel button */}
                 {emailChanged && (
-                  <div className="mt-3 space-y-2">
+                  <div className="mt-3 space-y-2 animate-in fade-in slide-in-from-top-1">
+                    <label className={labelClass}>
+                      {translations[
+                        "builder.account.tabs.profile.label_password"
+                      ] || "Password"}
+                    </label>
                     <input
                       className={inputClass}
                       type="password"
@@ -231,23 +237,31 @@ export function ProfileTab({
                       placeholder={
                         translations[
                           "builder.account.tabs.profile.password_for_email_change"
-                        ] || "Enter your password to confirm email change"
+                        ] || "Enter password"
                       }
                     />
-                    <button
-                      type="button"
-                      className="builder-btn builder-btn-primary builder-btn-sm"
-                      onClick={handleChangeEmail}
-                      disabled={emailChanging || !password || !editEmail}
-                    >
-                      {emailChanging
-                        ? translations[
-                            "builder.account.tabs.profile.changing_email"
-                          ] || "Changing..."
-                        : translations[
-                            "builder.account.tabs.profile.change_email_btn"
-                          ] || "Change Email"}
-                    </button>
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        className="builder-btn builder-btn-primary builder-btn-sm"
+                        onClick={handleChangeEmail}
+                        disabled={emailChanging || !password || !editEmail}
+                      >
+                        {emailChanging ? "Changing..." : "Change Email"}
+                      </button>
+
+                      {/* ADD THIS BUTTON */}
+                      <button
+                        type="button"
+                        className="text-xs text-(--builder-color-text-muted) hover:text-(--builder-color-text) underline underline-offset-2"
+                        onClick={() => {
+                          setEditEmail(account.email); // Resets the input to the original email
+                          setPassword(""); // Clears the password field
+                        }}
+                      >
+                        {translations["builder.actions.cancel"] || "Cancel"}
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>

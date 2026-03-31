@@ -22,14 +22,14 @@ export const Toggle: React.FC<ToggleProps> = ({
   const generatedId = useId();
   const toggleId = id || `toggle-${generatedId}`;
   return (
-    <div className={`flex items-center gap-2 ${className}`}>
+    <div className={`flex items-center gap-2 ${className} `}>
       <button
         id={toggleId}
         type="button"
         role="switch"
         aria-checked={checked}
         aria-label={ariaLabel || label || "Toggle"}
-        className={`
+        className={`cursor-pointer 
           w-10 h-6 rounded-full transition-colors duration-200 
           focus:outline-none focus:ring-2 focus:ring-(--builder-color-primary)
           ${checked ? "bg-(--builder-color-primary)" : "bg-(--builder-color-text-muted)"}

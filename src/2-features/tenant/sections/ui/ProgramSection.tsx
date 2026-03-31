@@ -1,6 +1,7 @@
 import { formatEventDate } from "@/4-shared/helpers/formatEventDate";
 import { formatWhereWedding } from "@/4-shared/helpers/formatWhereWedding";
 import { ProgramEvent } from "@/4-shared/types";
+import { Heading } from "@/4-shared/ui/commons/typography/Heading";
 
 type Props = {
   mainEvent: ProgramEvent | null;
@@ -27,7 +28,6 @@ export default function ProgramSectionComponent({
           lang,
         )
       : "";
-  console.log({ mainEventDate: mainEvent?.date, when });
   // WHERE: translation from program.event.location.{mainEvent.id}
   const whereWedding =
     mainEvent && mainEvent.id
@@ -62,7 +62,7 @@ export default function ProgramSectionComponent({
           letter-spacing-wide
         "
         >
-          <h2>{mainTitle}</h2>
+          <Heading as="h2">{mainTitle}</Heading>
         </span>
 
         <div

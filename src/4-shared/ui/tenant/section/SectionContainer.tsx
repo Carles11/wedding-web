@@ -1,4 +1,5 @@
 import React from "react";
+import Heading from "../../commons/typography/Heading";
 import FlowerDivider from "./FlowerDivider";
 
 type SectionContainerProps = {
@@ -66,12 +67,13 @@ export default function SectionContainer({
           {(heading || subtitle) && (
             <header className="mb-6">
               {heading && (
-                <h2
+                <Heading
+                  as="h2"
                   id={headingId}
                   className="text-2xl md:text-3xl font-extrabold leading-tight text-neutral-800 drop-shadow-[0_2px_8px_rgba(0,0,0,0.18)]"
                 >
                   {heading}
-                </h2>
+                </Heading>
               )}
               {subtitle && (
                 <p className="bg-white/60 min-w-fit w-fit leading-tight text-neutral-800 px-2 py-1">

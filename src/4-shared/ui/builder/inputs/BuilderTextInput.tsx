@@ -13,6 +13,7 @@ type BuilderTextInputProps = {
   autoComplete?: string;
   error?: string;
   showPasswordToggle?: boolean;
+  onBlur?: () => void; // Add this
 };
 
 export function BuilderTextInput({
@@ -26,6 +27,7 @@ export function BuilderTextInput({
   autoComplete,
   error,
   showPasswordToggle,
+  onBlur,
 }: BuilderTextInputProps) {
   const [showPassword, setShowPassword] = useState(false);
   const isPassword = type === "password";
@@ -47,6 +49,7 @@ export function BuilderTextInput({
           type={inputType}
           value={value}
           onChange={(e) => onChange(e.target.value)}
+          onBlur={onBlur}
           placeholder={placeholder}
           disabled={disabled}
           autoComplete={autoComplete}

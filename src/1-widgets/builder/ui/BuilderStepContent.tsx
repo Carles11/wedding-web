@@ -1,7 +1,6 @@
 "use client";
 
 import { BuilderStepContentProps } from "@/4-shared/types";
-import { CustomLoader } from "@/4-shared/ui/commons/loader/CustomLoader";
 import {
   AccommodationBuilderStep,
   ContactBuilderStep,
@@ -55,7 +54,7 @@ export default function BuilderStepContent({
         }
       </h2>
       <div className="mt-4">
-        {siteLoading ? (
+        {/*   {siteLoading ? (
           <CustomLoader
             message={translations["builder.status.loading"] || "Loading..."}
           />
@@ -68,7 +67,7 @@ export default function BuilderStepContent({
             {translations["builder.status.subdomain"]}{" "}
             {site?.subdomain ?? translations["builder.status.subdomain_empty"]}
           </p>
-        )}
+        )} */}
 
         <div className="mt-8 p-4 bg-gray-50">
           {/* Steps always mounted — unmounting would cause stale-read after Supabase writes */}

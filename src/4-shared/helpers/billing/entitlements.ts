@@ -26,9 +26,9 @@ export function getPlanDefinition(planType: PlanType) {
 export function getPlanFeatures(planType: PlanType): PlanFeatures {
   const def = getPlanDefinition(planType);
   return {
-    description: def.description,
-    featuresList: [...def.featuresList],
-    limits: { ...def.limits },
+    description: def?.description,
+    featuresList: [...(def?.featuresList ?? [])],
+    limits: { ...(def?.limits ?? {}) },
   };
 }
 

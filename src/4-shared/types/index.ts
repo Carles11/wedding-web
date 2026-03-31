@@ -4,6 +4,7 @@ export * from "./billing";
 export * from "./builderClient";
 export * from "./buttons";
 export * from "./contact";
+export * from "./domains";
 export * from "./generalSiteForm";
 export * from "./images";
 export * from "./language";

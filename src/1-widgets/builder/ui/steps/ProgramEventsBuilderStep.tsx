@@ -674,30 +674,38 @@ export default function ProgramEventsBuilderStep({
         "Cancel",
       )}
     >
-      <div className="mb-3 flex items-center justify-end gap-2">
-        <BuilderButton
-          variant="primary"
-          size="sm"
-          onClick={startCreate}
-          disabled={!canAddMore()}
-        >
-          {t(translations, "builder.program_events.button.add", "+ Add event")}
-        </BuilderButton>
-      </div>
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-6">
+        {/* Left side: Information Text */}
+        <div className="flex-1 text-sm sm:text-base text-gray-600 leading-relaxed">
+          {interpolate(
+            t(
+              translations,
+              "builder.program_events.info",
+              "Events are grouped into Before Wedding Day, Wedding Day, and After Wedding Day. Title and location are required in the site default language ({defaultLang}).",
+            ),
+            {
+              FREE_EVENT_LIMIT: eventsLimitLabel,
+              defaultLang,
+            },
+          )}
+        </div>
 
-      <div className="mb-4 text-md text-gray-600">
-        {interpolate(
-          t(
-            translations,
-            "builder.program_events.info",
-            "Events are grouped into Before Wedding Day, Wedding Day, and After Wedding Day. Free plan supports up to {limit} events total. Title and location are required in the site default language ({defaultLang}).",
-          ),
-          {
-            limit: eventsLimitLabel,
-            FREE_EVENT_LIMIT: eventsLimitLabel,
-            defaultLang,
-          },
-        )}
+        {/* Right side: Action Button */}
+        <div className="shrink-0">
+          <BuilderButton
+            variant="primary"
+            size="md" // Slightly larger for a more modern feel
+            onClick={startCreate}
+            disabled={!canAddMore()}
+            className="shadow-sm hover:shadow-md transition-shadow"
+          >
+            {t(
+              translations,
+              "builder.program_events.button.add",
+              "+ Add event",
+            )}
+          </BuilderButton>
+        </div>
       </div>
 
       <ProgramEventsList

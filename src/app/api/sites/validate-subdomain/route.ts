@@ -1,5 +1,5 @@
-import { isValidSubdomain } from "@/4-shared/utils/validations/subdomain";
 import { createClient } from "@/4-shared/lib/supabase/client";
+import { isValidSubdomain } from "@/4-shared/utils/validations/subdomain";
 
 export async function GET(req: Request) {
   const supabase = createClient();
@@ -17,7 +17,6 @@ export async function GET(req: Request) {
     .eq("subdomain", subdomain)
     .maybeSingle();
   if (existing) return Response.json({ valid: false, reason: "taken" });
-  // Reserved words, if logic is external to isValidSubdomain
-  // ...
+
   return Response.json({ valid: true });
 }

@@ -1,89 +1,127 @@
 "use client";
 
-import { isValidLanguage } from "@/4-shared/helpers/isValidLanguage";
+import { PLAN_CATALOG } from "@/4-shared/config/plans/planCatalog";
+import { BuilderButton } from "@/4-shared/ui/builder/BuilderButton";
 import Heading from "@/4-shared/ui/commons/typography/Heading";
 import { usePlan } from "@/app/providers";
 import { useRouter } from "next/navigation";
 
 export default function AccountBillingDetails({
-  t,
+  translations,
+  lang,
 }: {
-  t: Record<string, string>;
+  translations: Record<string, string>;
+  lang: string;
 }) {
-  const { planType, features, subscription, usage, lastInvoice } = usePlan();
+  const {
+    planType,
+    features: planEntitlements,
+    subscription,
+    usage,
+    lastInvoice,
+  } = usePlan();
   const router = useRouter();
-  // Language-prefixed routing: lang should be passed as a prop (from parent route context or page params).
-  // If not available, fallback to "en".
-  const lang = isValidLanguage(t?.lang) ? t.lang : "en";
+
+  // 1. Get the static marketing info from the catalog
+  // We use the 'planType' from usePlan as the key
+  const catalogItem = PLAN_CATALOG[planType as keyof typeof PLAN_CATALOG];
 
   const canUpgrade = planType === "free";
   const canManage = planType === "premium" || planType?.startsWith("agency");
 
-  const eventLimit = features?.limits?.events ?? -1;
+  // 2. Resolve the plan description
+  const descKey = catalogItem?.descriptionTranslationKeys?.[0];
+  const displayDescription =
+    descKey && translations[descKey]
+      ? translations[descKey]
+      : catalogItem?.description || translations["billing.plan_desc_default"];
+
+  // 3. Logic for Usage Progress
+  const eventLimit = planEntitlements?.limits?.events ?? -1;
   const eventUsage = usage?.events ?? 0;
   const usagePercent =
     eventLimit === -1 ? 0 : Math.min((eventUsage / eventLimit) * 100, 100);
+
   return (
     <div className="space-y-4">
-      {/* Current Plan */}
+      {/* Current Plan Card */}
       <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-100">
+        <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
           <Heading
             as="h2"
             className="text-sm font-semibold text-gray-500 uppercase tracking-wider"
           >
-            {t["billing.current_plan"] ?? "Current Plan"}
+            {translations["billing.current_plan"] ?? "Current Plan"}
           </Heading>
-        </div>
-        <div className="px-6 py-5 flex items-center justify-between">
-          <p className="text-gray-600 text-sm max-w-md">
-            {features?.description ?? t["billing.plan_desc_default"] ?? ""}
-          </p>
-          <span className="ml-4 shrink-0 inline-flex items-center px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-blue-700 text-xs font-semibold uppercase tracking-wide">
-            {t[`billing.plan_tier_${planType}`] ??
-              planType ??
-              t["billing.none"] ??
-              "None"}
+          <span className="inline-flex items-center px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-blue-700 text-xs font-bold uppercase tracking-wide">
+            {translations[`billing.plan_tier_${planType}`] ??
+              catalogItem?.name ??
+              planType}
           </span>
+        </div>
+        <div className="px-6 py-5">
+          <p className="text-gray-600 text-sm max-w-md leading-relaxed">
+            {displayDescription}
+          </p>
         </div>
       </div>
 
-      {/* Features */}
+      {/* Features List */}
       <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-100">
           <Heading
             as="h2"
             className="text-sm font-semibold text-gray-500 uppercase tracking-wider"
           >
-            {t["billing.features"] ?? "Features"}
+            {translations["billing.features"] ?? "Included Features"}
           </Heading>
         </div>
-        <ul className="px-6 py-5 grid md:grid-cols-2 gap-3">
-          {(features?.featuresList ?? []).map(
-            (feature: string, index: number) => (
-              <li
-                key={index}
-                className="flex items-start gap-3 text-sm text-gray-700"
-              >
-                <svg
-                  className="mt-0.5 shrink-0 text-blue-400 w-3.5 h-3.5"
-                  viewBox="0 0 12 12"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <circle cx="6" cy="6" r="6" className="fill-blue-100" />
-                  <path
-                    d="M3.5 6L5.2 7.7L8.5 4.5"
+        <ul className="px-6 py-5 grid md:grid-cols-2 gap-x-8 gap-y-4">
+          {catalogItem?.features.map((feature, index) => {
+            // Priority: Translated Title > Title String
+            const titleKey = feature.titleTranslationKeys?.[0];
+            const displayTitle =
+              titleKey && translations[titleKey]
+                ? translations[titleKey]
+                : feature.title;
+
+            // Priority: Translated Marketing Desc > Marketing Desc String
+            const marketingKey = feature.marketingDescriptionTranslationKey;
+            const displayMarketing =
+              marketingKey && translations[marketingKey]
+                ? translations[marketingKey]
+                : feature.marketingDescription;
+
+            return (
+              <li key={index} className="flex items-start gap-3">
+                <div className="mt-1 shrink-0 w-5 h-5 flex items-center justify-center rounded-full bg-green-50 text-green-600">
+                  <svg
+                    className="w-3 h-3"
+                    fill="none"
+                    viewBox="0 0 24 24"
                     stroke="currentColor"
-                    strokeWidth="1.2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-                {feature}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={3}
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-900">
+                    {displayTitle}
+                  </p>
+                  {displayMarketing && (
+                    <p className="text-xs text-gray-400 mt-0.5">
+                      {displayMarketing}
+                    </p>
+                  )}
+                </div>
               </li>
-            ),
-          )}
+            );
+          })}
         </ul>
       </div>
 
@@ -95,18 +133,18 @@ export default function AccountBillingDetails({
               as="h2"
               className="text-sm font-semibold text-gray-500 uppercase tracking-wider"
             >
-              {t["billing.usage"] ?? "Usage"}
+              {translations["billing.usage"] ?? "Usage"}
             </Heading>
           </div>
           <div className="px-6 py-5">
             <div className="flex justify-between text-sm text-gray-700 mb-2">
-              <span>{t["billing.events"] ?? "Events"}</span>
+              <span>{translations["billing.events"] ?? "Events"}</span>
               <span className="font-medium tabular-nums">
                 {eventUsage}{" "}
                 <span className="text-gray-400 font-normal">
                   /{" "}
                   {eventLimit === -1
-                    ? (t["billing.unlimited"] ?? "Unlimited")
+                    ? (translations["billing.unlimited"] ?? "Unlimited")
                     : eventLimit}
                 </span>
               </span>
@@ -131,21 +169,24 @@ export default function AccountBillingDetails({
               as="h2"
               className="text-sm font-semibold text-gray-500 uppercase tracking-wider"
             >
-              {t["billing.subscription"] ?? "Subscription"}
+              {translations["billing.subscription"] ?? "Subscription"}
             </Heading>
           </div>
           <div className="px-6 py-5 flex flex-col sm:flex-row gap-6 text-sm text-gray-700">
             <div className="flex flex-col gap-1">
               <span className="text-xs text-gray-400 uppercase tracking-wide">
-                {t["billing.renewal_date"] ?? "Next renewal"}
+                {translations["billing.renewal_date"] ?? "Next renewal"}
               </span>
               <strong className="text-gray-900">
-                {subscription.renewalDate ?? t["billing.date_unknown"]}
+                {subscription.renewalDate === null
+                  ? (translations["billing.renewal_never"] ?? "Never")
+                  : (subscription.renewalDate ??
+                    translations["billing.date_unknown"])}
               </strong>
             </div>
             <div className="flex flex-col gap-1">
               <span className="text-xs text-gray-400 uppercase tracking-wide">
-                {t["billing.status"] ?? "Status"}
+                {translations["billing.status"] ?? "Status"}
               </span>
               <span
                 className={`inline-flex items-center gap-1.5 font-medium capitalize ${subscription.status === "active" ? "text-green-600" : "text-gray-700"}`}
@@ -153,7 +194,8 @@ export default function AccountBillingDetails({
                 <span
                   className={`w-1.5 h-1.5 rounded-full ${subscription.status === "active" ? "bg-green-500" : "bg-gray-400"}`}
                 />
-                {subscription.status}
+                {translations[`billing.status.${subscription.status}`] ??
+                  subscription.status}{" "}
               </span>
             </div>
           </div>
@@ -168,7 +210,7 @@ export default function AccountBillingDetails({
               as="h2"
               className="text-sm font-semibold text-gray-500 uppercase tracking-wider"
             >
-              {t["billing.last_invoice"] ?? "Last Invoice"}
+              {translations["billing.last_invoice"] ?? "Last Invoice"}
             </Heading>
           </div>
           <div className="px-6 py-5 flex items-center justify-between text-sm text-gray-700">
@@ -184,7 +226,7 @@ export default function AccountBillingDetails({
               target="_blank"
               rel="noopener"
             >
-              {t["billing.download_receipt"] ?? "Download"} ↓
+              {translations["billing.download_receipt"] ?? "Download"} ↓
             </a>
           </div>
         </div>
@@ -194,21 +236,27 @@ export default function AccountBillingDetails({
       {/* Navigation uses language-prefixed URLs, e.g. /[lang]/pricing */}
       <div className="pt-2 flex gap-3">
         {canUpgrade && (
-          <button
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition"
+          <BuilderButton
+            variant="primary"
             onClick={() => router.push(`/${lang || "en"}/marketing/upgrade`)}
           >
-            {t["billing.cta_upgrade"] ?? "Upgrade"}
-          </button>
+            {translations["billing.cta_upgrade"] ?? "Upgrade"}
+          </BuilderButton>
         )}
         {canManage && (
-          <button
-            className="px-6 py-3 bg-gray-100 text-gray-800 rounded-lg font-semibold hover:bg-gray-200 transition cursor-pointer"
+          <BuilderButton
+            variant="primary"
             onClick={() => router.push(`/${lang || "en"}/pricing`)}
           >
-            {t["billing.cta_pricing"] ?? "See all membership benefits →"}
-          </button>
+            {translations["billing.cta_pricing"] ?? "See all plans"}
+          </BuilderButton>
         )}
+        <BuilderButton
+          variant="secondary"
+          onClick={() => router.push(`/${lang || "en"}/builder?step=7`)}
+        >
+          {translations["builder.actions.back"] ?? "Back to Builder"}
+        </BuilderButton>
       </div>
     </div>
   );

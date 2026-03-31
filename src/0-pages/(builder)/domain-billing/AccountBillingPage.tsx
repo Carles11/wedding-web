@@ -4,12 +4,7 @@ import { createSupabaseSSRClient } from "@/4-shared/lib/supabase/server";
 import Heading from "@/4-shared/ui/commons/typography/Heading";
 import AccountBillingDetails from "./ui/AccountBillingDetails";
 
-interface PageProps {
-  params: { lang: string; siteId: string };
-}
-
-export default async function AccountBillingPage({ params }: PageProps) {
-  const { lang, siteId } = params;
+export default async function AccountBillingPage({ lang }: { lang: string }) {
   const supabase = await createSupabaseSSRClient();
   const t = await fetchBuilderTranslations(supabase, lang, "en");
   const user = await getCurrentUser();
@@ -37,7 +32,7 @@ export default async function AccountBillingPage({ params }: PageProps) {
       </div>
 
       <div className="max-w-4xl mx-auto px-6 py-10">
-        <AccountBillingDetails t={t} />
+        <AccountBillingDetails translations={t} lang={lang} />
       </div>
     </div>
   );

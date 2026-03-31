@@ -128,7 +128,7 @@ export default async function Page({
 
     return (
       <>
-        <TenantPageComponent params={{ lang }} />
+        <TenantPageComponent lang={lang} translations={translations} />
         {showFooter && <Footer lang={lang} translations={translations} />}
       </>
     );

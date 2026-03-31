@@ -15,7 +15,6 @@ export async function getSiteByDomain(host: string | null) {
   try {
     const supabase = await createSupabaseSSRClient();
 
-    // Joining through user_profiles because subscriptions are linked to users, not sites directly.
     const query = supabase
       .from("sites")
       .select(
@@ -27,11 +26,7 @@ export async function getSiteByDomain(host: string | null) {
         languages, 
         domains, 
         seo_enabled,
-        user_profiles!owner_user_id (
-          subscriptions (
-            plan_type
-          )
-        ),
+        plan_type,
         program_events (
           date,
           is_main_event
@@ -52,10 +47,9 @@ export async function getSiteByDomain(host: string | null) {
 
     if (!data) return null;
 
-    // 1. Extract Plan Type via the User Profile relationship
-    // Note: We access subscriptions via user_profiles
-    const planType =
-      (data.user_profiles as any)?.subscriptions?.[0]?.plan_type || "free";
+    // 1. Get Plan Type directly from the site row
+    // If for some reason it's null in the DB, fallback to 'free'
+    const planType = data.plan_type || "free";
 
     // 2. Extract Wedding Date (find the is_main_event in the array)
     const mainEvent = (data.program_events as any[])?.find(
@@ -75,7 +69,7 @@ export async function getSiteByDomain(host: string | null) {
 
     return {
       ...data,
-      plan_type: planType,
+      plan_type: planType, // Remains compatible with your existing code
       wedding_date: weddingDateStr,
       is_expired: isExpired,
     };

@@ -12,24 +12,22 @@ import { fetchWhatToSeeDataForTenant } from "@/3-entities/what_to_see/api/fetchW
 import TenantHeroShell from "@/1-widgets/tenant/page/ui/TenantHeroShell";
 import TenantNotFoundState from "@/1-widgets/tenant/page/ui/TenantNotFoundState";
 import TenantSectionsContent from "@/1-widgets/tenant/page/ui/TenantSectionsContent";
-import { isValidLanguage } from "@/4-shared/helpers/isValidLanguage";
-import { getMergedTranslations } from "@/4-shared/lib/i18n";
 import { ProgramSection } from "@/4-shared/types";
 import { headers } from "next/headers";
 
 // --- MAIN MULTILINGUAL TENANT PAGE COMPONENT ---
 export default async function TenantPageComponent({
-  params,
+  lang = "en",
+  translations,
 }: {
-  params: { lang: string };
+  lang: string;
+  translations: Record<string, string>;
 }) {
-  const realParams = await params;
-  const lang = isValidLanguage(realParams.lang) ? realParams.lang : "en";
   const host = ((await headers()).get("host") ?? "").toLowerCase().trim();
-  console.log("[TenantPageComponent] entry, host:", host);
+
   const site = await getSiteByDomain(host);
   const siteId = site?.id ?? null;
-  const translations = await getMergedTranslations(siteId, lang, "en");
+
   if (!site) {
     console.error("Could not resolve tenant for host:", host);
   }

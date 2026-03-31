@@ -170,6 +170,50 @@ export async function getVercelDomainStatus(
   }
 }
 
+/**
+ * Updates a domain's configuration in the Vercel project.
+ * Useful for breaking redirect loops/dependencies before deletion.
+ */
+export async function updateVercelProjectDomain(
+  domain: string,
+  options: { redirect?: string | null; redirectStatusCode?: number | null },
+): Promise<{ status: "updated" | "error"; error?: string }> {
+  const normalizedDomain = normalizeDomain(domain);
+  const url = `https://api.vercel.com/v9/projects/${VERCEL_PROJECT_ID}/domains/${normalizedDomain}`;
+
+  try {
+    const res = await fetch(url, {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${VERCEL_TOKEN}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        redirect: options.redirect,
+        redirectStatusCode: options.redirectStatusCode,
+      }),
+    });
+
+    const data = await res.json().catch(() => null);
+
+    if (!res.ok) {
+      return {
+        status: "error",
+        error: extractVercelErrorMessage(data) || "Failed to update domain",
+      };
+    }
+
+    return { status: "updated" };
+  } catch (err: unknown) {
+    const errorMessage =
+      err instanceof Error ? err.message : "Unknown error updating domain";
+    return {
+      status: "error",
+      error: errorMessage,
+    };
+  }
+}
+
 export async function addDomainToVercelProject(
   domain: string,
   options: AddProjectDomainOptions = {},

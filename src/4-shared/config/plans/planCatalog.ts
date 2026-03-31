@@ -105,6 +105,7 @@ export const PLAN_CATALOG = {
   free: {
     name: "Free",
     description: "Get started for free. Great for testing or small events.",
+    descriptionTranslationKeys: ["billing.plan_desc_free"],
     features: FREE_PLAN_FEATURES,
     featuresList: FREE_PLAN_FEATURES.map((feature) => feature.title),
     limits: {
@@ -122,7 +123,8 @@ export const PLAN_CATALOG = {
   },
   premium: {
     name: "PREMIUM",
-    description: "Unlock unlimited events and premium features.",
+    description: "Your PREMIUM plan details are shown below.",
+    descriptionTranslationKeys: ["billing.plan_desc_premium"],
     features: PREMIUM_PLAN_FEATURES,
     featuresList: PREMIUM_PLAN_FEATURES.map((feature) => feature.title),
     limits: {

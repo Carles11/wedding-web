@@ -47,7 +47,7 @@ export interface PlanLimits {
 }
 
 export interface PlanFeatures {
-  description: string;
+  description: string | "";
   featuresList: string[];
   limits?: PlanLimits;
 }

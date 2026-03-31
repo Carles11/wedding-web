@@ -20,7 +20,7 @@ import { CookiesConsentBanner } from "@/4-shared/ui/CookiesConsentBanner";
 import { EMAIL_RE } from "@/4-shared/utils/validations";
 import { usePlan } from "@/app/providers";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useTransition } from "react";
 
 const STEP_KEYS = [
   "builder.nav.step.general",
@@ -42,6 +42,9 @@ export default function BuilderClient({
 }: BuilderClientProps) {
   const router = useRouter();
   const pathname = usePathname();
+
+  const [isPending, startTransition] = useTransition();
+
   const { user } = useSupabaseAuth();
   const {
     site,
@@ -55,7 +58,9 @@ export default function BuilderClient({
   const searchParams = useSearchParams();
   const initialStep = parseInt(searchParams.get("step") ?? "0", 10);
   const [active, setActive] = useState(isNaN(initialStep) ? 0 : initialStep);
+
   const [currentLang, setCurrentLang] = useState(initialLang);
+  const [translations, setTranslations] = useState(initialTranslations);
   // Sync currentLang from the [lang] path segment in the URL
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -65,7 +70,6 @@ export default function BuilderClient({
       setCurrentLang(pathLang);
     }
   }, [pathname]);
-  const [translations, setTranslations] = useState(initialTranslations);
 
   // --- step completeness state ---
   const [hasHeroContent, setHasHeroContent] = useState(false);
@@ -153,30 +157,42 @@ export default function BuilderClient({
   }, [site?.id]);
 
   const handleLanguageChange = async (lang: string) => {
-    setCurrentLang(lang);
+    // We don't await the DB update to keep UI snappy
     if (user?.id) {
-      await updateAccountInfo(user.id, { preferred_language: lang });
+      updateAccountInfo(user.id, { preferred_language: lang });
     }
-    // preserve step in URL
+
+    // This triggers the pathname useEffect which updates currentLang
     router.push(`/${lang}/builder?step=${active}`);
   };
 
   // Fetch builder translations when currentLang changes
+  // "Stale-While-Revalidating" Fetcher
   useEffect(() => {
-    if (currentLang === initialLang) return;
+    // Only fetch if the language in the URL actually changed from what we have in state
+    if (currentLang === initialLang && translations === initialTranslations)
+      return;
+
     async function fetchTranslations() {
       const { fetchBuilderTranslations } =
         await import("@/4-shared/api/builder/getTranslations");
       const supabase = createClient();
+
       const newTranslations = await fetchBuilderTranslations(
         supabase,
         currentLang,
         "en",
       );
-      setTranslations(newTranslations);
+
+      // Wrap the state update in a transition.
+      // React will keep the "old" translations on screen until this is done.
+      startTransition(() => {
+        setTranslations(newTranslations);
+      });
     }
+
     fetchTranslations();
-  }, [currentLang, initialLang]);
+  }, [currentLang]);
 
   // "done" → green check | "pending" → red dot (mandatory) | "optional" → gray circle
   const STEP_STATUS: StepStatus[] = [

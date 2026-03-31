@@ -15,7 +15,6 @@ export function BuilderLanguageCard({
   defaultBadgeLabel,
   children,
 }: BuilderLanguageCardProps) {
-  console.log({ languageCode, title });
   return (
     <section
       className={`rounded-xl border bg-white p-4 shadow-sm transition sm:p-5 ${
