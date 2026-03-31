@@ -95,7 +95,7 @@ export function TermsProhibitedSection({ translations }: SectionProps) {
       id="prohibited"
       className="mb-14 scroll-mt-24 p-8 rounded-3xl bg-white/50 border border-white/80 shadow-sm"
     >
-      <h2 className="font-display text-2xl mb-6">
+      <h2 className="font-display text-2xl mb-6 pb-6">
         {t(
           translations,
           "marketing.legal.terms.prohibited.title",
@@ -119,6 +119,11 @@ export function TermsProhibitedSection({ translations }: SectionProps) {
           {
             key: "marketing.legal.terms.prohibited.access",
             label: "Unauthorized access",
+          },
+          {
+            key: "marketing.legal.terms.prohibited.domain_abuse",
+            label:
+              "Circumventing domain, event, or plan limits (for example, by repeatedly swapping custom domains or sharing your account access).",
           },
         ].map((item, i) => (
           <li key={i} className="flex items-start gap-4 text-sm text-gray-700">

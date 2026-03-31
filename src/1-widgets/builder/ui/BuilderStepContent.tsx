@@ -1,6 +1,7 @@
 "use client";
 
 import { BuilderStepContentProps } from "@/4-shared/types";
+import { CustomLoader } from "@/4-shared/ui/commons/loader/CustomLoader";
 import {
   AccommodationBuilderStep,
   ContactBuilderStep,
@@ -55,7 +56,9 @@ export default function BuilderStepContent({
       </h2>
       <div className="mt-4">
         {siteLoading ? (
-          <p>{translations["builder.status.loading"]}</p>
+          <CustomLoader
+            message={translations["builder.status.loading"] || "Loading..."}
+          />
         ) : siteError ? (
           <p className="text-(--builder-color-danger)">
             {translations["builder.status.error"]} {siteError}

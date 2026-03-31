@@ -41,7 +41,10 @@ export default function PricingTable({
         // PRICE FORMATTING
         const formattedPrice =
           def.price === -1
-            ? null
+            ? new Intl.NumberFormat(lang, {
+                style: "currency",
+                currency: def.currency,
+              }).format(0.0)
             : new Intl.NumberFormat(lang, {
                 style: "currency",
                 currency: def.currency,
@@ -87,7 +90,7 @@ export default function PricingTable({
                   <p className="text-sm text-gray-500">
                     {def.billing === "one-time"
                       ? billingLabel
-                      : `/${billingLabel}`}
+                      : `${billingLabel}`}
                   </p>
                 </>
               ) : (

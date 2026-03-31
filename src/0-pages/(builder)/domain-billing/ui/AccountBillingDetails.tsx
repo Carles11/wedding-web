@@ -1,6 +1,7 @@
 "use client";
 
 import { isValidLanguage } from "@/4-shared/helpers/isValidLanguage";
+import Heading from "@/4-shared/ui/commons/typography/Heading";
 import { usePlan } from "@/app/providers";
 import { useRouter } from "next/navigation";
 
@@ -27,9 +28,12 @@ export default function AccountBillingDetails({
       {/* Current Plan */}
       <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-100">
-          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
+          <Heading
+            as="h2"
+            className="text-sm font-semibold text-gray-500 uppercase tracking-wider"
+          >
             {t["billing.current_plan"] ?? "Current Plan"}
-          </h2>
+          </Heading>
         </div>
         <div className="px-6 py-5 flex items-center justify-between">
           <p className="text-gray-600 text-sm max-w-md">
@@ -47,9 +51,12 @@ export default function AccountBillingDetails({
       {/* Features */}
       <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-100">
-          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
+          <Heading
+            as="h2"
+            className="text-sm font-semibold text-gray-500 uppercase tracking-wider"
+          >
             {t["billing.features"] ?? "Features"}
-          </h2>
+          </Heading>
         </div>
         <ul className="px-6 py-5 grid md:grid-cols-2 gap-3">
           {(features?.featuresList ?? []).map(
@@ -84,9 +91,12 @@ export default function AccountBillingDetails({
       {usage && (
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-100">
-            <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
+            <Heading
+              as="h2"
+              className="text-sm font-semibold text-gray-500 uppercase tracking-wider"
+            >
               {t["billing.usage"] ?? "Usage"}
-            </h2>
+            </Heading>
           </div>
           <div className="px-6 py-5">
             <div className="flex justify-between text-sm text-gray-700 mb-2">
@@ -117,9 +127,12 @@ export default function AccountBillingDetails({
       {subscription && (
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-100">
-            <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
+            <Heading
+              as="h2"
+              className="text-sm font-semibold text-gray-500 uppercase tracking-wider"
+            >
               {t["billing.subscription"] ?? "Subscription"}
-            </h2>
+            </Heading>
           </div>
           <div className="px-6 py-5 flex flex-col sm:flex-row gap-6 text-sm text-gray-700">
             <div className="flex flex-col gap-1">
@@ -151,9 +164,12 @@ export default function AccountBillingDetails({
       {lastInvoice && (
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-100">
-            <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
+            <Heading
+              as="h2"
+              className="text-sm font-semibold text-gray-500 uppercase tracking-wider"
+            >
               {t["billing.last_invoice"] ?? "Last Invoice"}
-            </h2>
+            </Heading>
           </div>
           <div className="px-6 py-5 flex items-center justify-between text-sm text-gray-700">
             <span>
@@ -187,7 +203,7 @@ export default function AccountBillingDetails({
         )}
         {canManage && (
           <button
-            className="px-6 py-3 bg-gray-100 text-gray-800 rounded-lg font-semibold hover:bg-gray-200 transition"
+            className="px-6 py-3 bg-gray-100 text-gray-800 rounded-lg font-semibold hover:bg-gray-200 transition cursor-pointer"
             onClick={() => router.push(`/${lang || "en"}/pricing`)}
           >
             {t["billing.cta_pricing"] ?? "See all membership benefits →"}

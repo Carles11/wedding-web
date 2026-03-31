@@ -20,6 +20,7 @@ import type {
   WeddingGift,
 } from "@/4-shared/types";
 import { PlanLimitNotice, UpgradeCTAModal } from "@/4-shared/ui/builder";
+import { CustomLoader } from "@/4-shared/ui/commons/loader/CustomLoader";
 import {
   isValidIBAN,
   isValidPhone,
@@ -372,7 +373,9 @@ export default function WeddingGiftBuilderStep({
         />
       )}
       {loading ? (
-        <div>{t(translations, "builder.what_to_see.loading", "Loading…")}</div>
+        <CustomLoader
+          message={translations["builder.status.loading"] || "Loading..."}
+        />
       ) : (
         <form
           className="max-w-2xl bg-(--builder-color-muted-surface) p-6 space-y-5"

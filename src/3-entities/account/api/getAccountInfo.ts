@@ -14,7 +14,7 @@ export async function getAccountInfo(): Promise<AccountInfo | null> {
   const { data, error } = await supabase
     .from("user_profiles")
     .select(
-      "id, email, full_name, avatar_url, preferred_language, created_at, updated_at, onboarding_completed",
+      "id, email, full_name, avatar_url, preferred_language, created_at, updated_at, onboarding_completed, cookie_consent, cookie_consent_at, cookie_consent_version",
     )
     .eq("id", user.id)
     .single();

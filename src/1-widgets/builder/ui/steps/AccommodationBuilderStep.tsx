@@ -25,6 +25,7 @@ import {
   PlanLimitNotice,
   UpgradeCTAModal,
 } from "@/4-shared/ui/builder";
+import { CustomLoader } from "@/4-shared/ui/commons/loader/CustomLoader";
 import { isValidURL } from "@/4-shared/utils/validations";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -393,7 +394,9 @@ export default function AccommodationBuilderStep({
       {isListOpen && (
         <>
           {loading ? (
-            <p>{translations["common.loading"] || "Loading…"}</p>
+            <CustomLoader
+              message={translations["builder.status.loading"] || "Loading..."}
+            />
           ) : (
             <div className="space-y-3">
               {items.length === 0 ? (

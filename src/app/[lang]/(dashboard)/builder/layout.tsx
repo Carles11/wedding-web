@@ -45,7 +45,7 @@ export default async function DashboardLayout({
         <Footer
           siteName="Weddweb.com"
           author="Carles del Río Francés"
-          repoUrl="https://www.rio-frances.com"
+          repoUrl="https://github.com/Carles11/"
           translations={marketingTranslations}
           lang={lang}
         />

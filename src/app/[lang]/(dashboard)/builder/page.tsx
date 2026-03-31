@@ -2,10 +2,10 @@
 
 import BuilderClient from "@/0-pages/(builder)/BuilderClient";
 import { getAccountInfo } from "@/3-entities/account/api/getAccountInfo";
-import { getCurrentUser } from "@/3-entities/user/api/getCurrentUser";
 import { fetchBuilderTranslations } from "@/4-shared/api/builder/getTranslations";
 import { isValidLanguage } from "@/4-shared/helpers/isValidLanguage";
 import { createSupabaseSSRClient } from "@/4-shared/lib/supabase/server";
+import { AccountInfo } from "@/4-shared/types";
 import { redirect } from "next/navigation";
 
 export default async function BuilderPage({
@@ -20,34 +20,21 @@ export default async function BuilderPage({
   const account = await getAccountInfo();
 
   const supabase = await createSupabaseSSRClient();
+
   // Check if user has completed onboarding
-  const user = await getCurrentUser();
-
-  let userProfile: any = null;
-  let userId: string | null = null;
-  if (user) {
-    userId = user.id;
-    const { data } = await supabase
-      .from("user_profiles")
-      .select(
-        "onboarding_completed, cookie_consent, cookie_consent_at, cookie_consent_version",
-      )
-      .eq("id", user.id)
-      .maybeSingle();
-    userProfile = data;
-    if (userProfile && userProfile.onboarding_completed === false) {
-      redirect(`/${lang}/builder/onboarding`);
-    }
-  }
-
+  const userProfile: AccountInfo | null = await getAccountInfo();
   const translations = await fetchBuilderTranslations(supabase, lang, "en");
+
+  if (userProfile && userProfile.onboarding_completed === false) {
+    redirect(`/${lang}/builder/onboarding`);
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
       <BuilderClient
         initialLang={lang}
         translations={translations}
-        userId={userId}
+        userId={userProfile?.id ?? null}
         userProfile={userProfile}
         account={account}
       />

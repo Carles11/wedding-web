@@ -171,7 +171,7 @@ export default function PrivacyPolicyPage({ translations, lang }: Props) {
 
         {/* Legal Content */}
         <main className="flex-1 max-w-2xl">
-          <PrivacyCollectSection translations={translations} />
+          <PrivacyCollectSection translations={translations} lang={lang} />
           <PrivacyUseSection translations={translations} />
           <PrivacySharingSection translations={translations} />
           <PrivacyTransfersSection translations={translations} />

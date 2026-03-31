@@ -1,6 +1,7 @@
 import { getCurrentUser } from "@/3-entities/user/api/getCurrentUser";
 import { fetchBuilderTranslations } from "@/4-shared/api/builder/getTranslations";
 import { createSupabaseSSRClient } from "@/4-shared/lib/supabase/server";
+import Heading from "@/4-shared/ui/commons/typography/Heading";
 import AccountBillingDetails from "./ui/AccountBillingDetails";
 
 interface PageProps {
@@ -27,9 +28,9 @@ export default async function AccountBillingPage({ params }: PageProps) {
             </span>
           </div>
           <div>
-            <h1 className="text-lg font-semibold text-gray-900">
+            <Heading as="h1" className="text-lg font-semibold text-gray-900">
               {t["billing.header"] ?? "Subscription & Billing"}
-            </h1>
+            </Heading>
             <p className="text-sm text-gray-500">{user.email}</p>
           </div>
         </div>

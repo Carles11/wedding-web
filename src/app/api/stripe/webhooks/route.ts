@@ -1,11 +1,12 @@
 "use server";
 
+import { updateUserProfile } from "@/3-entities/user/api/updatedUserProfile";
+import { upsertCurrentUserSubscription } from "@/3-entities/user/api/upsertCurrentUserSubscription";
 import { resolvePlanTypeFromStripePriceId } from "@/4-shared/lib/stripe/stripeCheckout";
 import {
   STRIPE_SECRET_KEY,
   STRIPE_WEBHOOK_SECRET,
 } from "@/4-shared/lib/stripe/stripeConfig";
-import { supabaseAdmin } from "@/4-shared/lib/supabase/supabaseServer";
 import type { PlanType } from "@/4-shared/types";
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
@@ -104,7 +105,7 @@ async function handleCheckoutSessionCompleted(
   const subscriptionPayload = {
     user_id: userId,
     plan_type: planType,
-    status: "active",
+    status: "active" as const,
     price_amount: (firstItem?.price?.unit_amount ?? 0) / 100,
     currency: (
       firstItem?.price?.currency ??
@@ -124,16 +125,35 @@ async function handleCheckoutSessionCompleted(
    * We use .upsert() targeting 'user_id' to ensure a user only ever has
    * one active subscription record in the table.
    */
-  const { error } = await supabaseAdmin
-    .from("subscriptions")
-    .upsert(subscriptionPayload, {
-      onConflict: "user_id",
-      ignoreDuplicates: false,
-    });
+  const { error } = await upsertCurrentUserSubscription(subscriptionPayload);
 
   if (error) {
-    console.error("[Stripe Webhook] DB Update Error:", error);
-    throw error; // Re-throwing sends a 500 to Stripe, so they retry later
+    // This log will now contain the actual Postgrest error message
+    console.error("[Stripe Webhook] DB Update Error:", error.message);
+
+    // Re-throwing tells Stripe "I failed, try again in an hour"
+    throw new Error(`Database Upsert Failed: ${error.message}`);
+  }
+
+  // Mark onboarding as complete for this user (for premium signups)
+  console.log(
+    "[Stripe Webhook] Attempting to update onboarding_completed for user:",
+    userId,
+  );
+
+  const { data: updatedProfile, error: onboardingError } =
+    await updateUserProfile(userId, { onboarding_completed: true });
+
+  if (onboardingError) {
+    console.error(
+      "[Stripe Webhook] Failed to update profile:",
+      onboardingError,
+    );
+  } else {
+    console.log(
+      "[Stripe Webhook] Profile updated successfully:",
+      updatedProfile,
+    );
   }
 
   console.log(

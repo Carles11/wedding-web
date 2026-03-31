@@ -39,6 +39,19 @@ function toApex(domain: string): string {
 }
 
 export async function removeCustomDomain(siteId: string, domain: string) {
+  // Only skip if domain is a true subdomain (not www), or local/test
+  const isLocalOrPort = domain.includes("localhost") || domain.includes(":");
+  const isWww = domain.startsWith("www.");
+  const parts = domain.replace(/^www\./, "").split(".");
+  // e.g. foo.bar.com (not www.bar.com or bar.com)
+  const isTrueSubdomain = parts.length > 2;
+  if (isLocalOrPort || isTrueSubdomain) {
+    console.log(
+      `[removeCustomDomain] Skipping subdomain or local/test domain: ${domain}`,
+    );
+    return { success: true, skipped: true, reason: "subdomain_or_local" };
+  }
+
   const apexDomain = normalizeToApex(domain);
   const wwwDomain = `www.${apexDomain}`;
 
@@ -83,17 +96,22 @@ export async function removeCustomDomain(siteId: string, domain: string) {
     throw new RemoveDomainError(500, "Failed to remove domain in DB");
   }
 
-  // 4. Remove both variants from Vercel
-  const [apexResult, wwwResult] = await Promise.all([
-    removeDomainFromVercelProject(apexDomain),
-    removeDomainFromVercelProject(wwwDomain),
-  ]);
+  // 4. Remove www first, then apex from Vercel, with detailed logging
+  console.log(`[removeCustomDomain] Attempting to remove www: ${wwwDomain}`);
+  const wwwResult = await removeDomainFromVercelProject(wwwDomain);
+  console.log(`[removeCustomDomain] WWW result:`, wwwResult);
 
-  const failures = [apexResult, wwwResult].filter((r) => r.status === "error");
+  // Now try to remove apex
+  console.log(`[removeCustomDomain] Attempting to remove apex: ${apexDomain}`);
+  const apexResult = await removeDomainFromVercelProject(apexDomain);
+  console.log(`[removeCustomDomain] Apex result:`, apexResult);
+
+  const failures = [wwwResult, apexResult].filter((r) => r.status === "error");
   if (failures.length > 0) {
+    console.error("[removeCustomDomain] Failed removals:", failures);
     throw new RemoveDomainError(
       502,
-      "Domain removed in DB but failed to fully remove from Vercel. Please retry.",
+      `Domain removed in DB but failed to fully remove from Vercel. Details: ${JSON.stringify(failures)}`,
     );
   }
 

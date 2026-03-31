@@ -5,6 +5,7 @@ import { t } from "@/4-shared/helpers/t";
 import type { ProgramEvent } from "@/4-shared/types";
 import { BuilderButton } from "@/4-shared/ui/builder";
 import { Toggle } from "@/4-shared/ui/commons/buttons/Toggle";
+import { CustomLoader } from "@/4-shared/ui/commons/loader/CustomLoader";
 import type { DayTagOption } from "./dayTags";
 
 type ProgramEventsListProps = {
@@ -38,9 +39,13 @@ export function ProgramEventsList({
 }: ProgramEventsListProps) {
   if (loading) {
     return (
-      <p>
-        {t(translations, "builder.program_events.loading", "Loading events…")}
-      </p>
+      <CustomLoader
+        message={t(
+          translations,
+          "builder.program_events.loading",
+          "Loading events…",
+        )}
+      />
     );
   }
 

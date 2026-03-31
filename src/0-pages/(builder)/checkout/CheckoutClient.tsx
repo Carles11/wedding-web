@@ -3,6 +3,7 @@
 import { isValidLanguage } from "@/4-shared/helpers/isValidLanguage";
 import { t } from "@/4-shared/helpers/t";
 import { CheckoutClientProps, CheckoutResponse } from "@/4-shared/types";
+import { CustomLoader } from "@/4-shared/ui/commons/loader/CustomLoader";
 import Heading from "@/4-shared/ui/commons/typography/Heading";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
@@ -238,13 +239,13 @@ export default function CheckoutClient({
           </p>
 
           {loading && (
-            <p className="text-sm text-gray-500">
-              {t(
+            <CustomLoader
+              message={t(
                 translations,
                 "checkout.status.wait",
                 "Please wait, this may take a moment.",
               )}
-            </p>
+            />
           )}
         </div>
 

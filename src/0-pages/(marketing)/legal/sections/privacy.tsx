@@ -3,9 +3,10 @@ import type { MarketingTranslations } from "@/4-shared/types/marketingPage";
 
 type SectionProps = {
   translations: MarketingTranslations;
+  lang?: string;
 };
 
-export function PrivacyCollectSection({ translations }: SectionProps) {
+export function PrivacyCollectSection({ translations, lang }: SectionProps) {
   return (
     <section id="collect" className="mb-16 scroll-mt-24">
       <h2 className="font-display text-3xl mb-6">
@@ -64,7 +65,7 @@ export function PrivacyCollectSection({ translations }: SectionProps) {
               "See our ",
             )}
             <a
-              href="/en/legal/cookie-policy"
+              href={`/${lang?.toLowerCase() || "en"}/cookie-policy`}
               className="underline font-medium text-teal-600"
             >
               {t(

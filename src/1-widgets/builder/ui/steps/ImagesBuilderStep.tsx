@@ -11,6 +11,7 @@ import { getPlanLimit } from "@/4-shared/helpers/billing/entitlements";
 import { notify } from "@/4-shared/lib/toast/toast";
 import type { ImageRow, PlanType, Site } from "@/4-shared/types";
 import FileUploader from "@/4-shared/ui/builder/FileUploader";
+import { CustomLoader } from "@/4-shared/ui/commons/loader/CustomLoader";
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Accept } from "react-dropzone";
@@ -421,9 +422,11 @@ export default function ImagesBuilderStep({
 
         {/* STATES */}
         {loading && (
-          <p>
-            {translations["builder.images.label.loading"] || "Loading images…"}
-          </p>
+          <CustomLoader
+            message={
+              translations["builder.images.label.loading"] || "Loading images…"
+            }
+          />
         )}
         {!loading && error && (
           <p className="text-[var(--builder-color-danger)] text-sm">{error}</p>

@@ -15,6 +15,7 @@ import { useSupabaseAuth } from "@/4-shared/hooks/useSupabaseAuth";
 import { createClient } from "@/4-shared/lib/supabase/client";
 import { BuilderClientProps, ImageSection, StepStatus } from "@/4-shared/types";
 import { BuilderHeader } from "@/4-shared/ui/builder";
+import { CustomLoader } from "@/4-shared/ui/commons/loader/CustomLoader";
 import { CookiesConsentBanner } from "@/4-shared/ui/CookiesConsentBanner";
 import { EMAIL_RE } from "@/4-shared/utils/validations";
 import { usePlan } from "@/app/providers";
@@ -131,7 +132,7 @@ export default function BuilderClient({
       const f = section?.content ?? {};
       const bride = (f.bride ?? {}) as { name?: string; email?: string };
       const groom = (f.groom ?? {}) as { name?: string; email?: string };
-      console.log("Contact section data:", { bride, groom });
+
       const validContact = (pt: { name?: string; email?: string }) =>
         !!pt?.name && !!pt?.email && EMAIL_RE.test(pt.email ?? "");
       setHasContact(validContact(bride) && validContact(groom));
@@ -190,7 +191,11 @@ export default function BuilderClient({
   ];
 
   if (!site || !planType)
-    return <div>{translations["builder.status.loading"]}</div>;
+    return (
+      <CustomLoader
+        message={translations["builder.status.loading"] || "Loading..."}
+      />
+    );
 
   return (
     <div className="builder-theme min-h-screen">

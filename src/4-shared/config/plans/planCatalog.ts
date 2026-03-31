@@ -118,7 +118,7 @@ export const PLAN_CATALOG = {
     },
     price: -1,
     currency: "EUR",
-    billing: "one-time",
+    billing: "",
   },
   premium: {
     name: "PREMIUM",

@@ -29,6 +29,7 @@ import {
   PlanLimitNotice,
   UpgradeCTAModal,
 } from "@/4-shared/ui/builder";
+import { CustomLoader } from "@/4-shared/ui/commons/loader/CustomLoader";
 import { useRouter } from "next/navigation";
 import { StepLayout } from "../../step-layout";
 import { WhatToSeeForm } from "./what-to-see/WhatToSeeForm";
@@ -472,7 +473,13 @@ export default function WhatToSeeBuilderStep({
       {!collapsed && (
         <>
           {loading ? (
-            <p>{t(translations, "builder.what_to_see.loading", "Loading…")}</p>
+            <CustomLoader
+              message={t(
+                translations,
+                "builder.what_to_see.loading",
+                "Loading…",
+              )}
+            />
           ) : items.length === 0 ? (
             <div className="text-sm text-gray-500">
               {t(translations, "builder.what_to_see.empty", "No entries yet.")}

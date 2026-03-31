@@ -19,7 +19,7 @@ export default async function CheckoutPage({
   const plan = resolvedSearchParams.plan as string | undefined;
   const success = resolvedSearchParams.success === "true";
   const sessionId = resolvedSearchParams.session_id as string | undefined;
-  console.log("CheckoutPage params:", { langParam, plan, success, sessionId });
+
   const lang = isValidLanguage(langParam) ? langParam : "en";
   const supabase = await createSupabaseSSRClient();
   const translations = await fetchBuilderTranslations(supabase, lang, "en");

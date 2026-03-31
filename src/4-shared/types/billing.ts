@@ -15,11 +15,12 @@ export type UserSubscriptionStatus =
   | "incomplete";
 
 export interface Subscription {
+  user_id: string;
   plan_type: PlanType | null;
   status: UserSubscriptionStatus;
-  stripe_customer_id?: string;
-  stripe_subscription_id?: string;
-  stripe_price_id?: string;
+  stripe_customer_id: string | null;
+  stripe_subscription_id: string | null;
+  stripe_price_id: string | null;
   started_at?: string;
   current_period_start?: string;
   current_period_end?: string;
