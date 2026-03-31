@@ -29,7 +29,7 @@ export default async function TenantPageComponent({
   const siteId = site?.id ?? null;
 
   if (!site) {
-    console.error("Could not resolve tenant for host:", host);
+    console.error("Could not resolve tenant for host -> ", host);
   }
   const availableLangs =
     Array.isArray(site?.languages) && site.languages.length > 0
