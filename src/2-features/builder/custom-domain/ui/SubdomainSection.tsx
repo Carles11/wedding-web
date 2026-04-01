@@ -24,7 +24,7 @@ export const SubdomainSection: React.FC<Props> = ({
   const activeUrl = getSiteUrl(site.subdomain ?? "");
 
   return (
-    <div className="flex items-center justify-between">
+    <div className="flex flex-col md:flex-row items-center justify-between">
       <div className="flex items-center gap-1 font-mono text-sm">
         <span className="text-gray-400 select-none">
           {activeUrl.startsWith("https") ? "https://" : "http://"}
@@ -34,7 +34,7 @@ export const SubdomainSection: React.FC<Props> = ({
       </div>
 
       <div className="flex items-center gap-3">
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-3 md:gap-1">
           <button
             onClick={onCopy}
             className="p-1.5 text-gray-400 hover:text-[#6ABDA6] transition-colors cursor-pointer"
