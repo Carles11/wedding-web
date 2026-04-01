@@ -148,7 +148,7 @@ export default function DetailsSection({
                         key={ev.id ?? idx}
                         className="flex flex-col md:flex-row md:items-center gap-3 md:gap-6"
                       >
-                        <div className="w-24 text-sm font-mono text-neutral-600">
+                        <div className="w-24 text-sm   text-neutral-600">
                           <div>{ev.time ? formatEventTime(ev.time) : ""}</div>
                           {compactDate && (
                             <div className="mt-0.5 text-xs font-semibold text-neutral-500">

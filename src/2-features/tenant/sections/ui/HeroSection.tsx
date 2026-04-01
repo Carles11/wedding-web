@@ -51,7 +51,7 @@ export default function HeroSection({
         </Heading>
 
         {description && (
-          <p className="subtitle mt-4 font-sans text-lg md:text-xl text-white text-center drop-shadow max-w-[85%] md:max-w-2xl">
+          <p className="mt-4 font-sans text-lg md:text-xl text-white text-center drop-shadow max-w-[85%] md:max-w-2xl">
             {description}
           </p>
         )}

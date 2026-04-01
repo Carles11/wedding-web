@@ -18,7 +18,7 @@ export function BuilderHeader({
       <div className="max-w-[95vw] mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
         {/* Branding/Title Section */}
         <div className="text-center sm:text-left">
-          <h2 className="text-xl sm:text-2xl text-blue-600 font-bold leading-tight">
+          <h2 className="text-xl sm:text-2xl text-(--builder-color-primary) font-bold leading-tight">
             {translations["builder.header.title"] || "Wedding-Web — Builder"}
           </h2>
           <p className="text-sm text-gray-500 mt-1">
@@ -49,7 +49,7 @@ export function BuilderHeader({
                 }
                 return (
                   <a
-                    className="text-sm font-medium text-blue-600 hover:underline whitespace-nowrap"
+                    className="text-sm font-medium text-(--builder-color-primary) hover:underline whitespace-nowrap"
                     href={previewUrl}
                     target="_blank"
                     rel="noreferrer"

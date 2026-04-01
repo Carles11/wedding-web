@@ -1,3 +1,8 @@
+import {
+  AVAILABLE_BODY_FONTS,
+  AVAILABLE_TITLE_FONTS,
+  DEFAULT_TENANT,
+} from "@/4-shared/lib/fonts/fontRegistry";
 import { getSiteByDomain } from "@/4-shared/lib/getSiteByDomain";
 import { generateEventSchema } from "@/4-shared/lib/seo/generateEventSchema";
 import { JsonLd } from "@/4-shared/lib/seo/JsonLd";
@@ -129,8 +134,23 @@ export default async function TenantPageComponent({
     shouldRenderContact ? "contact" : null,
   ].filter((id): id is string => Boolean(id));
 
+  const titleFontVar =
+    AVAILABLE_TITLE_FONTS.find(
+      (f) => f.id === (site?.title_font ?? DEFAULT_TENANT.title),
+    )?.variable ?? "--font-niconne";
+  const bodyFontVar =
+    AVAILABLE_BODY_FONTS.find(
+      (f) => f.id === (site?.body_font ?? DEFAULT_TENANT.body),
+    )?.variable ?? "--font-roboto";
+
   return (
-    <>
+    <div
+      className="tenant-theme"
+      style={{
+        ["--title-font" as any]: `var(${titleFontVar})`,
+        ["--body-font" as any]: `var(${bodyFontVar})`,
+      } as React.CSSProperties}
+    >
       {/* JSON-LD SEO */}
       <JsonLd data={eventSchema} />
       <TenantHeroShell
@@ -157,6 +177,6 @@ export default async function TenantPageComponent({
         shouldRenderWeddingGift={shouldRenderWeddingGift}
         shouldRenderContact={shouldRenderContact}
       />
-    </>
+    </div>
   );
 }

@@ -1,11 +1,27 @@
 @import "tailwindcss";
 
-/* Color and font variables */
+/* Tell Tailwind v4 to use our dynamic CSS variables for font utilities */
+@theme {
+  --font-sans: var(--body-font), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--title-font), ui-serif, Georgia, serif;
+  --font-display: var(--title-font), ui-serif, Georgia, serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+}
+
+/* Color and font variables
+   next/font injects per-family CSS variables (e.g. --font-roboto,
+   --font-playfair-display) on <body>. We map those to semantic
+   variables here. --title-font and --body-font are the dynamic
+   overrides that the Tenant page can set inline to swap fonts.
+*/
 :root {
+  /* 1. Core Colors */
   --background: #ffffff; /* blanco nieve */
   --foreground: #292d41; /* azul acero */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
 
-  /* Base font stacks per family so they can be switched from one place later. */
+  /* 2. Base font stacks per family */
   --font-sans-roboto: var(
     --font-roboto,
     var(--font-geist-sans),
@@ -29,10 +45,14 @@
   --font-serif-lora: var(--font-lora, Georgia, "Times New Roman", serif);
   --font-display-playfair: var(--font-playfair-display, var(--font-serif-lora));
 
-  /* Active semantic fonts (global defaults). */
-  --font-sans: var(--font-sans-roboto);
+  /* 3. Dynamic title / body variables (overridable inline by Tenant page) */
+  --title-font: var(--font-playfair-display);
+  --body-font: var(--font-plus-jakarta-sans);
+
+  /* 4. Semantic font mappings (kept for backward-compat) */
+  --font-sans: var(--body-font);
   --font-sans-secondary: var(--font-sans-plus-jakarta);
-  --font-serif: var(--font-serif-lora);
+  --font-serif: var(--title-font);
   --font-display: var(--font-display-playfair);
   --font-subtitle: var(--font-serif-lora);
   --tenant-display-font: var(--font-niconne, cursive);
@@ -46,33 +66,6 @@
     "Courier New",
     monospace
   );
-}
-
-/* Primary tokens and font fallbacks.
-   If you use next/font with the `variable` option, it will inject
-  --font-roboto, --font-niconne, --font-lora, --font-playfair-display
-  and --font-plus-jakarta-sans
-   into :root. We map those to
-   semantic variables used across the app.
-*/
-:root {
-  /* 1. Core Colors */
-  --background: #ffffff;
-  --foreground: #292d41;
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-
-  /* 2. Semantic Font Mapping */
-  --font-sans: var(--font-sans-roboto, ui-sans-serif, system-ui);
-  --font-sans-secondary: var(
-    --font-sans-plus-jakarta,
-    ui-sans-serif,
-    system-ui
-  );
-  --font-serif: var(--font-serif-lora, ui-serif, Georgia);
-  --font-display: var(--font-display-playfair, var(--font-serif));
-  --font-subtitle: var(--font-serif);
-  --tenant-display-font: var(--font-niconne, cursive);
 }
 
 /* Dark mode token overrides */
@@ -93,7 +86,7 @@ body,
 body {
   margin: 0;
   padding: 0;
-  font-family: var(--font-roboto, "Roboto", ui-sans-serif, system-ui);
+  font-family: var(--body-font), sans-serif;
   color: var(--color-foreground);
   background: var(--color-background);
   -webkit-font-smoothing: antialiased;
@@ -110,40 +103,42 @@ body {
 h1,
 h2,
 h3 {
-  font-family: var(--font-display, var(--font-playfair-display, serif));
+  font-family: var(--title-font), serif;
   font-weight: 400; /* Playfair is generally single-weight; adjust if you load more weights */
   line-height: 1.1;
   margin: 0;
 }
 
-/* Responsive sizes */
-h1 {
-  font-size: clamp(3.5rem, 5vw + 1rem, 4.5rem);
-}
+/* ==========================================================================
+  CORRECTED RESPONSIVE SIZES
+  Logic: min < max. 
+  H1: Hero level
+  H2: Section headers
+  H3: Sub-headers (now clearly smaller)
+  ========================================================================== */
 
-@media screen and (max-width: 468px) {
-  h1 {
-    font-size: clamp(8vw, 6vw, 3rem);
-  }
+h1 {
+  font-size: clamp(2.5rem, 8vw, 4.5rem);
 }
 
 h2 {
-  font-size: clamp(2rem, 5vw, 1.2rem);
-}
-
-@media screen and (max-width: 468px) {
-  h2 {
-    font-size: clamp(1.5rem, 4.5vw, 1rem);
-  }
+  font-size: clamp(1.75rem, 5vw, 2.5rem);
 }
 
 h3 {
-  font-size: clamp(1.5rem, 3vw, 1.7rem);
+  font-size: clamp(1.25rem, 3vw, 1.75rem);
 }
 
+/* Mobile Overrides (below 468px) */
 @media screen and (max-width: 468px) {
+  h1 {
+    font-size: clamp(2rem, 10vw, 2.5rem);
+  }
+  h2 {
+    font-size: clamp(1.5rem, 8vw, 1.8rem);
+  }
   h3 {
-    font-size: clamp(1.2rem, 2.5vw, 1.5rem);
+    font-size: clamp(1.1rem, 6vw, 1.3rem);
   }
 }
 
@@ -155,7 +150,7 @@ h3 {
 
 /* The Subtitle Control */
 .subtitle {
-  font-family: var(--font-subtitle) !important;
+  font-family: var(--font-subtitle);
   font-weight: 400;
   letter-spacing: 0.05em;
   text-transform: uppercase; /* Optional: Looks very professional for wedding dates/locations */
@@ -163,31 +158,31 @@ h3 {
 
 /* Utility class to specifically apply display font when needed */
 .font-display {
-  font-family: var(--font-display) !important;
+  font-family: var(--font-display);
 }
 
 .font-roboto {
-  font-family: var(--font-sans-roboto) !important;
+  font-family: var(--font-sans-roboto);
 }
 
 .font-plus-jakarta {
-  font-family: var(--font-sans-plus-jakarta) !important;
+  font-family: var(--font-sans-plus-jakarta);
 }
 
 .font-text-secondary {
-  font-family: var(--font-sans-secondary) !important;
+  font-family: var(--font-sans-secondary);
 }
 
 .font-lora {
-  font-family: var(--font-serif-lora) !important;
+  font-family: var(--font-serif-lora);
 }
 
 .font-niconne {
-  font-family: var(--font-niconne, cursive) !important;
+  font-family: var(--font-niconne, cursive);
 }
 
 .font-playfair {
-  font-family: var(--font-display-playfair) !important;
+  font-family: var(--font-display-playfair);
 }
 
 /* Accessibility: visually hidden (screen-reader only) */
@@ -212,33 +207,20 @@ Builder theme tokens and reusable surface/button styles.
 #########################################################################
  */
 .builder-theme {
-  --font-sans: var(
-    --font-plus-jakarta-sans,
-    "Plus Jakarta Sans",
-    ui-sans-serif,
-    system-ui
-  );
-  --font-display: var(
-    --font-plus-jakarta-sans,
-    "Plus Jakarta Sans",
-    ui-sans-serif,
-    system-ui
-  );
-  --font-subtitle: var(
-    --font-plus-jakarta-sans,
-    "Plus Jakarta Sans",
-    ui-sans-serif,
-    system-ui
-  );
-  --builder-font-sans: var(--font-sans);
+  --title-font: var(--font-playfair-display);
+  --body-font: var(--font-plus-jakarta-sans);
+  --font-sans: var(--body-font);
+  --font-display: var(--title-font);
+  --font-subtitle: var(--body-font);
+  --builder-font-sans: var(--body-font);
   --builder-color-page-bg: #f5f4f2;
   --builder-color-surface: #fdfcfb;
   --builder-color-muted-surface: #f9f8f6;
   --builder-color-text: #1c1917;
   --builder-color-text-muted: #78716c;
   --builder-color-border: #e8e6e1;
-  --builder-color-primary: #4f46e5;
-  --builder-color-primary-hover: #4338ca;
+  --builder-color-primary: var(--marketing-color-primary);
+  --builder-color-primary-hover: var(--marketing-color-primary-hover);
   --builder-color-secondary-bg: #fdfcfb;
   --builder-color-secondary-hover: #f5f4f2;
   --builder-color-danger: #dc2626;
@@ -250,7 +232,7 @@ Builder theme tokens and reusable surface/button styles.
   --builder-btn-primary-text-color: #fff;
   --builder-btn-primary-hover-bg: #1d4ed8;
 
-  font-family: var(--builder-font-sans);
+  font-family: var(--body-font);
   color: var(--builder-color-text);
 }
 
@@ -428,15 +410,12 @@ Builder theme tokens and reusable surface/button styles.
 }
 
 .marketing-theme {
-  --font-sans: var(
-    --font-plus-jakarta-sans,
-    "Plus Jakarta Sans",
-    ui-sans-serif,
-    system-ui
-  );
-  --font-display: var(--font-playfair-display, var(--font-serif));
+  --title-font: var(--font-playfair-display);
+  --body-font: var(--font-plus-jakarta-sans);
+  --font-sans: var(--body-font);
+  --font-display: var(--title-font);
   --font-subtitle: var(--font-serif-lora, serif);
-  font-family: var(--font-sans);
+  font-family: var(--body-font);
 }
 
 /* Button base */
@@ -630,13 +609,11 @@ Builder theme tokens and reusable surface/button styles.
 */
 /* 3. Theme Overrides */
 
-/* TENANT THEME: Specifically changes headings to Niconne */
+/* TENANT THEME: Uses dynamic font variables */
 .tenant-theme {
-  --font-sans: var(--font-lora, "Lora", serif);
-  --font-display: var(--tenant-display-font, var(--font-niconne, cursive));
-  /* Subtitle becomes Playfair/Lora for that classic wedding contrast */
+  --font-display: var(--title-font);
   --font-subtitle: var(--font-playfair-display, var(--font-serif));
-  font-family: var(--font-sans);
+  font-family: var(--body-font), sans-serif;
 }
 
 .tenant-theme h1,
@@ -645,10 +622,10 @@ Builder theme tokens and reusable surface/button styles.
   letter-spacing: 0.01em;
 }
 
-/* Keep h3 and specific subtitles as Playfair/Lora even in Tenant */
+/* Keep h3 using the title font in Tenant */
 .tenant-theme h3,
 .tenant-theme .heading-h3 {
-  font-family: var(--font-playfair-display, serif) !important;
+  font-family: var(--title-font), serif;
 }
 
 @keyframes fadeIn {

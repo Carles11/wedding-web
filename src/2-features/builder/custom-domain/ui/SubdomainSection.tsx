@@ -25,7 +25,7 @@ export const SubdomainSection: React.FC<Props> = ({
 
   return (
     <div className="flex flex-col md:flex-row items-center justify-between">
-      <div className="flex items-center gap-1 font-mono text-sm">
+      <div className="flex items-center gap-1   text-sm">
         <span className="text-gray-400 select-none">
           {activeUrl.startsWith("https") ? "https://" : "http://"}
         </span>

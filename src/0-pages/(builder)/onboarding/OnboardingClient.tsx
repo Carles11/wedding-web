@@ -101,7 +101,7 @@ export default function OnboardingClient({ translations, lang }: Props) {
           <button
             onClick={() => handlePlanSelect("free")}
             disabled={isLoading}
-            className="cursor-pointer text-blue-600 hover:text-blue-700 font-medium transition disabled:opacity-50 disabled:cursor-not-allowed"
+            className="cursor-pointer text-(--builder-color-primary) hover:text-(--builder-color-primary-hover) font-medium transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoading
               ? (translations["loading"] ?? "Loading...")

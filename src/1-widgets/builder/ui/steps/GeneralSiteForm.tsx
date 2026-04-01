@@ -1,5 +1,6 @@
 "use client";
 
+import { updateSiteFonts } from "@/3-entities/sites/api/updateSiteFonts";
 import { getSiteGeneralContent } from "@/4-shared/api/builder/getSiteGeneralContent";
 import { saveSiteGeneralContent } from "@/4-shared/api/builder/saveSiteGeneralContent";
 import type { SupportedLanguage } from "@/4-shared/config/i18n";
@@ -7,6 +8,13 @@ import {
   SUPPORTED_LANGUAGE_LABELS,
   SUPPORTED_LANGUAGES,
 } from "@/4-shared/config/i18n";
+import {
+  AVAILABLE_BODY_FONTS,
+  AVAILABLE_TITLE_FONTS,
+  DEFAULT_TENANT,
+  type FontOption,
+  type FontStyle,
+} from "@/4-shared/lib/fonts/fontRegistry";
 import { notify } from "@/4-shared/lib/toast/toast";
 import { GeneralContentState, GeneralSiteFormProps } from "@/4-shared/types";
 import { BuilderLangTabs, UpgradeCTAModal } from "@/4-shared/ui/builder";
@@ -42,6 +50,14 @@ export default function GeneralSiteForm({
   const [subtitleError, setSubtitleError] = useState<string | null>(null);
   const [languageError, setLanguageError] = useState<string | null>(null);
   const [showUpgradeCTA, setShowUpgradeCTA] = useState(false);
+  const [showFontUpgradeCTA, setShowFontUpgradeCTA] = useState(false);
+  const [selectedTitleFont, setSelectedTitleFont] = useState(
+    site?.title_font ?? DEFAULT_TENANT.title,
+  );
+  const [selectedBodyFont, setSelectedBodyFont] = useState(
+    site?.body_font ?? DEFAULT_TENANT.body,
+  );
+  const [savingFonts, setSavingFonts] = useState(false);
 
   function arraysEqual<T>(a: T[], b: T[]) {
     if (a.length !== b.length) return false;
@@ -70,6 +86,50 @@ export default function GeneralSiteForm({
 
     setActiveLang(res.default_lang);
     setGeneralComplete?.(!!res.titles[res.default_lang]?.trim());
+  }
+
+  // Group font options by style for the dropdown
+  function groupByStyle(fonts: FontOption[]) {
+    const groups: Partial<Record<FontStyle, FontOption[]>> = {};
+    for (const f of fonts) {
+      (groups[f.style] ??= []).push(f);
+    }
+    return groups;
+  }
+
+  async function handleFontChange(kind: "title" | "body", fontId: string) {
+    if (planType !== "premium") {
+      setShowFontUpgradeCTA(true);
+      return;
+    }
+
+    const nextTitle = kind === "title" ? fontId : selectedTitleFont;
+    const nextBody = kind === "body" ? fontId : selectedBodyFont;
+
+    if (kind === "title") setSelectedTitleFont(fontId);
+    else setSelectedBodyFont(fontId);
+
+    if (!site?.id) return;
+
+    setSavingFonts(true);
+    try {
+      const result = await updateSiteFonts(site.id, nextTitle, nextBody);
+      if (!result.success) {
+        notify.error(result.error ?? "Failed to update fonts.");
+        // revert
+        if (kind === "title") setSelectedTitleFont(selectedTitleFont);
+        else setSelectedBodyFont(selectedBodyFont);
+      }
+    } catch {
+      notify.error(
+        translations["error.something_went_wrong"] ??
+          "An unknown error occurred.",
+      );
+      if (kind === "title") setSelectedTitleFont(selectedTitleFont);
+      else setSelectedBodyFont(selectedBodyFont);
+    } finally {
+      setSavingFonts(false);
+    }
   }
 
   function generalContentSignature(res: GeneralContentState): string {
@@ -461,6 +521,118 @@ export default function GeneralSiteForm({
             }
           />
         </div>
+
+        {/* ── Font Selectors ─────────────────────────────────── */}
+        <fieldset className="space-y-4 rounded-lg border border-gray-200 p-4">
+          <legend className="px-2 text-md font-medium text-gray-700">
+            {translations["builder.fonts.section.title"] ?? "Typography"}
+          </legend>
+
+          {/* Title Font */}
+          <div>
+            <label
+              htmlFor="title-font-select"
+              className="block text-sm font-normal text-gray-600"
+            >
+              {translations["builder.fonts.label.title_font"] ?? "Title Font"}
+            </label>
+            <select
+              id="title-font-select"
+              value={selectedTitleFont}
+              onChange={(e) => handleFontChange("title", e.target.value)}
+              disabled={savingFonts}
+              className="mt-1 block w-full rounded border border-gray-300 bg-white px-3 py-2 text-sm focus:border-indigo-500 focus:ring-indigo-500"
+            >
+              {Object.entries(groupByStyle(AVAILABLE_TITLE_FONTS)).map(
+                ([style, fonts]) => (
+                  <optgroup key={style} label={style}>
+                    {fonts!.map((f) => (
+                      <option key={f.id} value={f.id}>
+                        {f.name}
+                      </option>
+                    ))}
+                  </optgroup>
+                ),
+              )}
+            </select>
+          </div>
+
+          {/* Body Font */}
+          <div>
+            <label
+              htmlFor="body-font-select"
+              className="block text-sm font-normal text-gray-600"
+            >
+              {translations["builder.fonts.label.body_font"] ?? "Body Font"}
+            </label>
+            <select
+              id="body-font-select"
+              value={selectedBodyFont}
+              onChange={(e) => handleFontChange("body", e.target.value)}
+              disabled={savingFonts}
+              className="mt-1 block w-full rounded border border-gray-300 bg-white px-3 py-2 text-sm focus:border-indigo-500 focus:ring-indigo-500"
+            >
+              {Object.entries(groupByStyle(AVAILABLE_BODY_FONTS)).map(
+                ([style, fonts]) => (
+                  <optgroup key={style} label={style}>
+                    {fonts!.map((f) => (
+                      <option key={f.id} value={f.id}>
+                        {f.name}
+                      </option>
+                    ))}
+                  </optgroup>
+                ),
+              )}
+            </select>
+          </div>
+
+          {/* Font Preview */}
+          <div className="rounded-md border border-dashed border-gray-300 bg-gray-50 p-4 text-center">
+            <p className="mb-1 text-xs uppercase tracking-wide text-gray-400">
+              {translations["builder.fonts.preview.label"] ?? "Preview"}
+            </p>
+            <p
+              className="text-2xl leading-snug"
+              style={{
+                fontFamily: `var(${AVAILABLE_TITLE_FONTS.find((f) => f.id === selectedTitleFont)?.variable ?? "--font-playfair-display"})`,
+              }}
+            >
+              {translations["builder.fonts.select.placeholder"] ??
+                "We are getting married!"}
+            </p>
+            <p
+              className="mt-2 text-base text-gray-600"
+              style={{
+                fontFamily: `var(${AVAILABLE_BODY_FONTS.find((f) => f.id === selectedBodyFont)?.variable ?? "--font-roboto"})`,
+              }}
+            >
+              {translations["builder.fonts.preview.body"] ??
+                "Join us for our special day and celebrate love."}
+            </p>
+          </div>
+
+          {/* Font Upgrade CTA */}
+          <UpgradeCTAModal
+            open={showFontUpgradeCTA && planType === "free"}
+            title={
+              translations["builder.fonts.upgrade.title"] ??
+              "Custom fonts are a Premium feature"
+            }
+            description={
+              translations["builder.fonts.upgrade.description"] ??
+              "Upgrade to Premium to personalise your wedding site with beautiful custom fonts."
+            }
+            cancelLabel={
+              translations["builder.general.form.cancel"] ?? "Cancel"
+            }
+            upgradeLabel={
+              translations["builder.general.form.upgrade"] ??
+              "Upgrade to Premium"
+            }
+            onClose={() => setShowFontUpgradeCTA(false)}
+            onUpgrade={() => router.push(`/${lang}/pricing`)}
+          />
+        </fieldset>
 
         {/* Status */}
         {titleError && (

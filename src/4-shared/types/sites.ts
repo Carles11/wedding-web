@@ -17,7 +17,8 @@ export type Site = {
     "idle" | "saving" | "success" | "error" | "pending" | "verified"
   > | null;
   seo_enabled?: boolean | null;
-  // Add other fields present in the `sites` table as needed.
+  title_font?: string | null;
+  body_font?: string | null;
 };
 
 // Helper type for queries that only select `id`.

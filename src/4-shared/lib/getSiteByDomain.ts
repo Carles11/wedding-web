@@ -27,6 +27,8 @@ export async function getSiteByDomain(host: string | null) {
         domains, 
         seo_enabled,
         plan_type,
+        title_font,
+        body_font,
         program_events (
           date,
           is_main_event

@@ -72,7 +72,7 @@ export default function WeddingGiftSection({ data, translations }: Props) {
               {data.bank_name && (
                 <p className="text-sm opacity-70 italic">{data.bank_name}</p>
               )}
-              <div className="pt-2 space-y-1 text-sm font-mono tracking-tight">
+              <div className="pt-2 space-y-1 text-sm   tracking-tight">
                 {data.bank_account_iban && (
                   <p>
                     <span className="block text-[10px] uppercase opacity-50 font-sans mb-0.5 tracking-normal">

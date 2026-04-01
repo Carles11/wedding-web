@@ -1,6 +1,6 @@
 import { SVGProps } from "react";
 
-const PRIMARY = "#4f46e5";
+const PRIMARY = "var(--builder-color-primary, #6abda6)";
 const STROKE = {
   stroke: PRIMARY,
   strokeWidth: 1.5,

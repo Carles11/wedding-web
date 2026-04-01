@@ -30,7 +30,7 @@ export const SubdomainEditingForm: React.FC<Props> = ({
     <div className="space-y-4 animate-in fade-in zoom-in-95 duration-200">
       <div className="flex flex-col gap-2">
         <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-[#6ABDA6]/20 transition-all">
-          <span className="bg-gray-50 px-3 py-2 text-xs text-gray-400 font-mono border-r select-none">
+          <span className="bg-gray-50 px-3 py-2 text-xs text-gray-400   border-r select-none">
             https://
           </span>
           <input
@@ -39,11 +39,11 @@ export const SubdomainEditingForm: React.FC<Props> = ({
             onChange={(e) =>
               setSubdomain(e.target.value.toLowerCase().replace(/\s+/g, ""))
             }
-            className="flex-1 px-3 py-2 text-sm font-mono outline-none"
+            className="flex-1 px-3 py-2 text-sm   outline-none"
             spellCheck={false}
             disabled={isSaving}
           />
-          <span className="bg-gray-50 px-3 py-2 text-xs text-gray-400 font-mono border-l select-none">
+          <span className="bg-gray-50 px-3 py-2 text-xs text-gray-400   border-l select-none">
             .{domainSuffix}
           </span>
         </div>

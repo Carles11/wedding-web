@@ -34,7 +34,7 @@ export function WeddingGiftForm({
       <GiftMethodCard
         icon={
           <BankIcon
-            className="text-blue-700"
+            className="text-(--builder-color-primary)"
             aria-label={
               t(translations, "builder.gift.bank", "Bank Transfer") + " icon"
             }
@@ -96,7 +96,7 @@ export function WeddingGiftForm({
       </GiftMethodCard>
       {/* ---- PAYPAL ---- */}
       <GiftMethodCard
-        icon={<PaypalIcon className="text-blue-700" />}
+        icon={<PaypalIcon className="text-(--builder-color-primary)" />}
         title={t(translations, "builder.gift.paypal", "PayPal")}
         description={t(
           translations,
@@ -124,7 +124,7 @@ export function WeddingGiftForm({
       <GiftMethodCard
         icon={
           <MobileIcon
-            className="text-blue-700"
+            className="text-(--builder-color-primary)"
             aria-label={
               t(translations, "builder.gift.mobile", "Bizum / Venmo") + " icon"
             }
@@ -166,7 +166,7 @@ export function WeddingGiftForm({
       <GiftMethodCard
         icon={
           <GiftlistIcon
-            className="text-blue-700"
+            className="text-(--builder-color-primary)"
             aria-label={
               t(translations, "builder.gift.giftlist", "Gift Registry/List") +
               " icon"
@@ -199,7 +199,7 @@ export function WeddingGiftForm({
       <GiftMethodCard
         icon={
           <HoneymoonIcon
-            className="text-blue-700"
+            className="text-(--builder-color-primary)"
             aria-label={
               t(translations, "builder.gift.honeymoon", "Honeymoon Fund") +
               " icon"
@@ -232,7 +232,7 @@ export function WeddingGiftForm({
       <GiftMethodCard
         icon={
           <OtherIcon
-            className="text-blue-700"
+            className="text-(--builder-color-primary)"
             aria-label={
               t(translations, "builder.gift.other", "Other Options") + " icon"
             }

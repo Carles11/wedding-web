@@ -75,9 +75,9 @@ export const SecurityTab = ({
           {/* SEO Visibility Row (Matches Password Row Style) */}
           <div className="flex items-center justify-between p-4 bg-(--builder-color-muted-surface)/20 rounded-lg border border-transparent hover:border-(--builder-color-primary)/10 transition-colors">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-full bg-(--builder-color-primary)/10 flex items-center justify-center">
                 <svg
-                  className="w-5 h-5 text-blue-500"
+                  className="w-5 h-5 text-(--builder-color-primary)"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"

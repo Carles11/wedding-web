@@ -142,11 +142,11 @@ export default function CheckoutClient({
       <main className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
         <div className="max-w-md w-full text-center">
           <div
-            className={`rounded-lg shadow-sm border p-8 ${isAlreadyPremium ? "bg-blue-50 border-blue-200" : "bg-white border-red-200"}`}
+            className={`rounded-lg shadow-sm border p-8 ${isAlreadyPremium ? "bg-(--builder-color-primary)/10 border-(--builder-color-primary)/20" : "bg-white border-red-200"}`}
           >
             <Heading
               as="h2"
-              className={`mb-3 ${isAlreadyPremium ? "text-blue-700" : isDowngradeNotAvailable ? "text-amber-700" : "text-red-700"}`}
+              className={`mb-3 ${isAlreadyPremium ? "text-(--builder-color-primary)" : isDowngradeNotAvailable ? "text-amber-700" : "text-red-700"}`}
             >
               {isAlreadyPremium
                 ? t(

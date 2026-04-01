@@ -27,11 +27,11 @@ const DnsRecord = ({
 }) => (
   <div className="rounded-xl p-4 mb-3 bg-neutral-800 border border-neutral-700">
     <div className="flex items-center gap-2 mb-3">
-      <span className="text-xs font-bold rounded-md px-2 py-0.5 bg-neutral-900 border border-neutral-800 text-slate-400 font-mono">
+      <span className="text-xs font-bold rounded-md px-2 py-0.5 bg-neutral-900 border border-neutral-800 text-slate-400  ">
         {t(translations, "builder.domain.dns_modal.step", "Step")} {step}
       </span>
       <span
-        className={`text-xs font-semibold rounded-md px-2 py-0.5 ${typeColor.bg} ${typeColor.text} font-mono border ${typeColor.border}`}
+        className={`text-xs font-semibold rounded-md px-2 py-0.5 ${typeColor.bg} ${typeColor.text}   border ${typeColor.border}`}
       >
         {type}
       </span>
@@ -41,7 +41,7 @@ const DnsRecord = ({
         <div className="text-xs mb-1.5 text-slate-500 font-medium font-sans">
           {t(translations, "builder.domain.dns_modal.name_host", "Name / Host")}
         </div>
-        <div className="rounded-lg px-3 py-2 text-xs bg-neutral-900 border border-neutral-800 text-slate-300 font-mono break-all">
+        <div className="rounded-lg px-3 py-2 text-xs bg-neutral-900 border border-neutral-800 text-slate-300   break-all">
           {name}
         </div>
       </div>
@@ -53,7 +53,7 @@ const DnsRecord = ({
             "Points to / Value",
           )}
         </div>
-        <div className="rounded-lg px-3 py-2 text-xs flex items-center justify-between gap-2 bg-neutral-900 border border-neutral-800 text-slate-300 font-mono break-all">
+        <div className="rounded-lg px-3 py-2 text-xs flex items-center justify-between gap-2 bg-neutral-900 border border-neutral-800 text-slate-300   break-all">
           <span>{value}</span>
           <CopyButton text={value} label={copyLabel} />
         </div>
