@@ -79,7 +79,6 @@ export function ProfileTab({
   useEffect(() => {
     if (user && user.email && user.email !== account.email && !emailChanging) {
       // Update user_profiles.email to match Auth user.email
-      console.log("Syncing email from Auth to profile:", user.email);
       updateAccountInfo(account.id, { email: user.email }).then((result) => {
         if (result.success) {
           if (!user.email) {
@@ -117,7 +116,6 @@ export function ProfileTab({
         editEmail,
         password,
       );
-      console.log("Email change result:", result);
       if (result.success) {
         setShowEmailChangeModal(true);
       } else {

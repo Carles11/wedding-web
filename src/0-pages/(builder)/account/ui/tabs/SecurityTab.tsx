@@ -33,7 +33,6 @@ export const SecurityTab = ({
   const [showUpgrade, setShowUpgrade] = useState(false);
 
   function goToPricing() {
-    console.log("site?.default_lang", site?.default_lang);
     // Use language-prefixed routing, not query param
     router.push(`/${lang || "en"}/pricing`);
   }

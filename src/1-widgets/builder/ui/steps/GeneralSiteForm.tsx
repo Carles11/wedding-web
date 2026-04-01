@@ -437,22 +437,73 @@ export default function GeneralSiteForm({
                 "You can enable all languages on your plan."}
           </p>
 
-          <div className="flex flex-wrap gap-x-3 gap-y-2 my-2">
-            {SUPPORTED_LANGUAGES.map((lang) => (
-              <label
-                key={lang}
-                className="cursor-pointer inline-flex items-center"
-              >
-                <input
-                  type="checkbox"
-                  value={lang}
-                  checked={languages.includes(lang)}
-                  onChange={() => handleLangCheckbox(lang)}
-                  className="mr-2"
-                />
-                {SUPPORTED_LANGUAGE_LABELS[lang]}
+          {/* Languages Selection Block */}
+          <div className="space-y-3">
+            <div className="flex flex-col gap-1">
+              <label className="block text-md font-medium text-gray-800">
+                {translations["builder.general.form.label.languages"] ??
+                  "Select your website display languages"}
               </label>
-            ))}
+              <p
+                className={`text-xs ${planType === "free" ? "text-amber-600 font-medium" : "text-gray-500"}`}
+              >
+                {planType === "free"
+                  ? translations["builder.general.form.language_limit"] ||
+                    "Free plan: 1 language. Upgrade to add more."
+                  : translations["builder.general.form.language_limit_pro"] ||
+                    "All languages enabled on your plan."}
+              </p>
+            </div>
+
+            <div className="flex flex-wrap gap-2 py-1">
+              {SUPPORTED_LANGUAGES.map((langCode) => {
+                const isSelected = languages.includes(langCode);
+                const isLocked =
+                  planType === "free" && !isSelected && languages.length >= 1;
+
+                return (
+                  <label
+                    key={langCode}
+                    className={`
+            builder-chip 
+            ${isSelected ? "builder-chip-active" : "builder-chip-idle"}
+            ${isLocked ? "builder-chip-locked" : ""}
+          `}
+                    onClick={(e) => {
+                      if (isLocked) {
+                        e.preventDefault();
+                        setShowUpgradeCTA(true);
+                      }
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      className="hidden"
+                      checked={isSelected}
+                      onChange={() => !isLocked && handleLangCheckbox(langCode)}
+                      disabled={isLocked}
+                    />
+
+                    {/* Status Dot */}
+                    <span
+                      className={`h-1.5 w-1.5 rounded-full ${isSelected ? "bg-white" : "bg-gray-300"}`}
+                    />
+
+                    {SUPPORTED_LANGUAGE_LABELS[langCode]}
+
+                    {isLocked && (
+                      <svg
+                        className="h-3 w-3 ml-1"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" />
+                      </svg>
+                    )}
+                  </label>
+                );
+              })}
+            </div>
           </div>
 
           <UpgradeCTAModal

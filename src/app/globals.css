@@ -373,6 +373,60 @@ Builder theme tokens and reusable surface/button styles.
 .builder-lang-tab-idle:hover {
   background: var(--builder-color-muted-surface);
 }
+/* --- Builder Language Chips --- */
+.builder-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  border: 2px solid #e5e7eb; /* gray-200 */
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  background: white;
+  color: #4b5563; /* gray-600 */
+  user-select: none;
+}
+
+.builder-chip-active {
+  background-color: var(--marketing-color-primary);
+  border-color: var(--marketing-color-primary);
+  color: white;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.builder-chip-idle:hover {
+  border-color: var(--marketing-color-primary);
+  opacity: 0.8;
+}
+
+.builder-chip-locked {
+  opacity: 0.5;
+  background-color: #f9fafb;
+  border-color: #e5e7eb;
+  cursor: not-allowed;
+  filter: grayscale(1);
+}
+
+/* --- Builder Tabs Modernization --- */
+.builder-lang-tab-active {
+  background-color: var(--marketing-color-primary) !important;
+  border-color: var(--marketing-color-primary) !important;
+  color: white !important;
+}
+
+.builder-lang-tab-idle {
+  background-color: white;
+  border-color: #e5e7eb;
+  color: #6b7280;
+}
+
+.builder-lang-tab-idle:hover {
+  border-color: var(--marketing-color-primary);
+  color: var(--marketing-color-primary);
+}
 
 /* ── Marketing + Auth Theme ─────────────────────────────────────────────
 #########################################################################

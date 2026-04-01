@@ -68,9 +68,6 @@ export async function removeCustomDomain(siteId: string, domain: string) {
   const isTrueSubdomain = parts.length > 2 && !domain.startsWith("www.");
 
   if (isLocalOrPort || isTrueSubdomain) {
-    console.log(
-      `[removeCustomDomain] Skipping subdomain or local/test domain: ${domain}`,
-    );
     return { success: true, skipped: true, reason: "subdomain_or_local" };
   }
 
@@ -122,9 +119,7 @@ export async function removeCustomDomain(siteId: string, domain: string) {
 
   // 4. BREAK THE REDIRECT FIRST
   // This prevents the "cannot delete because other domains redirect to it" error.
-  console.log(
-    `[removeCustomDomain] Breaking redirect dependency for: ${wwwDomain}`,
-  );
+
   await updateVercelProjectDomain(wwwDomain, {
     redirect: null,
     redirectStatusCode: null,
@@ -134,17 +129,13 @@ export async function removeCustomDomain(siteId: string, domain: string) {
   await sleep(1000);
 
   // 5. REMOVE WWW VARIANT
-  console.log(`[removeCustomDomain] Attempting to remove www: ${wwwDomain}`);
   const wwwResult = await removeDomainFromVercelProject(wwwDomain);
-  console.log(`[removeCustomDomain] WWW result:`, wwwResult);
 
   // Delay before removing the redirect target (Apex)
   await sleep(500);
 
   // 6. REMOVE APEX DOMAIN
-  console.log(`[removeCustomDomain] Attempting to remove apex: ${apexDomain}`);
   const apexResult = await removeDomainFromVercelProject(apexDomain);
-  console.log(`[removeCustomDomain] Apex result:`, apexResult);
 
   // 7. Final validation of Vercel status
   const failures = [wwwResult, apexResult].filter(
