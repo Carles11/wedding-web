@@ -133,7 +133,6 @@ export default async function TenantPageComponent({
     <>
       {/* JSON-LD SEO */}
       <JsonLd data={eventSchema} />
-
       <TenantHeroShell
         lang={lang}
         translations={translations}
@@ -142,7 +141,6 @@ export default async function TenantPageComponent({
         hero={heroFromi18n}
         heroImage={heroImage}
       />
-
       <TenantSectionsContent
         mainEvent={mainEvent}
         lang={lang}

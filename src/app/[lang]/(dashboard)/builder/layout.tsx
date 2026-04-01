@@ -38,18 +38,20 @@ export default async function DashboardLayout({
   const marketingTranslations = await fetchMarketingTranslations(lang, "en");
 
   return (
-    <PlanProvider subscription={subscription}>
-      {children}
-      <ToastProvider />
-      {showFooter && (
-        <Footer
-          siteName="Weddweb.com"
-          author="Carles del Río Francés"
-          repoUrl="https://github.com/Carles11/"
-          translations={marketingTranslations}
-          lang={lang}
-        />
-      )}
-    </PlanProvider>
+    <div className="builder-theme">
+      <PlanProvider subscription={subscription}>
+        {children}
+        <ToastProvider />
+        {showFooter && (
+          <Footer
+            siteName="Weddweb.com"
+            author="Carles del Río Francés"
+            repoUrl="https://github.com/Carles11/"
+            translations={marketingTranslations}
+            lang={lang}
+          />
+        )}
+      </PlanProvider>
+    </div>
   );
 }

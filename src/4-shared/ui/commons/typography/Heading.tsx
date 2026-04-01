@@ -24,8 +24,19 @@ export function Heading<T extends React.ElementType = "h2">({
   // Resolve tag from `as` or `level`, default to "h2"
   const Tag = (as ?? (level ? (`h${level}` as T) : ("h2" as T))) as T;
 
-  const classes = ["heading", className].filter(Boolean).join(" ");
+  const derivedLevel =
+    level ??
+    (typeof as === "string" && /^h[1-6]$/.test(as)
+      ? Number(as.slice(1))
+      : undefined);
 
+  const classes = [
+    "heading",
+    derivedLevel ? `heading-h${derivedLevel}` : "",
+    className,
+  ]
+    .filter(Boolean)
+    .join(" ");
   // Tag is a local variable, no import required — React accepts a variable element name
   return (
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment

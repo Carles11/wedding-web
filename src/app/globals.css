@@ -4,18 +4,6 @@
 :root {
   --background: #ffffff; /* blanco nieve */
   --foreground: #292d41; /* azul acero */
-}
-
-/* Primary tokens and font fallbacks.
-   If you use next/font with the `variable` option, it will inject
-  --font-roboto, --font-niconne, --font-lora, --font-playfair-display
-  and --font-plus-jakarta-sans
-   into :root. We map those to
-   semantic variables used across the app.
-*/
-:root {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
 
   /* Base font stacks per family so they can be switched from one place later. */
   --font-sans-roboto: var(
@@ -41,9 +29,13 @@
   --font-serif-lora: var(--font-lora, Georgia, "Times New Roman", serif);
   --font-display-playfair: var(--font-playfair-display, var(--font-serif-lora));
 
-  /* Active semantic fonts (defaults kept as before). */
+  /* Active semantic fonts (global defaults). */
   --font-sans: var(--font-sans-roboto);
   --font-sans-secondary: var(--font-sans-plus-jakarta);
+  --font-serif: var(--font-serif-lora);
+  --font-display: var(--font-display-playfair);
+  --font-subtitle: var(--font-serif-lora);
+  --tenant-display-font: var(--font-niconne, cursive);
   --font-mono: var(
     --font-geist-mono,
     ui-monospace,
@@ -54,9 +46,33 @@
     "Courier New",
     monospace
   );
+}
 
-  /* Display font defaults to Playfair, with Niconne as fallback option. */
-  --font-display: var(--font-display-playfair, var(--font-niconne));
+/* Primary tokens and font fallbacks.
+   If you use next/font with the `variable` option, it will inject
+  --font-roboto, --font-niconne, --font-lora, --font-playfair-display
+  and --font-plus-jakarta-sans
+   into :root. We map those to
+   semantic variables used across the app.
+*/
+:root {
+  /* 1. Core Colors */
+  --background: #ffffff;
+  --foreground: #292d41;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  /* 2. Semantic Font Mapping */
+  --font-sans: var(--font-sans-roboto, ui-sans-serif, system-ui);
+  --font-sans-secondary: var(
+    --font-sans-plus-jakarta,
+    ui-sans-serif,
+    system-ui
+  );
+  --font-serif: var(--font-serif-lora, ui-serif, Georgia);
+  --font-display: var(--font-display-playfair, var(--font-serif));
+  --font-subtitle: var(--font-serif);
+  --tenant-display-font: var(--font-niconne, cursive);
 }
 
 /* Dark mode token overrides */
@@ -77,7 +93,7 @@ body,
 body {
   margin: 0;
   padding: 0;
-  font-family: var(--font-sans-secondary);
+  font-family: var(--font-roboto, "Roboto", ui-sans-serif, system-ui);
   color: var(--color-foreground);
   background: var(--color-background);
   -webkit-font-smoothing: antialiased;
@@ -94,7 +110,7 @@ body {
 h1,
 h2,
 h3 {
-  font-family: var(--font-display);
+  font-family: var(--font-display, var(--font-playfair-display, serif));
   font-weight: 400; /* Playfair is generally single-weight; adjust if you load more weights */
   line-height: 1.1;
   margin: 0;
@@ -135,6 +151,14 @@ h3 {
 .title {
   display: inline-block;
   letter-spacing: 0;
+}
+
+/* The Subtitle Control */
+.subtitle {
+  font-family: var(--font-subtitle) !important;
+  font-weight: 400;
+  letter-spacing: 0.05em;
+  text-transform: uppercase; /* Optional: Looks very professional for wedding dates/locations */
 }
 
 /* Utility class to specifically apply display font when needed */
@@ -180,9 +204,32 @@ h3 {
   margin: -1px;
 }
 
-/* Builder theme tokens and reusable surface/button styles.
-   Keep this scoped so marketing can define its own theme later. */
+/* ── Builder Theme ─────────────────────────────────────────────
+Builder theme tokens and reusable surface/button styles.
+   Keep this scoped so marketing can define its own theme later.
+#########################################################################
+#########################################################################
+#########################################################################
+ */
 .builder-theme {
+  --font-sans: var(
+    --font-plus-jakarta-sans,
+    "Plus Jakarta Sans",
+    ui-sans-serif,
+    system-ui
+  );
+  --font-display: var(
+    --font-plus-jakarta-sans,
+    "Plus Jakarta Sans",
+    ui-sans-serif,
+    system-ui
+  );
+  --font-subtitle: var(
+    --font-plus-jakarta-sans,
+    "Plus Jakarta Sans",
+    ui-sans-serif,
+    system-ui
+  );
   --builder-font-sans: var(--font-sans);
   --builder-color-page-bg: #f5f4f2;
   --builder-color-surface: #fdfcfb;
@@ -346,6 +393,9 @@ h3 {
 }
 
 /* ── Marketing + Auth Theme ─────────────────────────────────────────────
+#########################################################################
+#########################################################################
+#########################################################################
    Tokens defined at :root so they work across marketing pages AND auth
    routes (which have no shared layout wrapper).
    Palette: teal-to-orange gradient — different from the builder's blue.  */
@@ -375,6 +425,18 @@ h3 {
     #fffaf5
   );
   --marketing-bg-subtle-gradient: linear-gradient(to bottom, #ffffff, #f9fafb);
+}
+
+.marketing-theme {
+  --font-sans: var(
+    --font-plus-jakarta-sans,
+    "Plus Jakarta Sans",
+    ui-sans-serif,
+    system-ui
+  );
+  --font-display: var(--font-playfair-display, var(--font-serif));
+  --font-subtitle: var(--font-serif-lora, serif);
+  font-family: var(--font-sans);
 }
 
 /* Button base */
@@ -557,6 +619,36 @@ h3 {
 .marketing-link:hover {
   color: var(--marketing-color-link-hover);
   text-decoration: underline;
+}
+
+/* ── Tenant Theme ──────────────────────────────────────────────────────
+#########################################################################
+#########################################################################
+#########################################################################
+   Used for the actual wedding websites. 
+   Allows for specific font overrides without breaking the builder.
+*/
+/* 3. Theme Overrides */
+
+/* TENANT THEME: Specifically changes headings to Niconne */
+.tenant-theme {
+  --font-sans: var(--font-lora, "Lora", serif);
+  --font-display: var(--tenant-display-font, var(--font-niconne, cursive));
+  /* Subtitle becomes Playfair/Lora for that classic wedding contrast */
+  --font-subtitle: var(--font-playfair-display, var(--font-serif));
+  font-family: var(--font-sans);
+}
+
+.tenant-theme h1,
+.tenant-theme .heading-h1 {
+  font-size: clamp(4rem, 10vw, 6.5rem);
+  letter-spacing: 0.01em;
+}
+
+/* Keep h3 and specific subtitles as Playfair/Lora even in Tenant */
+.tenant-theme h3,
+.tenant-theme .heading-h3 {
+  font-family: var(--font-playfair-display, serif) !important;
 }
 
 @keyframes fadeIn {

@@ -127,21 +127,21 @@ export default async function Page({
     const showFooter = await shouldShowFooter({ host, routeKind: "tenant" });
 
     return (
-      <>
+      <div className="tenant-theme">
         <TenantPageComponent lang={lang} translations={translations} />
         {showFooter && <Footer lang={lang} translations={translations} />}
-      </>
+      </div>
     );
   } else {
     const translations = await fetchMarketingTranslations(lang, "en");
     return (
-      <>
+      <div className="marketing-theme">
         <MarketingPageComponent
           initialLang={lang}
           translations={translations}
         />
         <Footer lang={lang} translations={translations} />
-      </>
+      </div>
     );
   }
 }
