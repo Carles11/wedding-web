@@ -424,19 +424,6 @@ export default function GeneralSiteForm({
       <form onSubmit={handleSubmit} className="space-y-4 min-w-0 pb-24 md:pb-0">
         {/* Languages */}
         <div>
-          <label className="block text-md font-normal text-gray-700">
-            {translations["builder.general.form.label.languages"] ??
-              "Select your website display languages"}
-          </label>
-
-          <p className="text-xs text-gray-500">
-            {planType === "free"
-              ? translations["builder.general.form.language_limit"] ||
-                "Free plan: choose one language. Upgrade to add more."
-              : translations["builder.general.form.language_limit_pro"] ||
-                "You can enable all languages on your plan."}
-          </p>
-
           {/* Languages Selection Block */}
           <div className="space-y-3">
             <div className="flex flex-col gap-1">
