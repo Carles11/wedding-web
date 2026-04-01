@@ -16,9 +16,6 @@ function shouldUseTestStripeMode(): boolean {
   const isProdNode = process.env.NODE_ENV === "production";
 
   // LOGGING: This will show up in your Vercel Function Logs!
-  console.log(
-    `[Stripe Config] Detected Env: VERCEL_ENV=${vercelEnv}, NODE_ENV=${process.env.NODE_ENV}`,
-  );
 
   // If we are definitely in Vercel Production, use Live.
   if (vercelEnv === "production") return false;

@@ -53,7 +53,6 @@ export default function BuilderClient({
     refresh,
   } = useSite(user ?? null);
   const { planType } = usePlan();
-
   // Initialize active step from URL query param
   const searchParams = useSearchParams();
   const initialStep = parseInt(searchParams.get("step") ?? "0", 10);

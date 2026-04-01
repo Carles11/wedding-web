@@ -57,7 +57,6 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ received: true }, { status: 200 });
   } catch (error) {
-    console.error("[Stripe Webhook] Critical Error:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 },
@@ -136,10 +135,6 @@ async function handleCheckoutSessionCompleted(
   }
 
   // Mark onboarding as complete for this user (for premium signups)
-  console.log(
-    "[Stripe Webhook] Attempting to update onboarding_completed for user:",
-    userId,
-  );
 
   const { data: updatedProfile, error: onboardingError } =
     await updateUserProfile(userId, { onboarding_completed: true });
