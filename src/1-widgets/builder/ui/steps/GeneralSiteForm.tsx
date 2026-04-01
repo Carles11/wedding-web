@@ -84,6 +84,12 @@ export default function GeneralSiteForm({
       ),
     );
 
+    // For premium users, update font selectors from the latest DB values
+    if (planType === "premium") {
+      setSelectedTitleFont(res.title_font ?? DEFAULT_TENANT.title);
+      setSelectedBodyFont(res.body_font ?? DEFAULT_TENANT.body);
+    }
+
     setActiveLang(res.default_lang);
     setGeneralComplete?.(!!res.titles[res.default_lang]?.trim());
   }

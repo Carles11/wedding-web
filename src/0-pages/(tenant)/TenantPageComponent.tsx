@@ -146,10 +146,12 @@ export default async function TenantPageComponent({
   return (
     <div
       className="tenant-theme"
-      style={{
-        ["--title-font" as any]: `var(${titleFontVar})`,
-        ["--body-font" as any]: `var(${bodyFontVar})`,
-      } as React.CSSProperties}
+      style={
+        {
+          ["--title-font" as any]: `var(${titleFontVar})`,
+          ["--body-font" as any]: `var(${bodyFontVar})`,
+        } as React.CSSProperties
+      }
     >
       {/* JSON-LD SEO */}
       <JsonLd data={eventSchema} />

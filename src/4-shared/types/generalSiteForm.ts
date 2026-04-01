@@ -25,4 +25,6 @@ export type GeneralContent = {
   heroId: string | null;
   titles: Record<SupportedLanguage, string>;
   subtitles: Record<SupportedLanguage, string>;
+  title_font: string | null;
+  body_font: string | null;
 };

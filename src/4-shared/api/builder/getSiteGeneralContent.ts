@@ -11,7 +11,7 @@ export async function getSiteGeneralContent(
   // Get language config and subdomain
   const { data: site, error: siteErr } = await supabase
     .from("sites")
-    .select("languages, default_lang, subdomain")
+    .select("languages, default_lang, subdomain, title_font, body_font")
     .eq("id", site_id)
     .maybeSingle();
   if (siteErr) throw siteErr;
@@ -62,5 +62,7 @@ export async function getSiteGeneralContent(
     heroId: site_id,
     titles,
     subtitles,
+    title_font: site.title_font ?? null,
+    body_font: site.body_font ?? null,
   };
 }
