@@ -69,7 +69,7 @@ export default function BuilderStepContent({
           </p>
         )} */}
 
-        <div className="mt-8 p-4 bg-gray-50">
+        <div className="mt-8 p-0 md:p-4 bg-gray-50">
           {/* Steps always mounted — unmounting would cause stale-read after Supabase writes */}
           <div className={active !== 0 ? "hidden" : undefined}>
             <GeneralSiteForm
