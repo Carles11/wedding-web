@@ -4,10 +4,11 @@ import { signupWithEmail } from "@/2-features/auth/api";
 import { TERMS_VERSION } from "@/4-shared/config/consents/versions";
 import { interpolate } from "@/4-shared/helpers/interpolateVars";
 import { BuilderTextInput } from "@/4-shared/ui/builder/inputs";
+import { BuilderCheckbox } from "@/4-shared/ui/builder/inputs/BuilderCheckbox"; // Import new component
 import { MarketingButton } from "@/4-shared/ui/marketing";
 import { EMAIL_RE, passwordsMatch } from "@/4-shared/utils/validations";
 import Link from "next/link";
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 
 type Props = {
   translations: Record<string, string>;
@@ -36,12 +37,7 @@ export default function SignupForm({ translations, lang }: Props) {
   const [passwordError, setPasswordError] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
   const [genericError, setGenericError] = useState("");
-  // Use lang prop from page
-  const notifiedStatus = useRef<string | null>(null);
 
-  // Remove placeholder, use lang prop everywhere
-
-  // Centralized validation
   const validate = () => {
     let hasError = false;
     setEmailError("");
@@ -50,6 +46,7 @@ export default function SignupForm({ translations, lang }: Props) {
     setFullNameError("");
     setGenericError("");
     setAcceptedTermsError("");
+
     if (!EMAIL_RE.test(email)) {
       setEmailError(
         tr(
@@ -60,7 +57,7 @@ export default function SignupForm({ translations, lang }: Props) {
       );
       hasError = true;
     }
-    // Granular password validation
+
     if (password.length < 8) {
       setPasswordError(
         tr(
@@ -89,6 +86,7 @@ export default function SignupForm({ translations, lang }: Props) {
       );
       hasError = true;
     }
+
     if (!passwordsMatch(password, confirmPassword)) {
       setConfirmPasswordError(
         tr(
@@ -99,6 +97,8 @@ export default function SignupForm({ translations, lang }: Props) {
       );
       hasError = true;
     }
+
+    // Custom Checkbox Validation
     if (!acceptedTerms) {
       setAcceptedTermsError(
         tr(
@@ -109,6 +109,7 @@ export default function SignupForm({ translations, lang }: Props) {
       );
       hasError = true;
     }
+
     return hasError;
   };
 
@@ -116,8 +117,8 @@ export default function SignupForm({ translations, lang }: Props) {
     e.preventDefault();
     setSuccess(false);
     setGenericError("");
-    const hasError = validate();
-    if (hasError) return;
+    if (validate()) return;
+
     setLoading(true);
     try {
       const result = await signupWithEmail(
@@ -129,7 +130,6 @@ export default function SignupForm({ translations, lang }: Props) {
         TERMS_VERSION,
       );
       if (result.error) {
-        // Try to assign error to input if possible
         if (result.error.toLowerCase().includes("email")) {
           setEmailError(result.error);
         } else if (result.error.toLowerCase().includes("password")) {
@@ -179,29 +179,15 @@ export default function SignupForm({ translations, lang }: Props) {
             {tr(
               translations,
               "auth.signup.success_message",
-              "We've sent you a verification link. Please check your email and click the link to activate your account.",
+              "We've sent you a verification link...",
             )}
           </p>
-          <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600">
-              {tr(
-                translations,
-                "auth.signup.have_account",
-                "Already have an account?",
-              )}{" "}
-              <Link
-                href={`/${lang}/auth/login`}
-                className="font-medium marketing-link"
-              >
-                {tr(translations, "auth.common.log_in", "Log in")}
-              </Link>
-            </p>
-          </div>
-          <div className="mt-4 text-center">
-            <Link href={`/${lang}`} className="text-sm marketing-link">
-              {tr(translations, "auth.common.back_to_home", "Back to home")}
-            </Link>
-          </div>
+          <Link
+            href={`/${lang}/auth/login`}
+            className="font-medium marketing-link"
+          >
+            {tr(translations, "auth.common.log_in", "Log in")}
+          </Link>
         </div>
       </div>
     );
@@ -213,7 +199,7 @@ export default function SignupForm({ translations, lang }: Props) {
         <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
           {tr(translations, "auth.signup.title", "Create Your Account")}
         </h2>
-        <form onSubmit={handleSubmit} className="space-y-4 mt-6">
+        <form onSubmit={handleSubmit} className="space-y-4 mt-6" noValidate>
           <BuilderTextInput
             label={
               tr(translations, "auth.signup.full_name", "Full Name") +
@@ -253,7 +239,7 @@ export default function SignupForm({ translations, lang }: Props) {
             placeholder={tr(
               translations,
               "auth.signup.password_placeholder",
-              "Enter your password (min 8 characters)",
+              "Enter your password",
             )}
             error={passwordError}
           />
@@ -275,6 +261,32 @@ export default function SignupForm({ translations, lang }: Props) {
             )}
             error={confirmPasswordError}
           />
+
+          {/* THE NEW CUSTOM CHECKBOX */}
+          <BuilderCheckbox
+            id="accept-terms"
+            checked={acceptedTerms}
+            onChange={setAcceptedTerms}
+            error={acceptedTermsError}
+            label={
+              <span
+                dangerouslySetInnerHTML={{
+                  __html: interpolate(
+                    tr(
+                      translations,
+                      "auth.signup.accept_terms_label",
+                      "I agree to the weddweb.com {privacy} and {terms}.",
+                    ),
+                    {
+                      privacy: `<a href='/${lang}/privacy-policy' target='_blank' class='underline text-blue-600 hover:text-blue-800 transition-colors'>${tr(translations, "auth.signup.privacy_policy", "Privacy Policy")}</a>`,
+                      terms: `<a href='/${lang}/terms-of-service' target='_blank' class='underline text-blue-600 hover:text-blue-800 transition-colors'>${tr(translations, "auth.signup.terms_of_service", "Terms of Service")}</a>`,
+                    },
+                  ),
+                }}
+              />
+            }
+          />
+
           <MarketingButton
             type="submit"
             variant="auth"
@@ -288,54 +300,17 @@ export default function SignupForm({ translations, lang }: Props) {
           >
             {tr(translations, "auth.common.sign_up", "Sign Up")}
           </MarketingButton>
-          <div className="flex items-center mt-2">
-            <input
-              id="accept-terms"
-              type="checkbox"
-              checked={acceptedTerms}
-              onChange={(e) => setAcceptedTerms(e.target.checked)}
-              className="mr-2 h-4 w-4 border-gray-300 rounded"
-              required
-            />
-            <label
-              htmlFor="accept-terms"
-              className="text-sm text-gray-700 select-none"
-            >
-              <span
-                dangerouslySetInnerHTML={{
-                  __html: interpolate(
-                    tr(
-                      translations,
-                      "auth.signup.accept_terms_label",
-                      "I agree to the weddweb.com {privacy} and {terms}.",
-                    ),
-                    {
-                      privacy: `<a href='/${lang}/privacy-policy' target='_blank' class='underline text-primary'>${tr(translations, "auth.signup.privacy_policy", "Privacy Policy")}</a>`,
-                      terms: `<a href='/${lang}/terms-of-service' target='_blank' class='underline text-primary'>${tr(translations, "auth.signup.terms_of_service", "Terms of Service")}</a>`,
-                    },
-                  ),
-                }}
-              />
-            </label>
-          </div>
-          {acceptedTermsError && (
-            <p
-              className="text-xs text-(--builder-color-danger) mt-1"
-              role="alert"
-            >
-              {acceptedTermsError}
-            </p>
-          )}
         </form>
+
         {genericError && (
           <p
-            id="error-message"
             className="mt-4 text-sm text-(--builder-color-danger) text-center"
             role="alert"
           >
             {genericError}
           </p>
         )}
+
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-600">
             {tr(
@@ -350,11 +325,6 @@ export default function SignupForm({ translations, lang }: Props) {
               {tr(translations, "auth.common.log_in", "Log in")}
             </Link>
           </p>
-        </div>
-        <div className="mt-4 text-center">
-          <Link href={`/${lang}`} className="text-sm marketing-link">
-            {tr(translations, "auth.common.back_to_home", "Back to home")}
-          </Link>
         </div>
       </div>
     </div>
