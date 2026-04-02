@@ -20,7 +20,12 @@ export async function signupWithEmail(
   preferredLanguage?: string,
   acceptedTerms?: boolean,
   acceptedTermsVersion?: string,
-): Promise<{ error?: string; success?: boolean; needsVerification?: boolean }> {
+): Promise<{
+  error?: string;
+  success?: boolean;
+  needsVerification?: boolean;
+  preferredLanguage?: string;
+}> {
   const supabase = await createSupabaseSSRClient();
   const selectedLang = isValidLanguage(preferredLanguage)
     ? preferredLanguage
@@ -33,7 +38,10 @@ export async function signupWithEmail(
     email,
     password,
     options: {
-      data: fullName ? { full_name: fullName } : undefined,
+      data:
+        fullName || selectedLang
+          ? { full_name: fullName, preferred_language: selectedLang }
+          : undefined,
       emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/${selectedLang}/auth/confirm?next=${onboardingNext}`,
     },
   });

@@ -2,11 +2,14 @@ import {
   Cinzel,
   Cormorant_Garamond,
   Great_Vibes,
+  Inter,
   Montserrat,
   Niconne,
   Playfair_Display,
   Plus_Jakarta_Sans,
   Roboto,
+  Tangerine,
+  Parisienne,
 } from "next/font/google";
 
 // ── Google Font instances ────────────────────────────────────────────
@@ -55,6 +58,23 @@ export const montserrat = Montserrat({
   variable: "--font-montserrat",
 });
 
+export const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+});
+
+export const tangerine = Tangerine({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-tangerine",
+});
+
+export const parisienne = Parisienne({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-parisienne",
+});
+
 // ── All font instances (for applying CSS variables to the DOM) ──────
 
 export const allFontInstances = [
@@ -66,6 +86,9 @@ export const allFontInstances = [
   roboto,
   plusJakartaSans,
   montserrat,
+  inter,
+  tangerine,
+  parisienne,
 ];
 
 // ── Data structures ─────────────────────────────────────────────────
@@ -110,6 +133,18 @@ export const AVAILABLE_TITLE_FONTS: FontOption[] = [
     variable: "--font-cormorant-garamond",
     style: "Classic",
   },
+  {
+    id: "tangerine",
+    name: "Tangerine",
+    variable: "--font-tangerine",
+    style: "Romantic",
+  },
+  {
+    id: "parisienne",
+    name: "Parisienne",
+    variable: "--font-parisienne",
+    style: "Romantic",
+  },
 ];
 
 export const AVAILABLE_BODY_FONTS: FontOption[] = [
@@ -130,6 +165,12 @@ export const AVAILABLE_BODY_FONTS: FontOption[] = [
     name: "Montserrat",
     variable: "--font-montserrat",
     style: "Classic",
+  },
+  {
+    id: "inter",
+    name: "Inter",
+    variable: "--font-inter",
+    style: "Modern",
   },
 ];
 

@@ -61,6 +61,7 @@ export async function createCheckoutSession(
     payment_method_types: ["card"],
     mode: "payment",
     customer_email: email,
+    allow_promotion_codes: true,
     line_items: [
       {
         price: priceId,
@@ -71,6 +72,7 @@ export async function createCheckoutSession(
       userId,
       planType,
     },
+    locale: language as any,
     // Adding the language to the success URL ensures the user returns to the right UI
     success_url: `${baseUrl}/${language}/builder/checkout?success=true&session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${baseUrl}/${language}/pricing`,

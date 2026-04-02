@@ -4,10 +4,10 @@ import "server-only";
 type StripeMode = "live" | "test";
 
 function shouldUseTestStripeMode(): boolean {
-  // 1. Manual override - check for BOTH string and boolean-like values
-  const forced = process.env.STRIPE_USE_TEST_KEYS;
-  if (forced === "true") return true;
-  if (forced === "false") return false;
+  // // 1. Manual override - check for BOTH string and boolean-like values
+  // const forced = process.env.STRIPE_USE_TEST_KEYS;
+  // if (forced === "true") return true;
+  // if (forced === "false") return false;
 
   // 2. Vercel System Variable
   const vercelEnv = process.env.VERCEL_ENV;

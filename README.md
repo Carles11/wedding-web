@@ -256,5 +256,20 @@ Keep your platform ahead of the curve by considering:
 
 ---
 
+## Font System Overview
+
+The font system in this project is fully dynamic and multi-tenant aware:
+
+- **Font Selection:** Each site (tenant) can select custom title and body fonts from a curated set of Google Fonts via the builder UI. Premium users can choose any available font; free users are limited to defaults.
+- **Database Driven:** Font choices are saved per site in the database (`title_font`, `body_font` fields).
+- **Dynamic CSS Variables:** On each tenant site, the selected fonts are injected as CSS variables (`--title-font`, `--body-font`) at the root of the page.
+- **Tailwind Integration:** Tailwind v4 utilities (e.g. `font-sans`, `font-serif`) are mapped to these CSS variables using the `@theme` block in `globals.css`, so all typography utilities automatically use the correct fonts.
+- **Consistent Theming:** Builder, marketing, and tenant themes all use the same variable-based system, ensuring font changes are reflected everywhere.
+- **No Hardcoded Font-Family:** All font-family assignments in components and CSS reference the dynamic variables, never hardcoded font names.
+
+**Result:** Changing a site's fonts in the builder instantly updates the entire site, including all Tailwind typography utilities, with no code changes or redeploys required.
+
+---
+
 With this test discipline, your SaaS is resilient, future-proof, and trusted by global users!  
 Want a specific sample for any next roadmap item? Just ask.
