@@ -8,6 +8,7 @@ interface User {
   email: string;
   user_metadata?: {
     language?: string;
+    preferred_language?: string;
   };
 }
 
@@ -23,74 +24,81 @@ const hookSecret = Deno.env
   ?.replace("v1,whsec_", "");
 
 Deno.serve(async (req) => {
-  // Only allow POST requests
-  if (req.method !== "POST") {
+  if (req.method !== "POST")
     return new Response("Method not allowed", { status: 405 });
-  }
 
   try {
-    // We get the raw text payload for webhook verification
     const payload = await req.text();
     const headers = Object.fromEntries(req.headers);
+    if (!hookSecret) throw new Error("Missing SEND_EMAIL_HOOK_SECRET");
 
-    if (!hookSecret) {
-      throw new Error("Missing SEND_EMAIL_HOOK_SECRET environment variable");
-    }
-
-    // 1. Verify the webhook signature
     const wh = new Webhook(hookSecret);
     const { user, email_data } = wh.verify(payload, headers) as {
       user: User;
       email_data: EmailData;
     };
 
-    // 2. Sniff language from URL or metadata
     const confirmationUrl = email_data.confirmation_url || "";
-    const urlParts = confirmationUrl.split("/");
     const supportedLangs = Object.keys(EMAIL_TRANSLATIONS);
 
-    // Find language in URL (e.g., /es/ or /fr/)
-    const langFromUrl = urlParts.find((part: string) =>
-      supportedLangs.includes(part),
-    );
+    // Sniff language from Metadata or URL
+    const lang =
+      user.user_metadata?.language ||
+      user.user_metadata?.preferred_language ||
+      supportedLangs.find((l) => confirmationUrl.includes(`/${l}/`)) ||
+      "en";
 
-    // Fallback: URL -> Metadata -> English
-    const lang = langFromUrl || user.user_metadata?.language || "en";
-
-    // 3. Get content based on event type
-    // email_data.type is used for traditional flows, email_action_type for newer hooks
     const eventType = email_data.type || email_data.email_action_type || "";
     const content =
       EMAIL_TRANSLATIONS[lang]?.[eventType] || EMAIL_TRANSLATIONS.en[eventType];
 
-    if (!content) {
-      throw new Error(
-        `No translation found for language: ${lang} and event: ${eventType}`,
-      );
-    }
+    if (!content)
+      throw new Error(`No translation for ${lang} and ${eventType}`);
 
-    // 4. Send via Resend
+    // Send via Resend with your NEW Wedding Styles
     const { data, error } = await resend.emails.send({
       from: "WeddWeb <hello@weddweb.com>",
       to: [user.email],
       subject: content.subject,
       html: `
-        <div style="font-family: sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; border: 1px solid #eee; border-radius: 8px;">
-          <h2 style="color: #333;">${content.title}</h2>
-          <p style="color: #555; line-height: 1.5;">Click the button below to proceed with your request:</p>
-          <div style="margin: 30px 0;">
-            <a href="${confirmationUrl}" style="background: #000; color: #fff; padding: 14px 28px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;">
-              ${content.button}
-            </a>
+        <div style="background-color: #f9fafb; padding: 40px 20px; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #292d41;">
+          <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e8e6e1;">
+            <div style="padding: 40px; text-align: center;">
+              <h1 style="font-family: Georgia, serif; color: #6abda6; font-size: 28px; margin-bottom: 20px; font-weight: normal;">
+                ${content.title}
+              </h1>
+              <p style="font-size: 16px; line-height: 1.6; color: #4b5563;">
+                ${content.description || "We're so excited to help you build the perfect website for your special day. First, please confirm your request by clicking the button below."}
+              </p>
+              
+             <div style="margin: 35px 0;">
+  <a href="${confirmationUrl}" 
+     style="background-color: #6abda6; 
+            color: #ffffff; 
+            padding: 14px 32px; 
+            border-radius: 50px; 
+            text-decoration: none; 
+            font-weight: 600; 
+            font-size: 16px; 
+            display: inline-block;
+            line-height: 100%;
+            text-align: center;
+            cursor: pointer !important;">
+    ${content.button}
+  </a>
+</div>
+              
+              <p style="font-size: 14px; color: #9ca3af; margin-top: 30px;">
+                If the button doesn't work, copy and paste this link into your browser:<br>
+                <span style="color: #6abda6; word-break: break-all;">${confirmationUrl}</span>
+              </p>
+            </div>
           </div>
-          <p style="font-size: 12px; color: #999;">If the button doesn't work, copy and paste this link into your browser:</p>
-          <p style="font-size: 12px; color: #999; word-break: break-all;">${confirmationUrl}</p>
         </div>
       `,
     });
 
     if (error) throw error;
-
     return new Response(JSON.stringify(data), {
       status: 200,
       headers: { "Content-Type": "application/json" },
@@ -98,10 +106,8 @@ Deno.serve(async (req) => {
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : String(err);
     console.error("Error processing auth email:", errorMessage);
-
     return new Response(JSON.stringify({ error: errorMessage }), {
-      status: 401, // Use 401 to indicate verification failure or unauthorized access
-      headers: { "Content-Type": "application/json" },
+      status: 401,
     });
   }
 });

@@ -40,7 +40,7 @@ export async function signupWithEmail(
     options: {
       data:
         fullName || selectedLang
-          ? { full_name: fullName, preferred_language: selectedLang }
+          ? { full_name: fullName, language: selectedLang }
           : undefined,
       emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/${selectedLang}/auth/confirm?next=${onboardingNext}`,
     },
