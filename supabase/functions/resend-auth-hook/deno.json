@@ -1,0 +1,7 @@
+{
+  "nodeModulesDir": "auto",
+  "imports": {
+    "resend": "npm:resend@3.5.0",
+    "standardwebhooks": "https://esm.sh/standardwebhooks@1.0.0"
+  }
+}

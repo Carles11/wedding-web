@@ -15,10 +15,13 @@ export async function sendPasswordReset(
   preferredLanguage?: string,
 ): Promise<{ error?: string; success?: boolean }> {
   const supabase = await createSupabaseSSRClient();
+
   const selectedLang = isValidLanguage(preferredLanguage)
     ? preferredLanguage
     : "en";
+
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    // Corrected: No nested 'options' key
     redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/${selectedLang}/auth/reset-password`,
   });
 
