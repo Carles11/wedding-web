@@ -1,5 +1,6 @@
 import { t } from "@/4-shared/helpers/t";
 import type { MarketingTranslations } from "@/4-shared/types/marketingPage";
+import Heading from "@/4-shared/ui/commons/typography/Heading";
 
 type SectionProps = {
   translations: MarketingTranslations;
@@ -8,13 +9,13 @@ type SectionProps = {
 export function TermsUseSection({ translations }: SectionProps) {
   return (
     <section id="use" className="mb-14 scroll-mt-24">
-      <h2 className="font-display text-2xl mb-4">
+      <Heading as="h2" className="font-display text-2xl pb-4">
         {t(
           translations,
           "marketing.legal.terms.use.title",
           "1. Use of Service",
         )}
-      </h2>
+      </Heading>
       <p className="text-gray-700 leading-relaxed opacity-90">
         {t(
           translations,
@@ -29,13 +30,13 @@ export function TermsUseSection({ translations }: SectionProps) {
 export function TermsAccountSection({ translations }: SectionProps) {
   return (
     <section id="account" className="mb-14 scroll-mt-24">
-      <h2 className="font-display text-2xl mb-4">
+      <Heading as="h2" className="font-display text-2xl pb-4">
         {t(
           translations,
           "marketing.legal.terms.account.title",
           "2. Account Registration",
         )}
-      </h2>
+      </Heading>
       <p className="text-gray-700 leading-relaxed opacity-90">
         {t(
           translations,
@@ -50,13 +51,13 @@ export function TermsAccountSection({ translations }: SectionProps) {
 export function TermsContentSection({ translations }: SectionProps) {
   return (
     <section id="content" className="mb-14 scroll-mt-24">
-      <h2 className="font-display text-2xl mb-4">
+      <Heading as="h2" className="font-display text-2xl pb-4">
         {t(
           translations,
           "marketing.legal.terms.content.title",
           "3. Content & Intellectual Property",
         )}
-      </h2>
+      </Heading>
       <p className="text-gray-700 leading-relaxed opacity-90">
         {t(
           translations,
@@ -71,13 +72,13 @@ export function TermsContentSection({ translations }: SectionProps) {
 export function TermsUserContentSection({ translations }: SectionProps) {
   return (
     <section id="user-content" className="mb-14 scroll-mt-24">
-      <h2 className="font-display text-2xl mb-4">
+      <Heading as="h2" className="font-display text-2xl pb-4">
         {t(
           translations,
           "marketing.legal.terms.user_content.title",
           "4. User Content",
         )}
-      </h2>
+      </Heading>
       <p className="text-gray-700 leading-relaxed opacity-90">
         {t(
           translations,
@@ -95,13 +96,13 @@ export function TermsProhibitedSection({ translations }: SectionProps) {
       id="prohibited"
       className="mb-14 scroll-mt-24 p-8 rounded-3xl bg-white/50 border border-white/80 shadow-sm"
     >
-      <h2 className="font-display text-2xl mb-6 pb-6">
+      <Heading as="h2" className="font-display text-2xl mb-6 pb-6">
         {t(
           translations,
           "marketing.legal.terms.prohibited.title",
           "5. Prohibited Conduct",
         )}
-      </h2>
+      </Heading>
       <ul className="grid gap-4">
         {[
           {
@@ -141,13 +142,13 @@ export function TermsProhibitedSection({ translations }: SectionProps) {
 export function TermsTerminationSection({ translations }: SectionProps) {
   return (
     <section id="termination" className="mb-14 scroll-mt-24">
-      <h2 className="font-display text-2xl mb-4">
+      <Heading as="h2" className="font-display text-2xl pb-4">
         {t(
           translations,
           "marketing.legal.terms.termination.title",
           "6. Termination",
         )}
-      </h2>
+      </Heading>
       <p className="text-gray-700 leading-relaxed opacity-90">
         {t(
           translations,
@@ -162,13 +163,13 @@ export function TermsTerminationSection({ translations }: SectionProps) {
 export function TermsDisclaimerSection({ translations }: SectionProps) {
   return (
     <section id="disclaimer" className="mb-14 scroll-mt-24">
-      <h2 className="font-display text-2xl mb-4">
+      <Heading as="h2" className="font-display text-2xl pb-4">
         {t(
           translations,
           "marketing.legal.terms.disclaimer.title",
           "7. Disclaimers & Liability",
         )}
-      </h2>
+      </Heading>
       <div className="p-6 rounded-2xl bg-slate-900/5 italic text-sm border-l-4 border-slate-300">
         {t(
           translations,
@@ -183,13 +184,13 @@ export function TermsDisclaimerSection({ translations }: SectionProps) {
 export function TermsChangesSection({ translations }: SectionProps) {
   return (
     <section id="changes" className="mb-14 scroll-mt-24">
-      <h2 className="font-display text-2xl mb-4">
+      <Heading as="h2" className="font-display text-2xl pb-4">
         {t(
           translations,
           "marketing.legal.terms.changes.title",
           "8. Changes to Terms",
         )}
-      </h2>
+      </Heading>
       <p className="text-gray-700 leading-relaxed opacity-90">
         {t(
           translations,
@@ -207,9 +208,9 @@ export function TermsContactSection({ translations }: SectionProps) {
       id="contact"
       className="mb-14 scroll-mt-24 pt-10 border-t border-black/5"
     >
-      <h2 className="font-display text-2xl mb-4">
+      <Heading as="h2" className="font-display text-2xl pb-4">
         {t(translations, "marketing.legal.terms.contact.title", "9. Contact")}
-      </h2>
+      </Heading>
       <p className="text-gray-700">
         {t(
           translations,

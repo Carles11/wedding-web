@@ -1,5 +1,6 @@
 import { t } from "@/4-shared/helpers/t";
 import type { MarketingTranslations } from "@/4-shared/types/marketingPage";
+import Heading from "@/4-shared/ui/commons/typography/Heading";
 
 // All section components for Cookie Policy Page
 
@@ -10,13 +11,13 @@ type SectionProps = {
 export function CookieWhatSection({ translations }: SectionProps) {
   return (
     <section id="what" className="mb-16 scroll-mt-24">
-      <h2 className="font-display text-3xl mb-6">
+      <Heading as="h2" className="font-display text-3xl pb-4">
         {t(
           translations,
           "marketing.legal.cookie.what_are_cookies.title",
           "1. What Are Cookies?",
         )}
-      </h2>
+      </Heading>
       <p className="text-gray-700 leading-relaxed opacity-90">
         {t(
           translations,
@@ -60,13 +61,13 @@ export function CookieTypesSection({ translations }: SectionProps) {
       id="types"
       className="mb-16 scroll-mt-24 border-t border-black/5 pt-12"
     >
-      <h2 className="font-display text-3xl mb-8">
+      <Heading as="h2" className="font-display text-3xl mb-8">
         {t(
           translations,
           "marketing.legal.cookie.types.title",
           "2. Types We Use",
         )}
-      </h2>
+      </Heading>
       <div className="grid gap-6">
         {cookies.map((cookie) => (
           <div
@@ -99,13 +100,13 @@ export function CookieTypesSection({ translations }: SectionProps) {
 export function CookieUsageSection({ translations }: SectionProps) {
   return (
     <section id="usage" className="mb-16 scroll-mt-24">
-      <h2 className="font-display text-3xl mb-6">
+      <Heading as="h2" className="font-display text-3xl pb-4">
         {t(
           translations,
           "marketing.legal.cookie.usage.title",
           "3. How We Use Them",
         )}
-      </h2>
+      </Heading>
       <p className="mb-6 text-gray-700">
         {t(
           translations,
@@ -120,13 +121,13 @@ export function CookieUsageSection({ translations }: SectionProps) {
 export function CookieManageSection({ translations }: SectionProps) {
   return (
     <section id="manage" className="mb-16 scroll-mt-24">
-      <h2 className="font-display text-2xl mb-4">
+      <Heading as="h2" className="font-display text-2xl pb-4">
         {t(
           translations,
           "marketing.legal.cookie.manage.title",
-          "4. Managing Preferences",
+          "4. Managing Your Cookie Preferences",
         )}
-      </h2>
+      </Heading>
       <p className="text-gray-700 leading-relaxed opacity-90">
         {t(
           translations,
@@ -141,13 +142,13 @@ export function CookieManageSection({ translations }: SectionProps) {
 export function CookieThirdPartySection({ translations }: SectionProps) {
   return (
     <section id="third-party" className="mb-16 scroll-mt-24">
-      <h2 className="font-display text-2xl mb-4">
+      <Heading as="h2" className="font-display text-2xl pb-4">
         {t(
           translations,
           "marketing.legal.cookie.third_party.title",
           "5. Third-Party Services",
         )}
-      </h2>
+      </Heading>
       <p className="text-gray-700 leading-relaxed opacity-90">
         {t(
           translations,
@@ -162,9 +163,9 @@ export function CookieThirdPartySection({ translations }: SectionProps) {
 export function CookieUpdatesSection({ translations }: SectionProps) {
   return (
     <section id="updates" className="mb-16 scroll-mt-24">
-      <h2 className="font-display text-2xl mb-4">
+      <Heading as="h2" className="font-display text-2xl pb-4">
         {t(translations, "marketing.legal.cookie.updates.title", "6. Updates")}
-      </h2>
+      </Heading>
       <p className="text-gray-700 leading-relaxed opacity-90">
         {t(
           translations,
@@ -182,11 +183,11 @@ export function CookieContactSection({ translations }: SectionProps) {
       id="contact"
       className="mb-16 scroll-mt-24 pt-10 border-t border-black/5"
     >
-      <h2 className="font-display text-3xl mb-6">
+      <Heading as="h2" className="font-display text-3xl pb-4">
         {t(translations, "marketing.legal.cookie.contact.title", "7. Contact")}
-      </h2>
+      </Heading>
       <div className="p-8 rounded-3xl bg-white border border-black/5 shadow-xl shadow-black/5">
-        <p className="text-gray-700 mb-6">
+        <p className="text-gray-700 pb-4">
           {t(
             translations,
             "marketing.legal.cookie.contact.desc",
