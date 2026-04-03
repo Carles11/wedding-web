@@ -248,7 +248,6 @@ export function ProfileTab({
                         {emailChanging ? "Changing..." : "Change Email"}
                       </button>
 
-                      {/* ADD THIS BUTTON */}
                       <button
                         type="button"
                         className="text-xs text-(--builder-color-text-muted) hover:text-(--builder-color-text) underline underline-offset-2"

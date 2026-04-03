@@ -20,6 +20,7 @@ interface EmailData {
   redirect_to?: string;
   action_link?: string;
   token_hash?: string;
+  new_email?: string;
 }
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
@@ -43,7 +44,18 @@ Deno.serve(async (req) => {
     };
     const { user, email_data } = verified;
 
-    // 1. Determine Language (Fixed: using redirect_to for sniff since confirmationUrl isn't built yet)
+    // 1. Determine Event Type
+    const eventType =
+      email_data.type || email_data.email_action_type || "signup";
+
+    // 2. Determine Recipient (Crucial for Email Change)
+    // If it's an email change confirmation, Supabase puts the new address in 'new_email'
+    const toEmail =
+      eventType === "email_change" && email_data.new_email
+        ? email_data.new_email
+        : user.email;
+
+    // 3. Determine Language
     const supportedLangs = Object.keys(EMAIL_TRANSLATIONS);
     const lang =
       user.user_metadata?.language ||
@@ -51,44 +63,36 @@ Deno.serve(async (req) => {
       supportedLangs.find((l) => email_data.redirect_to?.includes(`/${l}/`)) ||
       "en";
 
-    // 2. Determine Event Type
-    const eventType =
-      email_data.type || email_data.email_action_type || "signup";
-
-    // 3. SMART ROUTING: Define where the user should land AFTER the AuthConfirmClient is done
-    let finalDestination = `/${lang}/builder/onboarding`; // Default for signup/magiclink
+    // 4. SMART ROUTING: Define where the user should land AFTER AuthConfirmClient
+    let finalDestination = `/${lang}/builder/onboarding`; // Default
     if (eventType === "recovery") {
       finalDestination = `/${lang}/auth/reset-password`;
     } else if (eventType === "email_change") {
       finalDestination = `/${lang}/builder/account`;
     }
 
-    // 4. URL CONSTRUCTION (The Fix)
-    // We extract the base origin (e.g., http://localhost:3000) from redirect_to
+    // 5. URL CONSTRUCTION
     const origin = email_data.redirect_to
       ? new URL(email_data.redirect_to).origin
       : "http://localhost:3000";
 
-    // We force the link to go to our AuthConfirmClient first
     const confirmPagePath = `${origin}/${lang}/auth/confirm`;
-
-    // We assemble the "Master Link"
     const confirmationUrl = `${confirmPagePath}?token_hash=${email_data.token_hash}&type=${eventType}&next=${encodeURIComponent(finalDestination)}`;
 
     console.log(
-      `[DEBUG] Processing ${eventType} for ${user.email}. Link: ${confirmationUrl}`,
+      `[DEBUG] Sending ${eventType} to ${toEmail}. Routing next to ${finalDestination}`,
     );
 
-    // 5. Get Email Content
+    // 6. Get Email Content
     const content =
       EMAIL_TRANSLATIONS[lang]?.[eventType] || EMAIL_TRANSLATIONS.en[eventType];
     if (!content)
       throw new Error(`No translation for ${lang} and ${eventType}`);
 
-    // 6. Send via Resend
+    // 7. Send via Resend
     const { data, error } = await resend.emails.send({
       from: "WeddWeb <hello@weddweb.com>",
-      to: [user.email],
+      to: [toEmail],
       subject: content.subject,
       html: `
         <div style="background-color: #f9fafb; padding: 40px 20px; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #292d41; text-align: center;">
@@ -111,8 +115,10 @@ Deno.serve(async (req) => {
     });
 
     if (error) throw error;
+
     return new Response(JSON.stringify(data), {
       status: 200,
+
       headers: { "Content-Type": "application/json" },
     });
   } catch (err) {

@@ -15,28 +15,26 @@ const EmailChangeInstructionsModal: React.FC<
       open={open}
       title={
         translations["builder.account.email_change_modal_title"] ||
-        "Confirm your email change"
+        "Check your new inbox"
       }
       onClose={onClose}
     >
       <div className="space-y-4 p-2 text-sm">
-        <p>
+        <p className="text-(--builder-color-text)">
           {translations["builder.account.email_change_modal_instructions"] ||
-            "To complete your email change, please confirm the links sent to BOTH your old and new email addresses. Your email will not change until both are confirmed."}
+            "We've sent a confirmation link to your new email address. Please click the link in that email to finalize the change."}
         </p>
-        <ul className="list-disc pl-5">
-          <li>
-            {translations["builder.account.email_change_modal_step_old"] ||
-              "Check your old email inbox and confirm the link."}
-          </li>
-          <li>
-            {translations["builder.account.email_change_modal_step_new"] ||
-              "Check your new email inbox and confirm the link."}
-          </li>
-        </ul>
+
+        <div className="bg-(--builder-color-primary)/5 border border-(--builder-color-primary)/10 rounded-lg p-3">
+          <p className="text-xs text-(--builder-color-primary) font-medium">
+            {translations["builder.account.email_change_modal_note_action"] ||
+              "Your account will keep using your old email until you confirm the new one."}
+          </p>
+        </div>
+
         <p className="text-xs text-(--builder-color-text-muted)">
           {translations["builder.account.email_change_modal_note"] ||
-            "If you do not see the emails, please check your spam folder."}
+            "If you do not see the email in a few minutes, please check your spam folder."}
         </p>
       </div>
     </MainModal>
