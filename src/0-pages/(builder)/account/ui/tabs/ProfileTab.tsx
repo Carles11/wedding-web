@@ -245,7 +245,13 @@ export function ProfileTab({
                         onClick={handleChangeEmail}
                         disabled={emailChanging || !password || !editEmail}
                       >
-                        {emailChanging ? "Changing..." : "Change Email"}
+                        {emailChanging
+                          ? (translations[
+                              "builder.account.tabs.profile.changing_email"
+                            ] ?? "Changing...")
+                          : (translations[
+                              "builder.account.tabs.profile.change_email"
+                            ] ?? "Change Email")}
                       </button>
 
                       <button
