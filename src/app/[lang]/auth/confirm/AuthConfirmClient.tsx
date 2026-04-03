@@ -34,9 +34,15 @@ export default function AuthConfirmClient({ translations, lang }: Props) {
   useEffect(() => {
     let cancelled = false;
     const requestedLang = lang;
-    const nextRaw =
-      searchParams.get("next") ?? `/${requestedLang}/builder/onboarding`;
-    // Ensure 'next' is always language-prefixed
+
+    // 1. FIX: DOUBLE DECODE
+    // If the URL in the email was encoded, and then the browser parsed the query string,
+    // sometimes '/' becomes '%2F'. We decode it again to be 100% safe.
+    const rawParam = searchParams.get("next");
+    const nextRaw = rawParam
+      ? decodeURIComponent(rawParam)
+      : `/${requestedLang}/builder/onboarding`;
+
     const langPrefix = `/${requestedLang}/`;
     let next = nextRaw;
     if (!next.startsWith(langPrefix)) {
@@ -44,9 +50,13 @@ export default function AuthConfirmClient({ translations, lang }: Props) {
       next = `${langPrefix}${next}`;
     }
 
+    // 2. FIX: THE HARD REDIRECT
+    // router.replace is a "Soft" navigation. The Middleware often misses
+    // the new Supabase cookies during soft navs. window.location.href
+    // forces a full reload, ensuring you aren't kicked back to /login.
     const redirectToNext = () => {
       if (!cancelled) {
-        router.replace(next);
+        window.location.href = next;
       }
     };
 
@@ -54,7 +64,6 @@ export default function AuthConfirmClient({ translations, lang }: Props) {
       const {
         data: { session },
       } = await supabase.auth.getSession();
-
       return session;
     };
 
@@ -73,6 +82,7 @@ export default function AuthConfirmClient({ translations, lang }: Props) {
           return;
         }
 
+        // Logic for Implicit Grant (access_token)
         if (accessToken && refreshToken) {
           setMessage(
             tr(
@@ -85,34 +95,31 @@ export default function AuthConfirmClient({ translations, lang }: Props) {
             access_token: accessToken,
             refresh_token: refreshToken,
           });
-
-          if (error) {
-            throw error;
-          }
-
+          if (error) throw error;
           redirectToNext();
           return;
         }
 
+        // Logic for PKCE (code)
         if (code) {
           const { error } = await supabase.auth.exchangeCodeForSession(code);
-          if (error) {
-            throw error;
-          }
-
+          if (error) throw error;
           redirectToNext();
           return;
         }
 
+        // Logic for OTP / Recovery (token_hash)
         if (tokenHash && type) {
-          console.log("Verifying OTP for type:", type);
+          // ADDED: UI Feedback for OTP verification
+          setMessage(
+            tr(translations, "auth.confirm.finishing_signin", "Verifying..."),
+          );
+
           const { error } = await supabase.auth.verifyOtp({
             token_hash: tokenHash,
             type,
           });
-          if (error) {
-            throw error;
-          }
+          if (error) throw error;
 
           redirectToNext();
           return;

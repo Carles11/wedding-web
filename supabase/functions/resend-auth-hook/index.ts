@@ -60,7 +60,7 @@ Deno.serve(async (req) => {
     if (eventType === "recovery") {
       finalDestination = `/${lang}/auth/reset-password`;
     } else if (eventType === "email_change") {
-      finalDestination = `/${lang}/settings`;
+      finalDestination = `/${lang}/builder/account`;
     }
 
     // 4. URL CONSTRUCTION (The Fix)
