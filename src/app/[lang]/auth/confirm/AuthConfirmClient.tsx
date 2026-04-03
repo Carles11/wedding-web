@@ -35,13 +35,16 @@ export default function AuthConfirmClient({ translations, lang }: Props) {
     let cancelled = false;
     const requestedLang = lang;
 
-    // 1. FIX: DOUBLE DECODE
-    // If the URL in the email was encoded, and then the browser parsed the query string,
-    // sometimes '/' becomes '%2F'. We decode it again to be 100% safe.
+    // 1. ROBUST DECODE: Handle double-encoded slashes from the Edge Function
     const rawParam = searchParams.get("next");
-    const nextRaw = rawParam
+    let nextRaw = rawParam
       ? decodeURIComponent(rawParam)
       : `/${requestedLang}/builder/onboarding`;
+
+    // If it's still encoded (contains %2F), decode one more time
+    if (nextRaw.includes("%")) {
+      nextRaw = decodeURIComponent(nextRaw);
+    }
 
     const langPrefix = `/${requestedLang}/`;
     let next = nextRaw;
@@ -50,10 +53,8 @@ export default function AuthConfirmClient({ translations, lang }: Props) {
       next = `${langPrefix}${next}`;
     }
 
-    // 2. FIX: THE HARD REDIRECT
-    // router.replace is a "Soft" navigation. The Middleware often misses
-    // the new Supabase cookies during soft navs. window.location.href
-    // forces a full reload, ensuring you aren't kicked back to /login.
+    // 2. HARD REDIRECT: window.location.href ensures Middleware
+    // detects the new session/cookies after the email change.
     const redirectToNext = () => {
       if (!cancelled) {
         window.location.href = next;
@@ -68,73 +69,70 @@ export default function AuthConfirmClient({ translations, lang }: Props) {
     };
 
     async function completeAuth() {
-      const hashParams = new URLSearchParams(window.location.hash.slice(1));
-      const accessToken = hashParams.get("access_token");
-      const refreshToken = hashParams.get("refresh_token");
       const tokenHash = searchParams.get("token_hash");
       const type = searchParams.get("type") as EmailOtpType | null;
       const code = searchParams.get("code");
 
       try {
-        const existingSession = await getExistingSession();
-        if (existingSession) {
-          redirectToNext();
-          return;
-        }
-
-        // Logic for Implicit Grant (access_token)
-        if (accessToken && refreshToken) {
-          setMessage(
-            tr(
-              translations,
-              "auth.confirm.finishing_signin",
-              "Finishing sign-in...",
-            ),
-          );
-          const { error } = await supabase.auth.setSession({
-            access_token: accessToken,
-            refresh_token: refreshToken,
-          });
-          if (error) throw error;
-          redirectToNext();
-          return;
+        // --- THE FIX: FORCED VERIFICATION ---
+        // We only check for an existing session and skip if NO verification tokens are present.
+        // If we HAVE a token, we must run the verification even if logged in (common for email changes).
+        if (!tokenHash && !code) {
+          const existingSession = await getExistingSession();
+          if (existingSession) {
+            redirectToNext();
+            return;
+          }
         }
 
         // Logic for PKCE (code)
         if (code) {
+          setMessage(
+            tr(
+              translations,
+              "auth.confirm.finishing_signin",
+              "Verifying code...",
+            ),
+          );
           const { error } = await supabase.auth.exchangeCodeForSession(code);
           if (error) throw error;
           redirectToNext();
           return;
         }
 
-        // Logic for OTP / Recovery (token_hash)
+        // Logic for OTP / Recovery / Email Change (token_hash)
         if (tokenHash && type) {
-          // ADDED: UI Feedback for OTP verification
           setMessage(
-            tr(translations, "auth.confirm.finishing_signin", "Verifying..."),
+            tr(
+              translations,
+              "auth.confirm.finishing_signin",
+              "Finalizing change...",
+            ),
           );
 
           const { error } = await supabase.auth.verifyOtp({
             token_hash: tokenHash,
             type,
           });
+
           if (error) throw error;
 
+          // Verification successful - redirecting will now show the new email
           redirectToNext();
           return;
         }
 
-        await new Promise((resolve) => setTimeout(resolve, 250));
-        const detectedSession = await getExistingSession();
-        if (detectedSession) {
+        // If we reach here with no tokens and no session, wait briefly then check again
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        const finalCheck = await getExistingSession();
+        if (finalCheck) {
           redirectToNext();
-          return;
+        } else {
+          throw new Error("Missing authentication tokens");
         }
-
-        throw new Error("Missing authentication tokens");
-      } catch {
+      } catch (err) {
         if (!cancelled) {
+          console.error("Auth Confirmation Error:", err);
           setMessage(
             tr(
               translations,
@@ -142,26 +140,18 @@ export default function AuthConfirmClient({ translations, lang }: Props) {
               "We could not complete your email confirmation.",
             ),
           );
+          // Only redirect to error if verification actually failed
           router.replace(`/${lang}/auth/auth-code-error`);
         }
       }
     }
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session) {
-        redirectToNext();
-      }
-    });
-
     completeAuth();
 
     return () => {
       cancelled = true;
-      subscription.unsubscribe();
     };
-  }, [router, searchParams, supabase, translations]);
+  }, [lang, router, searchParams, supabase, translations]);
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-gray-50 px-6">
