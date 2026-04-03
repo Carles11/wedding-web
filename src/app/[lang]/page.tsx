@@ -73,6 +73,23 @@ export async function generateMetadata({
       languages[l] = `/${l}`;
     });
 
+    // Use local helper for correct OG locale
+    function getOGLocale(lang: string): string {
+      const localeMap: Record<string, string> = {
+        en: "en_US",
+        es: "es_ES",
+        ca: "ca_ES",
+        fr: "fr_FR",
+        de: "de_DE",
+        it: "it_IT",
+        pt: "pt_PT",
+        ru: "ru_RU",
+        zh: "zh_CN",
+        ar: "ar_AR",
+        hi: "hi_IN",
+      };
+      return localeMap[lang] || `${lang}_${lang.toUpperCase()}`;
+    }
     return {
       metadataBase,
       title: seo.title,
@@ -89,7 +106,7 @@ export async function generateMetadata({
         description: seo.ogDescription || seo.description,
         url: `/${lang}`,
         siteName: "WeddWeb",
-        locale: `${lang}_${lang.toUpperCase()}`,
+        locale: getOGLocale(lang),
         images: [ogImage],
         type: "website",
       },

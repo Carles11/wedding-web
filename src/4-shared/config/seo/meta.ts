@@ -17,11 +17,6 @@ export const WEBSITE_JSONLD = {
   "@type": "WebSite",
   url: "https://weddweb.com",
   name: "WeddWeb",
-  potentialAction: {
-    "@type": "SearchAction",
-    target: "https://weddweb.com/search?q={search_term_string}",
-    "query-input": "required name=search_term_string",
-  },
 };
 
 export const ICONS = [

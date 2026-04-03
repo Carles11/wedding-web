@@ -24,10 +24,5 @@ export function generateSoftwareSchema(
       "Guest List Management",
       "Mobile Friendly",
     ],
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: "4.9",
-      reviewCount: "120",
-    },
   };
 }
