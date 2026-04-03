@@ -48,8 +48,8 @@ Deno.serve(async (req) => {
     const eventType =
       email_data.type || email_data.email_action_type || "signup";
 
-    // 2. Determine Recipient (Crucial for Email Change)
-    // If it's an email change confirmation, Supabase puts the new address in 'new_email'
+    // 2. Determine Recipient
+    // For email changes, the confirmation link must go to the new address provided in 'new_email'
     const toEmail =
       eventType === "email_change" && email_data.new_email
         ? email_data.new_email
@@ -63,7 +63,7 @@ Deno.serve(async (req) => {
       supportedLangs.find((l) => email_data.redirect_to?.includes(`/${l}/`)) ||
       "en";
 
-    // 4. SMART ROUTING: Define where the user should land AFTER AuthConfirmClient
+    // 4. SMART ROUTING: Define the landing page after AuthConfirmClient verification
     let finalDestination = `/${lang}/builder/onboarding`; // Default
     if (eventType === "recovery") {
       finalDestination = `/${lang}/auth/reset-password`;
@@ -72,6 +72,7 @@ Deno.serve(async (req) => {
     }
 
     // 5. URL CONSTRUCTION
+    // Dynamically detect origin (localhost or production) from redirect_to
     const origin = email_data.redirect_to
       ? new URL(email_data.redirect_to).origin
       : "http://localhost:3000";
@@ -80,7 +81,7 @@ Deno.serve(async (req) => {
     const confirmationUrl = `${confirmPagePath}?token_hash=${email_data.token_hash}&type=${eventType}&next=${encodeURIComponent(finalDestination)}`;
 
     console.log(
-      `[DEBUG] Sending ${eventType} to ${toEmail}. Routing next to ${finalDestination}`,
+      `[DEBUG] Event: ${eventType} | Recipient: ${toEmail} | Destination: ${finalDestination}`,
     );
 
     // 6. Get Email Content
@@ -115,17 +116,13 @@ Deno.serve(async (req) => {
     });
 
     if (error) throw error;
-
     return new Response(JSON.stringify(data), {
       status: 200,
-
       headers: { "Content-Type": "application/json" },
     });
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : String(err);
-
     console.error("Error processing auth email:", errorMessage);
-
     return new Response(JSON.stringify({ error: errorMessage }), {
       status: 401,
     });
