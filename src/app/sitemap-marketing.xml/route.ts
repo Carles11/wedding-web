@@ -2,7 +2,10 @@ import { SUPPORTED_LANGUAGES } from "@/4-shared/config/i18n";
 import { NextResponse } from "next/server";
 
 const baseUrl = "https://weddweb.com";
-const fixedLastMod = "2024-03-25"; // Use a fixed lastmod for all marketing pages
+function getW3CDate() {
+  // Returns YYYY-MM-DD (W3C Datetime)
+  return new Date().toISOString().split("T")[0];
+}
 const priorityMap: Record<string, { p: string; f: string }> = {
   "": { p: "1.0", f: "daily" }, // Home
   pricing: { p: "0.9", f: "weekly" },
@@ -55,7 +58,7 @@ export async function GET() {
       ].join("");
       return SUPPORTED_LANGUAGES.map((lang: string) => {
         const loc = `${baseUrl}/${lang}${page ? `/${page}` : ""}`;
-        return `<url>\n<loc>${escapeXml(loc)}</loc>\n<lastmod>${fixedLastMod}</lastmod>\n<changefreq>${changefreq}</changefreq>\n<priority>${priority}</priority>\n${alternates}\n</url>`;
+        return `<url>\n<loc>${escapeXml(loc)}</loc>\n<lastmod>${getW3CDate()}</lastmod>\n<changefreq>${changefreq}</changefreq>\n<priority>${priority}</priority>\n${alternates}\n</url>`;
       });
     })
     .flat();

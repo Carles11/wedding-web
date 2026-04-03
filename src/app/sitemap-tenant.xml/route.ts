@@ -43,7 +43,7 @@ export async function GET(request: Request) {
       : ["en"];
   const lastMod = site.updated_at
     ? new Date(site.updated_at).toISOString().split("T")[0]
-    : "2024-03-25";
+    : new Date().toISOString().split("T")[0];
 
   // Only generate URLs for enabled languages, with x-default always present
   const urls = siteLangs.map((lang) => {
