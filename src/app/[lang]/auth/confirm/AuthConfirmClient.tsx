@@ -105,6 +105,7 @@ export default function AuthConfirmClient({ translations, lang }: Props) {
         }
 
         if (tokenHash && type) {
+          console.log("Verifying OTP for type:", type);
           const { error } = await supabase.auth.verifyOtp({
             token_hash: tokenHash,
             type,

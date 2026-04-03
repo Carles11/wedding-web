@@ -16,6 +16,10 @@ interface EmailData {
   type?: string;
   email_action_type?: string;
   confirmation_url?: string;
+  site_url?: string;
+  redirect_to?: string;
+  action_link?: string;
+  token_hash?: string;
 }
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
@@ -33,66 +37,74 @@ Deno.serve(async (req) => {
     if (!hookSecret) throw new Error("Missing SEND_EMAIL_HOOK_SECRET");
 
     const wh = new Webhook(hookSecret);
-    const { user, email_data } = wh.verify(payload, headers) as {
+    const verified = wh.verify(payload, headers) as {
       user: User;
       email_data: EmailData;
     };
+    const { user, email_data } = verified;
 
-    const confirmationUrl = email_data.confirmation_url || "";
+    // 1. Determine Language (Fixed: using redirect_to for sniff since confirmationUrl isn't built yet)
     const supportedLangs = Object.keys(EMAIL_TRANSLATIONS);
-
-    // Sniff language from Metadata or URL
     const lang =
       user.user_metadata?.language ||
       user.user_metadata?.preferred_language ||
-      supportedLangs.find((l) => confirmationUrl.includes(`/${l}/`)) ||
+      supportedLangs.find((l) => email_data.redirect_to?.includes(`/${l}/`)) ||
       "en";
 
-    const eventType = email_data.type || email_data.email_action_type || "";
+    // 2. Determine Event Type
+    const eventType =
+      email_data.type || email_data.email_action_type || "signup";
+
+    // 3. SMART ROUTING: Define where the user should land AFTER the AuthConfirmClient is done
+    let finalDestination = `/${lang}/builder/onboarding`; // Default for signup/magiclink
+    if (eventType === "recovery") {
+      finalDestination = `/${lang}/auth/reset-password`;
+    } else if (eventType === "email_change") {
+      finalDestination = `/${lang}/settings`;
+    }
+
+    // 4. URL CONSTRUCTION (The Fix)
+    // We extract the base origin (e.g., http://localhost:3000) from redirect_to
+    const origin = email_data.redirect_to
+      ? new URL(email_data.redirect_to).origin
+      : "http://localhost:3000";
+
+    // We force the link to go to our AuthConfirmClient first
+    const confirmPagePath = `${origin}/${lang}/auth/confirm`;
+
+    // We assemble the "Master Link"
+    const confirmationUrl = `${confirmPagePath}?token_hash=${email_data.token_hash}&type=${eventType}&next=${encodeURIComponent(finalDestination)}`;
+
+    console.log(
+      `[DEBUG] Processing ${eventType} for ${user.email}. Link: ${confirmationUrl}`,
+    );
+
+    // 5. Get Email Content
     const content =
       EMAIL_TRANSLATIONS[lang]?.[eventType] || EMAIL_TRANSLATIONS.en[eventType];
-
     if (!content)
       throw new Error(`No translation for ${lang} and ${eventType}`);
 
-    // Send via Resend with your NEW Wedding Styles
+    // 6. Send via Resend
     const { data, error } = await resend.emails.send({
       from: "WeddWeb <hello@weddweb.com>",
       to: [user.email],
       subject: content.subject,
       html: `
-        <div style="background-color: #f9fafb; padding: 40px 20px; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #292d41;">
-          <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e8e6e1;">
-            <div style="padding: 40px; text-align: center;">
-              <h1 style="font-family: Georgia, serif; color: #6abda6; font-size: 28px; margin-bottom: 20px; font-weight: normal;">
-                ${content.title}
-              </h1>
-              <p style="font-size: 16px; line-height: 1.6; color: #4b5563;">
-                ${content.description || "We're so excited to help you build the perfect website for your special day. First, please confirm your request by clicking the button below."}
-              </p>
-              
-             <div style="margin: 35px 0;">
-  <a href="${confirmationUrl}" 
-     style="background-color: #6abda6; 
-            color: #ffffff; 
-            padding: 14px 32px; 
-            border-radius: 50px; 
-            text-decoration: none; 
-            font-weight: 600; 
-            font-size: 16px; 
-            display: inline-block;
-            line-height: 100%;
-            text-align: center;
-            cursor: pointer !important;">
-    ${content.button}
-  </a>
-</div>
-              
-              <p style="font-size: 14px; color: #9ca3af; margin-top: 30px;">
-                If the button doesn't work, copy and paste this link into your browser:<br>
-                <span style="color: #6abda6; word-break: break-all;">${confirmationUrl}</span>
-              </p>
+        <div style="background-color: #f9fafb; padding: 40px 20px; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #292d41; text-align: center;">
+          <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e8e6e1; padding: 40px;">
+            <h1 style="font-family: Georgia, serif; color: #6abda6; font-size: 28px; margin-bottom: 20px; font-weight: normal;">${content.title}</h1>
+            <p style="font-size: 16px; line-height: 1.6; color: #4b5563; margin-bottom: 30px;">${content.description}</p>
+            <div style="margin: 35px 0;">
+              <a href="${confirmationUrl}" 
+                 style="background-color: #6abda6; border: 12px solid #6abda6; color: #ffffff; padding: 0 30px; border-radius: 50px; text-decoration: none; font-weight: 600; font-size: 16px; display: inline-block; cursor: pointer;">
+                <span style="color: #ffffff;">${content.button}</span>
+              </a>
             </div>
+            <p style="font-size: 13px; color: #9ca3af; margin-top: 40px; border-top: 1px solid #f3f4f6; padding-top: 20px;">
+              If the button doesn't work, copy and paste this link into your browser:<br>
+              <a href="${confirmationUrl}" style="color: #6abda6; word-break: break-all; text-decoration: none;">${confirmationUrl}</a>
+            </p>
           </div>
         </div>
       `,
@@ -105,7 +117,9 @@ Deno.serve(async (req) => {
     });
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : String(err);
+
     console.error("Error processing auth email:", errorMessage);
+
     return new Response(JSON.stringify({ error: errorMessage }), {
       status: 401,
     });
