@@ -273,3 +273,59 @@ The font system in this project is fully dynamic and multi-tenant aware:
 
 With this test discipline, your SaaS is resilient, future-proof, and trusted by global users!  
 Want a specific sample for any next roadmap item? Just ask.
+
+---
+
+## Sitemap Architecture & Use Cases
+
+Wedding-Web uses a multi-level, SaaS-optimized sitemap structure to maximize SEO, discoverability, and scalability for both the main platform and all tenant (wedding) sites. Here’s how each sitemap works:
+
+### 1. `sitemap.xml`
+
+- **Location:** `/sitemap.xml` (served by `src/app/sitemap.xml/route.ts`)
+- **Purpose:** Main entry point for all search engines. On the main domain (`weddweb.com`), returns a sitemap index referencing:
+  - The marketing site sitemap (`/sitemap-marketing.xml`)
+  - The tenant sitemap index (`/sitemap-tenants.xml`)
+- **Custom Domains:** On a tenant’s custom domain (e.g., `alice-and-bob.com`), this route returns only that tenant’s sitemap (see below).
+
+### 2. `sitemap-marketing.xml`
+
+- **Location:** `/sitemap-marketing.xml`
+- **Purpose:** Lists all public marketing and legal pages for the main SaaS platform (e.g., pricing, FAQ, legal, landing pages).
+- **Audience:** Search engines crawling the main WeddWeb platform.
+
+### 3. `sitemap-tenant.xml`
+
+- **Location:** `/sitemap-tenant.xml` (served by `src/app/sitemap-tenant.xml/route.ts`)
+- **Purpose:** Generates a sitemap for a single tenant (i.e., a single couple’s wedding website, usually on a custom domain or subdomain).
+- **Use Case:** When a search engine requests `https://alice-and-bob.com/sitemap.xml`, this route returns only the URLs for that specific wedding site (pages, legal, etc.), not for the whole platform.
+- **Audience:** Search engines crawling individual wedding sites (custom domains or subdomains).
+
+### 4. `sitemap-tenants.xml`
+
+- **Location:** `/sitemap-tenants.xml` (served by `src/app/sitemap-tenants.xml/route.ts`)
+- **Purpose:** Generates a sitemap index listing all tenant sitemaps (i.e., all wedding sites hosted on WeddWeb).
+- **Use Case:** When a search engine requests `https://weddweb.com/sitemap-tenants.xml`, it gets a list of all active tenant sitemaps (e.g., `https://alice-and-bob.com/sitemap.xml`, `https://carla-y-juan.weddweb.com/sitemap.xml`, etc.).
+- **Audience:** Search engines crawling the main WeddWeb platform, so they can discover and index every wedding site hosted on the service.
+
+---
+
+### Summary Table
+
+| Sitemap               | Route/Location         | Purpose/Use Case                                                                  |
+| --------------------- | ---------------------- | --------------------------------------------------------------------------------- |
+| sitemap.xml           | /sitemap.xml           | Main entry: index for marketing + tenants, or per-tenant sitemap on custom domain |
+| sitemap-marketing.xml | /sitemap-marketing.xml | All public marketing/legal pages for SaaS                                         |
+| sitemap-tenant.xml    | /sitemap-tenant.xml    | All pages for a single tenant (wedding site)                                      |
+| sitemap-tenants.xml   | /sitemap-tenants.xml   | Index of all tenant sitemaps (all wedding sites)                                  |
+
+---
+
+**Best Practice:**
+This two-level structure (index + per-tenant) is best practice for large SaaS/multisite platforms. It ensures:
+
+- Search engines can discover every wedding site (via the index)
+- Each wedding site is independently crawlable and SEO-optimized
+- The main SaaS platform and all tenants are clearly separated for search and analytics
+
+---
