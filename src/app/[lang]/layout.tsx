@@ -4,9 +4,11 @@ import {
   THEME_COLOR,
 } from "@/4-shared/config/seo/meta";
 import { isValidLanguage } from "@/4-shared/helpers/isValidLanguage";
+import { allFontInstances } from "@/4-shared/lib/fonts/fontRegistry";
 import { generateGraphSchema } from "@/4-shared/lib/seo/generateGraphSchema";
 import { JsonLd } from "@/4-shared/lib/seo/JsonLd";
 import { ReactNode } from "react";
+import "../globals.css";
 
 export default async function LangLayout({
   children,
@@ -17,31 +19,31 @@ export default async function LangLayout({
 }) {
   const realParams = await params;
   const lang = isValidLanguage(realParams.lang) ? realParams.lang : "en";
+  const isRTL = lang === "ar"; // 🚀 The Smoking Gun for Arabic
+  const fontVariables = allFontInstances.map((f) => f.variable).join(" ");
 
   return (
-    <>
-      {/* 
-          Hoisted Elements: Next.js will move these into the 
-          <head> of the Root Layout automatically.
-      */}
-      {ICONS.filter((icon) => icon.rel !== "manifest").map((icon, i) => (
-        <link key={i} {...icon} />
-      ))}
+    <html lang={lang} dir={isRTL ? "rtl" : "ltr"}>
+      <head>
+        <link rel="alternate" type="text/plain" href="/llms.txt" />
+        {ICONS.filter((icon) => icon.rel !== "manifest").map((icon, i) => (
+          <link key={i} {...icon} />
+        ))}
 
-      <link
-        rel="manifest"
-        href={`/manifests/${lang}/site.webmanifest`}
-        crossOrigin="use-credentials"
-      />
+        <link
+          rel="manifest"
+          href={`/manifests/${lang}/site.webmanifest`}
+          crossOrigin="use-credentials"
+        />
 
-      <meta name="theme-color" content={THEME_COLOR} />
-      <meta name="language" content={lang} />
-      <meta
-        name="google-site-verification"
-        content={GOOGLE_SITE_VERIFICATION}
-      />
+        <meta name="theme-color" content={THEME_COLOR} />
+        <meta name="language" content={lang} />
+        <meta
+          name="google-site-verification"
+          content={GOOGLE_SITE_VERIFICATION}
+        />
 
-      {/*
+        {/*
         Single consolidated @graph block — Organization, WebSite, and SoftwareApplication
         are linked via @id references so LLMs and structured-data validators see one
         coherent semantic entity instead of multiple disconnected scripts.
@@ -50,10 +52,11 @@ export default async function LangLayout({
         no translations). The marketing page does NOT inject a duplicate — this is the
         single source of truth for all three entities.
       */}
-      <JsonLd data={generateGraphSchema({}, lang)} />
-
-      {/* The actual page content */}
-      {children}
-    </>
+      </head>
+      <body className={`${fontVariables} antialiased`}>
+        <JsonLd data={generateGraphSchema({}, lang)} />
+        {children}
+      </body>
+    </html>
   );
 }

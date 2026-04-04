@@ -90,7 +90,7 @@ export function Footer({
               }}
             >
               <span
-                className="relative flex h-1.5 w-1.5 flex-shrink-0"
+                className="relative flex h-1.5 w-1.5 shrink-0"
                 aria-hidden="true"
               >
                 <span
@@ -175,10 +175,10 @@ export function Footer({
         </div>
 
         {/* ── Platform Entity Strip (AISEO) ──────────────────────── */}
-        <section className="mb-10 flex items-start gap-4 rounded-[10px] p-6 border border-emerald-500/10 bg-emerald-500/[0.02]">
+        <section className="mb-10 flex items-start gap-4 rounded-[10px] p-6 border border-emerald-500/10 bg-emerald-500/2">
           <div
             aria-hidden="true"
-            className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 border border-emerald-500/20"
+            className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 border border-emerald-500/20"
           >
             <svg
               width="13"

@@ -2,6 +2,7 @@ export { default as CTASection } from "./CTASection";
 export { default as FeaturesGrid } from "./FeaturesGrid";
 export { default } from "./HeroMarketing";
 export { default as MarketingFloatingLanguageSelector } from "./MarketingFloatingLanguageSelector";
+export { default as MultilingualLogic } from "./MultilingualLogic";
 export { default as PricingCTATableAdapter } from "./PricingCTATableAdapter";
 export type { PricingCTATableAdapterProps } from "./PricingCTATableAdapter";
 export { default as PricingPageShell } from "./PricingPageShell";
