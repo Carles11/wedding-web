@@ -1,9 +1,15 @@
 import PricingPage from "@/0-pages/(marketing)/PricingPage";
 import { fetchMarketingTranslations } from "@/4-shared/api/marketing";
+import type { SupportedLanguage } from "@/4-shared/config/i18n";
 import { SUPPORTED_LANGUAGES } from "@/4-shared/config/i18n";
 import { getSEOMetadata } from "@/4-shared/config/seo";
 import { isValidLanguage } from "@/4-shared/helpers/isValidLanguage";
-import { getMetadataBase } from "@/4-shared/lib/seo/getMetadataBase"; // Import Helper
+import {
+  BREADCRUMB_LABELS,
+  generateBreadcrumbSchema,
+} from "@/4-shared/lib/seo/generateBreadcrumbSchema";
+import { getMetadataBase } from "@/4-shared/lib/seo/getMetadataBase";
+import { JsonLd } from "@/4-shared/lib/seo/JsonLd";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 
@@ -69,8 +75,23 @@ export default async function Page({
   const realParams = await params;
   const lang = isValidLanguage(realParams?.lang) ? realParams.lang : "en";
 
+  const host = ((await headers()).get("host") ?? "").toLowerCase().trim();
+  const { baseUrl } = getMetadataBase(host, false);
+
   // Server-side fetch: Zero hydration flicker
   const translations = await fetchMarketingTranslations(lang, "en");
 
-  return <PricingPage translations={translations} lang={lang} />;
+  const labels =
+    BREADCRUMB_LABELS[lang as SupportedLanguage] ?? BREADCRUMB_LABELS.en;
+  const breadcrumbSchema = generateBreadcrumbSchema([
+    { name: labels.home, item: `${baseUrl}/${lang}` },
+    { name: labels.pricing, item: `${baseUrl}/${lang}/pricing` },
+  ]);
+
+  return (
+    <>
+      <JsonLd data={breadcrumbSchema} />
+      <PricingPage translations={translations} lang={lang} />
+    </>
+  );
 }

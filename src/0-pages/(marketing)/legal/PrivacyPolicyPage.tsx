@@ -19,8 +19,6 @@ type Props = {
 };
 
 export default function PrivacyPolicyPage({ translations, lang }: Props) {
-  // Sections are now modular components
-
   return (
     <div
       className="min-h-screen"

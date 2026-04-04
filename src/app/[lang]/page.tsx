@@ -6,6 +6,11 @@ import { SUPPORTED_LANGUAGES, SupportedLanguage } from "@/4-shared/config/i18n";
 import { getSEOMetadata } from "@/4-shared/config/seo";
 import { getSiteByDomain } from "@/4-shared/lib/getSiteByDomain";
 import { getMergedTranslations } from "@/4-shared/lib/i18n";
+import { JsonLd } from "@/4-shared/lib/seo/JsonLd";
+import {
+  BREADCRUMB_LABELS,
+  generateBreadcrumbSchema,
+} from "@/4-shared/lib/seo/generateBreadcrumbSchema";
 import { generateSiteMetadata } from "@/4-shared/lib/seo/generateSiteMetadata";
 import { getMetadataBase } from "@/4-shared/lib/seo/getMetadataBase"; // New Helper
 import { Footer } from "@/4-shared/ui/commons/footer/Footer";
@@ -73,7 +78,7 @@ export async function generateMetadata({
       languages[l] = `/${l}`;
     });
 
-    // Use local helper for correct OG locale
+    // Helper for OG locale mapping
     function getOGLocale(lang: string): string {
       const localeMap: Record<string, string> = {
         en: "en_US",
@@ -90,6 +95,16 @@ export async function generateMetadata({
       };
       return localeMap[lang] || `${lang}_${lang.toUpperCase()}`;
     }
+    const ogLocale = getOGLocale(lang);
+    const ogLocaleAlternates = SUPPORTED_LANGUAGES.filter(
+      (l) => l !== lang,
+    ).map(getOGLocale);
+    // Inject og:locale:alternate tags using the 'other' property
+    const other: Metadata["other"] = {};
+    ogLocaleAlternates.forEach((alt) => {
+      if (!other["og:locale:alternate"]) other["og:locale:alternate"] = [];
+      (other["og:locale:alternate"] as string[]).push(alt);
+    });
     return {
       metadataBase,
       title: seo.title,
@@ -106,7 +121,7 @@ export async function generateMetadata({
         description: seo.ogDescription || seo.description,
         url: `/${lang}`,
         siteName: "WeddWeb",
-        locale: getOGLocale(lang),
+        locale: ogLocale,
         images: [ogImage],
         type: "website",
       },
@@ -117,6 +132,7 @@ export async function generateMetadata({
         images: [ogImage],
       },
       robots: { index: true, follow: true },
+      other,
     };
   }
 }
@@ -151,8 +167,15 @@ export default async function Page({
     );
   } else {
     const translations = await fetchMarketingTranslations(lang, "en");
+    const { baseUrl } = getMetadataBase(host, false);
+    const labels =
+      BREADCRUMB_LABELS[lang as SupportedLanguage] ?? BREADCRUMB_LABELS.en;
+    const breadcrumbSchema = generateBreadcrumbSchema([
+      { name: labels.home, item: `${baseUrl}/${lang}` },
+    ]);
     return (
       <div className="marketing-theme">
+        <JsonLd data={breadcrumbSchema} />
         <MarketingPageComponent
           initialLang={lang}
           translations={translations}

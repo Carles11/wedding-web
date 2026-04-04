@@ -1,9 +1,15 @@
 import PrivacyPolicyPage from "@/0-pages/(marketing)/legal/PrivacyPolicyPage";
 import { fetchMarketingTranslations } from "@/4-shared/api/marketing/getTranslations";
+import type { SupportedLanguage } from "@/4-shared/config/i18n";
 import { SUPPORTED_LANGUAGES } from "@/4-shared/config/i18n";
-import { getSEOMetadata } from "@/4-shared/config/seo";
 import { isValidLanguage } from "@/4-shared/helpers/isValidLanguage";
-import { getMetadataBase } from "@/4-shared/lib/seo/getMetadataBase"; // Import Helper
+import {
+  BREADCRUMB_LABELS,
+  generateBreadcrumbSchema,
+} from "@/4-shared/lib/seo/generateBreadcrumbSchema";
+import { getMetadataBase } from "@/4-shared/lib/seo/getMetadataBase";
+import { JsonLd } from "@/4-shared/lib/seo/JsonLd";
+import { legalTranslations } from "@/4-shared/lib/seo/legalMetadata";
 import { Footer } from "@/4-shared/ui/commons/footer/Footer";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
@@ -23,23 +29,22 @@ export async function generateMetadata({
   const host = ((await headers()).get("host") ?? "").toLowerCase().trim();
   const { metadataBase } = getMetadataBase(host, false);
 
-  const seo = getSEOMetadata(lang, "marketing", "privacy-policy");
-
-  // SEO FIX: Path should match your actual URL (e.g., weddweb.com/en/privacy-policy)
+  const t =
+    legalTranslations[lang as SupportedLanguage] ?? legalTranslations.en;
   const path = "privacy-policy";
 
-  // Build Hreflang Alternates for 11 languages
+  // Build Hreflang Alternates for all 11 languages
   const languages: Record<string, string> = {};
   SUPPORTED_LANGUAGES.forEach((l) => {
     languages[l] = `/${l}/${path}`;
   });
 
-  const ogImage = seo.ogImage || "/assets/og/weddweb-OG.png";
+  const ogImage = "/assets/og/weddweb-OG.png";
 
   return {
     metadataBase,
-    title: seo.title,
-    description: seo.description,
+    title: t.privacyTitle,
+    description: t.privacyDesc,
     alternates: {
       canonical: `/${lang}/${path}`,
       languages: {
@@ -48,8 +53,8 @@ export async function generateMetadata({
       },
     },
     openGraph: {
-      title: seo.ogTitle || seo.title,
-      description: seo.ogDescription || seo.description,
+      title: t.privacyTitle,
+      description: t.privacyDesc,
       url: `/${lang}/${path}`,
       siteName: "WeddWeb",
       locale: `${lang}_${lang.toUpperCase()}`,
@@ -58,8 +63,8 @@ export async function generateMetadata({
     },
     twitter: {
       card: "summary_large_image",
-      title: seo.ogTitle || seo.title,
-      description: seo.ogDescription || seo.description,
+      title: t.privacyTitle,
+      description: t.privacyDesc,
       images: [ogImage],
     },
     // Indexing allowed for E-E-A-T signals (Trustworthiness)
@@ -75,11 +80,24 @@ export default async function Page({
   const realParams = await params;
   const lang = isValidLanguage(realParams?.lang) ? realParams.lang : "en";
 
+  const host = ((await headers()).get("host") ?? "").toLowerCase().trim();
+  const { baseUrl } = getMetadataBase(host, false);
+
   // Server-side fetch for zero-hydration flicker
   const translations = await fetchMarketingTranslations(lang, "en");
 
+  const t =
+    legalTranslations[lang as SupportedLanguage] ?? legalTranslations.en;
+  const homeLabel =
+    BREADCRUMB_LABELS[lang as SupportedLanguage]?.home ?? "Home";
+  const breadcrumbSchema = generateBreadcrumbSchema([
+    { name: homeLabel, item: `${baseUrl}/${lang}` },
+    { name: t.privacyPageName, item: `${baseUrl}/${lang}/privacy-policy` },
+  ]);
+
   return (
     <>
+      <JsonLd data={breadcrumbSchema} />
       <PrivacyPolicyPage translations={translations} lang={lang} />
       <Footer lang={lang} translations={translations} />
     </>
