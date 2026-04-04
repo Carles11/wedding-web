@@ -38,4 +38,5 @@ export const ICONS = [
 ];
 
 export const THEME_COLOR = "#ffffff";
-export const GOOGLE_SITE_VERIFICATION = "YOUR_GOOGLE_VERIFICATION";
+export const GOOGLE_SITE_VERIFICATION =
+  "qZVellQZ9wEjIzSSd7ZE-1UxU0cTUDrFZa1hq20yHe4";
