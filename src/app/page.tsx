@@ -40,7 +40,7 @@ export function MarketingLanding() {
           </div>
         </div>
 
-        <h1 className="text-3xl md:text-5xl font-extrabold text-gray-900 mb-6 tracking-tight">
+        <h1 className="text-2xl md:text-5xl font-extrabold text-gray-900 mb-6 tracking-tight">
           The First 2026-Native <br />
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-pink-500">
             Multilingual Wedding Platform
