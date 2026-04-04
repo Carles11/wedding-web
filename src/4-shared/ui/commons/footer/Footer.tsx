@@ -1,6 +1,6 @@
 import { SUPPORTED_LANGUAGES } from "@/4-shared/config/i18n";
 import { t } from "@/4-shared/helpers/t";
-import type { MarketingTranslations } from "@/4-shared/types/marketingPage";
+import type { MarketingTranslations } from "@/4-shared/types";
 
 type FooterProps = {
   author?: string;

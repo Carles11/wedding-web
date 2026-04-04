@@ -8,7 +8,7 @@ import type { ReactNode } from "react";
  * covering every page under /[lang]/auth/ regardless of whether the
  * individual page exports its own generateMetadata.
  *
- * Layer 1: robots.ts  → Disallow /*/auth/ for all crawlers (robots.txt)
+ * Layer 1: robots.ts  → Disallow /* /auth/ for all crawlers (robots.txt)
  * Layer 2: This layout → X-Robots-Tag: noindex via exported metadata
  * Layer 3: Each page  → generateMetadata with robots: { index: false, ... }
  *
