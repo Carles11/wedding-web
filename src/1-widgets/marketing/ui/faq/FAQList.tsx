@@ -1,5 +1,5 @@
 import type { TranslationDictionary } from "@/4-shared/types";
-import { faqCategories, FAQCategory } from "../model/faqCategories";
+import { faqCategories, FAQCategory } from "../../model/faqCategories";
 import FAQCategoryComponent from "./FAQCategory";
 
 interface FAQListProps {

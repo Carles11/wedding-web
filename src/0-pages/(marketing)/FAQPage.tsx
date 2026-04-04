@@ -1,12 +1,10 @@
 "use client";
 
-import FAQList from "@/1-widgets/marketing/ui/FAQList";
-import FAQPageShell from "@/1-widgets/marketing/ui/FAQPageShell";
-import MarketingFloatingLanguageSelector from "@/1-widgets/marketing/ui/MarketingFloatingLanguageSelector";
-import { JsonLd } from "@/4-shared/lib/seo/JsonLd";
+import FAQList from "@/1-widgets/marketing/ui/faq/FAQList";
+import FAQPageShell from "@/1-widgets/marketing/ui/faq/FAQPageShell";
 import { generateFAQSchema } from "@/4-shared/lib/seo/generateFAQSchema";
+import { JsonLd } from "@/4-shared/lib/seo/JsonLd";
 import { MarketingTranslations } from "@/4-shared/types/marketingPage";
-import UnderlinedLink from "@/4-shared/ui/commons/link/UnderlinedLink";
 
 type Props = {
   translations: MarketingTranslations;
@@ -24,22 +22,6 @@ export default function FAQPage({ translations, lang }: Props) {
           discoverable by both Google and AI Search Engines.
       */}
       <JsonLd data={faqSchema} />
-
-      <UnderlinedLink
-        href={`/${lang?.toLowerCase() || "en"}/`}
-        thicknessClass="h-0.5"
-        durationMs={350}
-        ariaLabel={"Back to home"}
-        fixed={true}
-        className="left-4 top-4"
-      >
-        {translations["auth.common.back_to_home"] || "Back"}
-      </UnderlinedLink>
-
-      <MarketingFloatingLanguageSelector
-        currentLang={lang}
-        label={translations["marketing.lang_selector.label"]}
-      />
 
       <FAQPageShell
         title={

@@ -1,8 +1,7 @@
-import PricingCTATableAdapter from "@/1-widgets/marketing/ui/PricingCTATableAdapter";
-import PricingPageShell from "@/1-widgets/marketing/ui/PricingPageShell";
+import PricingCTATableAdapter from "@/1-widgets/marketing/ui/pricing/PricingCTATableAdapter";
+import PricingPageShell from "@/1-widgets/marketing/ui/pricing/PricingPageShell";
 
 import type { MarketingTranslations } from "@/4-shared/types";
-import { Footer } from "@/4-shared/ui/commons/footer/Footer";
 
 type Props = {
   translations: MarketingTranslations;
@@ -25,7 +24,6 @@ export default function PricingPage({ translations, lang }: Props) {
       >
         <PricingCTATableAdapter lang={lang} t={translations} />
       </PricingPageShell>
-      <Footer lang={lang} translations={translations} />
     </>
   );
 }

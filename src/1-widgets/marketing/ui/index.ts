@@ -1,11 +1,11 @@
 export { default as CTASection } from "./CTASection";
+export { default as MultilingualLogic } from "./features/MultilingualLogic";
 export { default as FeaturesGrid } from "./FeaturesGrid";
 export { default } from "./HeroMarketing";
 export { default as MarketingFloatingLanguageSelector } from "./MarketingFloatingLanguageSelector";
-export { default as MultilingualLogic } from "./MultilingualLogic";
-export { default as PricingCTATableAdapter } from "./PricingCTATableAdapter";
-export type { PricingCTATableAdapterProps } from "./PricingCTATableAdapter";
-export { default as PricingPageShell } from "./PricingPageShell";
-export type { PricingPageShellProps } from "./PricingPageShell";
-export { default as PricingSection } from "./PricingSection";
+export { default as PricingCTATableAdapter } from "./pricing/PricingCTATableAdapter";
+export type { PricingCTATableAdapterProps } from "./pricing/PricingCTATableAdapter";
+export { default as PricingPageShell } from "./pricing/PricingPageShell";
+export type { PricingPageShellProps } from "./pricing/PricingPageShell";
+export { default as PricingSection } from "./pricing/PricingSection";
 export { default as TestimonialsSection } from "./TestimonialsSection";

@@ -97,23 +97,12 @@ export default function MultilingualLogic({ translations }: Props) {
 
       <section
         aria-labelledby="ml-title"
-        className="w-full py-24 px-6"
+        className="w-full py-12 px-6"
         style={{ background: "var(--marketing-bg-subtle-gradient)" }}
       >
         <div className="max-w-5xl mx-auto">
           {/* ── Section Header ── */}
-          <Heading
-            as="h2"
-            id="ml-title"
-            className="text-3xl md:text-4xl font-bold text-center pb-4"
-            style={{ color: "var(--marketing-color-primary)" }}
-          >
-            {t(
-              translations,
-              "marketing.multilingual.title",
-              "One Platform. 11 Languages. Every Script.",
-            )}
-          </Heading>
+
           <p className="text-center text-gray-500 mb-16 max-w-2xl mx-auto">
             {t(
               translations,

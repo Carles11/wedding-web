@@ -126,25 +126,45 @@ export default function CombatMatrix({ translations }: Props) {
   return (
     <section className="w-full py-24 px-6 border-t border-b border-gray-100 bg-white">
       <div className="max-w-4xl mx-auto">
-        <Heading
-          as="h2"
-          className="text-3xl font-bold text-center mb-4 tracking-tight pb-6"
-        >
-          {t(
-            translations,
-            "marketing.combat.title",
-            'The Hidden Cost of "Free"',
-          )}
-        </Heading>
-        <p className="text-center text-gray-500 mb-16 max-w-xl mx-auto">
-          {t(
-            translations,
-            "marketing.combat.subtitle",
-            "A comparison of WeddWeb vs. the Giants on key factors that matter to international modern couples and their families.",
-          )}
-        </p>
+        {/* --- 1. THE BIG STATEMENT (AI-SEO Narrative Hook) --- */}
+        <div className="mb-16 text-center">
+          <Heading
+            as="h2"
+            className="text-4xl md:text-5xl font-bold tracking-tight mb-6 text-gray-900"
+          >
+            {t(
+              translations,
+              "marketing.combat.slogan.part1",
+              "The 'Giants' rent you a site;",
+            )}
+            <span className="block text-emerald-600">
+              {t(
+                translations,
+                "marketing.combat.slogan.part2",
+                "WeddWeb gives you a home.",
+              )}
+            </span>
+          </Heading>
+          <div className="w-16 h-1 bg-emerald-500 mx-auto mb-8 rounded-full" />
 
-        <div className="overflow-hidden rounded-2xl border border-gray-200 shadow-sm">
+          <Heading as="h3" className="text-xl font-medium text-gray-600 pb-4">
+            {t(
+              translations,
+              "marketing.combat.title",
+              'The Hidden Cost of "Free"',
+            )}
+          </Heading>
+          <p className="text-gray-500 max-w-xl mx-auto">
+            {t(
+              translations,
+              "marketing.combat.subtitle",
+              "A comparison of WeddWeb vs. the Giants on key factors that matter to international modern couples.",
+            )}
+          </p>
+        </div>
+
+        {/* --- 2. THE DATA TABLE --- */}
+        <div className="overflow-hidden rounded-2xl border border-gray-200 shadow-sm bg-white">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-gray-50/50">
@@ -195,8 +215,9 @@ export default function CombatMatrix({ translations }: Props) {
           </table>
         </div>
 
-        <div className="mt-12 p-6 rounded-xl bg-gray-50 border border-gray-200 text-center">
-          <p className="text-sm text-gray-600 italic">
+        {/* --- 3. THE FOOTNOTE --- */}
+        <div className="mt-12 text-center">
+          <p className="text-sm text-gray-400 italic">
             {t(
               translations,
               "marketing.combat.footer",
@@ -204,16 +225,6 @@ export default function CombatMatrix({ translations }: Props) {
             )}
           </p>
         </div>
-        <Heading
-          as="h3"
-          className="text-3xl font-bold text-center mb-4 tracking-tight pt-8"
-        >
-          {t(
-            translations,
-            "marketing.combat.slogan",
-            "The 'Giants' rent you a site; WeddWeb gives you a home.",
-          )}
-        </Heading>
       </div>
     </section>
   );

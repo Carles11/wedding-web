@@ -1,6 +1,7 @@
 import MarketingPageComponent from "@/0-pages/(marketing)/MarketingPageComponent";
 import ExpiredSiteNotice from "@/0-pages/(tenant)/ExpiredSiteNotice";
 import TenantPageComponent from "@/0-pages/(tenant)/TenantPageComponent";
+import MarketingHeader from "@/1-widgets/marketing/ui/MarketingHeader";
 import { fetchMarketingTranslations } from "@/4-shared/api/marketing";
 import { SUPPORTED_LANGUAGES, SupportedLanguage } from "@/4-shared/config/i18n";
 import { getSEOMetadata } from "@/4-shared/config/seo";
@@ -176,6 +177,7 @@ export default async function Page({
     return (
       <div className="marketing-theme">
         <JsonLd data={breadcrumbSchema} />
+        <MarketingHeader lang={lang} translations={translations} />
         <MarketingPageComponent
           initialLang={lang}
           translations={translations}

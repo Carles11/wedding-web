@@ -10,7 +10,6 @@ import {
 
 import { t } from "@/4-shared/helpers/t";
 import type { MarketingTranslations } from "@/4-shared/types/marketingPage";
-import UnderlinedLink from "@/4-shared/ui/commons/link/UnderlinedLink";
 
 type Props = {
   translations: MarketingTranslations;
@@ -23,16 +22,6 @@ export default function CookiePolicyPage({ translations, lang }: Props) {
       className="min-h-screen"
       style={{ background: "var(--marketing-bg-gradient)" }}
     >
-      <UnderlinedLink
-        href={`/${lang?.toLowerCase() || "en"}/`}
-        thicknessClass="h-0.5"
-        durationMs={350}
-        ariaLabel={t(translations, "auth.common.back_to_home", "Back to home")}
-        fixed={true}
-        className="left-4 top-4"
-      >
-        {t(translations, "auth.common.back_to_home", "Back")}
-      </UnderlinedLink>
       {/* Hero Header */}
       <header className="pt-24 pb-16 px-4 text-center border-b border-black/5">
         <div className="inline-block mb-4 text-teal-600 animate-bounce">

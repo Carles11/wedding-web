@@ -1,6 +1,4 @@
-import { MarketingFloatingLanguageSelector } from "@/1-widgets/marketing/ui";
-import CombatMatrix from "@/1-widgets/marketing/ui/CombatMatrix";
-import MultilingualLogic from "@/1-widgets/marketing/ui/MultilingualLogic";
+import { MultilingualMatrixPage } from "@/0-pages/(marketing)/MultilingualMatrixPage";
 import { fetchMarketingTranslations } from "@/4-shared/api/marketing";
 import { SUPPORTED_LANGUAGES, SupportedLanguage } from "@/4-shared/config/i18n";
 import { getSEOMetadata } from "@/4-shared/config/seo";
@@ -15,7 +13,6 @@ import {
   generateBreadcrumbSchema,
 } from "@/4-shared/lib/seo/generateBreadcrumbSchema";
 import { getMetadataBase } from "@/4-shared/lib/seo/getMetadataBase";
-import { Footer } from "@/4-shared/ui/commons/footer/Footer";
 
 import { Metadata } from "next";
 import { headers } from "next/headers";
@@ -102,19 +99,12 @@ export default async function MultilingualFeaturePage({
   return (
     <main className="marketing-theme">
       <JsonLd data={breadcrumbSchema} />
-      <MarketingFloatingLanguageSelector
-        currentLang={lang}
-        label={translations["marketing.lang_selector.label"]}
-      />
+
       {/* The Widget we built. It already contains its own 
           HowTo Schema linked to #software 
       */}
-      {/* 1. The Technical Proof */}
-      <MultilingualLogic translations={translations} />
 
-      {/* 2. The Competitive Advantage */}
-      <CombatMatrix translations={translations} />
-      <Footer lang={lang} translations={translations} />
+      <MultilingualMatrixPage translations={translations} lang={lang} />
     </main>
   );
 }

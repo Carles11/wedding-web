@@ -1,4 +1,5 @@
 import UnderlinedLink from "@/4-shared/ui/commons/link/UnderlinedLink";
+import Heading from "@/4-shared/ui/commons/typography/Heading";
 import { ReactNode } from "react";
 
 interface FAQPageShellProps {
@@ -20,12 +21,13 @@ export default function FAQPageShell({
       style={{ background: "var(--marketing-bg-gradient)" }}
     >
       <header className="max-w-4xl mx-auto mb-12 text-center animate-fadeIn">
-        <h1
-          className="font-display text-4xl md:text-5xl mb-4"
+        <Heading
+          as="h2"
+          className="text-3xl md:text-4xl font-bold text-center pt-0 md:pt-8 pb-6"
           style={{ color: "var(--marketing-color-on-gradient-text)" }}
         >
           {title}
-        </h1>
+        </Heading>
         <p className="text-lg opacity-80 max-w-2xl mx-auto mb-6">{summary}</p>
         {fine_print && (
           <UnderlinedLink

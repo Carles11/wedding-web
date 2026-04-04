@@ -4,10 +4,10 @@ import { buildMarketingPageViewModel } from "@/1-widgets/marketing/model";
 import HeroMarketing, {
   CTASection,
   FeaturesGrid,
-  MarketingFloatingLanguageSelector,
   PricingSection,
   TestimonialsSection,
 } from "@/1-widgets/marketing/ui";
+import GlobalLegacyBridge from "@/1-widgets/marketing/ui/features/GlobalLegacyBridge";
 import { updateAccountInfo } from "@/3-entities/account/api/accountCrud";
 import { useSupabaseAuth } from "@/4-shared/hooks/useSupabaseAuth";
 import { JsonLd } from "@/4-shared/lib/seo/JsonLd";
@@ -106,11 +106,6 @@ export default function MarketingPageComponent({
         )}
       />
       <JsonLd data={faqSchema} />
-      <MarketingFloatingLanguageSelector
-        currentLang={initialLang}
-        label={translations["marketing.lang_selector.label"]}
-        onLanguageChange={handleLanguageChange}
-      />
 
       <main className="min-h-screen">
         {/* SEMANTIC CHECK: HeroMarketing uses <h1> as verified in Source 9 */}
@@ -128,13 +123,17 @@ export default function MarketingPageComponent({
         <TestimonialsSection {...viewModel.testimonials} />
 
         {/* SEMANTIC CHECK: PricingSection uses <h2> as verified in Source 11 */}
-        <PricingSection
-          {...viewModel.pricing}
-          onFreePlanClick={handlePrimaryClick}
-          onPremiumPlanClick={handlePrimaryClick}
-          primaryHref={primaryHref}
-        />
+        <section id="pricing" className="scroll-mt-20">
+          {" "}
+          <PricingSection
+            {...viewModel.pricing}
+            onFreePlanClick={handlePrimaryClick}
+            onPremiumPlanClick={handlePrimaryClick}
+            primaryHref={primaryHref}
+          />
+        </section>
 
+        <GlobalLegacyBridge translations={translations} lang={initialLang} />
         {/* SEMANTIC CHECK: CTASection uses <h2> as verified in Source 7 */}
         <CTASection
           {...viewModel.cta}

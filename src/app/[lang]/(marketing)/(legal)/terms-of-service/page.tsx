@@ -10,7 +10,6 @@ import {
 import { getMetadataBase } from "@/4-shared/lib/seo/getMetadataBase";
 import { JsonLd } from "@/4-shared/lib/seo/JsonLd";
 import { legalTranslations } from "@/4-shared/lib/seo/legalMetadata";
-import { Footer } from "@/4-shared/ui/commons/footer/Footer";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 
@@ -99,7 +98,6 @@ export default async function Page({
     <>
       <JsonLd data={breadcrumbSchema} />
       <TermsOfServicePage translations={translations} lang={lang} />
-      <Footer lang={lang} translations={translations} />
     </>
   );
 }

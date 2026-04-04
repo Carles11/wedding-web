@@ -4,6 +4,7 @@ import {
 } from "@/4-shared/config/i18n";
 import { t } from "@/4-shared/helpers/t";
 import type { MarketingTranslations } from "@/4-shared/types";
+import Link from "next/link";
 
 type FooterProps = {
   author?: string;
@@ -66,15 +67,20 @@ export function Footer({
         >
           {/* Brand Column */}
           <div className="flex flex-col gap-5 md:col-span-5">
-            <h3 className="font-serif text-2xl font-normal leading-none tracking-tight">
-              {siteName.replace(".com", "")}
-              <em
-                className="italic"
-                style={{ color: "var(--marketing-color-primary)" }}
-              >
-                .com
-              </em>
-            </h3>
+            <Link
+              href={`${langPrefix}/`}
+              className="inline-flex items-center gap-2"
+            >
+              <h3 className="font-serif text-2xl font-normal leading-none tracking-tight">
+                {siteName.replace(".com", "")}
+                <em
+                  className="italic"
+                  style={{ color: "var(--marketing-color-primary)" }}
+                >
+                  .com
+                </em>
+              </h3>
+            </Link>
             <p className="max-w-xs text-sm font-light leading-relaxed text-slate-500">
               {t(
                 translations,
