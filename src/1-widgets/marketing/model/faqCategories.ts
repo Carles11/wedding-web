@@ -23,13 +23,13 @@ export function faqCategories(t: TranslationDictionary): FAQCategory[] {
             "What is Wedding-Web?",
           a:
             t["marketing.faq.general.what_is_wedding_web.answer"] ??
-            "WeddWeb is a platform to create beautiful, multilingual wedding websites with RSVP, event schedule, accommodation info, custom domains, and more.",
+            "WeddWeb is a 2026-native SaaS platform for creating multilingual wedding websites. It supports 11 languages, custom domains, event schedules, accommodation info, and RSVP tools — all in one URL.",
         },
         {
           q: t["marketing.faq.general.is_it_free"] ?? "Is WeddWeb free?",
           a:
             t["marketing.faq.general.is_it_free.answer"] ??
-            "We offer a free plan with core features and paid plans for advanced options.",
+            "WeddWeb offers a permanent Free plan with one language, a custom subdomain, and all core features. A Premium plan unlocks custom domains and additional languages.",
         },
         {
           q:
@@ -37,7 +37,7 @@ export function faqCategories(t: TranslationDictionary): FAQCategory[] {
             "How long will my site remain online?",
           a:
             t["marketing.faq.general.site_lifetime.answer"] ??
-            "Free websites (with subdomains) and premium websites with a custom domain will remain online as long as weddweb.com exists.",
+            "Your WeddWeb site stays online permanently as long as weddweb.com exists — no expiry date on Free or Premium plans.",
         },
         {
           q:
@@ -134,7 +134,7 @@ export function faqCategories(t: TranslationDictionary): FAQCategory[] {
             "Can I create a multilingual site?",
           a:
             t["marketing.faq.planning.multilingual.answer"] ??
-            "Yes, WeddWeb supports 11+ languages and lets you add translations for all content.",
+            "Yes. WeddWeb natively supports 11 languages (en, es, fr, de, it, pt, ca, nl, pl, tr, el) with AI-ready sub-second performance and global accessibility built in.",
         },
       ],
     },

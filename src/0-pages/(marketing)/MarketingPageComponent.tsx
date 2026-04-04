@@ -11,7 +11,7 @@ import HeroMarketing, {
 import { updateAccountInfo } from "@/3-entities/account/api/accountCrud";
 import { useSupabaseAuth } from "@/4-shared/hooks/useSupabaseAuth";
 import { JsonLd } from "@/4-shared/lib/seo/JsonLd";
-import { generateSoftwareSchema } from "@/4-shared/lib/seo/generateSoftwareSchema";
+import { generateWebPageSchema } from "@/4-shared/lib/seo/generateGraphSchema";
 import type { MarketingPageProps } from "@/4-shared/types";
 import { CookiesConsentBanner } from "@/4-shared/ui/CookiesConsentBanner";
 import { useRouter } from "next/navigation";
@@ -76,10 +76,7 @@ export default function MarketingPageComponent({
     onSecondaryClick: handleSecondaryClick,
   });
 
-  // NEW: Generate the Software Schema
-  const softwareSchema = generateSoftwareSchema(translations, initialLang);
-
-  // NEW: Generate the FAQ Schema (Optional but HIGHLY recommended for marketing)
+  // FAQ Schema — page-specific; Organization/WebSite/SoftwareApplication are in the layout @graph
   const faqSchema = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
@@ -99,8 +96,15 @@ export default function MarketingPageComponent({
 
   return (
     <>
-      {/* SEO/AI JSON-LD Blocks */}
-      <JsonLd data={softwareSchema} />
+      {/* Page-specific JSON-LD — full @graph (Org/WebSite/Software) is in [lang]/layout.tsx */}
+      {/* WebPage + Speakable: pins #hero-title and #hero-summary as the canonical voice/AI summary */}
+      <JsonLd
+        data={generateWebPageSchema(
+          translations["marketing.hero.subheadline"] ||
+            "Create your professional wedding website easily.",
+          initialLang,
+        )}
+      />
       <JsonLd data={faqSchema} />
       <MarketingFloatingLanguageSelector
         currentLang={initialLang}

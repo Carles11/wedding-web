@@ -1,3 +1,4 @@
+import { SUPPORTED_LANGUAGES } from "@/4-shared/config/i18n";
 import { t } from "@/4-shared/helpers/t";
 import type { MarketingTranslations } from "@/4-shared/types/marketingPage";
 
@@ -18,136 +19,236 @@ export function Footer({
 }: FooterProps) {
   const currentYear = new Date().getFullYear();
   const langPrefix = lang ? `/${lang}` : "";
+  const env = process.env.NODE_ENV?.toUpperCase() || "PRODUCTION";
+
   return (
     <footer
-      className="w-full py-24 px-6"
+      className="footer-root relative w-full overflow-hidden px-6 pb-9 pt-16 font-sans md:px-12"
       style={{
         background: "var(--marketing-bg-subtle-gradient)",
         borderTop: "1px solid var(--builder-color-border)",
-        color: "var(--marketing-color-on-gradient-text)",
+        color: "var(--foreground)",
       }}
     >
-      <div className="max-w-6xl mx-auto">
-        {/* Top Section: Grid Links */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10 text-left">
-          {/* Brand/About Section */}
-          <div className="flex flex-col gap-3">
-            <h3
-              className="font-bold text-lg"
-              style={{ color: "var(--marketing-color-primary)" }}
-            >
-              {siteName}
+      <style>{`
+        .footer-nav-link { color: var(--builder-color-text-muted); text-decoration: none; transition: color 0.2s; }
+        .footer-nav-link:hover { color: var(--marketing-color-primary); }
+        .footer-author-link { color: var(--marketing-color-primary); font-weight: 500; text-decoration: none; transition: color 0.2s; }
+        .footer-author-link:hover { color: var(--marketing-color-primary-hover); text-decoration: underline; }
+        .footer-lang-tag { font-size: 9px; padding: 2px 5px; border-radius: 4px; border: 1px solid rgba(106,189,166,0.2); opacity: 0.7; }
+      `}</style>
+
+      {/* Ambient Glows preserved */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -right-16 -top-20 h-80 w-80 rounded-full"
+        style={{
+          background:
+            "radial-gradient(circle, rgba(106,189,166,0.07) 0%, transparent 70%)",
+        }}
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -bottom-10 -left-10 h-52 w-52 rounded-full"
+        style={{
+          background:
+            "radial-gradient(circle, rgba(244,162,97,0.05) 0%, transparent 70%)",
+        }}
+      />
+
+      <div className="relative mx-auto max-w-6xl">
+        <div
+          className="mb-12 grid grid-cols-1 gap-10 pb-12 md:grid-cols-12"
+          style={{ borderBottom: "1px solid var(--builder-color-border)" }}
+        >
+          {/* Brand Column */}
+          <div className="flex flex-col gap-5 md:col-span-5">
+            <h3 className="font-serif text-2xl font-normal leading-none tracking-tight">
+              {siteName.replace(".com", "")}
+              <em
+                className="italic"
+                style={{ color: "var(--marketing-color-primary)" }}
+              >
+                .com
+              </em>
             </h3>
-            <p className="opacity-70 text-sm leading-relaxed">
+            <p className="max-w-xs text-sm font-light leading-relaxed text-slate-500">
               {t(
                 translations,
                 "marketing.footer.about",
-                "Crafting digital experiences with care and precision.",
+                "Crafting digital experiences for the moments that matter most.",
               )}
             </p>
+
+            {/* Localized Status Badge */}
+            <span
+              className="inline-flex w-fit items-center gap-2 rounded-full px-3 py-1.5 text-[10px] font-medium uppercase tracking-widest"
+              style={{
+                background: "rgba(106,189,166,0.08)",
+                border: "1px solid rgba(106,189,166,0.25)",
+                color: "var(--marketing-color-primary-hover)",
+              }}
+            >
+              <span
+                className="relative flex h-1.5 w-1.5 flex-shrink-0"
+                aria-hidden="true"
+              >
+                <span
+                  className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-75"
+                  style={{ background: "var(--marketing-color-primary)" }}
+                />
+                <span
+                  className="relative inline-flex h-1.5 w-1.5 rounded-full"
+                  style={{ background: "var(--marketing-color-primary)" }}
+                />
+              </span>
+              {t(
+                translations,
+                "marketing.footer.production",
+                "Live Production",
+              )}
+            </span>
           </div>
 
-          {/* Resources Section */}
-          <div className="flex flex-col gap-3 text-sm">
-            <h4 className="font-semibold uppercase tracking-wider opacity-50">
+          <div className="hidden md:block md:col-span-1" />
+
+          {/* Resources Column */}
+          <div className="flex flex-col gap-4 text-sm md:col-span-2">
+            <h4 className="text-[9px] font-medium uppercase tracking-[0.2em] opacity-60 text-slate-400">
               {t(translations, "marketing.footer.resources", "Resources")}
             </h4>
-            <a
-              href={`${langPrefix}/faq`}
-              className="hover:opacity-100 opacity-70 transition-opacity"
-            >
-              {t(translations, "marketing.footer.faq", "FAQ")}
-            </a>
-            {/* <a
-              href="https://www.notion.so/32f83b723884451893ed83b4c4722a10?v=5bcada60b2b24b0294ab8d5f9f7702b4"
-              target="_blank"
-              rel="noopener"
-              className="hover:opacity-100 opacity-70 transition-opacity"
-            >
-              {t(translations, "marketing.footer.docs", "Documentation")}
-            </a> */}
-            <a
-              href={repoUrl}
-              target="_blank"
-              rel="noopener"
-              className="hover:opacity-100 opacity-70 transition-opacity"
-            >
-              {t(translations, "marketing.footer.github", "GitHub")}
-            </a>
+            <nav className="flex flex-col gap-2.5">
+              <a href={`${langPrefix}/faq`} className="footer-nav-link">
+                {t(translations, "marketing.footer.faq", "FAQ")}
+              </a>
+              <a
+                href={repoUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="footer-nav-link"
+              >
+                GitHub
+              </a>
+            </nav>
           </div>
 
-          {/* Legal Section */}
-          <div className="flex flex-col gap-3 text-sm">
-            <h4 className="font-semibold uppercase tracking-wider opacity-50">
+          {/* Legal Column - RESTORED COOKIE POLICY */}
+          <div className="flex flex-col gap-4 text-sm md:col-span-2">
+            <h4 className="text-[9px] font-medium uppercase tracking-[0.2em] opacity-60 text-slate-400">
               {t(translations, "marketing.footer.legal", "Legal")}
             </h4>
-            <a
-              href={`${langPrefix}/privacy-policy`}
-              className="hover:opacity-100 opacity-70 transition-opacity"
-            >
-              {t(
-                translations,
-                "marketing.legal.privacy.title",
-                "Privacy Policy",
-              )}
-            </a>
-            <a
-              href={`${langPrefix}/terms-of-service`}
-              className="hover:opacity-100 opacity-70 transition-opacity"
-            >
-              {t(
-                translations,
-                "marketing.legal.terms.title",
-                "Terms of Service",
-              )}
-            </a>
-            <a
-              href={`${langPrefix}/cookie-policy`}
-              className="hover:opacity-100 opacity-70 transition-opacity"
-            >
-              {t(translations, "marketing.legal.cookie.title", "Cookie Policy")}
-            </a>
+            <nav className="flex flex-col gap-2.5">
+              <a
+                href={`${langPrefix}/privacy-policy`}
+                className="footer-nav-link"
+              >
+                {t(translations, "marketing.legal.privacy.title", "Privacy")}
+              </a>
+              <a
+                href={`${langPrefix}/terms-of-service`}
+                className="footer-nav-link"
+              >
+                {t(translations, "marketing.legal.terms.title", "Terms")}
+              </a>
+              <a
+                href={`${langPrefix}/cookie-policy`}
+                className="footer-nav-link"
+              >
+                {t(translations, "marketing.legal.cookie.title", "Cookies")}
+              </a>
+            </nav>
+          </div>
+
+          {/* Languages Column */}
+          <div className="flex flex-col gap-4 text-sm md:col-span-2">
+            <h4 className="text-[9px] font-medium uppercase tracking-[0.2em] opacity-60 text-slate-400">
+              {t(translations, "marketing.footer.languages", "Global Reach")}
+            </h4>
+            <div className="flex flex-wrap gap-1.5 font-mono text-[10px] text-slate-400">
+              {SUPPORTED_LANGUAGES.map((l) => (
+                <span key={l} className="footer-lang-tag">
+                  {l.toUpperCase()}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
 
-        {/* Bottom Section: Copyright & Attribution */}
-        <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 text-xs opacity-60">
+        {/* ── Platform Entity Strip (AISEO) ──────────────────────── */}
+        <section className="mb-10 flex items-start gap-4 rounded-[10px] p-6 border border-emerald-500/10 bg-emerald-500/[0.02]">
+          <div
+            aria-hidden="true"
+            className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 border border-emerald-500/20"
+          >
+            <svg
+              width="13"
+              height="13"
+              viewBox="0 0 16 16"
+              fill="none"
+              stroke="var(--marketing-color-primary)"
+              strokeWidth="1.5"
+            >
+              <circle cx="8" cy="8" r="5.5" />
+              <path d="M8 5v3l2 1.5" />
+            </svg>
+          </div>
+
+          <div>
+            <p className="mb-1.5 font-serif text-[10px] italic tracking-wide text-emerald-600">
+              {t(
+                translations,
+                "marketing.footer.at_a_glance.title",
+                "Platform Entity Data",
+              )}
+            </p>
+            <p
+              id="platform-summary"
+              className="text-[11.5px] font-light leading-[1.8] text-slate-500"
+            >
+              {t(
+                translations,
+                "marketing.footer.at_a_glance.body",
+                "WeddWeb is a 2026-native, multilingual SaaS for wedding websites. Supporting {count} languages ({list}), it enables global communication...",
+                {
+                  count: SUPPORTED_LANGUAGES.length,
+                  list: SUPPORTED_LANGUAGES.join(", "),
+                },
+              )}
+            </p>
+          </div>
+        </section>
+
+        {/* ── Bottom Bar ────────────────────────────────────────── */}
+        <div className="flex flex-col items-center justify-between gap-6 border-t border-black/5 pt-8 text-[10px] uppercase tracking-[0.2em] opacity-40 md:flex-row">
           <p>
-            © {currentYear} {siteName}.{" "}
-            {t(
-              translations,
-              "marketing.footer.copyright",
-              "All rights reserved.",
-            )}
+            © {currentYear} {siteName}
           </p>
 
-          <p>
-            {t(
-              translations,
-              "marketing.footer.made_with_love",
-              "Made with love at",
-            )}{" "}
-            <a
-              href="https://weddweb.com"
-              target="_blank"
-              rel="noopener"
-              className="font-semibold hover:underline"
-              style={{ color: "var(--marketing-color-primary)" }}
+          <div className="flex items-center gap-4">
+            <span>
+              {t(translations, "marketing.footer.made_with_love", "Built by")}{" "}
+              <a
+                href={repoUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="footer-author-link"
+              >
+                {author}
+              </a>
+            </span>
+            <span style={{ opacity: 0.3 }}>|</span>
+            {/* DYNAMIC ENV LABEL */}
+            <span
+              className="rounded font-mono text-[9px] tracking-widest px-2 py-0.5"
+              style={{
+                background: "rgba(106,189,166,0.07)",
+                border: "1px solid rgba(106,189,166,0.18)",
+                color: "var(--marketing-color-primary-hover)",
+              }}
             >
-              WeddWeb
-            </a>
-            {" • "}
-            {t(translations, "marketing.footer.powered_by", "Powered by")}{" "}
-            <a
-              href={"https://rio-frances.com"}
-              target="_blank"
-              rel="noopener"
-              className="font-semibold hover:underline"
-              style={{ color: "var(--marketing-color-primary)" }}
-            >
-              {author}
-            </a>
-          </p>
+              {t(translations, "marketing.footer.env_label", "ENV")}: {env}
+            </span>
+          </div>
         </div>
       </div>
     </footer>

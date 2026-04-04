@@ -1,13 +1,16 @@
+import {
+  SUPPORTED_LANGUAGES,
+  type SupportedLanguage,
+} from "@/4-shared/config/i18n";
 import { createClient } from "@/4-shared/lib/supabase/client";
 import type { WeddingGift } from "@/4-shared/types";
-import type { SupportedLanguage } from "@/4-shared/config/i18n";
 
 /**
  * Fetch the wedding gift (if any) for a site, plus all translation fields (title/instructions...) for enabled languages.
  */
 export async function fetchWeddingGiftBySite(
   siteId: string,
-  enabledLangs: SupportedLanguage[] = ["en", "es", "ca"],
+  enabledLangs: readonly SupportedLanguage[] = SUPPORTED_LANGUAGES,
 ): Promise<
   | (WeddingGift & {
       title: Record<SupportedLanguage, string>;
