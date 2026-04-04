@@ -1,4 +1,7 @@
-import { SUPPORTED_LANGUAGES } from "@/4-shared/config/i18n";
+import {
+  SUPPORTED_LANGUAGE_LABELS,
+  SUPPORTED_LANGUAGES,
+} from "@/4-shared/config/i18n";
 import { t } from "@/4-shared/helpers/t";
 import type { MarketingTranslations } from "@/4-shared/types";
 
@@ -122,6 +125,16 @@ export function Footer({
                 {t(translations, "marketing.footer.faq", "FAQ")}
               </a>
               <a
+                href={`${langPrefix}/features/multilingual-wedding-website`}
+                className="footer-nav-link"
+              >
+                {t(
+                  translations,
+                  "marketing.footer.feature-multilingual",
+                  "Multilingual Wedding Websites",
+                )}
+              </a>
+              <a
                 href={repoUrl}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -208,10 +221,10 @@ export function Footer({
               {t(
                 translations,
                 "marketing.footer.at_a_glance.body",
-                "WeddWeb is a 2026-native, multilingual SaaS for wedding websites. Supporting {count} languages ({list}), it enables global communication...",
+                "WeddWeb is a 2026-native, multilingual SaaS for wedding websites. Supporting {count} languages ({list}), it enables global communication between international families through a sub-second, script-aware experience that puts privacy and technical excellence first.",
                 {
                   count: SUPPORTED_LANGUAGES.length,
-                  list: SUPPORTED_LANGUAGES.join(", "),
+                  list: Object.values(SUPPORTED_LANGUAGE_LABELS).join(", "),
                 },
               )}
             </p>

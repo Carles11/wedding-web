@@ -151,7 +151,8 @@ export default function MultilingualLogic({ translations }: Props) {
           <div>
             <Heading
               as="h3"
-              className="text-center text-xs font-bold tracking-widest uppercase text-gray-400 pb-6"
+              className="text-center text-xs font-bold tracking-widest uppercase pb-6"
+              style={{ color: "var(--marketing-color-primary)" }}
             >
               {t(
                 translations,

@@ -1,4 +1,5 @@
 import { MarketingFloatingLanguageSelector } from "@/1-widgets/marketing/ui";
+import CombatMatrix from "@/1-widgets/marketing/ui/CombatMatrix";
 import MultilingualLogic from "@/1-widgets/marketing/ui/MultilingualLogic";
 import { fetchMarketingTranslations } from "@/4-shared/api/marketing";
 import { SUPPORTED_LANGUAGES, SupportedLanguage } from "@/4-shared/config/i18n";
@@ -108,11 +109,11 @@ export default async function MultilingualFeaturePage({
       {/* The Widget we built. It already contains its own 
           HowTo Schema linked to #software 
       */}
+      {/* 1. The Technical Proof */}
       <MultilingualLogic translations={translations} />
 
-      {/* Pro-Tip: You could add a specialized FAQ or 
-          CTA section here later to drive conversions 
-      */}
+      {/* 2. The Competitive Advantage */}
+      <CombatMatrix translations={translations} />
       <Footer lang={lang} translations={translations} />
     </main>
   );
