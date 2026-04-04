@@ -5,6 +5,7 @@ import {
 import { t } from "@/4-shared/helpers/t";
 import { JsonLd } from "@/4-shared/lib/seo/JsonLd";
 import type { MarketingTranslations } from "@/4-shared/types/marketingPage";
+import { Heading } from "@/4-shared/ui/commons/typography/Heading";
 
 /** Language codes that use right-to-left script. */
 const RTL_CODES = new Set(["ar"]);
@@ -101,9 +102,10 @@ export default function MultilingualLogic({ translations }: Props) {
       >
         <div className="max-w-5xl mx-auto">
           {/* ── Section Header ── */}
-          <h2
+          <Heading
+            as="h2"
             id="ml-title"
-            className="text-3xl md:text-4xl font-bold text-center mb-4"
+            className="text-3xl md:text-4xl font-bold text-center pb-4"
             style={{ color: "var(--marketing-color-primary)" }}
           >
             {t(
@@ -111,7 +113,7 @@ export default function MultilingualLogic({ translations }: Props) {
               "marketing.multilingual.title",
               "One Platform. 11 Languages. Every Script.",
             )}
-          </h2>
+          </Heading>
           <p className="text-center text-gray-500 mb-16 max-w-2xl mx-auto">
             {t(
               translations,
@@ -131,12 +133,13 @@ export default function MultilingualLogic({ translations }: Props) {
                 <span className="text-3xl" aria-hidden="true">
                   {pillar.icon}
                 </span>
-                <h3
+                <Heading
+                  as="h3"
                   className="font-semibold text-lg"
                   style={{ color: "var(--marketing-color-primary)" }}
                 >
                   {pillar.title}
-                </h3>
+                </Heading>
                 <p className="text-sm leading-relaxed text-gray-600">
                   {pillar.body}
                 </p>
@@ -146,13 +149,16 @@ export default function MultilingualLogic({ translations }: Props) {
 
           {/* ── Language Grid ── */}
           <div>
-            <h3 className="text-center text-xs font-bold tracking-widest uppercase text-gray-400 mb-6">
+            <Heading
+              as="h3"
+              className="text-center text-xs font-bold tracking-widest uppercase text-gray-400 pb-6"
+            >
               {t(
                 translations,
                 "marketing.multilingual.grid.title",
                 `${SUPPORTED_LANGUAGES.length} supported languages`,
               )}
-            </h3>
+            </Heading>
             <ul
               className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3"
               aria-label="Supported languages"

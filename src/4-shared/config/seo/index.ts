@@ -53,6 +53,19 @@ import { seoMetadata as pricingPt } from "./marketing/pricing/pricing-pt";
 import { seoMetadata as pricingRu } from "./marketing/pricing/pricing-ru";
 import { seoMetadata as pricingZh } from "./marketing/pricing/pricing-zh";
 
+// Features: Multilingual
+import { seoMetadata as multilingualAr } from "./marketing/features/multilingual/feature-multilang-ar";
+import { seoMetadata as multilingualCa } from "./marketing/features/multilingual/feature-multilang-ca";
+import { seoMetadata as multilingualDe } from "./marketing/features/multilingual/feature-multilang-de";
+import { seoMetadata as multilingualEn } from "./marketing/features/multilingual/feature-multilang-en";
+import { seoMetadata as multilingualEs } from "./marketing/features/multilingual/feature-multilang-es";
+import { seoMetadata as multilingualFr } from "./marketing/features/multilingual/feature-multilang-fr";
+import { seoMetadata as multilingualHi } from "./marketing/features/multilingual/feature-multilang-hi";
+import { seoMetadata as multilingualIt } from "./marketing/features/multilingual/feature-multilang-it";
+import { seoMetadata as multilingualPt } from "./marketing/features/multilingual/feature-multilang-pt";
+import { seoMetadata as multilingualRu } from "./marketing/features/multilingual/feature-multilang-ru";
+import { seoMetadata as multilingualZh } from "./marketing/features/multilingual/feature-multilang-zh";
+
 import type { PageSEO, SitewideSEO } from "./types";
 
 const homeSeoByLocale: Record<string, SitewideSEO> = {
@@ -97,6 +110,20 @@ const pricingSeoByLocale: Record<string, SitewideSEO> = {
   it: pricingIt,
 };
 
+const featuresMultilingualSeoByLocale: Record<string, SitewideSEO> = {
+  en: multilingualEn,
+  es: multilingualEs,
+  ca: multilingualCa,
+  zh: multilingualZh,
+  hi: multilingualHi,
+  ar: multilingualAr,
+  fr: multilingualFr,
+  de: multilingualDe,
+  pt: multilingualPt,
+  ru: multilingualRu,
+  it: multilingualIt,
+};
+
 /**
  * Get SEO metadata for a given locale, page, and section.
  * Falls back to English if locale is not supported.
@@ -116,6 +143,7 @@ export function getSEOMetadata(
     | "auth-login"
     | "privacy-policy"
     | "terms-of-service"
+    | "features_multilingual"
     | "cookie-policy" = "home", // Default to home (root)
 ): PageSEO {
   const sectionMap: Record<string, Record<string, SitewideSEO>> = {
@@ -124,6 +152,7 @@ export function getSEOMetadata(
     pricing: pricingSeoByLocale,
     "privacy-policy": privacyPolicySeoByLocale,
     "terms-of-service": termsOfServiceSeoByLocale,
+    features_multilingual: featuresMultilingualSeoByLocale,
     "cookie-policy": cookiePolicySeoByLocale,
   };
 
