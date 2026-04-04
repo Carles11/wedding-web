@@ -429,7 +429,7 @@ export default function ImagesBuilderStep({
           />
         )}
         {!loading && error && (
-          <p className="text-[var(--builder-color-danger)] text-sm">{error}</p>
+          <p className="text-(--builder-color-danger) text-sm">{error}</p>
         )}
         {!loading && (
           <div className="grid gap-6 lg:grid-cols-2">

@@ -18,6 +18,7 @@ import {
 import { notify } from "@/4-shared/lib/toast/toast";
 import { GeneralContentState, GeneralSiteFormProps } from "@/4-shared/types";
 import { BuilderLangTabs, UpgradeCTAModal } from "@/4-shared/ui/builder";
+import { SkeletonLoader } from "@/4-shared/ui/commons/loader/SkeletonLoader";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 import { StepLayout } from "../../step-layout";
@@ -236,18 +237,7 @@ export default function GeneralSiteForm({
   }, [site?.id]);
 
   if (loading) {
-    return (
-      <StepLayout
-        nextLabel="Save"
-        backLabel="Cancel"
-        backDisabled
-        translations={translations}
-      >
-        <p className="text-sm text-gray-600">
-          {translations["builder.status.loading"] || "Loading..."}
-        </p>
-      </StepLayout>
-    );
+    return <SkeletonLoader />;
   }
 
   // 🔹 Language toggle

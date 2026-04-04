@@ -1,5 +1,5 @@
-import PricingCTATableAdapter from "@/1-widgets/marketing/ui/pricing/PricingCTATableAdapter";
-import PricingPageShell from "@/1-widgets/marketing/ui/pricing/PricingPageShell";
+import PricingCTATableAdapter from "@/1-widgets/marketing/ui/PricingCTATableAdapter";
+import PricingPageShell from "@/1-widgets/marketing/ui/PricingPageShell";
 
 import type { MarketingTranslations } from "@/4-shared/types";
 
