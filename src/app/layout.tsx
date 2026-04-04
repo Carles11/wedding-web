@@ -14,6 +14,10 @@ export default async function RootLayout({
   const lang = isValidLanguage(realParams.lang) ? realParams.lang : "en";
   return (
     <html lang={lang}>
+      <head>
+        {/* AI & LLM discovery — allows agents to find structured platform docs */}
+        <link rel="alternate" type="text/plain" href="/llms.txt" />
+      </head>
       <body className={`${fontVariables} antialiased`}>{children}</body>
     </html>
   );
