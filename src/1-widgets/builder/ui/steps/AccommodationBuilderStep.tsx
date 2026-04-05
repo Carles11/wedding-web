@@ -365,14 +365,14 @@ export default function AccommodationBuilderStep({
       </div>
 
       <div className="mb-4 text-md text-gray-600">
-        {interpolate(
-          translations["builder.accommodation.description"] ||
-            "Add hotels or places to stay. Free plan allows up to {limit} entries.",
-          {
-            limit: accommodationLimit,
-            FREE_ACCOMMODATION_LIMIT: accommodationLimit,
-          },
-        )}
+        {accommodationLimit === -1
+          ? translations["builder.accommodation.description_unlimited"] ||
+            "Add hotels or places to stay. With your Premium plan, you can add as many as you like."
+          : interpolate(
+              translations["builder.accommodation.description"] ||
+                "Add hotels or places to stay. Start with up to {limit} recommendations.",
+              { limit: accommodationLimit }, // This will be 2 based on your PLAN_CATALOG
+            )}
       </div>
 
       <div className="mb-2">

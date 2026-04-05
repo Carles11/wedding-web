@@ -396,6 +396,11 @@ export default function WhatToSeeBuilderStep({
     );
   }
 
+  const isUnlimited = whatToSeeLimit === -1;
+  const descriptionKey = isUnlimited
+    ? "builder.what_to_see.limit_info_unlimited"
+    : "builder.what_to_see.limit_info";
+
   return (
     <StepLayout
       translations={translations}
@@ -438,24 +443,14 @@ export default function WhatToSeeBuilderStep({
         </BuilderButton>
       </div>
 
-      <div className="mb-4 text-md text-gray-600">
-        {interpolate(
-          t(
-            translations,
-            "builder.what_to_see.limit_info",
-            `Add up to ${whatToSeeLimit === -1 ? t(translations, "common.interpolate.unlimited", "unlimited") : whatToSeeLimit} recommended places.`,
-          ),
-          {
-            limit:
-              whatToSeeLimit === -1
-                ? t(translations, "common.interpolate.unlimited", "unlimited")
-                : whatToSeeLimit,
-            FREE_WHATTOSEE_LIMIT:
-              whatToSeeLimit === -1
-                ? t(translations, "common.interpolate.unlimited", "unlimited")
-                : whatToSeeLimit,
-          },
-        )}
+      <div className="text-gray-600">
+        {isUnlimited
+          ? translations[descriptionKey] ||
+            "With your Premium plan, add as many as you like."
+          : interpolate(
+              translations[descriptionKey] || "Add up to {limit} places.",
+              { limit: whatToSeeLimit },
+            )}
       </div>
 
       {/* Collapsible list */}
@@ -611,14 +606,14 @@ export default function WhatToSeeBuilderStep({
       <UpgradeCTAModal
         open={showUpgradeCTA && planType === "free"}
         title={
-          translations["builder.general.form.need_more_langs"] ||
-          "Need more languages?"
+          translations["builder.what_to_see.upgrade_title"] ||
+          "Need to add more places?"
         }
         description={
-          translations["builder.general.form.upgrade_description"] ||
-          "Your current plan only allows one language. Upgrade to Premium to unlock all languages for your wedding site."
+          translations["builder.what_to_see.upgrade_description"] ||
+          "Your current plan allows up to 2 recommended places. Upgrade to Premium to add as many as you like."
         }
-        cancelLabel={translations["builder.general.form.cancel"] || "Cancel"}
+        cancelLabel={translations["builder.actions.cancel"] || "Cancel"}
         upgradeLabel={
           translations["builder.general.form.upgrade"] || "Upgrade to Premium"
         }

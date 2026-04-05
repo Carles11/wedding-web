@@ -18,7 +18,7 @@ import { BuilderClientProps, ImageSection, StepStatus } from "@/4-shared/types";
 import { BuilderHeader } from "@/4-shared/ui/builder";
 import { CustomLoader } from "@/4-shared/ui/commons/loader/CustomLoader";
 import { CookiesConsentBanner } from "@/4-shared/ui/CookiesConsentBanner";
-import { EMAIL_RE } from "@/4-shared/utils/validations";
+import { isValidEmail } from "@/4-shared/utils/validations";
 import { usePlan } from "@/app/providers";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState, useTransition } from "react";
@@ -141,9 +141,13 @@ export default function BuilderClient({
       const bride = (f.bride ?? {}) as { name?: string; email?: string };
       const groom = (f.groom ?? {}) as { name?: string; email?: string };
 
-      const validContact = (pt: { name?: string; email?: string }) =>
-        !!pt?.name && !!pt?.email && EMAIL_RE.test(pt.email ?? "");
-      setHasContact(validContact(bride) && validContact(groom));
+      const isBrideComplete =
+        !!bride.name && !!bride.email && isValidEmail(bride.email);
+      const isGroomComplete =
+        !!groom.name && !!groom.email && isValidEmail(groom.email);
+
+      // CHANGE: Use OR (||) so one valid contact turns the step green
+      setHasContact(isBrideComplete || isGroomComplete);
     });
 
     fetchHasMainProgramEvent(id).then(setHasMainProgramEvent);

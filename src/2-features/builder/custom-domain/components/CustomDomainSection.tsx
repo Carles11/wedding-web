@@ -38,7 +38,6 @@ export const CustomDomainSection: React.FC<CustomDomainSectionProps> = ({
   >({});
   const [dnsModalDomain, setDnsModalDomain] = useState<string | null>(null);
 
-  // Local state for optimistic UI
   const [verifiedDomains, setVerifiedDomains] =
     useState<string[]>(verifiedDomainsProp);
   const [pendingDomains, setPendingDomains] =
@@ -53,7 +52,6 @@ export const CustomDomainSection: React.FC<CustomDomainSectionProps> = ({
     }, 1200);
   };
 
-  // Sync local state with props after backend update
   React.useEffect(() => {
     if (skipNextPropSyncRef.current) {
       skipNextPropSyncRef.current = false;
@@ -64,7 +62,7 @@ export const CustomDomainSection: React.FC<CustomDomainSectionProps> = ({
     setDomainStatuses(domainStatusesProp);
   }, [verifiedDomainsProp, pendingDomainsProp, domainStatusesProp]);
 
-  const isPaid = planType !== "free";
+  const userIsPremium = planType !== "free";
   const allDomains = Array.from(
     new Set([...verifiedDomains, ...pendingDomains].map(toApexDomain)),
   ).filter(Boolean);
@@ -76,8 +74,6 @@ export const CustomDomainSection: React.FC<CustomDomainSectionProps> = ({
     setDomainError(null);
     let addSucceeded = false;
 
-    // Domain format validation
-    // Import isValidDomain from validations
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const { isValidDomain } = require("@/4-shared/utils/validations/domain");
     if (!isValidDomain(inputDomain)) {
@@ -91,7 +87,6 @@ export const CustomDomainSection: React.FC<CustomDomainSectionProps> = ({
 
     const { apex } = getDomainVariants(inputDomain);
 
-    // Optimistically update UI
     setPendingDomains((prev) => {
       const next = [...prev.filter((d) => toApexDomain(d) !== apex), apex];
       return Array.from(new Set(next));
@@ -104,7 +99,7 @@ export const CustomDomainSection: React.FC<CustomDomainSectionProps> = ({
     });
 
     try {
-      await addCustomDomainClient(siteId, inputDomain); // Only user input—let backend handle variants/redirect/delay!
+      await addCustomDomainClient(siteId, inputDomain);
       addSucceeded = true;
       skipNextPropSyncRef.current = true;
       setLocalStatus("success");
@@ -133,6 +128,7 @@ export const CustomDomainSection: React.FC<CustomDomainSectionProps> = ({
       }
     }
   };
+
   const handleRemove = async (domain: string) => {
     if (!domain || loading) return;
     setLocalStatus("saving");
@@ -140,7 +136,6 @@ export const CustomDomainSection: React.FC<CustomDomainSectionProps> = ({
     let removeSucceeded = false;
     const { apex } = getDomainVariants(domain);
 
-    // Optimistically update UI
     setVerifiedDomains((prev) => prev.filter((d) => toApexDomain(d) !== apex));
     setPendingDomains((prev) => prev.filter((d) => toApexDomain(d) !== apex));
     setDomainStatuses((prev) => {
@@ -153,11 +148,9 @@ export const CustomDomainSection: React.FC<CustomDomainSectionProps> = ({
       removeSucceeded = true;
       skipNextPropSyncRef.current = true;
       setLocalStatus("success");
-
       notify.success(translations["builder.domain.custom_domain_removed"]);
     } catch (err) {
       setLocalStatus("error");
-
       notify.error(
         err instanceof Error
           ? err.message
@@ -184,14 +177,11 @@ export const CustomDomainSection: React.FC<CustomDomainSectionProps> = ({
         },
       }));
       setLocalStatus("success");
-      setLocalMsg(
+      const checkMsg =
         translations["builder.domain.custom_domain_checked"] ||
-          "Status checked. Refresh the page now.",
-      );
-      notify.success(
-        translations["builder.domain.custom_domain_checked"] ||
-          "Status checked. Refresh the page now.",
-      );
+        "Status checked.";
+      setLocalMsg(checkMsg);
+      notify.success(checkMsg);
       await refetchDomains();
     } catch (err) {
       setLocalStatus("error");
@@ -205,23 +195,37 @@ export const CustomDomainSection: React.FC<CustomDomainSectionProps> = ({
 
   return (
     <section className="mt-8">
-      <Heading as="h3" className="font-semibold text-gray-900 pb-4">
-        {translations["builder.domain.custom_domain_title"]}
+      <Heading as="h3" className="font-semibold text-gray-900 pb-2">
+        {translations["builder.domain.custom_domain_title"] || "Custom Domain"}
       </Heading>
 
-      {!isPaid ? (
-        <div className="flex items-center gap-3 p-3 bg-gray-50 border border-gray-200 rounded text-gray-500">
-          <span aria-hidden className="inline-block text-xl">
-            🔒
-          </span>
-          <span>{translations["builder.domain.custom_domain_locked"]}</span>
+      {/* Dynamic Subtitles applied here */}
+      <p className="text-sm text-gray-500 mb-4 max-w-xl">
+        {userIsPremium
+          ? translations["builder.domain.custom_subtitle_premium"] ||
+            "Connect your own personal domain (e.g., yourname.com) for a cleaner look and easier guest access."
+          : translations["builder.domain.custom_subtitle_free"] ||
+            "Upgrade to Premium to unlock a custom domain and remove 'weddweb' from your professional web address."}
+      </p>
+
+      {!userIsPremium ? (
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 bg-gray-50 border border-gray-200 rounded-xl">
+          <div className="flex items-center gap-3 text-gray-500 flex-1">
+            <span aria-hidden className="text-xl">
+              🔒
+            </span>
+            <span className="text-sm font-medium">
+              {translations["builder.domain.custom_domain_locked"] ||
+                "Custom domain feature is locked."}
+            </span>
+          </div>
           <BuilderButton
-            className="ml-auto"
             size="sm"
             onClick={onUpgradeClick}
             type="button"
+            className="w-full sm:w-auto"
           >
-            {translations["builder.domain.upgrade_btn"] ?? "Upgrade"}
+            {translations["builder.domain.upgrade_btn"] ?? "Upgrade Now"}
           </BuilderButton>
         </div>
       ) : (
@@ -233,80 +237,70 @@ export const CustomDomainSection: React.FC<CustomDomainSectionProps> = ({
             <label className="sr-only" htmlFor="custom-domain-input">
               {translations["builder.domain.custom_domain_placeholder"]}
             </label>
-            <input
-              id="custom-domain-input"
-              type="text"
-              className="border px-2 py-1 rounded w-72"
-              placeholder={
-                translations["builder.domain.custom_domain_placeholder"]
-              }
-              disabled={loading || localStatus === "saving"}
-              value={inputDomain}
-              onChange={(e) => {
-                setInputDomain(e.target.value.trim());
-                setLocalStatus("");
-                setLocalMsg(null);
-                setDomainError(null);
-              }}
-              aria-label={
-                translations["builder.domain.custom_domain_placeholder"]
-              }
-              autoComplete="off"
-            />
+            <div className="flex flex-col sm:flex-row gap-2">
+              <input
+                id="custom-domain-input"
+                type="text"
+                className="border border-gray-300 px-3 py-2 rounded-lg w-full sm:w-72 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                placeholder="yourwedding.com"
+                disabled={loading || localStatus === "saving"}
+                value={inputDomain}
+                onChange={(e) => {
+                  setInputDomain(e.target.value.trim());
+                  setLocalStatus("");
+                  setLocalMsg(null);
+                  setDomainError(null);
+                }}
+                autoComplete="off"
+              />
+              <BuilderButton
+                type="submit"
+                disabled={loading || !inputDomain || localStatus === "saving"}
+                className="whitespace-nowrap"
+              >
+                {translations["builder.domain.save_btn"]}
+              </BuilderButton>
+            </div>
+
             {!!localMsg && (
               <div
-                className={`text-xs mt-1 ${
-                  localStatus === "success"
-                    ? "text-green-700"
-                    : localStatus === "error"
-                      ? "text-(--builder-color-danger)"
-                      : ""
-                }`}
+                className={`text-xs mt-1 ${localStatus === "success" ? "text-green-700" : "text-red-500"}`}
               >
                 {localMsg}
               </div>
             )}
             {!!domainError && (
-              <div className="text-xs mt-1 text-(--builder-color-danger)">
-                {domainError}
-              </div>
+              <div className="text-xs mt-1 text-red-500">{domainError}</div>
             )}
-            <BuilderButton
-              className="mt-1 w-72"
-              type="submit"
-              disabled={loading || !inputDomain}
-            >
-              {translations["builder.domain.save_btn"]}
-            </BuilderButton>
           </form>
 
           {allDomains.length > 0 && (
-            <div className="mt-6">
-              <h5 className="font-semibold mb-1">
+            <div className="mt-8">
+              <h5 className="font-semibold text-gray-900 mb-3">
                 {translations["builder.domain.custom_domain_list_title"] ||
-                  "Your domains"}
+                  "Connected Domains"}
               </h5>
-              <ul className="divide-y border rounded bg-gray-50">
+              <ul className="divide-y border border-gray-200 rounded-xl bg-white overflow-hidden shadow-sm">
                 {allDomains.map((domain) => (
                   <React.Fragment key={domain}>
-                    <li className="flex items-center px-3 py-2 justify-between">
-                      <span>
-                        {domain}
+                    <li className="flex items-center px-4 py-3 justify-between hover:bg-gray-50 transition-colors">
+                      <div className="flex items-center gap-3">
+                        <span className="font-medium text-gray-700">
+                          {domain}
+                        </span>
                         {(domainStatuses[domain] ||
                           domainStatuses[`www.${domain}`]) && (
                           <span
-                            className={`ml-2 text-xs px-2 py-0.5 rounded
-                              ${
-                                (domainStatuses[domain] ||
-                                  domainStatuses[`www.${domain}`]) ===
-                                "verified"
-                                  ? "bg-green-100 text-green-800"
-                                  : (domainStatuses[domain] ||
-                                        domainStatuses[`www.${domain}`]) ===
-                                      "pending"
-                                    ? "bg-yellow-100 text-yellow-800"
-                                    : "bg-red-100 text-red-800"
-                              }`}
+                            className={`text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full ${
+                              (domainStatuses[domain] ||
+                                domainStatuses[`www.${domain}`]) === "verified"
+                                ? "bg-green-100 text-green-700"
+                                : (domainStatuses[domain] ||
+                                      domainStatuses[`www.${domain}`]) ===
+                                    "pending"
+                                  ? "bg-yellow-100 text-yellow-700"
+                                  : "bg-red-100 text-red-700"
+                            }`}
                           >
                             {translations[
                               `builder.domain.status_${domainStatuses[domain] || domainStatuses[`www.${domain}`]}`
@@ -315,6 +309,9 @@ export const CustomDomainSection: React.FC<CustomDomainSectionProps> = ({
                               domainStatuses[`www.${domain}`]}
                           </span>
                         )}
+                      </div>
+
+                      <div className="flex items-center gap-2">
                         {(domainStatuses[domain] ||
                           domainStatuses[`www.${domain}`]) !== "verified" && (
                           <BuilderButton
@@ -322,103 +319,83 @@ export const CustomDomainSection: React.FC<CustomDomainSectionProps> = ({
                             disabled={loading || localStatus === "saving"}
                             variant="secondary"
                             size="sm"
-                            className="ml-2"
-                            style={{ minWidth: 80 }}
                             onClick={() => handleCheckStatus(domain)}
                           >
                             {translations["builder.domain.check_status_btn"] ||
-                              "Check status"}
+                              "Refresh"}
                           </BuilderButton>
                         )}
-                      </span>
-                      <BuilderButton
-                        type="button"
-                        disabled={loading || localStatus === "saving"}
-                        variant="secondary"
-                        tone="danger"
-                        size="sm"
-                        className="ml-4"
-                        onClick={() => handleRemove(domain)}
-                      >
-                        {translations["builder.domain.remove_btn"] || "Remove"}
-                      </BuilderButton>
+                        <BuilderButton
+                          type="button"
+                          disabled={loading || localStatus === "saving"}
+                          variant="secondary"
+                          tone="danger"
+                          size="sm"
+                          onClick={() => handleRemove(domain)}
+                        >
+                          {translations["builder.domain.remove_btn"] ||
+                            "Remove"}
+                        </BuilderButton>
+                      </div>
                     </li>
 
-                    {/* Verified domain: onboarding UX */}
+                    {/* Verified UI */}
                     {(domainStatuses[domain] ||
                       domainStatuses[`www.${domain}`]) === "verified" && (
-                      <div className="px-6 pb-2 pt-2 text-xs rounded-b bg-green-50 border-b border-green-200 flex flex-col gap-2">
-                        <span className="text-green-700 font-semibold">
-                          {translations["builder.domain.verified_message"] ||
-                            "Domain is live and connected!"}
-                        </span>
-                        <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:gap-6 items-center">
-                          <span>
-                            {translations["builder.domain.did_you_add_dns"] ||
-                              "Did you already add the correct DNS records at your provider?"}
-                          </span>
-                          <div className="flex gap-2 mt-2 sm:mt-0">
+                      <li className="bg-green-50/50 px-4 py-3 border-t border-green-100">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                          <div className="text-xs text-green-800">
+                            <p className="font-semibold mb-0.5">
+                              {translations[
+                                "builder.domain.verified_message"
+                              ] || "Your domain is live!"}
+                            </p>
+                            <p>
+                              {translations["builder.domain.did_you_add_dns"] ||
+                                "Everything looks good."}
+                            </p>
+                          </div>
+                          <div className="flex gap-2">
                             <BuilderButton
-                              type="button"
+                              size="sm"
                               variant="primary"
                               onClick={() =>
-                                window.open(
-                                  `https://${domain}`,
-                                  "_blank",
-                                  "noopener,noreferrer",
-                                )
+                                window.open(`https://${domain}`, "_blank")
                               }
                             >
                               {translations["builder.domain.go_to_domain"] ||
-                                "Yes, Visit my website"}
+                                "Visit Site"}
                             </BuilderButton>
                             <BuilderButton
-                              type="button"
-                              variant="secondary"
                               size="sm"
+                              variant="secondary"
                               onClick={() => setDnsModalDomain(domain)}
                             >
                               {translations["builder.domain.no_show_how"] ||
-                                "No, show me how"}
+                                "Instructions"}
                             </BuilderButton>
                           </div>
                         </div>
-                        <MainModal
-                          open={dnsModalDomain === domain}
-                          title={
-                            translations["builder.domain.dns_modal_title"] ||
-                            "How to connect your domain"
-                          }
-                          onClose={() => setDnsModalDomain(null)}
-                        >
-                          <DnsModalContent translations={translations} />
-                        </MainModal>
-                      </div>
+                      </li>
                     )}
 
-                    {/* Show DNS instructions + error for PENDING/ERROR */}
+                    {/* Pending DNS View */}
                     {domainStatuses[domain] !== "verified" &&
                       domainInfo[domain]?.dnsInstructions && (
-                        <div className="px-6 pb-2 pt-2 text-xs whitespace-pre-wrap bg-blue-50 border-b border-blue-200 rounded-b">
-                          <strong>
+                        <li className="bg-blue-50/30 px-4 py-3 border-t border-blue-100">
+                          <p className="text-[10px] font-bold text-blue-800 uppercase tracking-tight mb-2">
                             {translations[
                               "builder.domain.dns_instructions_label"
-                            ] || "DNS Instructions:"}
-                          </strong>
-                          <br />
-                          {domainInfo[domain].dnsInstructions
-                            .split("\n")
-                            .map((line, idx) => (
-                              <div key={idx}>{line}</div>
-                            ))}
-                          {domainInfo[domain]?.error && (
-                            <div className="text-(--builder-color-danger) mt-2">
-                              {translations["builder.domain.dns_error"] ||
-                                "Error:"}{" "}
-                              {domainInfo[domain].error}
-                            </div>
-                          )}
-                        </div>
+                            ] || "DNS Records Required"}
+                          </p>
+                          <div className="bg-white border border-blue-100 rounded-md p-3 font-mono text-[11px] text-blue-900 overflow-x-auto">
+                            {domainInfo[domain].dnsInstructions
+                              .split("\n")
+                              .map((line, idx) => (
+                                <div key={idx}>{line}</div>
+                              ))}
+                          </div>
+                        </li>
                       )}
                   </React.Fragment>
                 ))}
@@ -427,6 +404,18 @@ export const CustomDomainSection: React.FC<CustomDomainSectionProps> = ({
           )}
         </>
       )}
+
+      {/* DNS Modal */}
+      <MainModal
+        open={!!dnsModalDomain}
+        title={
+          translations["builder.domain.dns_modal_title"] ||
+          "Connect Your Domain"
+        }
+        onClose={() => setDnsModalDomain(null)}
+      >
+        <DnsModalContent translations={translations} />
+      </MainModal>
     </section>
   );
 };

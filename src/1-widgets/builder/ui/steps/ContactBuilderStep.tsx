@@ -9,6 +9,7 @@ import {
 import { fetchContactSection } from "@/3-entities/sections/api/fetchContactSection";
 import { notify } from "@/4-shared/lib/toast/toast";
 import type { AccountInfo, ContactSection, Site } from "@/4-shared/types";
+import { SkeletonLoader } from "@/4-shared/ui/commons/loader/SkeletonLoader";
 import { ensureNotLegacy } from "@/4-shared/utils/billing/legacyLock";
 import { isValidEmail, isValidPhone } from "@/4-shared/utils/validations";
 import { useEffect, useRef, useState } from "react";
@@ -161,12 +162,18 @@ export default function ContactBuilderStep({
     return true;
   }
 
-  // Run completeness detection/propagate to parent on changes
   useEffect(() => {
     if (setHasContact) {
       const bride = (form?.bride as Partner | undefined) ?? {};
       const groom = (form?.groom as Partner | undefined) ?? {};
-      setHasContact(validContact(bride) && validContact(groom));
+
+      const isBrideComplete =
+        !!bride.name && !!bride.email && isValidEmail(bride.email);
+      const isGroomComplete =
+        !!groom.name && !!groom.email && isValidEmail(groom.email);
+
+      // Matches the BuilderClient logic
+      setHasContact(isBrideComplete || isGroomComplete);
     }
   }, [form, setHasContact]);
 
@@ -294,7 +301,7 @@ export default function ContactBuilderStep({
         </div>
 
         {loading ? (
-          <p>{translations["common.loading"] || "Loading..."}</p>
+          <SkeletonLoader />
         ) : (
           <div className="space-y-4">
             {contactImageUrl && (
@@ -321,7 +328,7 @@ export default function ContactBuilderStep({
                 disabled={saving}
               />
               {error && (
-                <div className="text-[--builder-color-danger] mt-4">
+                <div className="text-(--builder-color-danger) mt-4">
                   {error}
                 </div>
               )}

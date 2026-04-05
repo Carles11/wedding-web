@@ -420,9 +420,9 @@ export default function ImagesBuilderStep({
     <StepLayout showActions={false}>
       <div className="space-y-6 min-w-0">
         {/* HEADER */}
-        <div className="mb-4 text-md text-gray-600">
+        <div className="mb-4 text-md text-gray-600 leading-relaxed">
           {translations["builder.images.label.intro"] ||
-            "Upload and assign your images."}
+            "Personalize your site with a stunning Hero image and a Contact photo to add a personal touch."}
         </div>
 
         {/* STATES */}

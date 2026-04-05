@@ -18,12 +18,7 @@ export function BuilderHeader({
 }) {
   const requiredSteps = stepStatus?.filter((s, i) => s !== "optional") ?? [];
   const allRequiredDone = requiredSteps.every((s) => s === "done");
-  console.log(
-    "BuilderHeader - stepStatus:",
-    stepStatus,
-    "allRequiredDone:",
-    allRequiredDone,
-  );
+
   return (
     <header className="border-b bg-white p-4 sm:p-6">
       <div className="max-w-[95vw] mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">

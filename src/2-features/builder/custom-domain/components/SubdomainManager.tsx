@@ -62,7 +62,8 @@ export default function SubdomainManager({
         setStatus(`error_${reason}`);
         setHelpText(
           translations[`builder.domain.error_${reason}`] ||
-            translations["builder.domain.error_generic"],
+            translations["builder.domain.error_generic"] ||
+            "An error occurred while saving the subdomain.",
         );
         return;
       }
@@ -76,7 +77,10 @@ export default function SubdomainManager({
       if (!res.ok) throw new Error();
 
       setStatus("success");
-      setHelpText(translations["builder.domain.success_saved"]);
+      setHelpText(
+        translations["builder.domain.success_saved"] ||
+          "Subdomain saved successfully.",
+      );
       await refresh();
       setEditing(false);
       notify.success(
@@ -84,7 +88,10 @@ export default function SubdomainManager({
       );
     } catch {
       setStatus("error");
-      setHelpText(translations["builder.domain.error_generic"]);
+      setHelpText(
+        translations["builder.domain.error_generic"] ||
+          "An error occurred while saving the subdomain.",
+      );
     }
   }
 
@@ -92,10 +99,11 @@ export default function SubdomainManager({
     <div className="space-y-6 max-w-xl">
       <div>
         <Heading as="h3" className="font-semibold text-gray-900 pb-2">
-          {translations["builder.status.subdomain"]}
+          {translations["builder.status.subdomain"] || "Subdomain"}
         </Heading>
         <p className="text-sm text-gray-500 mt-1">
-          {translations["builder.domain.subdomain_desc"]}
+          {translations["builder.domain.subdomain_desc"] ||
+            "Guests will reach your site at this subdomain. Letters, numbers, and hyphens only."}
         </p>
       </div>
 
