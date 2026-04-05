@@ -3,9 +3,7 @@ import { getCurrentUserSubscription } from "@/3-entities/user/api/getCurrentUser
 import { fetchMarketingTranslations } from "@/4-shared/api/marketing";
 import { isValidLanguage } from "@/4-shared/helpers/isValidLanguage";
 import { Footer } from "@/4-shared/ui/commons/footer/Footer";
-import { shouldShowFooter } from "@/4-shared/utils/shouldShowFooter";
 import { PlanProvider, ToastProvider } from "@/app/providers";
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { ReactNode } from "react";
 import "../../../globals.css";
@@ -32,8 +30,6 @@ export default async function DashboardLayout({
   }
 
   const subscription = await getCurrentUserSubscription(user.id);
-  const host = ((await headers()).get("host") ?? "").toLowerCase().trim();
-  const showFooter = await shouldShowFooter({ host, routeKind: "builder" });
 
   const marketingTranslations = await fetchMarketingTranslations(lang, "en");
 
@@ -42,15 +38,13 @@ export default async function DashboardLayout({
       <PlanProvider subscription={subscription}>
         {children}
         <ToastProvider />
-        {showFooter && (
-          <Footer
-            siteName="Weddweb.com"
-            author="Carles del Río Francés"
-            repoUrl="https://github.com/Carles11/"
-            translations={marketingTranslations}
-            lang={lang}
-          />
-        )}
+        <Footer
+          siteName="Weddweb.com"
+          author="Carles del Río Francés"
+          repoUrl="https://github.com/Carles11/"
+          translations={marketingTranslations}
+          lang={lang}
+        />
       </PlanProvider>
     </div>
   );

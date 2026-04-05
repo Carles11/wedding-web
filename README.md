@@ -329,3 +329,63 @@ This two-level structure (index + per-tenant) is best practice for large SaaS/mu
 - The main SaaS platform and all tenants are clearly separated for search and analytics
 
 ---
+
+# 🕊️ Site Persistence & "Legacy Mode" Strategy
+
+WeddWeb provides a "Permanent Home" for wedding memories. Unlike competitors who often delete sites after 12 months, WeddWeb keeps all sites online indefinitely. To balance infrastructure costs and provide a clear value proposition for the **Premium** upgrade, we implement a **Legacy Mode** logic.
+
+---
+
+## 1. Product Logic
+
+- **Guest Experience:** All sites (Free & Premium) remain accessible to guests forever (as long as WeddWeb is active).
+- **Free Plan:** Moves to **Legacy Mode (Read-Only)** after 6 months of user inactivity.
+- **Premium Plan:** Remains **Fully Editable Forever** regardless of activity levels.
+
+## 2. Technical Architecture
+
+### Database Layer (Supabase/PostgreSQL)
+
+Activity is tracked automatically at the database level via a centralized trigger system. This ensures the "Last Activity" date is always accurate, regardless of which part of the site is updated.
+
+- **Storage Column:** `public.sites.last_activity_at` (TIMESTAMPTZ)
+- **Automation:** The `sync_site_activity` function updates the timestamp whenever a row is modified in the following tables:
+  - `site_translations` (User-generated text, names, stories)
+  - `program_events` (Wedding schedule and dates)
+  - `sites` (Font choices, SEO settings, Plan changes)
+  - `wedding_gifts` (Registry and payment details)
+
+### Logic Layer (Next.js / Server Side)
+
+The `is_legacy_mode` status is calculated dynamically during the site fetch in `getSiteByDomain.ts`:
+
+```typescript
+const planType = data.plan_type || "free";
+const lastActivity = data.last_activity_at ? new Date(data.last_activity_at) : new Date(data.created_at);
+
+let isLegacyMode = false;
+
+if (planType === "free") {
+  const cutoffDate = new Date(lastActivity);
+  cutoffDate.setMonth(cutoffDate.getMonth() + 6); // 180-day window
+  isLegacyMode = new Date() > cutoffDate;
+}
+
+3. UI/UX Implementation
+Guest-Facing Site: No change. The site remains fully visible.
+
+Builder/Dashboard: - Detects is_legacy_mode: true.
+
+Displays the Legacy Mode Banner at the top of the interface.
+
+Disables "Save" and "Update" functionality.
+
+Provides a direct CTA to upgrade to Premium to reactivate editing rights permanently.
+
+4. Maintenance & Safety
+To ensure existing users (pre-deployment) are not immediately locked out, we initialize the column with the current timestamp for all existing records:
+
+SQL
+UPDATE public.sites SET last_activity_at = now() WHERE last_activity_at IS NULL;
+Last updated: April 2026
+```

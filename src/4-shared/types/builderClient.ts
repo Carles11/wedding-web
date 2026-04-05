@@ -11,6 +11,7 @@ export interface BuilderClientProps {
     [key: string]: any;
   } | null;
   account: any;
+  isLegacyMode: boolean;
 }
 
 export interface BuilderStepContentProps {

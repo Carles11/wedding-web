@@ -7,4 +7,6 @@ export interface AccountInfo {
   created_at: string;
   updated_at: string;
   onboarding_completed: boolean | null;
+  plan_type: string | null;
+  last_activity_at: string | null;
 }

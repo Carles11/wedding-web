@@ -2,6 +2,7 @@
 
 import BuilderStepContent from "@/1-widgets/builder/ui/BuilderStepContent";
 import BuilderStepNav from "@/1-widgets/builder/ui/BuilderStepNav";
+import { LegacyModeBanner } from "@/2-features/builder/legacy-mode/LegacyModeBanner";
 import { fetchAccommodationEntries } from "@/3-entities/accommodation/api";
 import { updateAccountInfo } from "@/3-entities/account/api/accountCrud";
 import { fetchImagesBySite } from "@/3-entities/images/api";
@@ -21,7 +22,6 @@ import { EMAIL_RE } from "@/4-shared/utils/validations";
 import { usePlan } from "@/app/providers";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState, useTransition } from "react";
-
 const STEP_KEYS = [
   "builder.nav.step.general",
   "builder.nav.step.images",
@@ -39,6 +39,7 @@ export default function BuilderClient({
   userId,
   userProfile,
   account,
+  isLegacyMode,
 }: BuilderClientProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -78,6 +79,10 @@ export default function BuilderClient({
   const [whatToSeeCount, setWhatToSeeCount] = useState(0);
   const [hasWeddingGiftData, setHasWeddingGiftData] = useState(false);
   const [hasContact, setHasContact] = useState(false);
+
+  const handleUpgrade = () => {
+    router.push(`/${initialLang}/builder/checkout?plan=premium`);
+  };
 
   function hasAnyGiftPaymentMethod(
     gift: Record<string, unknown> | null,
@@ -214,6 +219,22 @@ export default function BuilderClient({
 
   return (
     <div className="builder-theme min-h-screen">
+      {isLegacyMode && (
+        <LegacyModeBanner
+          onUpgrade={handleUpgrade}
+          title={
+            translations["builder.legacy_mode.title"] ?? "Site in Legacy Mode"
+          }
+          description={
+            translations["builder.legacy_mode.description"] ??
+            "Editing disabled due to inactivity."
+          }
+          buttonText={
+            translations["builder.legacy_mode.upgrade_btn"] ??
+            "Unlock Editing Forever"
+          }
+        />
+      )}
       <CookiesConsentBanner
         translations={translations}
         lang={currentLang}
@@ -226,59 +247,63 @@ export default function BuilderClient({
         currentLang={currentLang}
         handleLanguageChange={handleLanguageChange}
       />
-      <main className="sm:p-6 overflow-x-hidden">
-        <div className="builder-shell md:max-w-[95vw] mx-auto rounded flex flex-col lg:flex-row">
-          <div className="flex flex-col">
-            <p className="text-(--builder-color-text-muted) flex items-center justify-center sm:justify-start gap-2 text-sm sm:text-base m-4">
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                />
-              </svg>
-              <span className="truncate">{account.email}</span>
-            </p>
-            <BuilderStepNav
-              stepKeys={STEP_KEYS}
-              stepStatuses={STEP_STATUS}
+      <div
+        className={`flex-1 ${isLegacyMode ? "pointer-events-none opacity-70 grayscale-[0.5]" : ""}`}
+      >
+        <main className="sm:p-6 overflow-x-hidden">
+          <div className="builder-shell md:max-w-[95vw] mx-auto rounded flex flex-col lg:flex-row">
+            <div className="flex flex-col">
+              <p className="text-(--builder-color-text-muted) flex items-center justify-center sm:justify-start gap-2 text-sm sm:text-base m-4">
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                  />
+                </svg>
+                <span className="truncate">{account.email}</span>
+              </p>
+              <BuilderStepNav
+                stepKeys={STEP_KEYS}
+                stepStatuses={STEP_STATUS}
+                active={active}
+                onSelect={(step: number) => {
+                  setActive(step);
+                  // update step in URL
+                  const url = `/${currentLang}/builder?step=${step}`;
+                  router.push(url);
+                }}
+                translations={translations}
+                currentLang={currentLang}
+              />
+            </div>
+            <BuilderStepContent
               active={active}
-              onSelect={(step: number) => {
-                setActive(step);
-                // update step in URL
-                const url = `/${currentLang}/builder?step=${step}`;
-                router.push(url);
-              }}
-              translations={translations}
+              site={site}
+              siteLoading={siteLoading}
+              siteError={siteError}
+              refresh={refresh}
               currentLang={currentLang}
+              translations={translations}
+              langLimit={langLimit}
+              planType={planType}
+              setHasHeroContent={setHasHeroContent}
+              setHeroImageExists={setHeroImageExists}
+              setHasMainProgramEvent={setHasMainProgramEvent}
+              setAccommodationCount={setAccommodationCount}
+              setWhatToSeeCount={setWhatToSeeCount}
+              setHasWeddingGiftData={setHasWeddingGiftData}
+              setHasContact={setHasContact}
             />
           </div>
-          <BuilderStepContent
-            active={active}
-            site={site}
-            siteLoading={siteLoading}
-            siteError={siteError}
-            refresh={refresh}
-            currentLang={currentLang}
-            translations={translations}
-            langLimit={langLimit}
-            planType={planType}
-            setHasHeroContent={setHasHeroContent}
-            setHeroImageExists={setHeroImageExists}
-            setHasMainProgramEvent={setHasMainProgramEvent}
-            setAccommodationCount={setAccommodationCount}
-            setWhatToSeeCount={setWhatToSeeCount}
-            setHasWeddingGiftData={setHasWeddingGiftData}
-            setHasContact={setHasContact}
-          />
-        </div>
-      </main>
+        </main>
+      </div>
     </div>
   );
 }

@@ -41,7 +41,7 @@ const FREE_PLAN_FEATURES: readonly PlanFeatureCatalogItem[] = [
     title: "Subdomain availability",
     titleTranslationKeys: ["pricing.plan.free.feature_9"],
     marketingDescription:
-      "Your wedding website or subdomainremains online indefinitely—a digital keepsake that lives on as long as WeddWeb does, or until you choose to take it down.",
+      "Online indefinitely. Switches to view-only (Legacy Mode) after 6 months of inactivity.",
     marketingDescriptionTranslationKey:
       "marketing.features.free_plan_feature_6_description",
   },
@@ -95,7 +95,8 @@ const PREMIUM_PLAN_FEATURES: readonly PlanFeatureCatalogItem[] = [
   {
     title: "Custom domain live forever",
     titleTranslationKeys: ["pricing.plan.premium.feature_6"],
-    marketingDescription: "Your custom domain remains online indefinitely",
+    marketingDescription:
+      "Your site remains online indefinitely and stays fully editable forever.",
     marketingDescriptionTranslationKey:
       "marketing.features.premium_plan_feature_6_description",
   },

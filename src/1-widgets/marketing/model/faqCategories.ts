@@ -29,7 +29,7 @@ export function faqCategories(t: TranslationDictionary): FAQCategory[] {
           q: t["marketing.faq.general.is_it_free"] ?? "Is WeddWeb free?",
           a:
             t["marketing.faq.general.is_it_free.answer"] ??
-            "WeddWeb offers a permanent Free plan with one language, a custom subdomain, and all core features. A Premium plan unlocks custom domains and additional languages.",
+            "WeddWeb offers a permanent Free plan with one language, a custom subdomain, and all core features. A Premium plan unlocks custom domains, extra features, and additional languages.",
         },
         {
           q:
