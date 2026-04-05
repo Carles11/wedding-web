@@ -41,7 +41,7 @@ const FREE_PLAN_FEATURES: readonly PlanFeatureCatalogItem[] = [
     title: "Subdomain availability",
     titleTranslationKeys: ["pricing.plan.free.feature_9"],
     marketingDescription:
-      "Your subdomain stays online for 2 months after your wedding day",
+      "Your wedding website or subdomainremains online indefinitely—a digital keepsake that lives on as long as WeddWeb does, or until you choose to take it down.",
     marketingDescriptionTranslationKey:
       "marketing.features.free_plan_feature_6_description",
   },

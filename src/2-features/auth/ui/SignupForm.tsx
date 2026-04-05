@@ -301,7 +301,6 @@ export default function SignupForm({ translations, lang }: Props) {
             {tr(translations, "auth.common.sign_up", "Sign Up")}
           </MarketingButton>
         </form>
-
         {genericError && (
           <p
             className="mt-4 text-sm text-(--builder-color-danger) text-center"
@@ -310,7 +309,6 @@ export default function SignupForm({ translations, lang }: Props) {
             {genericError}
           </p>
         )}
-
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-600">
             {tr(
@@ -325,6 +323,11 @@ export default function SignupForm({ translations, lang }: Props) {
               {tr(translations, "auth.common.log_in", "Log in")}
             </Link>
           </p>
+        </div>{" "}
+        <div className="mt-4 text-center">
+          <Link href={`/${lang}`} className="text-sm marketing-link">
+            {tr(translations, "auth.common.back_to_home", "Back to home")}
+          </Link>
         </div>
       </div>
     </div>

@@ -37,7 +37,7 @@ export function faqCategories(t: TranslationDictionary): FAQCategory[] {
             "How long will my site remain online?",
           a:
             t["marketing.faq.general.site_lifetime.answer"] ??
-            "Your WeddWeb site stays online permanently as long as weddweb.com exists — no expiry date on Free or Premium plans.",
+            "Your WeddWeb site stays online permanently as long as weddweb.com exists — no expiry date on Free or Premium plans. Free sites will not be editable after 6 months of inactivity, but still remain viewable.",
         },
         {
           q:

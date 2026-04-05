@@ -2,10 +2,12 @@ import { getPublicUrlForTenantBucketImage } from "@/4-shared/helpers/getPublicUr
 import type { HeroSectionType } from "@/4-shared/types";
 import Heading from "@/4-shared/ui/commons/typography/Heading";
 import Image from "next/image";
+import { WeddWebBadge } from "../../branding/WeddWebBadge";
 
 type HeroSectionProps = {
   hero: HeroSectionType;
-  backgroundImage: string; // Public URL already fetched outside
+  backgroundImage: string;
+  showBrandBadge?: boolean;
 };
 
 /**
@@ -15,13 +17,14 @@ type HeroSectionProps = {
 export default function HeroSection({
   hero,
   backgroundImage,
+  showBrandBadge = true,
 }: HeroSectionProps) {
   const title = hero.title ?? "";
   const description = hero.description ?? "";
 
   return (
     <section
-      className="relative w-full h-screen min-h-[340px] overflow-hidden flex items-center justify-center shadow-lg"
+      className="relative w-full h-screen min-h-85 overflow-hidden flex items-center justify-center shadow-lg"
       aria-labelledby="hero-title"
     >
       {backgroundImage && (
@@ -56,6 +59,7 @@ export default function HeroSection({
           </p>
         )}
       </div>
+      {showBrandBadge && <WeddWebBadge />}
     </section>
   );
 }

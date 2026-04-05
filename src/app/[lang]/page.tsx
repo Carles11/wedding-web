@@ -15,7 +15,7 @@ import {
 import { generateSiteMetadata } from "@/4-shared/lib/seo/generateSiteMetadata";
 import { getMetadataBase } from "@/4-shared/lib/seo/getMetadataBase"; // New Helper
 import { Footer } from "@/4-shared/ui/commons/footer/Footer";
-import { shouldShowFooter } from "@/4-shared/utils/shouldShowFooter";
+import { shouldShowBrandBadge, shouldShowFooter } from "@/4-shared/utils";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 
@@ -158,11 +158,22 @@ export default async function Page({
     if (site.is_expired && site.plan_type === "free") {
       return <ExpiredSiteNotice translations={translations} lang={lang} />;
     }
-    const showFooter = await shouldShowFooter({ host, routeKind: "tenant" });
+    const showFooter = await shouldShowFooter({
+      planType: site.plan_type,
+      routeKind: "tenant",
+    });
+    const showBrandBadge = await shouldShowBrandBadge({
+      planType: site.plan_type,
+      routeKind: "tenant",
+    });
 
     return (
       <div className="tenant-theme">
-        <TenantPageComponent lang={lang} translations={translations} />
+        <TenantPageComponent
+          lang={lang}
+          translations={translations}
+          showBrandBadge={showBrandBadge}
+        />
         {showFooter && <Footer lang={lang} translations={translations} />}
       </div>
     );

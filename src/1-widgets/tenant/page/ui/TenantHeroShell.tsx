@@ -9,6 +9,7 @@ interface TenantHeroShellProps {
   availableLangs: React.ComponentProps<typeof LanguageToggle>["availableLangs"];
   hero: React.ComponentProps<typeof HeroSection>["hero"];
   heroImage: React.ComponentProps<typeof HeroSection>["backgroundImage"];
+  showBrandBadge?: boolean;
 }
 
 export default function TenantHeroShell({
@@ -18,6 +19,7 @@ export default function TenantHeroShell({
   availableLangs,
   hero,
   heroImage,
+  showBrandBadge,
 }: TenantHeroShellProps) {
   return (
     <div className="relative">
@@ -40,7 +42,11 @@ export default function TenantHeroShell({
         </div>
       </header>
 
-      <HeroSection hero={hero} backgroundImage={heroImage} />
+      <HeroSection
+        hero={hero}
+        backgroundImage={heroImage}
+        showBrandBadge={showBrandBadge}
+      />
     </div>
   );
 }

@@ -23,9 +23,11 @@ import { headers } from "next/headers";
 // --- MAIN MULTILINGUAL TENANT PAGE COMPONENT ---
 export default async function TenantPageComponent({
   lang = "en",
+  showBrandBadge,
   translations,
 }: {
   lang: string;
+  showBrandBadge: boolean;
   translations: Record<string, string>;
 }) {
   const host = ((await headers()).get("host") ?? "").toLowerCase().trim();
@@ -162,6 +164,7 @@ export default async function TenantPageComponent({
         availableLangs={availableLangs}
         hero={heroFromi18n}
         heroImage={heroImage}
+        showBrandBadge={showBrandBadge}
       />
       <TenantSectionsContent
         mainEvent={mainEvent}
