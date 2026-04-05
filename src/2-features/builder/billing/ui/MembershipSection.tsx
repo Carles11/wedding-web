@@ -2,8 +2,8 @@
 import { getLocalizedPlanFeatureTitles } from "@/4-shared/helpers/billing/entitlements";
 import type { PlanType } from "@/4-shared/types";
 import { BuilderButton } from "@/4-shared/ui/builder";
+import { ArrowRight, Check, Sparkles } from "lucide-react"; // Recommended: lucide-react for icons
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 
 interface Props {
   planType: PlanType;
@@ -20,7 +20,6 @@ export default function MembershipSection({
 }: Props) {
   const router = useRouter();
 
-  const [isHovered, setIsHovered] = useState(false);
   const planLabel = {
     free: translations["builder.billing.current_plan_free"],
     premium: translations["builder.billing.current_plan_premium"],
@@ -32,93 +31,91 @@ export default function MembershipSection({
   );
 
   const canUpgrade = planType === "free";
-  const canManage = planType === "premium";
+
+  const handleAction = () => {
+    if (canUpgrade) {
+      router.push(`/${lang}/pricing`);
+    } else {
+      router.push(`/${lang}/builder/${siteId}/billing`);
+    }
+  };
 
   return (
-    <section className="mt-12">
-      <h4 className="font-semibold text-gray-900 mb-4">
+    <section className="mt-12 max-w-3xl">
+      <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
         {translations["builder.billing.membership_title"]}
       </h4>
 
-      <div
-        className="relative border border-gray-200 rounded-2xl bg-linear-to-br from-white via-gray-50 to-gray-100 p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-6 shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden"
-        onMouseEnter={() => setIsHovered(true)} // ✅ always fires, for both plan types
-        onMouseLeave={() => setIsHovered(false)}
-      >
-        {/* Decorative background accent */}
-        <div className="pointer-events-none absolute -top-10 -right-10 w-48 h-48 rounded-full bg-blue-50 opacity-60 blur-2xl" />
+      <div className="group relative border border-gray-200 rounded-3xl bg-white p-1 shadow-sm transition-all hover:shadow-md">
+        {/* Subtle Gradient Inner Border for Premium */}
+        <div
+          className={`rounded-[22px] p-6 flex flex-col md:flex-row md:items-center gap-6 ${
+            planType === "premium"
+              ? "bg-linear-to-br from-blue-50/50 to-white"
+              : "bg-white"
+          }`}
+        >
+          {/* LEFT: Info */}
+          <div className="flex-1 space-y-4">
+            <div className="flex items-center gap-3">
+              <div
+                className={`px-3 py-1 text-[10px] font-bold tracking-widest uppercase rounded-full border ${
+                  planType === "premium"
+                    ? "bg-blue-600 text-white border-blue-600"
+                    : "bg-gray-100 text-gray-600 border-gray-200"
+                }`}
+              >
+                {planLabel}
+              </div>
+              <span className="text-xs text-gray-400 font-medium italic">
+                {translations["builder.billing.current_plan"]}
+              </span>
+            </div>
 
-        {/* Hover overlay */}
-        {(canUpgrade || canManage) && (
-          <div
-            className={`absolute inset-0 flex items-center justify-center rounded-2xl bg-blue-600/4 backdrop-blur-[1px] transition-opacity duration-200 ${isHovered ? "opacity-100" : "opacity-0"}`}
-            // ✅ no pointer-events-none here — clicks must pass through
-          >
+            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2">
+              {localizedFeatures.map((feature, index) => (
+                <li
+                  key={index}
+                  className="flex items-center gap-2 text-sm text-gray-600"
+                >
+                  <Check className="w-4 h-4 text-blue-500 shrink-0" />
+                  <span className="truncate">{feature}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* RIGHT: Action (Responsive divider on mobile) */}
+          <div className="pt-6 md:pt-0 md:pl-6 border-t md:border-t-0 md:border-l border-gray-100 flex items-center justify-center">
             <BuilderButton
               type="button"
-              variant="secondary"
-              className="cursor-pointer"
-              onClick={() =>
-                canUpgrade
-                  ? router.push(`/${lang}/pricing`)
-                  : router.push(`/${lang}/builder/${siteId}/billing`)
-              }
+              variant={canUpgrade ? "primary" : "secondary"}
+              className="w-full md:w-auto min-w-[160px] flex items-center justify-center gap-2 shadow-sm"
+              onClick={handleAction}
             >
-              ✦{" "}
-              {canUpgrade
-                ? translations["builder.general.form.upgrade"] ||
-                  "Upgrade to Premium"
-                : translations["builder.billing.manage_btn"] ||
-                  "Manage Subscription"}
+              {canUpgrade ? (
+                <>
+                  <Sparkles className="w-4 h-4" />
+                  {translations["builder.general.form.upgrade"] || "Upgrade"}
+                </>
+              ) : (
+                <>
+                  {translations["builder.billing.manage_btn"] || "Manage"}
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
             </BuilderButton>
           </div>
-        )}
-
-        {/* LEFT SIDE */}
-        <div className="flex flex-col gap-3 relative pointer-events-none">
-          <div className="flex items-center gap-3">
-            <span className="text-sm text-gray-500">
-              {translations["builder.billing.current_plan"]}
-            </span>
-            <span className="px-3 py-1 text-xs font-semibold rounded-full bg-white border border-gray-200 text-gray-700 shadow-sm tracking-wide uppercase">
-              {planLabel}
-            </span>
-          </div>
-
-          <ul className="space-y-1.5 text-sm text-gray-500 leading-relaxed">
-            {localizedFeatures.map((feature, index) => (
-              <li
-                key={`${planType}-feature-${index}`}
-                className="flex items-start gap-2"
-              >
-                <svg
-                  className="mt-0.5 shrink-0 text-blue-400 w-3.5 h-3.5"
-                  viewBox="0 0 12 12"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <circle cx="6" cy="6" r="6" className="fill-blue-100" />
-                  <path
-                    d="M3.5 6L5.2 7.7L8.5 4.5"
-                    stroke="currentColor"
-                    strokeWidth="1.2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-                {feature}
-              </li>
-            ))}
-          </ul>
         </div>
       </div>
 
-      <div
-        className="mt-3 text-sm text-blue-700 underline cursor-pointer hover:text-blue-800 transition"
+      <button
+        className="mt-4 text-xs font-medium text-gray-400 hover:text-blue-600 transition-colors flex items-center gap-1"
         onClick={() => router.push(`/${lang}/pricing`)}
       >
         {translations["builder.billing.learn_more"]}
-      </div>
+        <ArrowRight className="w-3 h-3" />
+      </button>
     </section>
   );
 }
