@@ -3,13 +3,17 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 export default async function Page() {
+  // Grabbing the Browser's Language
   const acceptLang = ((await headers()).get("accept-language") ?? "")
     .toLowerCase()
     .trim();
+
   const langCandidates = acceptLang
     .split(",")
     .map((l) => l.split("-")[0].trim());
+
   let bestLang = "en";
+
   for (const candidate of langCandidates) {
     if (
       SUPPORTED_LANGUAGES.includes(
@@ -20,5 +24,6 @@ export default async function Page() {
       break;
     }
   }
+
   redirect(`/${bestLang}`);
 }

@@ -1,25 +1,5 @@
+import { getOGLocale } from "@/4-shared/config/i18n";
 import type { Metadata } from "next";
-
-/**
- * Maps simple ISO language codes to the full locale format required by OpenGraph.
- */
-function getOGLocale(lang: string): string {
-  const localeMap: Record<string, string> = {
-    en: "en_US",
-    es: "es_ES",
-    ca: "ca_ES",
-    fr: "fr_FR",
-    de: "de_DE",
-    it: "it_IT",
-    pt: "pt_PT",
-    ru: "ru_RU",
-    zh: "zh_CN",
-    ar: "ar_AR",
-    hi: "hi_IN",
-  };
-
-  return localeMap[lang] || `${lang}_${lang.toUpperCase()}`;
-}
 
 /**
  * Generates SEO metadata for marketing and tenant pages.

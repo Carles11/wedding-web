@@ -45,3 +45,23 @@ export const LANGUAGES_SELECTOR: {
   { code: "ru", name: "Russian", nativeName: "Русский" },
   { code: "it", name: "Italian", nativeName: "Italiano" },
 ];
+
+export const OG_LOCALE_MAP: Record<string, string> = {
+  en: "en_US",
+  es: "es_ES",
+  ca: "ca_ES",
+  fr: "fr_FR",
+  de: "de_DE",
+  it: "it_IT",
+  pt: "pt_PT",
+  ru: "ru_RU",
+  zh: "zh_CN",
+  ar: "ar_AR",
+  hi: "hi_IN",
+};
+/**
+ * Maps simple ISO language codes to the full locale format required by OpenGraph.
+ */
+export function getOGLocale(lang: string): string {
+  return OG_LOCALE_MAP[lang] || `${lang}_${lang.toUpperCase()}`;
+}
