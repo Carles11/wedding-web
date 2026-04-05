@@ -635,7 +635,7 @@ export default function GeneralSiteForm({
               {translations["builder.fonts.preview.label"] ?? "Preview"}
             </p>
             <p
-              className="text-2xl leading-snug"
+              className="text-5xl md:text-6xl leading-snug"
               style={{
                 fontFamily: `var(${AVAILABLE_TITLE_FONTS.find((f) => f.id === selectedTitleFont)?.variable ?? "--font-playfair-display"})`,
               }}
@@ -644,7 +644,7 @@ export default function GeneralSiteForm({
                 "We are getting married!"}
             </p>
             <p
-              className="mt-2 text-base text-gray-600"
+              className="mt-2 text-lg text-gray-600"
               style={{
                 fontFamily: `var(${AVAILABLE_BODY_FONTS.find((f) => f.id === selectedBodyFont)?.variable ?? "--font-roboto"})`,
               }}

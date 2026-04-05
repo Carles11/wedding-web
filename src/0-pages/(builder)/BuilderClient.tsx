@@ -246,6 +246,7 @@ export default function BuilderClient({
         site={site}
         currentLang={currentLang}
         handleLanguageChange={handleLanguageChange}
+        stepStatus={STEP_STATUS}
       />
       <div
         className={`flex-1 ${isLegacyMode ? "pointer-events-none opacity-70 grayscale-[0.5]" : ""}`}

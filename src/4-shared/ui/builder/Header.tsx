@@ -1,4 +1,5 @@
 import { LogoutButton } from "@/2-features/auth/ui";
+import { notify } from "@/4-shared/lib/toast/toast";
 import type { Site } from "@/4-shared/types";
 import LanguageSelector from "./LanguageSelector";
 
@@ -7,12 +8,22 @@ export function BuilderHeader({
   site,
   currentLang = "en",
   handleLanguageChange = () => {},
+  stepStatus = [],
 }: {
   translations: Record<string, string>;
   site: Site | null;
   currentLang?: string;
   handleLanguageChange?: (lang: string) => void;
+  stepStatus?: string[];
 }) {
+  const requiredSteps = stepStatus?.filter((s, i) => s !== "optional") ?? [];
+  const allRequiredDone = requiredSteps.every((s) => s === "done");
+  console.log(
+    "BuilderHeader - stepStatus:",
+    stepStatus,
+    "allRequiredDone:",
+    allRequiredDone,
+  );
   return (
     <header className="border-b bg-white p-4 sm:p-6">
       <div className="max-w-[95vw] mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
@@ -53,6 +64,16 @@ export function BuilderHeader({
                     href={previewUrl}
                     target="_blank"
                     rel="noreferrer"
+                    onClick={(e) => {
+                      if (!allRequiredDone) {
+                        e.preventDefault();
+                        notify.error(
+                          "Please complete all required steps before previewing your site.",
+                        );
+                      }
+                    }}
+                    tabIndex={allRequiredDone ? 0 : -1}
+                    aria-disabled={!allRequiredDone}
                   >
                     {translations["builder.header.site_preview"] ||
                       "Open site preview"}
