@@ -300,6 +300,7 @@ export default function BuilderClient({
               setWhatToSeeCount={setWhatToSeeCount}
               setHasWeddingGiftData={setHasWeddingGiftData}
               setHasContact={setHasContact}
+              account={account}
             />
           </div>
         </main>

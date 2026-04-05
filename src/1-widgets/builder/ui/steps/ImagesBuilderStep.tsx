@@ -9,9 +9,10 @@ import {
 } from "@/3-entities/images/api";
 import { getPlanLimit } from "@/4-shared/helpers/billing/entitlements";
 import { notify } from "@/4-shared/lib/toast/toast";
-import type { ImageRow, PlanType, Site } from "@/4-shared/types";
+import type { AccountInfo, ImageRow, PlanType, Site } from "@/4-shared/types";
 import FileUploader from "@/4-shared/ui/builder/FileUploader";
 import { CustomLoader } from "@/4-shared/ui/commons/loader/CustomLoader";
+import { ensureNotLegacy } from "@/4-shared/utils/billing/legacyLock";
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Accept } from "react-dropzone";
@@ -157,6 +158,7 @@ type Props = {
   translations: Record<string, string>;
   setHeroImageExists?: (exists: boolean) => void;
   planType: PlanType;
+  account: AccountInfo;
 };
 
 export default function ImagesBuilderStep({
@@ -165,6 +167,7 @@ export default function ImagesBuilderStep({
   translations,
   setHeroImageExists,
   planType,
+  account,
 }: Props) {
   const fetchCounterRef = useRef(0);
   const imageLimit = getPlanLimit(planType, "images");
@@ -312,6 +315,8 @@ export default function ImagesBuilderStep({
     setError(null);
 
     try {
+      ensureNotLegacy(account);
+
       const existingInSlot = slot === "hero" ? assignedHero : assignedContact;
       const sectionId = await fetchSectionId(site.id, slot);
       if (!sectionId) {

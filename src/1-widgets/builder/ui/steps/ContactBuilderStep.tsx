@@ -8,7 +8,8 @@ import {
 } from "@/3-entities/images/api";
 import { fetchContactSection } from "@/3-entities/sections/api/fetchContactSection";
 import { notify } from "@/4-shared/lib/toast/toast";
-import type { ContactSection, Site } from "@/4-shared/types";
+import type { AccountInfo, ContactSection, Site } from "@/4-shared/types";
+import { ensureNotLegacy } from "@/4-shared/utils/billing/legacyLock";
 import { isValidEmail, isValidPhone } from "@/4-shared/utils/validations";
 import { useEffect, useRef, useState } from "react";
 import { ContactForm } from "./contact/ContactForm";
@@ -19,6 +20,7 @@ type Props = {
   lang: string;
   translations: Record<string, string>;
   setHasContact?: (hasContact: boolean) => void;
+  account: AccountInfo;
 };
 
 export default function ContactBuilderStep({
@@ -26,6 +28,7 @@ export default function ContactBuilderStep({
   refresh,
   setHasContact,
   translations,
+  account,
 }: Props) {
   const fetchCounterRef = useRef(0);
   const [section, setSection] = useState<ContactSection | null>(null);
@@ -170,6 +173,19 @@ export default function ContactBuilderStep({
   async function handleSave() {
     if (!site?.id) return;
     setError(null);
+
+    // 🛡️ SECURITY CHECK
+    try {
+      ensureNotLegacy(account);
+    } catch (err) {
+      const msg =
+        translations["builder.errors.legacy_mode_active"] ||
+        "Site is in read-only Legacy Mode.";
+      setError(msg);
+      notify.error(msg);
+      return;
+    }
+
     const bride = (form?.bride as Partner | undefined) ?? {};
     const groom = (form?.groom as Partner | undefined) ?? {};
     const errors: Record<string, string> = {};

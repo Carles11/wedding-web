@@ -2,12 +2,13 @@ import { updateAccountInfo } from "@/3-entities/account/api/accountCrud";
 import type { SupportedLanguage } from "@/4-shared/config/i18n";
 import { useSupabaseAuth } from "@/4-shared/hooks/useSupabaseAuth";
 import { notify } from "@/4-shared/lib/toast/toast";
+import { AccountInfo } from "@/4-shared/types/account";
 import LanguageSelector from "@/4-shared/ui/builder/LanguageSelector";
 import Heading from "@/4-shared/ui/commons/typography/Heading";
 import { useState } from "react";
 
 interface PreferencesTabProps {
-  account: any;
+  account: AccountInfo;
   translations: Record<string, string>;
   cardClass: string;
 }

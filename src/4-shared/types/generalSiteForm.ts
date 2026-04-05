@@ -1,5 +1,6 @@
 import { getSiteGeneralContent } from "../api/builder/getSiteGeneralContent";
 import { SupportedLanguage } from "../config/i18n";
+import { AccountInfo } from "./account";
 import { PlanType } from "./billing";
 import { Site } from "./sites";
 
@@ -10,6 +11,7 @@ export type GeneralSiteFormProps = {
   translations: Record<string, string>;
   langLimit: number;
   planType: PlanType;
+  account: AccountInfo;
   /** Called with true once hero title + subtitle are saved for the default language. */
   setGeneralComplete?: (v: boolean) => void;
 };

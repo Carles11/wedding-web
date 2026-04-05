@@ -1,7 +1,8 @@
+import { AccountInfo } from "@/4-shared/types/account";
 import { BuilderButton } from "@/4-shared/ui/builder";
 
 interface AccountDangerZoneProps {
-  account: any;
+  account: AccountInfo;
   translations: Record<string, string>;
   saving: boolean;
   deleteConfirm: string;

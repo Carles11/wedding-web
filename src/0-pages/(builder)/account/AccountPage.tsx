@@ -12,11 +12,11 @@ import { PreferencesTab } from "./ui/tabs/PreferencesTab";
 import { ProfileTab } from "./ui/tabs/ProfileTab";
 import { SecurityTab } from "./ui/tabs/SecurityTab";
 
-import type { Site } from "@/4-shared/types";
+import type { AccountInfo, Site } from "@/4-shared/types";
 import { Heading } from "@/4-shared/ui/commons/typography/Heading";
 
 interface Props {
-  account: any;
+  account: AccountInfo;
   translations: Record<string, string>;
   site?: Site;
 }

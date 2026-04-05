@@ -14,6 +14,7 @@ import { t } from "@/4-shared/helpers/t";
 import { useAlertConfirm } from "@/4-shared/hooks/useAlertConfirm";
 import { notify } from "@/4-shared/lib/toast/toast";
 import type {
+  AccountInfo,
   PlanType,
   Site,
   TranslationDictionary,
@@ -21,6 +22,7 @@ import type {
 } from "@/4-shared/types";
 import { PlanLimitNotice, UpgradeCTAModal } from "@/4-shared/ui/builder";
 import { CustomLoader } from "@/4-shared/ui/commons/loader/CustomLoader";
+import { ensureNotLegacy } from "@/4-shared/utils/billing/legacyLock";
 import {
   isValidEmail,
   isValidIBAN,
@@ -42,6 +44,7 @@ type Props = {
   lang: string;
   translations: TranslationDictionary;
   planType: PlanType;
+  account: AccountInfo;
   /** Fired when at least one payment method is saved (or cleared). */
   setHasData?: (hasData: boolean) => void;
 };
@@ -53,6 +56,7 @@ export default function WeddingGiftBuilderStep({
   translations,
   planType,
   setHasData,
+  account,
 }: Props) {
   const router = useRouter();
   const fetchCounterRef = useRef(0);
@@ -255,7 +259,16 @@ export default function WeddingGiftBuilderStep({
 
   async function handleSave(e?: React.FormEvent) {
     if (e) e.preventDefault();
-
+    // 🛡️ SECURITY CHECK
+    try {
+      ensureNotLegacy(account);
+    } catch (err) {
+      notify.error(
+        translations["builder.errors.legacy_mode_active"] ||
+          "Site is in read-only Legacy Mode.",
+      );
+      return;
+    }
     const draftGift = gift ?? {};
     const validationErrors = validateGift(draftGift);
     setErrors(validationErrors);
@@ -317,6 +330,17 @@ export default function WeddingGiftBuilderStep({
 
   async function handleDelete() {
     if (!site?.id) return;
+    // 🛡️ SECURITY CHECK
+    try {
+      ensureNotLegacy(account);
+    } catch (err) {
+      notify.error(
+        translations["builder.errors.legacy_mode_active"] ||
+          "Site is in read-only Legacy Mode.",
+      );
+      return;
+    }
+
     const ok = await confirmDelete({
       title: t(translations, "builder.actions.delete", "Delete"),
       message: t(

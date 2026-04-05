@@ -2,6 +2,7 @@ import { updateAccountInfo } from "@/3-entities/account/api/accountCrud";
 import { formatAccountDate } from "@/4-shared/helpers/formatAccountDate";
 import { useSupabaseAuth } from "@/4-shared/hooks/useSupabaseAuth";
 import { notify } from "@/4-shared/lib/toast/toast";
+import { AccountInfo } from "@/4-shared/types/account";
 import { BuilderButton } from "@/4-shared/ui/builder/BuilderButton";
 import Heading from "@/4-shared/ui/commons/typography/Heading";
 import { useEffect, useState } from "react";
@@ -9,7 +10,7 @@ import AccountDangerZone from "../AccountDangerZone";
 import EmailChangeInstructionsModal from "../EmailChangeInstructionsModal";
 
 interface ProfileTabProps {
-  account: any;
+  account: AccountInfo;
   translations: Record<string, string>;
   editName: string;
   setEditName: (v: string) => void;

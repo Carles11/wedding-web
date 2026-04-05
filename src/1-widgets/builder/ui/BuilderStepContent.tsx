@@ -34,6 +34,7 @@ export default function BuilderStepContent({
   setWhatToSeeCount,
   setHasWeddingGiftData,
   setHasContact,
+  account,
 }: BuilderStepContentProps) {
   return (
     <section className="flex-1 min-w-0 p-4 sm:p-6">
@@ -80,6 +81,7 @@ export default function BuilderStepContent({
               langLimit={langLimit}
               planType={planType}
               setGeneralComplete={setHasHeroContent}
+              account={account}
             />
           </div>
           <div className={active !== 1 ? "hidden" : undefined}>
@@ -90,6 +92,7 @@ export default function BuilderStepContent({
               translations={translations}
               setHeroImageExists={setHeroImageExists}
               planType={planType}
+              account={account}
             />
           </div>
           <div className={active !== 2 ? "hidden" : undefined}>
@@ -100,6 +103,7 @@ export default function BuilderStepContent({
               translations={translations}
               setHasMainProgramEvent={setHasMainProgramEvent}
               planType={planType}
+              account={account}
             />
           </div>
           <div className={active !== 3 ? "hidden" : undefined}>
@@ -130,6 +134,7 @@ export default function BuilderStepContent({
               translations={translations}
               setHasData={setHasWeddingGiftData}
               planType={planType}
+              account={account}
             />
           </div>
           <div className={active !== 6 ? "hidden" : undefined}>
@@ -139,6 +144,7 @@ export default function BuilderStepContent({
               lang={currentLang}
               translations={translations}
               setHasContact={setHasContact}
+              account={account}
             />
           </div>
           <div className={active !== 7 ? "hidden" : undefined}>

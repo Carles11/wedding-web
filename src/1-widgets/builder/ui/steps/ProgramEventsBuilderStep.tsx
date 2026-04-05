@@ -17,12 +17,14 @@ import { t } from "@/4-shared/helpers/t";
 import { useAlertConfirm } from "@/4-shared/hooks/useAlertConfirm";
 import { notify } from "@/4-shared/lib/toast/toast";
 import type {
+  AccountInfo,
   PlanType,
   ProgramEvent,
   ProgramEventTranslation,
   Site,
 } from "@/4-shared/types";
 import { BuilderButton, PlanLimitNotice } from "@/4-shared/ui/builder";
+import { ensureNotLegacy } from "@/4-shared/utils/billing/legacyLock";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { StepLayout } from "../../step-layout";
@@ -37,6 +39,7 @@ type Props = {
   translations: Record<string, string>;
   planType: PlanType;
   setHasMainProgramEvent?: (hasMain: boolean) => void;
+  account: AccountInfo;
 };
 
 export default function ProgramEventsBuilderStep({
@@ -46,6 +49,7 @@ export default function ProgramEventsBuilderStep({
   translations,
   planType,
   setHasMainProgramEvent,
+  account,
 }: Props) {
   const router = useRouter();
   const formRef = useRef<HTMLDivElement | null>(null);
@@ -346,6 +350,17 @@ export default function ProgramEventsBuilderStep({
   async function handleToggleMainEvent(event: ProgramEvent, makeMain: boolean) {
     if (saving) return;
 
+    // 🛡️ SECURITY CHECK TOP LEVEL
+    try {
+      ensureNotLegacy(account);
+    } catch (err) {
+      notify.error(
+        translations["builder.errors.legacy_mode_active"] ||
+          "Site is in read-only Legacy Mode.",
+      );
+      return;
+    }
+
     if (!makeMain) {
       const otherMainExists = events.some(
         (candidate) =>
@@ -374,6 +389,8 @@ export default function ProgramEventsBuilderStep({
     setSaving(true);
 
     try {
+      ensureNotLegacy(account);
+
       setEvents((prev) =>
         prev.map((row) =>
           row.day_tag === "wedding_day"
@@ -409,7 +426,16 @@ export default function ProgramEventsBuilderStep({
 
   async function handleSave() {
     if (!site?.id) return;
-
+    // 🛡️ SECURITY CHECK FIRST
+    try {
+      ensureNotLegacy(account);
+    } catch (err) {
+      notify.error(
+        translations["builder.errors.legacy_mode_active"] ||
+          "Site is in read-only Legacy Mode.",
+      );
+      return;
+    }
     const title = (form.title as Record<string, string> | undefined) ?? {};
     const location =
       (form.location as Record<string, string> | undefined) ?? {};
@@ -612,7 +638,16 @@ export default function ProgramEventsBuilderStep({
 
   async function handleDelete(id: string) {
     const event = events.find((entry) => entry.id === id);
-
+    // 🛡️ SECURITY CHECK
+    try {
+      ensureNotLegacy(account);
+    } catch (err) {
+      notify.error(
+        translations["builder.errors.legacy_mode_active"] ||
+          "Site is in read-only Legacy Mode.",
+      );
+      return;
+    }
     if (event?.day_tag === "wedding_day" && event?.is_main_event) {
       notify.error(
         t(

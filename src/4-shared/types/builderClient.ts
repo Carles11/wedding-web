@@ -1,4 +1,4 @@
-import type { PlanType, Site } from "@/4-shared/types";
+import type { AccountInfo, PlanType, Site } from "@/4-shared/types";
 
 export interface BuilderClientProps {
   initialLang?: string;
@@ -10,12 +10,13 @@ export interface BuilderClientProps {
     cookie_consent_version?: string | null;
     [key: string]: any;
   } | null;
-  account: any;
+  account: AccountInfo;
   isLegacyMode: boolean;
 }
 
 export interface BuilderStepContentProps {
   active: number;
+  account: AccountInfo;
   site: Site;
   siteLoading: boolean;
   siteError: string | null;

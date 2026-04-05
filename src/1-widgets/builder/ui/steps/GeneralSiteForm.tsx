@@ -19,6 +19,7 @@ import { notify } from "@/4-shared/lib/toast/toast";
 import { GeneralContentState, GeneralSiteFormProps } from "@/4-shared/types";
 import { BuilderLangTabs, UpgradeCTAModal } from "@/4-shared/ui/builder";
 import { SkeletonLoader } from "@/4-shared/ui/commons/loader/SkeletonLoader";
+import { ensureNotLegacy } from "@/4-shared/utils/billing/legacyLock";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 import { StepLayout } from "../../step-layout";
@@ -31,6 +32,7 @@ export default function GeneralSiteForm({
   langLimit,
   planType,
   setGeneralComplete,
+  account,
 }: GeneralSiteFormProps) {
   const router = useRouter();
   const fetchCounterRef = useRef(0);
@@ -105,6 +107,8 @@ export default function GeneralSiteForm({
   }
 
   async function handleFontChange(kind: "title" | "body", fontId: string) {
+    ensureNotLegacy(account);
+
     if (planType !== "premium") {
       setShowFontUpgradeCTA(true);
       return;
@@ -370,6 +374,7 @@ export default function GeneralSiteForm({
 
     setSaving(true);
     try {
+      ensureNotLegacy(account);
       await saveSiteGeneralContent({
         site_id: site.id,
         heroId: heroId,
@@ -389,12 +394,16 @@ export default function GeneralSiteForm({
           "Saved successfully.",
       );
     } catch (err: unknown) {
-      notify.error(
-        err instanceof Error
-          ? err.message
-          : translations["error.something_went_wrong"] ||
-              "An unknown error occurred.",
-      );
+      // Check if it's our specific Legacy error
+      const errorMessage =
+        err instanceof Error && err.message === "LEGACY_MODE_ACTIVE"
+          ? translations["builder.errors.legacy_mode_active"] ||
+            "Editing is disabled for legacy sites. Please upgrade to continue."
+          : err instanceof Error
+            ? err.message
+            : translations["error.something_went_wrong"];
+
+      notify.error(errorMessage);
     } finally {
       setSaving(false);
     }
