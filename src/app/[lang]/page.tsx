@@ -1,5 +1,4 @@
 import MarketingPageComponent from "@/0-pages/(marketing)/MarketingPageComponent";
-import ExpiredSiteNotice from "@/0-pages/(tenant)/ExpiredSiteNotice";
 import TenantPageComponent from "@/0-pages/(tenant)/TenantPageComponent";
 import MarketingHeader from "@/1-widgets/marketing/ui/MarketingHeader";
 import { fetchMarketingTranslations } from "@/4-shared/api/marketing";
@@ -155,9 +154,6 @@ export default async function Page({
   if (site) {
     const translations = await getMergedTranslations(site.id, lang, "en");
 
-    if (site.is_expired && site.plan_type === "free") {
-      return <ExpiredSiteNotice translations={translations} lang={lang} />;
-    }
     const showFooter = await shouldShowFooter({
       planType: site.plan_type,
       routeKind: "tenant",
