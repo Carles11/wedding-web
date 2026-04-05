@@ -14,9 +14,12 @@
   "prettier.useEditorConfig": true,
   "prettier.configPath": ".prettierrc",
 
-  // Deno: disabled globally, enabled ONLY for the edge function subfolder
-  "deno.enable": false,
-  "deno.enablePaths": ["supabase/functions/resend-auth-hook"],
+  // Deno: enable globally, but use enablePaths to keep it contained
+  "deno.enable": true,
+  "deno.enablePaths": [
+    "supabase/functions/resend-auth-hook",
+    "supabase/functions/legacy-notification"
+  ],
   "deno.disablePaths": ["src", "e2e", "scripts", "public", "app"],
   "deno.lint": true,
   "deno.suggest.imports.hosts": {

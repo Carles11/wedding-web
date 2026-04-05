@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "lib": ["deno.ns", "deno.window"]
+  },
+  "imports": {
+    "resend": "npm:resend@3.5.0"
+  }
+}

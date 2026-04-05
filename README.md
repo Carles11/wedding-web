@@ -155,6 +155,48 @@ Follow these steps to ensure Stripe webhooks work in all environments:
 
 ---
 
+## Email Verification & Resend Integration
+
+WeddWeb uses the [Resend](https://resend.com/) email API to deliver all authentication and verification emails, including signup, password recovery, and email change flows. The integration is designed for reliability, localization, and security:
+
+- **Triggering Resend:**
+  - When a user requests a verification email (signup, password reset, or email change), the backend calls Supabase Auth’s `resend` method.
+  - This triggers a Supabase Edge Function (`supabase/functions/resend-auth-hook/index.ts`) that securely handles the email delivery using the Resend API.
+
+- **Localization:**
+  - The Edge Function detects the user’s preferred language and selects the correct email template and translations from `EMAIL_TRANSLATIONS`.
+  - All email content (subject, body, button text) is localized for 11+ languages.
+
+- **Security:**
+  - The Edge Function verifies webhook payloads and only sends emails for valid, signed requests.
+  - Confirmation links are generated with secure tokens and proper redirect URLs.
+
+- **Custom Branding:**
+  - Emails are sent from `WeddWeb <hello@weddweb.com>` with a branded HTML template.
+
+- **Error Handling:**
+  - Any delivery errors are surfaced to the user, and all errors are logged for monitoring.
+
+**How to test Resend integration:**
+
+1. Trigger a signup, password reset, or email change in the app.
+2. Check your inbox for a localized, branded email from WeddWeb.
+3. If you do not receive the email, check the Edge Function logs and Resend dashboard for errors.
+
+**Environment variables required:**
+
+- `RESEND_API_KEY` (for the Edge Function)
+- `SEND_EMAIL_HOOK_SECRET` (for webhook verification)
+- `NEXT_PUBLIC_SITE_URL` (for correct redirect links)
+
+**See also:**
+
+- `src/2-features/auth/api/resendVerificationEmail.ts` (API logic)
+- `supabase/functions/resend-auth-hook/index.ts` (Edge Function)
+- `EMAIL_TRANSLATIONS` (email content)
+
+---
+
 ## Single-Site-Per-User Enforcement (2026-03)
 
 - By default, each user can only have **one site**. This is enforced at the database level with a unique constraint on `sites.owner_user_id` and in the API logic.
@@ -389,3 +431,79 @@ SQL
 UPDATE public.sites SET last_activity_at = now() WHERE last_activity_at IS NULL;
 Last updated: April 2026
 ```
+
+# 🛠️ Legacy Mode Automation (Email Notifications & 5-Month Inactivity Reminder)
+
+## Objective
+
+To improve user retention by automatically identifying users whose wedding websites have transitioned to Legacy Mode (triggered after 150 days/5 months of inactivity on the Free Plan). The system notifies them via email, encouraging them to log back in and reactivate their site before any data is permanently affected.
+
+## System Architecture
+
+The system uses a decoupled architecture to ensure high reliability and security:
+
+1. **Database Cron (`pg_cron`):** A scheduled job runs daily at midnight (`0 0 * * *`). It manages the timing of the check to ensure users are notified exactly once when they hit the threshold.
+2. **Database Function (`public.send_legacy_warnings`):**
+   - Queries `public.sites` and `public.user_profiles` to identify Free Plan users.
+   - Filters for accounts where `last_activity` was exactly 150 days ago.
+   - Triggers an internal `POST` request to the Supabase Edge Function using the `net.http_post` extension.
+3. **Edge Function (`legacy-notification`):**
+   - **Auth:** Validates the request using a custom secret (`MY_CUSTOM_SERVICE_KEY`) to ensure only internal database triggers can execute the function.
+   - **i18n:** Detects the user's preferred language and fetches the appropriate translation from `email-translations.ts`.
+   - **Delivery:** Uses Resend to deliver a high-fidelity HTML email containing the user's name, wedding title, and their specific tenant subdomain link.
+
+## Technical Stack
+
+| Layer          | Technology                                                  |
+| -------------- | ----------------------------------------------------------- |
+| Trigger        | `pg_cron` extension in PostgreSQL                           |
+| Logic Source   | `public.sites` & `public.user_profiles` tables              |
+| Backend        | Supabase Edge Functions (Deno)                              |
+| Email Provider | Resend (Verified Domain: `weddweb.com`)                     |
+| Security       | Service Role JWT validation with custom environment secrets |
+
+## Environment Variables & Secrets
+
+To maintain this function, the following secrets must be set in the Supabase Vault via the CLI:
+
+| Secret                  | Description                                                                          |
+| ----------------------- | ------------------------------------------------------------------------------------ |
+| `RESEND_API_KEY`        | API key from your Resend dashboard.                                                  |
+| `MY_CUSTOM_SERVICE_KEY` | Your Supabase `service_role` key (manual entry to ensure actual JWT string is used). |
+
+**Command to set secrets:**
+
+```bash
+npx supabase secrets set MY_CUSTOM_SERVICE_KEY=your_service_role_key
+npx supabase secrets set RESEND_API_KEY=re_your_resend_key
+```
+
+## Local Development
+
+To test the email flow without waiting for the scheduled cron job:
+
+1. Add the secrets to your local `.env` file.
+2. Run the function locally:
+
+```bash
+supabase functions serve legacy-notification
+```
+
+3. Invoke via the Supabase Dashboard Test sidebar (ensuring the `service_role` is selected) or via cURL:
+
+```bash
+curl -i --request POST 'http://localhost:54321/functions/v1/legacy-notification' \
+  --header 'Authorization: Bearer YOUR_SERVICE_ROLE_KEY' \
+  --header 'Content-Type: application/json' \
+  --data '{"email":"test@example.com", "name":"User", "lang":"en", "wedding_title":"My Wedding", "subdomain":"test-site"}'
+```
+
+## Deployment
+
+Deploy updates to the cloud using the following command:
+
+```bash
+npx supabase functions deploy legacy-notification --no-verify-jwt
+```
+
+> **Note:** The `--no-verify-jwt` flag is used because we handle the authorization logic manually within the function code for more robust key matching and to bypass placeholder issues.

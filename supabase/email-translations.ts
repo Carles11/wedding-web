@@ -28,6 +28,13 @@ export const EMAIL_TRANSLATIONS: Record<string, any> = {
         "We received a request to change your account email. If this was you, please confirm the change by clicking below.",
       button: "Confirm Change",
     },
+    legacy_warning: {
+      subject: "Action Required: Your editing access for {{wedding_title}}",
+      title: "Your site is entering Legacy Mode soon",
+      description:
+        "Hi {{name}}, your wedding site {{wedding_title}} has been inactive for 5 months. In 30 days, it will become read-only to keep our community fresh. Log in now to reset your timer!",
+      button: "Log in to keep editing",
+    },
   },
   es: {
     signup: {
@@ -57,6 +64,13 @@ export const EMAIL_TRANSLATIONS: Record<string, any> = {
       description:
         "Hemos recibido una solicitud para cambiar tu correo. Si has sido tú, confírmalo pulsando el botón de abajo.",
       button: "Confirmar Cambio",
+    },
+    legacy_warning: {
+      subject: "Acción requerida: Acceso de edición para {{wedding_title}}",
+      title: "Tu sitio pronto entrará en Modo Legado",
+      description:
+        "Hola {{name}}, tu sitio de boda {{wedding_title}} ha estado inactivo durante 5 meses. En 30 días, se volverá solo de lectura para mantener nuestra comunidad actualizada. ¡Inicia sesión ahora para reiniciar el contador!",
+      button: "Iniciar sesión para seguir editando",
     },
   },
   ca: {
@@ -88,6 +102,13 @@ export const EMAIL_TRANSLATIONS: Record<string, any> = {
         "Hem rebut una sol·licitud per canviar el teu correu. Si has estat tu, confirma-ho prement el botó de sota.",
       button: "Confirmar Canvi",
     },
+    legacy_warning: {
+      subject: "Acció requerida: Accés d'edició per a {{wedding_title}}",
+      title: "El teu lloc entrarà aviat en Mode Llegat",
+      description:
+        "Hola {{name}}, el teu lloc de casament {{wedding_title}} ha estat inactiu durant 5 mesos. En 30 dies, passarà a només lectura per mantenir la comunitat actualitzada. Inicia sessió ara per reiniciar el comptador!",
+      button: "Inicia sessió per seguir editant",
+    },
   },
   fr: {
     signup: {
@@ -117,6 +138,13 @@ export const EMAIL_TRANSLATIONS: Record<string, any> = {
       description:
         "Nous avons reçu une demande de changement d'e-mail. S'il s'agit de vous, veuillez confirmer la modification ci-dessous.",
       button: "Confirmer le changement",
+    },
+    legacy_warning: {
+      subject: "Action requise : Accès d’édition pour {{wedding_title}}",
+      title: "Votre site passera bientôt en mode Héritage",
+      description:
+        "Bonjour {{name}}, votre site de mariage {{wedding_title}} est inactif depuis 5 mois. Dans 30 jours, il passera en lecture seule pour garder notre communauté à jour. Connectez-vous maintenant pour réinitialiser le compteur !",
+      button: "Se connecter pour continuer à éditer",
     },
   },
   de: {
@@ -148,6 +176,14 @@ export const EMAIL_TRANSLATIONS: Record<string, any> = {
         "Wir haben eine Anfrage zur Änderung deiner E-Mail-Adresse erhalten. Wenn du das warst, bestätige dies bitte unten.",
       button: "Änderung bestätigen",
     },
+    legacy_warning: {
+      subject:
+        "Handlung erforderlich: Bearbeitungszugriff für {{wedding_title}}",
+      title: "Deine Seite wechselt bald in den Legacy-Modus",
+      description:
+        "Hallo {{name}}, deine Hochzeitsseite {{wedding_title}} war 5 Monate lang inaktiv. In 30 Tagen wird sie schreibgeschützt, um unsere Community aktuell zu halten. Melde dich jetzt an, um den Timer zurückzusetzen!",
+      button: "Anmelden, um weiter zu bearbeiten",
+    },
   },
   it: {
     signup: {
@@ -177,6 +213,13 @@ export const EMAIL_TRANSLATIONS: Record<string, any> = {
       description:
         "Abbiamo ricevuto una richiesta di modifica della tua email. Se sei stato tu, conferma la modifica cliccando qui sotto.",
       button: "Conferma Modifica",
+    },
+    legacy_warning: {
+      subject: "Azione richiesta: Accesso di modifica per {{wedding_title}}",
+      title: "Il tuo sito entrerà presto in Modalità Legacy",
+      description:
+        "Ciao {{name}}, il tuo sito di nozze {{wedding_title}} è inattivo da 5 mesi. Tra 30 giorni diventerà di sola lettura per mantenere la nostra community aggiornata. Accedi ora per azzerare il timer!",
+      button: "Accedi per continuare a modificare",
     },
   },
   pt: {
@@ -208,6 +251,13 @@ export const EMAIL_TRANSLATIONS: Record<string, any> = {
         "Recebemos um pedido para alterar o seu e-mail. Se foi você, confirme a alteração clicando abaixo.",
       button: "Confirmar Alteração",
     },
+    legacy_warning: {
+      subject: "Ação necessária: Acesso de edição para {{wedding_title}}",
+      title: "Seu site entrará em Modo Legado em breve",
+      description:
+        "Olá {{name}}, seu site de casamento {{wedding_title}} está inativo há 5 meses. Em 30 dias, ficará somente leitura para manter nossa comunidade atualizada. Faça login agora para reiniciar o contador!",
+      button: "Entrar para continuar editando",
+    },
   },
   zh: {
     signup: {
@@ -235,6 +285,13 @@ export const EMAIL_TRANSLATIONS: Record<string, any> = {
       description:
         "我们收到了更改您账户电子邮件的请求。如果是您本人操作，请点击下方确认。",
       button: "确认更改",
+    },
+    legacy_warning: {
+      subject: "操作提示：{{wedding_title}} 的编辑权限",
+      title: "您的网站即将进入旧版模式",
+      description:
+        "您好 {{name}}，您的婚礼网站 {{wedding_title}} 已经有5个月未活动。30天后将变为只读，以保持社区活跃。请立即登录以重置计时！",
+      button: "登录以继续编辑",
     },
   },
   hi: {
@@ -266,6 +323,13 @@ export const EMAIL_TRANSLATIONS: Record<string, any> = {
         "हमें आपका ईमेल बदलने का अनुरोध प्राप्त हुआ है। यदि यह आप ही हैं, तो कृपया नीचे पुष्टि करें।",
       button: "परिवर्तन की पुष्टि करें",
     },
+    legacy_warning: {
+      subject: "कार्रवाई आवश्यक: {{wedding_title}} के लिए संपादन पहुँच",
+      title: "आपकी साइट जल्द ही लिगेसी मोड में जाएगी",
+      description:
+        "नमस्ते {{name}}, आपकी वेडिंग साइट {{wedding_title}} पिछले 5 महीनों से निष्क्रिय है। 30 दिनों में यह केवल पढ़ने योग्य हो जाएगी ताकि हमारी कम्युनिटी ताज़ा बनी रहे। टाइमर रीसेट करने के लिए अभी लॉगिन करें!",
+      button: "संपादन जारी रखने के लिए लॉगिन करें",
+    },
   },
   ar: {
     signup: {
@@ -296,6 +360,13 @@ export const EMAIL_TRANSLATIONS: Record<string, any> = {
         "تلقينا طلباً لتغيير بريدك الإلكتروني. إذا كنت أنت من قام بذلك، يرجى التأكيد أدناه.",
       button: "تأكيد التغيير",
     },
+    legacy_warning: {
+      subject: "إجراء مطلوب: صلاحية التعديل لـ {{wedding_title}}",
+      title: "موقعك سيدخل قريبًا وضع الإرث",
+      description:
+        "مرحبًا {{name}}، موقع زفافك {{wedding_title}} غير نشط منذ 5 أشهر. خلال 30 يومًا سيصبح للقراءة فقط للحفاظ على مجتمعنا متجددًا. سجّل الدخول الآن لإعادة ضبط المؤقت!",
+      button: "سجّل الدخول لمتابعة التعديل",
+    },
   },
   ru: {
     signup: {
@@ -325,6 +396,13 @@ export const EMAIL_TRANSLATIONS: Record<string, any> = {
       description:
         "Мы получили запрос на изменение вашей почты. Если это вы, подтвердите изменения ниже.",
       button: "Подтвердить смену",
+    },
+    legacy_warning: {
+      subject: "Требуется действие: доступ к редактированию {{wedding_title}}",
+      title: "Ваш сайт скоро перейдет в режим Legacy",
+      description:
+        "Здравствуйте, {{name}}! Ваш свадебный сайт {{wedding_title}} неактивен уже 5 месяцев. Через 30 дней он станет только для чтения, чтобы поддерживать актуальность сообщества. Войдите сейчас, чтобы сбросить таймер!",
+      button: "Войти для продолжения редактирования",
     },
   },
 };
