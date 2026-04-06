@@ -148,29 +148,35 @@ export default function WeddingGiftSection({ data, translations }: Props) {
           <div className="flex flex-col justify-center p-6 bg-white/40 rounded-2xl border border-white/60 backdrop-blur-sm shadow-sm transition-all hover:shadow-md">
             <Heading
               as="h3"
-              className="text-xs font-bold uppercase tracking-widest text-neutral-400 mb-3"
+              className="text-xs font-bold uppercase tracking-widest text-neutral-400 mb-4"
             >
               {t(translations, "wedding_gift.mobile", "Mobile Transfer")}
             </Heading>
-            <div className="space-y-4">
+
+            <div className="space-y-5">
               {hasBizum && (
                 <div>
-                  <p className="text-[10px] uppercase opacity-50 mb-0.5">
+                  <p className="text-[10px] uppercase tracking-wider opacity-50 mb-1">
                     {t(translations, "wedding_gift.bizum_phone", "Bizum")}
                   </p>
-                  <p className="text-lg font-medium text-neutral-800">
-                    {data.bizum_phone}
-                  </p>
+                  <div className="flex items-center justify-between">
+                    <p className="text-lg font-medium text-neutral-800">
+                      {data.bizum_phone}
+                    </p>
+                  </div>
                 </div>
               )}
+
               {hasVenmo && (
                 <div>
-                  <p className="text-[10px] uppercase opacity-50 mb-0.5">
+                  <p className="text-[10px] uppercase tracking-wider opacity-50 mb-1">
                     {t(translations, "wedding_gift.venmo_username", "Venmo")}
                   </p>
-                  <p className="text-lg font-medium text-neutral-800">
-                    @{data.venmo_username?.replace("@", "")}
-                  </p>
+                  <div className="flex items-center justify-between">
+                    <p className="text-lg font-medium text-neutral-800">
+                      @{data.venmo_username?.replace("@", "")}
+                    </p>
+                  </div>
                 </div>
               )}
             </div>
