@@ -5,6 +5,7 @@ import {
   SUPPORTED_LANGUAGES,
 } from "@/4-shared/config/i18n";
 import { t } from "@/4-shared/helpers/t";
+import { useSupabaseAuth } from "@/4-shared/hooks/useSupabaseAuth";
 import type { MarketingTranslations } from "@/4-shared/types";
 import { ChevronDown, Globe, Menu, X } from "lucide-react";
 import Link from "next/link";
@@ -19,10 +20,13 @@ type Props = {
 export default function MarketingHeader({ translations, lang }: Props) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLangOpen, setIsLangOpen] = useState(false);
+  const { user } = useSupabaseAuth();
 
   const router = useRouter();
   const pathname = usePathname();
   const langPrefix = `/${lang}`;
+  const signUpRef = user ? `/${lang}/builder` : `/${lang}/auth/signup`;
+  const logInRef = user ? `/${lang}/builder` : `/${lang}/auth/login`;
 
   const handleLanguageChange = (newLang: string) => {
     const segments = pathname.split("/");
@@ -118,13 +122,13 @@ export default function MarketingHeader({ translations, lang }: Props) {
 
           {/* SIGNUP - Hidden on mobile to avoid overflow */}
           <Link
-            href={`${langPrefix}/auth/login`}
+            href={logInRef}
             className="text-lg font-medium text-emerald-600"
           >
             {t(translations, "marketing.nav.login", "Log in")}
           </Link>
           <Link
-            href={`${langPrefix}/auth/signup`}
+            href={signUpRef}
             className="hidden sm:block rounded-full bg-emerald-600 px-4 py-2 text-xs md:text-sm font-bold text-white shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 transition-all"
           >
             {t(translations, "pricing.cta", "Get Started")}
@@ -171,13 +175,13 @@ export default function MarketingHeader({ translations, lang }: Props) {
             </Link>
             <hr className="border-gray-100" />
             <Link
-              href={`${langPrefix}/auth/login`}
+              href={logInRef}
               className="text-lg font-medium text-emerald-600"
             >
               {t(translations, "marketing.nav.login", "Log in")}
             </Link>
             <Link
-              href={`${langPrefix}/auth/signup`}
+              href={signUpRef}
               className="w-full text-center rounded-xl bg-emerald-600 py-4 font-bold text-white shadow-lg shadow-emerald-600/10"
             >
               {t(translations, "pricing.cta", "Get Started")}

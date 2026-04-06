@@ -114,15 +114,24 @@ export default function WeddingGiftSection({ data, translations }: Props) {
                   :
                 </p>
                 <a
-                  href={`mailto:${data.paypal_url}`}
+                  // Construct a real payment URL instead of just the email
+                  href={`https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=${encodeURIComponent(data.paypal_url ?? "")}&currency_code=EUR`}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="text-lg font-medium text-neutral-800 hover:text-neutral-500 transition-colors"
                 >
+                  {/* We still show the email as the label so they know who they are paying */}
                   {data.paypal_url}
                 </a>
               </div>
             ) : (
               <UnderlinedLink
-                href={data.paypal_url!}
+                // Ensure the link has https://
+                href={
+                  data.paypal_url?.startsWith("http")
+                    ? data.paypal_url
+                    : `https://${data.paypal_url}`
+                }
                 className="text-neutral-800 text-lg font-medium"
                 ariaLabel="PayPal link"
                 thicknessClass="h-[1px]"

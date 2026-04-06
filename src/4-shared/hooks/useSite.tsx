@@ -51,10 +51,8 @@ export function useSite(user: User | null) {
       const rows = Array.isArray(data) ? data : [];
       const chosenSite =
         (lockedSiteId.current
-          ? (rows.find((row) => row.id === lockedSiteId.current) ?? null)
-          : null) ??
-        rows[0] ??
-        null;
+          ? rows.find((row) => row.id === lockedSiteId.current)
+          : rows[0]) ?? null;
 
       if (rows.length > 1) {
         console.warn("[useSite] Multiple site rows found for owner_user_id", {

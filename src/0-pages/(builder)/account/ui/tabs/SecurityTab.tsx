@@ -123,7 +123,7 @@ export const SecurityTab = ({
                 }
                 description={
                   translations["builder.account.upgrade_cta_desc"] ||
-                  "SEO visibility is a premium feature. Upgrade to enable search engine indexing."
+                  "Search engine privacy is a Premium feature. Upgrade to hide your site from Google and other search engines."
                 }
                 upgradeLabel={
                   translations["builder.account.upgrade_cta_title"] ||
