@@ -118,6 +118,12 @@ export default function MarketingHeader({ translations, lang }: Props) {
 
           {/* SIGNUP - Hidden on mobile to avoid overflow */}
           <Link
+            href={`${langPrefix}/auth/login`}
+            className="text-lg font-medium text-emerald-600"
+          >
+            {t(translations, "marketing.nav.login", "Log in")}
+          </Link>
+          <Link
             href={`${langPrefix}/auth/signup`}
             className="hidden sm:block rounded-full bg-emerald-600 px-4 py-2 text-xs md:text-sm font-bold text-white shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 transition-all"
           >

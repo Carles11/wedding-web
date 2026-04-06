@@ -20,16 +20,18 @@ export function faqCategories(t: TranslationDictionary): FAQCategory[] {
         {
           q:
             t["marketing.faq.general.what_is_wedding_web"] ??
-            "What is WeddWeb?",
+            "What exactly is WeddWeb?",
           a:
             t["marketing.faq.general.what_is_wedding_web.answer"] ??
-            "WeddWeb is a wedding website builder where every couple gets a beautiful, multilingual site that lives online permanently. 11 languages, custom domains, RSVP tools, event schedules, and accommodation info — all in one place, for as long as you want it.",
+            "WeddWeb is a wedding website platform built for the global family. Create your site in minutes, share it in up to 11 native scripts, and keep it online forever—on your own domain, completely free of advertising.",
         },
         {
-          q: t["marketing.faq.general.is_it_free"] ?? "Is WeddWeb free?",
+          q:
+            t["marketing.faq.general.is_it_free"] ??
+            "Is WeddWeb really free to start?",
           a:
             t["marketing.faq.general.is_it_free.answer"] ??
-            "Yes. WeddWeb has a permanent Free plan — no expiry date, no trial period. It includes one language, a custom subdomain, and all core features. Upgrade to Premium once, and unlock custom domains, more languages, and everything else — forever.",
+            "Yes. The Free plan gives you a permanent wedding website on a custom subdomain, core features, and one language—no credit card required. The Premium plan is a single one-time payment that unlocks your own domain, all 11 languages, and unlimited content.",
         },
         {
           q:

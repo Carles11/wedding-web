@@ -25,16 +25,15 @@ export default function FAQPage({ translations, lang }: Props) {
 
       <FAQPageShell
         title={
-          translations["marketing.faq.title"] ??
-          "Your Wedding, Every Question Answered"
+          translations["marketing.faq.title"] ?? "Everything You Want to Know"
         }
         summary={
           translations["marketing.faq.summary"] ??
-          "Everything you need to know about building a wedding website that lasts a lifetime."
+          "Your questions, answered honestly. From how long your site stays online to how your grandmother in Riyadh reads it in Arabic—everything about your WeddWeb experience, right here."
         }
         fine_print={
           translations["marketing.faq.fine_print"] ??
-          "Still have questions? Write to us."
+          "Still have a question? Our team is one message away."
         }
       >
         <FAQList t={translations} />
