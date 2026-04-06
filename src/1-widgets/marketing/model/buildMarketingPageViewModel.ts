@@ -89,7 +89,8 @@ export function buildMarketingPageViewModel(
       freePlanName: translations["marketing.pricing.free_plan_name"] || "Free",
       freePlanPrice: translations["marketing.pricing.free_plan_price"] || "0 €",
       freePlanCTA:
-        translations["marketing.pricing.free_plan_cta"] || "Start for Free",
+        translations["marketing.pricing.free_plan_cta"] ||
+        "Begin Your Story, Free",
       freePlanFeatures: getLocalizedPlanFeatureTitles("free", translations),
       premiumPlanName:
         translations["marketing.pricing.premium_plan_name"] || "Premium",

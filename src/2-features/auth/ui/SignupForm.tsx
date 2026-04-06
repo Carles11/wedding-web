@@ -219,7 +219,7 @@ export default function SignupForm({ translations, lang }: Props) {
           <BuilderTextInput
             label={tr(translations, "auth.common.email", "Email")}
             value={email}
-            onChange={setEmail}
+            onChange={(val) => setEmail(val.trim())}
             type="email"
             placeholder={tr(
               translations,

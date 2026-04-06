@@ -28,18 +28,15 @@ export default function PricingTable({
   const planKeys = Object.keys(PLAN_CATALOG) as PlanType[];
 
   const filteredPlans = planKeys.filter((p) =>
-    // Agency plans start with "agency", private plans do not
-    // (AGENCY PLANS MUST BE NAMED WITH "agency" PREFIX FOR THIS TO WORK: COMMING SOON)
     type === "agency" ? p.startsWith("agency") : !p.startsWith("agency"),
   );
 
   return (
-    <div className="mx-auto grid max-w-5xl gap-8 md:grid-cols-2 lg:grid-cols-2">
+    <div className="mx-auto grid max-w-5xl gap-8 md:grid-cols-2 lg:grid-cols-2 marketing-theme">
       {filteredPlans.map((plan) => {
         const def = PLAN_CATALOG[plan];
         const highlight = plan === "premium";
 
-        // PRICE FORMATTING
         const formattedPrice =
           def.price === -1
             ? new Intl.NumberFormat(lang, {
@@ -51,7 +48,6 @@ export default function PricingTable({
                 currency: def.currency,
               }).format(def.price);
 
-        // TRANSLATIONS
         const planName = t(translations, `pricing.plan.${plan}.name`, def.name);
 
         const localizedFeatures = getLocalizedPlanFeatureTitles(
@@ -59,21 +55,32 @@ export default function PricingTable({
           translations,
         );
 
-        const billingKey = `pricing.billing.${String(def.billing).replace("-", "_")}`;
+        const billingKey = `pricing.billing.${String(def.billing).replace(
+          "-",
+          "_",
+        )}`;
         const billingLabel = t(translations, billingKey, String(def.billing));
 
         return (
           <div
             key={plan}
+            style={{
+              borderColor: highlight
+                ? "var(--marketing-color-primary)"
+                : undefined,
+            }}
             className={`
             relative flex flex-col rounded-2xl border bg-white
             p-8 shadow-sm transition
             ${isLoading ? "opacity-80 pointer-events-none" : "hover:shadow-xl hover:-translate-y-1"}
-            ${highlight ? "border-blue-500 shadow-lg" : "border-gray-200"}
+            ${highlight ? "shadow-lg ring-1 ring-[var(--marketing-color-primary)]" : "border-gray-200"}
             `}
           >
             {highlight && (
-              <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-blue-600 px-3 py-1 text-xs text-white">
+              <span
+                style={{ backgroundColor: "var(--marketing-color-primary)" }}
+                className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full px-3 py-1 text-xs text-white font-bold"
+              >
                 {translations["pricing.most_popular"] ?? "Most loved"}
               </span>
             )}
@@ -103,19 +110,29 @@ export default function PricingTable({
               )}
             </div>
 
-            {/* FEATURES (comming from PLAN_CATALOG. src\4-shared\config\plans\planCatalog.ts */}
+            {/* FEATURES */}
             <ul className="mb-6 space-y-3 text-sm">
               {localizedFeatures.map((feat, i) => (
                 <li key={i} className="flex items-start gap-3">
-                  <span className="mt-1 flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-xs text-blue-600">
+                  <span
+                    style={{
+                      backgroundColor: "var(--marketing-color-primary)",
+                      opacity: 0.15,
+                    }}
+                    className="mt-1 flex h-5 w-5 items-center justify-center rounded-full text-xs"
+                  ></span>
+                  <span
+                    style={{ color: "var(--marketing-color-primary)" }}
+                    className="mt-1 -ml-8 flex h-5 w-5 items-center justify-center text-xs font-bold"
+                  >
                     ✓
                   </span>
-                  {feat}
+                  <span className="ml-0">{feat}</span>
                 </li>
               ))}
             </ul>
 
-            {/* LIMITS  (comming from PLAN_CATALOG.limits src\4-shared\config\plans\planCatalog.ts */}
+            {/* LIMITS */}
             {def.limits && (
               <div className="mt-auto border-t pt-4 text-sm">
                 <div className="space-y-2">
@@ -128,7 +145,7 @@ export default function PricingTable({
                           prop.replace(/([A-Z])/g, " $1").trim(),
                         )}
                       </span>
-                      <span className="font-medium">
+                      <span className="font-medium text-[var(--foreground)]">
                         {formatLimit(val as number, translations, prop)}
                       </span>
                     </div>
@@ -141,13 +158,15 @@ export default function PricingTable({
             {onSelect && (
               <button
                 disabled={isLoading}
+                style={{
+                  backgroundColor: isLoading
+                    ? "#9ca3af"
+                    : "var(--marketing-color-primary)",
+                }}
                 className={`
-                  mt-8 w-full rounded-lg py-3 text-sm font-semibold text-white transition
-                  ${
-                    isLoading
-                      ? "bg-gray-400 cursor-not-allowed"
-                      : "bg-blue-600 hover:bg-blue-700 cursor-pointer"
-                  }
+                  mt-8 w-full rounded-full py-3 text-sm font-semibold text-white transition
+                  hover:brightness-110 active:scale-95
+                  ${isLoading ? "cursor-not-allowed" : "cursor-pointer shadow-md"}
                 `}
                 onClick={() => onSelect(plan)}
               >

@@ -64,7 +64,7 @@ export default async function LoginPage({
   const translations = await fetchGlobalTranslations(lang, "en");
 
   return (
-    <main className="min-h-screen flex items-center justify-center">
+    <main className="min-h-screen flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mt-8">
           <Heading as="h1">

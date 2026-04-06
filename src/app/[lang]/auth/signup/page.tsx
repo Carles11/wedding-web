@@ -64,8 +64,8 @@ export default async function SignupPage({
   const translations = await fetchGlobalTranslations(lang, "en");
 
   return (
-    <main className="min-h-screen flex items-center justify-center">
-      <div className="w-full max-w-[80%]">
+    <main className="min-h-screen flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
         <div className="text-center mt-8">
           <Heading as="h1">
             {translations["auth.signup.welcome"] ?? "Welcome"}

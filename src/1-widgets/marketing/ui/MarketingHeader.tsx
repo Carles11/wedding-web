@@ -127,7 +127,7 @@ export default function MarketingHeader({ translations, lang }: Props) {
             href={`${langPrefix}/auth/signup`}
             className="hidden sm:block rounded-full bg-emerald-600 px-4 py-2 text-xs md:text-sm font-bold text-white shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 transition-all"
           >
-            {t(translations, "marketing.nav.get_started", "Get Started")}
+            {t(translations, "pricing.cta", "Get Started")}
           </Link>
 
           {/* MOBILE MENU TOGGLE */}
@@ -180,7 +180,7 @@ export default function MarketingHeader({ translations, lang }: Props) {
               href={`${langPrefix}/auth/signup`}
               className="w-full text-center rounded-xl bg-emerald-600 py-4 font-bold text-white shadow-lg shadow-emerald-600/10"
             >
-              {t(translations, "marketing.nav.get_started", "Get Started")}
+              {t(translations, "pricing.cta", "Get Started")}
             </Link>
           </nav>
         </div>

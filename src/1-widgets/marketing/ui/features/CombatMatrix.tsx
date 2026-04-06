@@ -214,10 +214,14 @@ export default function CombatMatrix({ translations }: Props) {
                   {/* Giants pill */}
                   <div className="rounded-xl bg-gray-50 p-3">
                     <div className="text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-1.5">
-                      The Giants
+                      {t(
+                        translations,
+                        "'marketing.combat.table.title.giants'",
+                        "The Giants",
+                      )}
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-gray-300 shrink-0" />
+                      <X className="w-4 h-4 shrink-0 text-gray-400" />
                       <span className="text-[11px] font-semibold text-gray-500 leading-tight">
                         {item.giants.label}
                       </span>
@@ -226,17 +230,21 @@ export default function CombatMatrix({ translations }: Props) {
                 </div>
 
                 {/* Desktop: Original Column Layout */}
-                <div className="hidden md:flex col-span-3 p-6 bg-emerald-50/10 justify-center">
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold uppercase tracking-wider">
-                    <Check className="w-3.5 h-3.5 shrink-0" />
-                    {item.weddweb.label}
+                <div className="hidden md:flex col-span-3 p-6 bg-emerald-50/10 items-center justify-center border-l border-gray-100">
+                  <div className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-emerald-100/50 text-emerald-800 w-full max-w-[160px] min-h-[64px] justify-center transition-all hover:scale-105">
+                    <Check className="w-4 h-4 shrink-0 text-emerald-600" />
+                    <span className="text-[10px] leading-tight font-bold uppercase tracking-widest text-center">
+                      {item.weddweb.label}
+                    </span>
                   </div>
                 </div>
 
-                <div className="hidden md:flex col-span-3 p-6 justify-center">
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gray-100 text-gray-500 text-xs font-medium uppercase tracking-wider">
-                    <X className="w-3.5 h-3.5 shrink-0" />
-                    {item.giants.label}
+                <div className="hidden md:flex col-span-3 p-6 items-center justify-center border-l border-gray-100">
+                  <div className="flex flex-col items-center gap-2 px-4 py-2 rounded-2xl bg-gray-100/80 text-gray-500 w-full max-w-[160px] min-h-[64px] justify-center opacity-80 grayscale hover:grayscale-0 transition-all">
+                    <X className="w-4 h-4 shrink-0 text-gray-400" />
+                    <span className="text-[10px] leading-tight font-bold uppercase tracking-widest text-center">
+                      {item.giants.label}
+                    </span>
                   </div>
                 </div>
               </div>

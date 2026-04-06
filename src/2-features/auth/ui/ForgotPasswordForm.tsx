@@ -52,7 +52,7 @@ export default function ForgotPasswordForm({ translations, lang }: Props) {
 
     setLoading(true);
     try {
-      const result = await sendPasswordReset(email, currentLang);
+      const result = await sendPasswordReset(email.trim(), currentLang);
       if (result.error) {
         setGenericError(result.error);
       } else {
@@ -121,7 +121,7 @@ export default function ForgotPasswordForm({ translations, lang }: Props) {
           <BuilderTextInput
             label={tr(translations, "auth.common.email", "Email")}
             value={email}
-            onChange={setEmail}
+            onChange={(val) => setEmail(val.trim())}
             placeholder={tr(
               translations,
               "auth.common.email_placeholder",
