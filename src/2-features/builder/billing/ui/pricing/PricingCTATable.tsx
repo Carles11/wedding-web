@@ -30,7 +30,7 @@ export default function PricingCTATable({
           as="h2"
           className="font-light text-left tracking-wide drop-shadow-lg max-w-[90%] md:max-w-3xl pb-8"
         >
-          {t["pricing.for_couples"] ?? "For couples"}
+          {t["pricing.for_couples"] ?? "For you two"}
         </Heading>
         <PricingTable
           translations={t}

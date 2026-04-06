@@ -22,7 +22,7 @@ export default function HeroMarketing({
 }: HeroMarketingProps) {
   return (
     <section
-      className="w-full min-h-[80vh] flex items-center"
+      className="w-full min-h-auto md:min-h-[70vh] flex items-center"
       aria-label="Marketing hero"
     >
       <div

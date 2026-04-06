@@ -15,6 +15,7 @@ import { generateWebPageSchema } from "@/4-shared/lib/seo/generateGraphSchema";
 import type { MarketingPageProps } from "@/4-shared/types";
 import { CookiesConsentBanner } from "@/4-shared/ui/CookiesConsentBanner";
 import { useRouter } from "next/navigation";
+
 /**
  * Refactored MarketingPageComponent
  *
@@ -36,8 +37,6 @@ export default function MarketingPageComponent({
 
   // HANDLER: Primary CTA (Builder or Signup)
   const handlePrimaryClick = async () => {
-    // Immediate feedback for INP: We don't wait for the session to push the route
-    // if the user object is already present from the hook.
     if (user) {
       router.push(`/${initialLang}/builder`);
       return;
@@ -60,13 +59,9 @@ export default function MarketingPageComponent({
 
   // HANDLER: Language Selector
   const handleLanguageChange = async (lang: string) => {
-    // If user is logged in, sync preference in background
     if (user?.id) {
       updateAccountInfo(user.id, { preferred_language: lang });
     }
-
-    // NATIVE REDIRECT: Let the Server Page handle fetching new translations
-    // This eliminates the need for client-side 'useEffect' fetching.
     router.push(`/${lang}`);
   };
 
@@ -76,19 +71,20 @@ export default function MarketingPageComponent({
     onSecondaryClick: handleSecondaryClick,
   });
 
-  // FAQ Schema — page-specific; Organization/WebSite/SoftwareApplication are in the layout @graph
+  // FAQ Schema — Updated with "Senior Copywriter" fallbacks
   const faqSchema = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
     mainEntity: [
       {
         "@type": "Question",
-        name: translations["marketing.faq.q1.title"] || "Is WeddWeb free?",
+        name:
+          translations["marketing.faq.q1.title"] || "Is WeddWeb really free?",
         acceptedAnswer: {
           "@type": "Answer",
           text:
             translations["marketing.faq.q1.text"] ||
-            "Yes, we offer a free tier with all essential features.",
+            "Yes. We offer a fully functional free tier so you can start sharing your story immediately, with no credit card required.",
         },
       },
     ],
@@ -96,19 +92,16 @@ export default function MarketingPageComponent({
 
   return (
     <>
-      {/* Page-specific JSON-LD — full @graph (Org/WebSite/Software) is in [lang]/layout.tsx */}
-      {/* WebPage + Speakable: pins #hero-title and #hero-summary as the canonical voice/AI summary */}
       <JsonLd
         data={generateWebPageSchema(
           translations["marketing.hero.subheadline"] ||
-            "Create your professional wedding website easily.",
+            "11 native languages, optimized for search visibility, and an experience your guests will love — before the ink dries on your invitations.",
           initialLang,
         )}
       />
       <JsonLd data={faqSchema} />
 
       <main className="min-h-screen">
-        {/* SEMANTIC CHECK: HeroMarketing uses <h1> as verified in Source 9 */}
         <HeroMarketing
           {...viewModel.hero}
           lang={initialLang}
@@ -116,15 +109,11 @@ export default function MarketingPageComponent({
           secondaryHref={secondaryHref}
         />
 
-        {/* SEMANTIC CHECK: FeaturesGrid uses <h2> as verified in Source 8 */}
         <FeaturesGrid lang={initialLang} {...viewModel.features} />
 
-        {/* SEMANTIC CHECK: TestimonialsSection uses <h2> as verified in Source 12 */}
         <TestimonialsSection {...viewModel.testimonials} />
 
-        {/* SEMANTIC CHECK: PricingSection uses <h2> as verified in Source 11 */}
         <section id="pricing" className="scroll-mt-20">
-          {" "}
           <PricingSection
             {...viewModel.pricing}
             onFreePlanClick={handlePrimaryClick}
@@ -134,7 +123,7 @@ export default function MarketingPageComponent({
         </section>
 
         <GlobalLegacyBridge translations={translations} lang={initialLang} />
-        {/* SEMANTIC CHECK: CTASection uses <h2> as verified in Source 7 */}
+
         <CTASection
           {...viewModel.cta}
           onButtonClick={handlePrimaryClick}

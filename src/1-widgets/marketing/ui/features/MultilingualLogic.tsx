@@ -1,7 +1,4 @@
-import {
-  LANGUAGES_SELECTOR,
-  SUPPORTED_LANGUAGES,
-} from "@/4-shared/config/i18n";
+import { LANGUAGES_SELECTOR } from "@/4-shared/config/i18n";
 import { t } from "@/4-shared/helpers/t";
 import { JsonLd } from "@/4-shared/lib/seo/JsonLd";
 import type { MarketingTranslations } from "@/4-shared/types/marketingPage";
@@ -35,12 +32,12 @@ export default function MultilingualLogic({ translations }: Props) {
       title: t(
         translations,
         "marketing.multilingual.pillar.edge.title",
-        "Edge-Computed Locale Detection",
+        "Every Guest, Instantly at Home",
       ),
       body: t(
         translations,
         "marketing.multilingual.pillar.edge.body",
-        "WeddWeb's Next.js middleware intercepts every request at the network edge—before a single byte of HTML is sent. It reads the Accept-Language header, matches it against our 11 supported BCP-47 codes, and instantly serves the correct language version with sub-second performance. No client-side redirects. No layout shift. Fully compatible with Google's language-targeting guidelines.",
+        "Before your guest reads a single word, WeddWeb has already identified their preferred language at the network edge. No jarring redirects. No language-selector dropdown they have to hunt for. Just the warmth of your wedding story arriving in the script that feels like home—in under a second.",
       ),
     },
     {
@@ -49,12 +46,12 @@ export default function MultilingualLogic({ translations }: Props) {
       title: t(
         translations,
         "marketing.multilingual.pillar.scripts.title",
-        "Native Script Engine — RTL, Logograms & Devanagari",
+        "Arabic, Hindi, Chinese—Written Right",
       ),
       body: t(
         translations,
         "marketing.multilingual.pillar.scripts.body",
-        "WeddWeb is the best bilingual wedding website platform for 2026 because it renders each script natively. Arabic (العربية) and other RTL languages are served with dir='rtl' at the HTML level — not overridden by CSS hacks. Chinese (中文) logograms, Devanagari for Hindi (हिन्दी), and Cyrillic for Russian (Русский) all use correct Unicode ranges and font stacks, guaranteeing global accessibility for every guest.",
+        "We don't bolt on a translation plugin. We built a native script engine. Arabic flows right-to-left as it was meant to. Devanagari for Hindi renders with the correct letterforms. Chinese logograms display with precision. Every script is optimized for search visibility, so your shared history is found, honored, and preserved.",
       ),
     },
     {
@@ -63,12 +60,12 @@ export default function MultilingualLogic({ translations }: Props) {
       title: t(
         translations,
         "marketing.multilingual.pillar.hreflang.title",
-        "Automated 11-Way Hreflang Injection",
+        "Your Story, Discoverable in Every Language",
       ),
       body: t(
         translations,
         "marketing.multilingual.pillar.hreflang.body",
-        "Every WeddWeb page automatically generates a complete set of hreflang alternate tags covering all 11 language variants plus x-default. This eliminates duplicate-content penalties and tells Google's crawlers exactly which URL to serve in each country — maximising international SEO coverage with zero manual configuration.",
+        "WeddWeb automatically tells every search engine exactly which language version to show to every guest worldwide. No duplicate content. No invisible wedding. Just your story—precisely surfaced, in the right language, in the right country.",
       ),
     },
   ];
@@ -107,7 +104,7 @@ export default function MultilingualLogic({ translations }: Props) {
             {t(
               translations,
               "marketing.multilingual.subtitle",
-              "WeddWeb is an AI-ready multilingual wedding website platform with native RTL support, automated hreflang, and sub-second performance — the global accessibility standard for 2026.",
+              "The moment the ink dries on your invitations, your family starts spreading across borders. WeddWeb ensures that a grandmother in Mumbai, a cousin in Paris, and a dear friend in Riyadh all feel equally honored—reading every detail of your day in their own native script, perfectly rendered, forever.",
             )}
           </p>
 
@@ -146,7 +143,7 @@ export default function MultilingualLogic({ translations }: Props) {
               {t(
                 translations,
                 "marketing.multilingual.grid.title",
-                `${SUPPORTED_LANGUAGES.length} supported languages`,
+                "11 native scripts. One shared story.",
               )}
             </Heading>
             <ul

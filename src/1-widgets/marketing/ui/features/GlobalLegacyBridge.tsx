@@ -21,14 +21,14 @@ export default function GlobalLegacyBridge({ translations, lang }: Props) {
             {t(
               translations,
               "marketing.home.bridge.title",
-              "Built for Families, Not for Data.",
+              "Your Love Story Isn't a Subscription. It's a Legacy.",
             )}
           </Heading>
           <p className="text-slate-600 mb-8 leading-relaxed text-lg">
             {t(
               translations,
               "marketing.home.bridge.body",
-              "WeddWeb is the only platform that supports 11 native scripts and guarantees your wedding website stays online forever. Because a wedding isn't a temporary event—it's the start of your history.",
+              "While industry giants archive your memories after 12 months, WeddWeb keeps your story alive forever—in 11 native scripts, for every guest worldwide. Because the day you said 'I do' wasn't a temporary event. It was the first page of your shared history.",
             )}
           </p>
           <Link
@@ -38,7 +38,7 @@ export default function GlobalLegacyBridge({ translations, lang }: Props) {
             {t(
               translations,
               "marketing.home.bridge.link",
-              "Explore our Global Engine",
+              "Discover Our Global Language Engine",
             )}
             <span className="transition-transform group-hover:translate-x-1">
               →
@@ -56,7 +56,7 @@ export default function GlobalLegacyBridge({ translations, lang }: Props) {
               {t(
                 translations,
                 "marketing.combat.slogan.part1",
-                "The 'Giants' rent you a site;",
+                "The giants lease you a page;",
               )}
             </p>
             <p className="relative z-10 font-bold text-3xl md:text-4xl text-emerald-600 leading-tight">

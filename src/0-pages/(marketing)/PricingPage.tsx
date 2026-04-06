@@ -12,14 +12,14 @@ export default function PricingPage({ translations, lang }: Props) {
   return (
     <>
       <PricingPageShell
-        title={translations["pricing.title"] ?? "Plans & Pricing"}
+        title={translations["pricing.title"] ?? "Start Free. Own It Forever."}
         summary={
           translations["pricing.summary"] ??
-          "Create a beautiful wedding website and share your special day."
+          "Your wedding website stays online forever—in 11 native scripts, on your own domain, with complete privacy. Begin for free, and upgrade once when you're ready for all of it."
         }
         fine_print={
           translations["pricing.fine_print"] ??
-          "All prices include applicable taxes where required."
+          "All prices are in EUR and include any applicable taxes. The Premium plan is a single, one-time payment—no annual renewals, no hidden costs, no surprises."
         }
       >
         <PricingCTATableAdapter lang={lang} t={translations} />

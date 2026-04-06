@@ -2,6 +2,7 @@
 
 import { sendPasswordReset } from "@/2-features/auth/api";
 import { BuilderTextInput } from "@/4-shared/ui/builder/inputs";
+import Heading from "@/4-shared/ui/commons/typography/Heading";
 import { MarketingButton } from "@/4-shared/ui/marketing";
 import { EMAIL_RE } from "@/4-shared/utils/validations";
 import Link from "next/link";
@@ -89,9 +90,9 @@ export default function ForgotPasswordForm({ translations, lang }: Props) {
               />
             </svg>
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+          <Heading as="h2" className="text-2xl font-bold text-gray-900 mb-2">
             {tr(translations, "auth.common.check_email", "Check Your Email")}
-          </h2>
+          </Heading>
           <p className="text-gray-600 mb-6">
             {tr(
               translations,
@@ -110,9 +111,12 @@ export default function ForgotPasswordForm({ translations, lang }: Props) {
   return (
     <div className="flex items-center justify-center min-h-screen">
       <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
+        <Heading
+          as="h2"
+          className="text-2xl font-bold text-center text-gray-800 mb-6"
+        >
           {tr(translations, "auth.forgot.title", "Reset Your Password")}
-        </h2>
+        </Heading>
         <form onSubmit={handleSubmit} className="space-y-4">
           <BuilderTextInput
             label={tr(translations, "auth.common.email", "Email")}

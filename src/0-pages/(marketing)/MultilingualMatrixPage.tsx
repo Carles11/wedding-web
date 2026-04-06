@@ -23,13 +23,13 @@ export const MultilingualMatrixPage = ({ translations, lang }: Props) => {
         {t(
           translations,
           "marketing.multilingual.title.part1",
-          "One Platform. 11 Languages.",
+          "One Website. Every Language.",
         )}
         <span className="block mt-2 text-emerald-600">
           {t(
             translations,
             "marketing.multilingual.title.part2",
-            "Every Script.",
+            "No Guest Left Behind.",
           )}
         </span>
       </Heading>

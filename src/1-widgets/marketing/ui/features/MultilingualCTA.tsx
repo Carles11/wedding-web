@@ -22,7 +22,7 @@ export default function MultilingualCTA({ translations, lang }: Props) {
           {t(
             translations,
             "marketing.ml_cta.title",
-            "Ready to build your digital home?",
+            "Your Story Deserves to Be Told in Every Language.",
           )}
         </Heading>
 
@@ -30,7 +30,7 @@ export default function MultilingualCTA({ translations, lang }: Props) {
           {t(
             translations,
             "marketing.ml_cta.subtitle",
-            "Start creating your professional, 11-language wedding website today. No ads, no data selling, just memories.",
+            "Start building your permanent digital home today. No ads. No data selling. No expiry date. Just the two of you, and every guest who loves you.",
           )}
         </p>
 
@@ -42,7 +42,7 @@ export default function MultilingualCTA({ translations, lang }: Props) {
             {t(
               translations,
               "marketing.pricing.free_plan_cta",
-              "Get Started for Free",
+              "Begin Your Story, Free",
             )}
           </Link>
           <Link
@@ -52,7 +52,7 @@ export default function MultilingualCTA({ translations, lang }: Props) {
             {t(
               translations,
               "marketing.ml_cta.button.secondary",
-              "View Pricing",
+              "See Pricing",
             )}
           </Link>
         </div>

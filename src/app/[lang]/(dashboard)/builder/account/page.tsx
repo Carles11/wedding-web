@@ -9,6 +9,7 @@ import {
   resolveSearchParams,
 } from "@/4-shared/lib/params/resolveSearchParams";
 import { createSupabaseSSRClient } from "@/4-shared/lib/supabase/server";
+import { CustomLoader } from "@/4-shared/ui/commons/loader/CustomLoader";
 
 export default async function AccountPageSSR({
   params,
@@ -34,5 +35,16 @@ export default async function AccountPageSSR({
 
   // Fetch account info server-side (stub userId for demo)
   const account = await getAccountInfo();
+
+  if (!account) {
+    return (
+      <CustomLoader
+        message={
+          translations["checkout.status.wait"] ||
+          "Please wait, this may take a moment."
+        }
+      />
+    );
+  }
   return <AccountPage account={account} translations={translations} />;
 }

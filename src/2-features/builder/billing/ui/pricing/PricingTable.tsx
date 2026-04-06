@@ -4,6 +4,7 @@ import { PLAN_CATALOG } from "@/4-shared/config/plans/planCatalog";
 import { getLocalizedPlanFeatureTitles } from "@/4-shared/helpers/billing/entitlements";
 import { t } from "@/4-shared/helpers/t";
 import type { PlanType } from "@/4-shared/types";
+import Heading from "@/4-shared/ui/commons/typography/Heading";
 
 function formatLimit(val: number, t: Record<string, string>, prop: string) {
   if (val === -1) return t["pricing.unlimited"] ?? "Unlimited";
@@ -73,13 +74,15 @@ export default function PricingTable({
           >
             {highlight && (
               <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-blue-600 px-3 py-1 text-xs text-white">
-                {translations["pricing.most_popular"] ?? "Most popular"}
+                {translations["pricing.most_popular"] ?? "Most loved"}
               </span>
             )}
 
             {/* PLAN TITLE */}
             <div className="mb-6 text-center">
-              <h3 className="text-xl font-semibold">{planName}</h3>
+              <Heading as="h3" className="text-xl font-semibold">
+                {planName}
+              </Heading>
             </div>
 
             {/* PRICE */}
@@ -149,8 +152,8 @@ export default function PricingTable({
                 onClick={() => onSelect(plan)}
               >
                 {isLoading
-                  ? (translations["loading"] ?? "Processing...")
-                  : (translations["pricing.cta"] ?? "Select")}
+                  ? (translations["loading"] ?? "Almost there…")
+                  : (translations["pricing.cta"] ?? "Get started")}
               </button>
             )}
           </div>

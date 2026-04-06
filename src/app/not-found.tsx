@@ -5,8 +5,16 @@ import { i18n404 } from "@/4-shared/config/seo/i18n404";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import "./globals.css";
-
+// REMOVED: import "./globals.css";
+/**
+ * RootNotFound Component
+ * * WHY INLINE STYLES?
+ * This page is a "Root" entry point that exists outside the main [lang] layout.
+ * By using scoped inline CSS instead of importing the heavy 'globals.css', we:
+ * 1. Eliminate a massive render-blocking request for a simple page.
+ * 2. Prevent "Flash of Unstyled Content" (FOUC) during 404 redirects.
+ * 3. Keep the 404 experience extremely fast and resilient to CSS architecture changes.
+ */
 export default function RootNotFound() {
   const pathname = usePathname();
   const segments = pathname?.split("/") || [];
@@ -18,30 +26,50 @@ export default function RootNotFound() {
   const dict = i18n404[lang as keyof typeof i18n404] || i18n404.en;
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gray-50 px-4 antialiased">
-      <div className="max-w-md w-full text-center">
-        <div className="mb-6 select-none">
-          <span className="text-9xl font-bold text-gray-200">404</span>
-        </div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-4">{dict.title}</h1>
+    <>
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
+        .nf-container { 
+          min-height: 100vh; display: flex; align-items: center; justify-content: center; 
+          background: #f9fafb; padding: 0 1rem; font-family: ui-sans-serif, system-ui, sans-serif; 
+        }
+        .nf-content { max-width: 28rem; width: 100%; text-align: center; }
+        .nf-404 { font-size: 8rem; font-weight: 800; color: #f3f4f6; margin-bottom: 1.5rem; user-select: none; line-height: 1; }
+        .nf-title { font-size: 1.875rem; font-weight: 700; color: #111827; margin-bottom: 1rem; }
+        .nf-desc { color: #4b5563; margin-bottom: 2rem; line-height: 1.6; }
+        .nf-actions { display: flex; flex-direction: column; gap: 1rem; justify-content: center; }
+        @media (min-width: 640px) { .nf-actions { flex-direction: row; } }
+        .btn-main { 
+          padding: 0.75rem 1.5rem; border-radius: 0.375rem; color: #fff; font-weight: 600; 
+          text-decoration: none; background-color: #6ABDA6; transition: opacity 0.2s;
+        }
+        .btn-sec { 
+          padding: 0.75rem 1.5rem; border-radius: 0.375rem; color: #374151; font-weight: 500; 
+          text-decoration: none; border: 1px solid #d1d5db; background: #fff; transition: background 0.2s;
+        }
+        .btn-main:hover { opacity: 0.9; }
+        .btn-sec:hover { background: #f9fafb; }
+      `,
+        }}
+      />
 
-        <p className="text-gray-600 mb-8">{dict.desc}</p>
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <Link
-            href={`/${lang}`}
-            className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 rounded-md text-white font-semibold transition-all hover:opacity-90 shadow-sm"
-            style={{ backgroundColor: "#6ABDA6" }}
-          >
-            {dict.home}
-          </Link>
-          <Link
-            href={`/${lang}/faq`}
-            className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors"
-          >
-            {dict.faq}
-          </Link>
+      <main className="nf-container">
+        <div className="nf-content">
+          <div className="nf-404">404</div>
+          <h1 className="nf-title">{dict.title}</h1>
+          <p className="nf-desc">{dict.desc}</p>
+
+          <div className="nf-actions">
+            <Link href={`/${lang}`} className="btn-main">
+              {dict.home}
+            </Link>
+            <Link href={`/${lang}/faq`} className="btn-sec">
+              {dict.faq}
+            </Link>
+          </div>
         </div>
-      </div>
-    </main>
+      </main>
+    </>
   );
 }
