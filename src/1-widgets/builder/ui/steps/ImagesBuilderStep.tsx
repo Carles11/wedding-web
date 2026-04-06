@@ -74,13 +74,13 @@ function publicUrlFor(image: ImageRow): string | null {
   return `${base}?t=${cacheBuster}`;
 }
 
-function EmptySlot({ label }: { label: string }) {
-  return (
-    <div className="h-40 rounded-xl border border-dashed flex items-center justify-center text-sm text-gray-500 bg-gray-50">
-      {label}
-    </div>
-  );
-}
+// function EmptySlot({ label }: { label: string }) {
+//   return (
+//     <div className="h-40 rounded-xl border border-dashed flex items-center justify-center text-sm text-gray-500 bg-gray-50">
+//       {label}
+//     </div>
+//   );
+// }
 
 function ImageCard({
   img,
@@ -463,13 +463,7 @@ export default function ImagesBuilderStep({
                   translations={translations}
                   onDelete={() => handleDelete(assignedHero)}
                 />
-              ) : (
-                <EmptySlot
-                  label={
-                    translations["builder.images.label.hero"] || "Hero image"
-                  }
-                />
-              )}
+              ) : null}
 
               {!assignedHero && (
                 <FileUploader
@@ -525,14 +519,7 @@ export default function ImagesBuilderStep({
                   onDelete={() => handleDelete(assignedContact)}
                   vertical
                 />
-              ) : (
-                <EmptySlot
-                  label={
-                    translations["builder.images.label.contact"] ||
-                    "Contact image"
-                  }
-                />
-              )}
+              ) : null}
 
               {!assignedContact && (
                 <FileUploader

@@ -57,7 +57,7 @@ export default function OnboardingClient({ translations, lang }: Props) {
       <div className="max-w-6xl mx-auto px-6">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900">
+          <h1 className="text-4xl md:text-5xl font-bold pb-4 text-gray-900">
             {translations["onboarding.welcome"] ??
               "Welcome to Your Wedding Website"}
           </h1>
@@ -82,7 +82,7 @@ export default function OnboardingClient({ translations, lang }: Props) {
 
         {/* Free plan info box */}
         <div className="max-w-3xl mx-auto bg-white rounded-lg border border-gray-200 p-8 shadow-sm">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+          <h3 className="text-lg font-semibold text-gray-900 pb-4">
             {translations["onboarding.free_plan_note"] ??
               "Ready to start free?"}
           </h3>

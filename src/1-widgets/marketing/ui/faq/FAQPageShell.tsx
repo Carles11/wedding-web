@@ -23,7 +23,7 @@ export default function FAQPageShell({
       <header className="max-w-4xl mx-auto mb-12 text-center animate-fadeIn">
         <Heading
           as="h2"
-          className="text-3xl md:text-4xl font-bold text-center pt-0 md:pt-8 pb-6"
+          className="text-3xl md:text-4xl font-bold text-center pt-2 md:pt-10 pb-6"
           style={{ color: "var(--marketing-color-on-gradient-text)" }}
         >
           {title}

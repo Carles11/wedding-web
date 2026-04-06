@@ -425,19 +425,19 @@ export default function GeneralSiteForm({
         <div>
           {/* Languages Selection Block */}
           <div className="space-y-3">
-            <div className="flex flex-col gap-1">
-              <label className="block text-md font-medium text-gray-800">
+            <div className="flex flex-col gap-1.5 border-l-4 border-emerald-500/20 pl-4 py-1">
+              <label className="block text-md font-semibold text-gray-900">
                 {translations["builder.general.form.label.languages"] ??
-                  "Select your website display languages"}
+                  "In which languages will your guests view the site?"}
               </label>
               <p
-                className={`text-xs ${planType === "free" ? "text-amber-600 font-medium" : "text-gray-500"}`}
+                className={`text-xs leading-relaxed ${planType === "free" ? "text-amber-700 bg-amber-50 px-2 py-1 rounded" : "text-gray-500"}`}
               >
                 {planType === "free"
                   ? translations["builder.general.form.language_limit"] ||
-                    "Free plan: 1 language. Upgrade to add more."
+                    "Your current plan includes 1 language. Upgrade to Premium to welcome guests in all 11 scripts."
                   : translations["builder.general.form.language_limit_pro"] ||
-                    "All languages enabled on your plan."}
+                    "Premium Plan: All 11 languages are enabled for your guests."}
               </p>
             </div>
 

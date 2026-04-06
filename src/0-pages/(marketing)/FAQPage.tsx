@@ -25,7 +25,8 @@ export default function FAQPage({ translations, lang }: Props) {
 
       <FAQPageShell
         title={
-          translations["marketing.faq.title"] ?? "Everything You Want to Know"
+          translations["marketing.faq.title.generic"] ??
+          "Frequently Asked Questions"
         }
         summary={
           translations["marketing.faq.summary"] ??
