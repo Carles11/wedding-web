@@ -1,0 +1,180 @@
+"use server";
+
+import { fetchGlobalTranslations } from "@/4-shared/lib/globalTranslations";
+import { supabaseAdmin } from "@/4-shared/lib/supabase/supabaseServer";
+import type { TranslationDictionary } from "@/4-shared/types";
+
+const MARKETING_CACHE_TTL_MS = 1000 * 60 * 5; // 5 minutes
+
+type MarketingCacheEntry = {
+  value: TranslationDictionary;
+  expiresAt: number;
+};
+
+function getMarketingCache(): Map<string, MarketingCacheEntry> {
+  // Persist cache on globalThis so it survives module reloads in dev
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  if (!(globalThis as any).__MARKETING_TRANSLATIONS_CACHE) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (globalThis as any).__MARKETING_TRANSLATIONS_CACHE = new Map<
+      string,
+      MarketingCacheEntry
+    >();
+  }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (globalThis as any).__MARKETING_TRANSLATIONS_CACHE as Map<
+    string,
+    MarketingCacheEntry
+  >;
+}
+
+/**
+ * Fetch marketing page translations from `global_translations_marketing` table.
+ *
+ * This helper fetches translations for a primary `locale` and optionally a
+ * `fallbackLocale`. Results are merged with primary values overriding fallback
+ * values. A small in-memory cache (TTL 5 minutes) reduces DB load.
+ *
+ * NOTE: server-side only helper (uses `supabaseAdmin`).
+ *
+ * @param locale Primary locale code (e.g., "en", "es")
+ * @param fallbackLocale Optional fallback locale (defaults to "en")
+ * @returns Flat translation dictionary mapping keys to values
+ *
+ * @example
+ * ```ts
+ * // In a server component or API route:
+ * const translations = await fetchMarketingTranslations('es', 'en');
+ * const headline = translations['marketing.hero.headline'];
+ * ```
+ */
+export async function fetchMarketingTranslations(
+  locale: string,
+  fallbackLocale?: string,
+): Promise<TranslationDictionary> {
+  const fallback = fallbackLocale ?? "en";
+  if (!locale && !fallback) return {};
+
+  const cacheKey = `marketing:${locale}:${fallbackLocale ?? ""}`;
+  const cache = getMarketingCache();
+  const now = Date.now();
+
+  const existing = cache.get(cacheKey);
+  if (existing && existing.expiresAt > now) return existing.value;
+
+  // Build a set of locale candidates to query. Some DB rows may store
+  // either full locales (e.g. "es-ES") or short locales (e.g. "es").
+  // Include both the exact locale and its base (part before '-') for
+  // both primary and fallback locales to increase matching coverage.
+  const candidates = new Set<string>();
+  const addLocale = (l?: string) => {
+    if (!l) return;
+    candidates.add(l);
+    const base = l.split("-")[0];
+    if (base) candidates.add(base);
+  };
+  addLocale(locale);
+  if (fallback && fallback !== locale) addLocale(fallback);
+  const localesToQuery = Array.from(candidates);
+
+  try {
+    const { data, error } = await supabaseAdmin
+      .from("global_translations_marketing")
+      .select("key, locale, value")
+      .in("locale", localesToQuery);
+
+    if (error) {
+      console.error(
+        "[marketingTranslations] fetchMarketingTranslations error",
+        error,
+      );
+      return {};
+    }
+
+    const map: Record<string, { preferred?: string; fallback?: string }> = {};
+
+    (data ?? []).forEach((row: unknown) => {
+      const r = row as { key?: string; locale?: string; value?: string };
+      if (!r || !r.key) return;
+      const {
+        key,
+        locale: rowLocale,
+        value,
+      } = r as {
+        key: string;
+        locale: string;
+        value: string;
+      };
+      if (!map[key]) map[key] = {};
+      if (rowLocale === locale) map[key].preferred = value;
+      else map[key].fallback = value;
+    });
+
+    // Bring in shared plan title keys from builder translations so
+    // marketing can reuse planCatalog feature title translation keys.
+    try {
+      const { data: builderData, error: builderError } = await supabaseAdmin
+        .from("global_translations_builder")
+        .select("key, locale, value")
+        .in("locale", localesToQuery)
+        .like("key", "pricing.plan.%");
+
+      if (!builderError) {
+        (builderData ?? []).forEach((row: unknown) => {
+          const r = row as { key?: string; locale?: string; value?: string };
+          if (!r || !r.key) return;
+
+          const {
+            key,
+            locale: rowLocale,
+            value,
+          } = r as {
+            key: string;
+            locale: string;
+            value: string;
+          };
+
+          if (!map[key]) map[key] = {};
+          if (rowLocale === locale) {
+            if (!map[key].preferred) map[key].preferred = value;
+          } else {
+            if (!map[key].fallback) map[key].fallback = value;
+          }
+        });
+      }
+    } catch (e) {
+      // Ignore this optional merge and continue with available translations.
+    }
+
+    const result: TranslationDictionary = {};
+    Object.keys(map).forEach((k) => {
+      result[k] = map[k].preferred ?? map[k].fallback ?? "";
+    });
+
+    // Fall back to global translations for any keys missing in the
+    // marketing-specific table. This helps when some locales were only
+    // populated in the global translations table (observed for several
+    // marketing strings in non-`ca` locales).
+    try {
+      const global = await fetchGlobalTranslations(locale, fallback);
+      Object.keys(global).forEach((k) => {
+        if (!result[k] || result[k] === "") result[k] = global[k];
+      });
+    } catch (e) {
+      // Ignore fallback errors and proceed with `result` as-is.
+    }
+
+    cache.set(cacheKey, {
+      value: result,
+      expiresAt: now + MARKETING_CACHE_TTL_MS,
+    });
+
+    return result;
+  } catch (err) {
+    console.error(
+      "[marketingTranslations] fetchMarketingTranslations unexpected error",
+      err,
+    );
+    return {};
+  }
+}

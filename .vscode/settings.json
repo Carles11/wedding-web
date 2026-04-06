@@ -1,15 +1,29 @@
 {
   // Use Prettier for code formatting
   "editor.defaultFormatter": "esbenp.prettier-vscode",
-  // Format on save
   "editor.formatOnSave": true,
-  // (Optional) Restrict formatting to supported files only
+
+  // Language-specific formatting overrides
   "[javascript]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
   "[typescript]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
   "[json]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
   "[css]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
   "[markdown]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
-  // Make sure Prettier uses the project's .prettierrc automatically
+
+  // Prettier Configuration
   "prettier.useEditorConfig": true,
-  "prettier.configPath": ".prettierrc"
+  "prettier.configPath": ".prettierrc",
+
+  // Deno: enable globally, but use enablePaths to keep it contained
+  "deno.enable": true,
+  "deno.enablePaths": [
+    "supabase/functions/resend-auth-hook",
+    "supabase/functions/legacy-notification"
+  ],
+  "deno.disablePaths": ["src", "e2e", "scripts", "public", "app"],
+  "deno.lint": true,
+  "deno.suggest.imports.hosts": {
+    "https://deno.land": true,
+    "https://esm.sh": true
+  }
 }

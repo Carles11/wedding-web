@@ -1,0 +1,1 @@
+export { MarketingInput } from "./MarketingInput";

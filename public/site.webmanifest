@@ -1,0 +1,308 @@
+{
+  "name": "WeddWeb",
+  "short_name": "WeddWeb",
+  "description": "Create your wedding website easily. Multilingual, customizable, and beautiful designs.",
+  "lang": "en",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "theme_color": "#ffffff",
+  "background_color": "#ffffff",
+  "orientation": "any",
+  "categories": [
+    "wedding",
+    "events",
+    "website",
+    "multilingual",
+    "customizable"
+  ],
+  "icons": [
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Pricing",
+      "url": "/en/pricing",
+      "description": "See pricing plans"
+    },
+    {
+      "name": "FAQ",
+      "url": "/en/faq",
+      "description": "Frequently Asked Questions"
+    },
+    {
+      "name": "Privacy Policy",
+      "url": "/en/privacy-policy",
+      "description": "Read our privacy policy"
+    },
+    {
+      "name": "Terms of Service",
+      "url": "/en/terms-of-service",
+      "description": "Read our terms of service"
+    },
+    {
+      "name": "Cookie Policy",
+      "url": "/en/cookie-policy",
+      "description": "Read our cookie policy"
+    },
+    {
+      "name": "Precios",
+      "url": "/es/pricing",
+      "description": "Ver planes de precios"
+    },
+    {
+      "name": "Preguntas frecuentes",
+      "url": "/es/faq",
+      "description": "Preguntas frecuentes"
+    },
+    {
+      "name": "Política de privacidad",
+      "url": "/es/privacy-policy",
+      "description": "Lee nuestra política de privacidad"
+    },
+    {
+      "name": "Términos de servicio",
+      "url": "/es/terms-of-service",
+      "description": "Lee nuestros términos de servicio"
+    },
+    {
+      "name": "Política de cookies",
+      "url": "/es/cookie-policy",
+      "description": "Lee nuestra política de cookies"
+    },
+    {
+      "name": "价格方案",
+      "url": "/zh/pricing",
+      "description": "查看定价计划"
+    },
+    {
+      "name": "常见问题",
+      "url": "/zh/faq",
+      "description": "常见问题解答"
+    },
+    {
+      "name": "隐私政策",
+      "url": "/zh/privacy-policy",
+      "description": "阅读我们的隐私政策"
+    },
+    {
+      "name": "服务条款",
+      "url": "/zh/terms-of-service",
+      "description": "阅读我们的服务条款"
+    },
+    {
+      "name": "Cookie 政策",
+      "url": "/zh/cookie-policy",
+      "description": "阅读我们的 Cookie 政策"
+    },
+    {
+      "name": "मूल्य निर्धारण",
+      "url": "/hi/pricing",
+      "description": "मूल्य निर्धारण योजनाएं देखें"
+    },
+    {
+      "name": "अक्सर पूछे जाने वाले प्रश्न",
+      "url": "/hi/faq",
+      "description": "अक्सर पूछे जाने वाले प्रश्न"
+    },
+    {
+      "name": "गोपनीयता नीति",
+      "url": "/hi/privacy-policy",
+      "description": "हमारी गोपनीयता नीति पढ़ें"
+    },
+    {
+      "name": "सेवा की शर्तें",
+      "url": "/hi/terms-of-service",
+      "description": "हमारी सेवा की शर्तें पढ़ें"
+    },
+    {
+      "name": "कुकी नीति",
+      "url": "/hi/cookie-policy",
+      "description": "हमारी कुकी नीति पढ़ें"
+    },
+    {
+      "name": "Preus",
+      "url": "/ca/pricing",
+      "description": "Revisa els plans de preus"
+    },
+    {
+      "name": "Preguntes freqüents",
+      "url": "/ca/faq",
+      "description": "Preguntes freqüents"
+    },
+    {
+      "name": "Política de privadesa",
+      "url": "/ca/privacy-policy",
+      "description": "Llegeix la nostra política de privadesa"
+    },
+    {
+      "name": "Termes de servei",
+      "url": "/ca/terms-of-service",
+      "description": "Llegeix els nostres termes de servei"
+    },
+    {
+      "name": "Política de cookies",
+      "url": "/ca/cookie-policy",
+      "description": "Llegeix la nostra política de cookies"
+    },
+    {
+      "name": "الأسعار",
+      "url": "/ar/pricing",
+      "description": "عرض خطط الأسعار"
+    },
+    {
+      "name": "الأسئلة الشائعة",
+      "url": "/ar/faq",
+      "description": "الأسئلة المتداولة"
+    },
+    {
+      "name": "سياسة الخصوصية",
+      "url": "/ar/privacy-policy",
+      "description": "اقرأ سياسة الخصوصية الخاصة بنا"
+    },
+    {
+      "name": "شروط الخدمة",
+      "url": "/ar/terms-of-service",
+      "description": "اقرأ شروط الخدمة الخاصة بنا"
+    },
+    {
+      "name": "سياسة ملفات تعريف الارتباط",
+      "url": "/ar/cookie-policy",
+      "description": "اقرأ سياسة ملفات تعريف الارتباط الخاصة بنا"
+    },
+    {
+      "name": "Tarifs",
+      "url": "/fr/pricing",
+      "description": "Voir les plans tarifaires"
+    },
+    {
+      "name": "FAQ",
+      "url": "/fr/faq",
+      "description": "Foire aux questions"
+    },
+    {
+      "name": "Politique de confidentialité",
+      "url": "/fr/privacy-policy",
+      "description": "Lire notre politique de confidentialité"
+    },
+    {
+      "name": "Conditions d'utilisation",
+      "url": "/fr/terms-of-service",
+      "description": "Lire nos conditions d'utilisation"
+    },
+    {
+      "name": "Politique relative aux cookies",
+      "url": "/fr/cookie-policy",
+      "description": "Lire notre politique relative aux cookies"
+    },
+    {
+      "name": "Preise",
+      "url": "/de/pricing",
+      "description": "Preise und Tarife ansehen"
+    },
+    {
+      "name": "FAQ",
+      "url": "/de/faq",
+      "description": "Häufig gestellte Fragen"
+    },
+    {
+      "name": "Datenschutzerklärung",
+      "url": "/de/privacy-policy",
+      "description": "Unsere Datenschutzerklärung lesen"
+    },
+    {
+      "name": "Nutzungsbedingungen",
+      "url": "/de/terms-of-service",
+      "description": "Unsere Nutzungsbedingungen lesen"
+    },
+    {
+      "name": "Cookie-Richtlinie",
+      "url": "/de/cookie-policy",
+      "description": "Unsere Cookie-Richtlinie lesen"
+    },
+    {
+      "name": "Preços",
+      "url": "/pt/pricing",
+      "description": "Ver planos de preços"
+    },
+    {
+      "name": "FAQ",
+      "url": "/pt/faq",
+      "description": "Perguntas Frequentes"
+    },
+    {
+      "name": "Política de Privacidade",
+      "url": "/pt/privacy-policy",
+      "description": "Leia a nossa política de privacidade"
+    },
+    {
+      "name": "Termos de Serviço",
+      "url": "/pt/terms-of-service",
+      "description": "Leia os nossos termos de serviço"
+    },
+    {
+      "name": "Política de Cookies",
+      "url": "/pt/cookie-policy",
+      "description": "Leia a nossa política de cookies"
+    },
+    {
+      "name": "Цены",
+      "url": "/ru/pricing",
+      "description": "Посмотреть тарифные планы"
+    },
+    {
+      "name": "FAQ",
+      "url": "/ru/faq",
+      "description": "Часто задаваемые вопросы"
+    },
+    {
+      "name": "Политика конфиденциальности",
+      "url": "/ru/privacy-policy",
+      "description": "Ознакомьтесь с нашей политикой конфиденциальности"
+    },
+    {
+      "name": "Условия использования",
+      "url": "/ru/terms-of-service",
+      "description": "Ознакомьтесь с нашими условиями использования"
+    },
+    {
+      "name": "Политика в отношении куки",
+      "url": "/ru/cookie-policy",
+      "description": "Ознакомьтесь с нашей политикой в отношении куки"
+    },
+    {
+      "name": "Prezzi",
+      "url": "/it/pricing",
+      "description": "Visualizza i piani tariffari"
+    },
+    {
+      "name": "FAQ",
+      "url": "/it/faq",
+      "description": "Domande frequenti"
+    },
+    {
+      "name": "Informativa sulla privacy",
+      "url": "/it/privacy-policy",
+      "description": "Leggi la nostra informativa sulla privacy"
+    },
+    {
+      "name": "Termini di servizio",
+      "url": "/it/terms-of-service",
+      "description": "Leggi i nostri termini di servizio"
+    },
+    {
+      "name": "Politica sui cookie",
+      "url": "/it/cookie-policy",
+      "description": "Leggi la nostra politica sui cookie"
+    }
+  ]
+}

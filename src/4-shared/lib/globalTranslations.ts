@@ -1,4 +1,4 @@
-import { supabaseAdmin } from "@/4-shared/lib/supabaseServer";
+import { createSupabaseSSRClient } from "@/4-shared/lib/supabase/server";
 
 /**
  * Server helper to fetch global translations with a tiny in-memory cache.
@@ -56,7 +56,7 @@ export function clearGlobalTranslationsCache() {
 export async function fetchGlobalTranslations(
   locale: string,
   fallbackLocale: string | null = null,
-  ttlSeconds: number = DEFAULT_TTL_SECONDS
+  ttlSeconds: number = DEFAULT_TTL_SECONDS,
 ): Promise<Record<string, string>> {
   if (!locale && !fallbackLocale) return {};
 
@@ -77,7 +77,8 @@ export async function fetchGlobalTranslations(
 
   try {
     // NOTE: do not use a generic on .from(...) for SDK compatibility
-    const { data, error } = await supabaseAdmin
+    const supabase = await createSupabaseSSRClient();
+    const { data, error } = await supabase
       .from("global_translations")
       .select("key, locale, value")
       .in("locale", localesToQuery);

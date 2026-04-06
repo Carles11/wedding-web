@@ -1,0 +1,52 @@
+{
+  "name": "WeddWeb",
+  "short_name": "WeddWeb",
+  "description": "अपनी शादी की वेबसाइट आसानी से बनाएं। बहुभाषी, अनुकूलन योग्य, और सुंदर डिज़ाइन।",
+  "lang": "hi",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "theme_color": "#ffffff",
+  "background_color": "#ffffff",
+  "orientation": "any",
+  "categories": ["शादी", "इवेंट्स", "वेबसाइट", "बहुभाषी", "अनुकूलन योग्य"],
+  "icons": [
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "मूल्य निर्धारण",
+      "url": "/hi/pricing",
+      "description": "मूल्य निर्धारण योजनाएं देखें"
+    },
+    {
+      "name": "अक्सर पूछे जाने वाले प्रश्न",
+      "url": "/hi/faq",
+      "description": "अक्सर पूछे जाने वाले प्रश्न"
+    },
+    {
+      "name": "गोपनीयता नीति",
+      "url": "/hi/privacy-policy",
+      "description": "हमारी गोपनीयता नीति पढ़ें"
+    },
+    {
+      "name": "सेवा की शर्तें",
+      "url": "/hi/terms-of-service",
+      "description": "हमारी सेवा की शर्तें पढ़ें"
+    },
+    {
+      "name": "कुकी नीति",
+      "url": "/hi/cookie-policy",
+      "description": "हमारी कुकी नीति पढ़ें"
+    }
+  ]
+}

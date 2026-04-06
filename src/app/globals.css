@@ -1,22 +1,28 @@
 @import "tailwindcss";
 
-/* Color and font variables */
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* Tell Tailwind v4 to use our dynamic CSS variables for font utilities */
+@theme {
+  --font-sans: var(--body-font), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--title-font), ui-serif, Georgia, serif;
+  --font-display: var(--title-font), ui-serif, Georgia, serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 }
 
-/* Primary tokens and font fallbacks.
-   If you use next/font with the `variable` option, it will inject
-   --font-roboto and --font-niconne into :root. We map those to
-   semantic variables used across the app.
+/* Color and font variables
+   next/font injects per-family CSS variables (e.g. --font-roboto,
+   --font-playfair-display) on <body>. We map those to semantic
+   variables here. --title-font and --body-font are the dynamic
+   overrides that the Tenant page can set inline to swap fonts.
 */
 :root {
+  /* 1. Core Colors */
+  --background: #ffffff; /* blanco nieve */
+  --foreground: #292d41; /* azul acero */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
 
-  /* Keep existing geist variables as fallbacks but prefer next/font vars if present */
-  --font-sans: var(
+  /* 2. Base font stacks per family */
+  --font-sans-roboto: var(
     --font-roboto,
     var(--font-geist-sans),
     system-ui,
@@ -26,6 +32,30 @@
     "Helvetica Neue",
     Arial
   );
+  --font-sans-plus-jakarta: var(
+    --font-plus-jakarta-sans,
+    var(--font-geist-sans),
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    "Plus Jakarta Sans",
+    "Helvetica Neue",
+    Arial
+  );
+  --font-serif-lora: var(--font-lora, Georgia, "Times New Roman", serif);
+  --font-display-playfair: var(--font-playfair-display, var(--font-serif-lora));
+
+  /* 3. Dynamic title / body variables (overridable inline by Tenant page) */
+  --title-font: var(--font-playfair-display);
+  --body-font: var(--font-plus-jakarta-sans);
+
+  /* 4. Semantic font mappings (kept for backward-compat) */
+  --font-sans: var(--body-font);
+  --font-sans-secondary: var(--font-sans-plus-jakarta);
+  --font-serif: var(--title-font);
+  --font-display: var(--font-display-playfair);
+  --font-subtitle: var(--font-serif-lora);
+  --tenant-display-font: var(--font-niconne, cursive);
   --font-mono: var(
     --font-geist-mono,
     ui-monospace,
@@ -36,16 +66,13 @@
     "Courier New",
     monospace
   );
-
-  /* Display font for headings/titles — falls back to --font-serif if Niconne isn't present */
-  --font-display: var(--font-niconne, var(--font-serif));
 }
 
 /* Dark mode token overrides */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #292d41; /* azul acero */
+    --foreground: #ffffff; /* blanco nieve */
   }
 }
 
@@ -54,11 +81,13 @@ html,
 body,
 #__next {
   height: 100%;
+  scroll-behavior: smooth;
 }
 
 body {
   margin: 0;
-  font-family: var(--font-sans);
+  padding: 0;
+  font-family: var(--body-font), sans-serif;
   color: var(--color-foreground);
   background: var(--color-background);
   -webkit-font-smoothing: antialiased;
@@ -66,8 +95,8 @@ body {
   line-height: 1.5;
 }
 
-/* Typography: use the display font (Niconne) for headings and titles.
-   Niconne is a script/display face — keep weight light and line-height tight.
+/* Typography: use the display font (Playfair) for headings and titles.
+   Playfair is a serif/display face — keep weight light and line-height tight.
 */
 .heading,
 .title,
@@ -75,19 +104,43 @@ body {
 h1,
 h2,
 h3 {
-  font-family: var(--font-display);
-  font-weight: 400; /* Niconne is generally single-weight; adjust if you load more weights */
+  font-family: var(--title-font), serif;
+  font-weight: 400; /* Playfair is generally single-weight; adjust if you load more weights */
   line-height: 1.1;
   margin: 0;
 }
 
-/* Responsive sizes */
+/* ==========================================================================
+  CORRECTED RESPONSIVE SIZES
+  Logic: min < max. 
+  H1: Hero level
+  H2: Section headers
+  H3: Sub-headers (now clearly smaller)
+  ========================================================================== */
+
 h1 {
-  font-size: clamp(9vw, 6vw, 3rem);
+  font-size: clamp(2.5rem, 8vw, 4.5rem);
 }
 
 h2 {
-  font-size: clamp(1.5rem, 4.5vw, 2rem);
+  font-size: clamp(1.75rem, 5vw, 2.5rem);
+}
+
+h3 {
+  font-size: clamp(1.25rem, 3vw, 1.75rem);
+}
+
+/* Mobile Overrides (below 468px) */
+@media screen and (max-width: 468px) {
+  h1 {
+    font-size: clamp(2rem, 10vw, 2.5rem);
+  }
+  h2 {
+    font-size: clamp(1.5rem, 8vw, 1.8rem);
+  }
+  h3 {
+    font-size: clamp(1.1rem, 6vw, 1.3rem);
+  }
 }
 
 /* Small inline title used in hero sections */
@@ -96,9 +149,41 @@ h2 {
   letter-spacing: 0;
 }
 
+/* The Subtitle Control */
+.subtitle {
+  font-family: var(--font-subtitle);
+  font-weight: 400;
+  letter-spacing: 0.05em;
+  text-transform: uppercase; /* Optional: Looks very professional for wedding dates/locations */
+}
+
 /* Utility class to specifically apply display font when needed */
 .font-display {
-  font-family: var(--font-display) !important;
+  font-family: var(--font-display);
+}
+
+.font-roboto {
+  font-family: var(--font-sans-roboto);
+}
+
+.font-plus-jakarta {
+  font-family: var(--font-sans-plus-jakarta);
+}
+
+.font-text-secondary {
+  font-family: var(--font-sans-secondary);
+}
+
+.font-lora {
+  font-family: var(--font-serif-lora);
+}
+
+.font-niconne {
+  font-family: var(--font-niconne, cursive);
+}
+
+.font-playfair {
+  font-family: var(--font-display-playfair);
 }
 
 /* Accessibility: visually hidden (screen-reader only) */
@@ -113,4 +198,501 @@ h2 {
   border: 0;
   padding: 0;
   margin: -1px;
+}
+
+/* ── Builder Theme ─────────────────────────────────────────────
+Builder theme tokens and reusable surface/button styles.
+   Keep this scoped so marketing can define its own theme later.
+#########################################################################
+#########################################################################
+#########################################################################
+ */
+.builder-theme {
+  --title-font: var(--font-playfair-display);
+  --body-font: var(--font-plus-jakarta-sans);
+  --font-sans: var(--body-font);
+  --font-display: var(--title-font);
+  --font-subtitle: var(--body-font);
+  --builder-font-sans: var(--body-font);
+  --builder-color-page-bg: #f5f4f2;
+  --builder-color-surface: #fdfcfb;
+  --builder-color-muted-surface: #f9f8f6;
+  --builder-color-text: #1c1917;
+  --builder-color-text-muted: #78716c;
+  --builder-color-border: #e8e6e1;
+  --builder-color-primary: var(--marketing-color-primary);
+  --builder-color-primary-hover: var(--marketing-color-primary-hover);
+  --builder-color-secondary-bg: #fdfcfb;
+  --builder-color-secondary-hover: #f5f4f2;
+  --builder-color-danger: #dc2626;
+  --builder-color-danger-border: #fecaca;
+  --builder-color-danger-hover-bg: #fef2f2;
+  --builder-radius: 0.625rem;
+  --builder-shadow: 0 10px 30px rgba(28, 25, 23, 0.07);
+
+  --builder-btn-primary-text-color: #fff;
+  --builder-btn-primary-hover-bg: #1d4ed8;
+
+  font-family: var(--body-font);
+  color: var(--builder-color-text);
+}
+
+.builder-shell {
+  background: var(--builder-color-surface);
+  color: var(--builder-color-text);
+  border: 1px solid var(--builder-color-border);
+  box-shadow: var(--builder-shadow);
+}
+
+.builder-muted-surface {
+  background: var(--builder-color-muted-surface);
+  border-color: var(--builder-color-border);
+}
+
+.builder-text-muted {
+  color: var(--builder-color-text-muted);
+}
+
+.builder-btn {
+  cursor: pointer;
+  border-radius: var(--builder-radius);
+  border: 1px solid transparent;
+  font-weight: 600;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease,
+    opacity 0.15s ease,
+    transform 0.1s ease;
+}
+
+.builder-btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.builder-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.builder-btn-md {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.builder-btn-sm {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
+.builder-btn-primary {
+  background: var(--builder-color-primary);
+  color: var(--builder-btn-primary-text-color);
+}
+
+.builder-btn-primary:hover:not(:disabled) {
+  background: var(--builder-color-primary-hover);
+}
+
+.builder-btn-secondary {
+  background: var(--builder-color-secondary-bg);
+  color: var(--builder-color-text);
+  border-color: var(--builder-color-border);
+}
+
+.builder-btn-secondary:hover:not(:disabled) {
+  background: var(--builder-color-secondary-hover);
+}
+
+.builder-btn-secondary-danger {
+  background: var(--builder-color-secondary-bg);
+  color: var(--builder-color-danger);
+  border-color: var(--builder-color-danger-border);
+}
+
+.builder-btn-secondary-danger:hover:not(:disabled) {
+  background: var(--builder-color-danger-hover-bg);
+}
+
+.builder-step-nav-mobile-active {
+  background: var(--builder-color-primary);
+  color: #fff;
+  border-color: var(--builder-color-primary);
+}
+
+.builder-step-nav-mobile-idle {
+  background: var(--builder-color-surface);
+  color: var(--builder-color-text);
+  border-color: var(--builder-color-border);
+}
+
+.builder-step-nav-mobile-idle:hover {
+  background: var(--builder-color-muted-surface);
+}
+
+.builder-step-nav-desktop-active {
+  background: rgba(37, 99, 235, 0.12);
+  color: var(--builder-color-text);
+  font-weight: 600;
+}
+
+.builder-step-nav-desktop-idle {
+  color: var(--builder-color-text);
+}
+
+.builder-step-nav-desktop-idle:hover {
+  background: var(--builder-color-muted-surface);
+}
+
+.builder-step-divider {
+  background: var(--builder-color-border);
+}
+
+.builder-link-action {
+  color: var(--builder-color-primary);
+  text-decoration: underline;
+}
+
+.builder-link-action:hover {
+  color: var(--builder-color-primary-hover);
+}
+
+.builder-lang-tab-active {
+  background: var(--builder-color-primary);
+  color: #fff;
+  border-color: var(--builder-color-primary);
+}
+
+.builder-lang-tab-idle {
+  background: var(--builder-color-surface);
+  color: var(--builder-color-text);
+  border-color: var(--builder-color-border);
+}
+
+.builder-lang-tab-idle:hover {
+  background: var(--builder-color-muted-surface);
+}
+/* --- Builder Language Chips --- */
+.builder-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  border: 2px solid #e5e7eb; /* gray-200 */
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  background: white;
+  color: #4b5563; /* gray-600 */
+  user-select: none;
+}
+
+.builder-chip-active {
+  background-color: var(--marketing-color-primary);
+  border-color: var(--marketing-color-primary);
+  color: white;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.builder-chip-idle:hover {
+  border-color: var(--marketing-color-primary);
+  opacity: 0.8;
+}
+
+.builder-chip-locked {
+  opacity: 0.5;
+  background-color: #f9fafb;
+  border-color: #e5e7eb;
+  cursor: not-allowed;
+  filter: grayscale(1);
+}
+
+/* --- Builder Tabs Modernization --- */
+.builder-lang-tab-active {
+  background-color: var(--marketing-color-primary) !important;
+  border-color: var(--marketing-color-primary) !important;
+  color: white !important;
+}
+
+.builder-lang-tab-idle {
+  background-color: white;
+  border-color: #e5e7eb;
+  color: #6b7280;
+}
+
+.builder-lang-tab-idle:hover {
+  border-color: var(--marketing-color-primary);
+  color: var(--marketing-color-primary);
+}
+
+/* ── Marketing + Auth Theme ─────────────────────────────────────────────
+#########################################################################
+#########################################################################
+#########################################################################
+   Tokens defined at :root so they work across marketing pages AND auth
+   routes (which have no shared layout wrapper).
+   Palette: teal-to-orange gradient — different from the builder's blue.  */
+:root {
+  --marketing-color-primary: #6abda6;
+  --marketing-color-primary-hover: #4aa693;
+  --marketing-color-primary-focus: rgba(106, 189, 166, 0.35);
+  --marketing-color-accent: #f4a261;
+  --marketing-color-accent-hover: #e08849;
+  --marketing-color-on-gradient-text: #0f766e;
+  --marketing-color-link: #0f766e;
+  --marketing-color-link-hover: #065f46;
+  --marketing-radius-pill: 9999px;
+  --marketing-radius-rect: 0.375rem;
+  --marketing-shadow-btn:
+    0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --marketing-bg-gradient: linear-gradient(
+    to bottom right,
+    #e6faf4,
+    #ffffff,
+    #fff5eb
+  );
+  --marketing-bg-light-gradient: linear-gradient(
+    to bottom right,
+    #f5fdfb,
+    #ffffff,
+    #fffaf5
+  );
+  --marketing-bg-subtle-gradient: linear-gradient(to bottom, #ffffff, #f9fafb);
+}
+
+.marketing-theme {
+  --title-font: var(--font-playfair-display);
+  --body-font: var(--font-plus-jakarta-sans);
+  --font-sans: var(--body-font);
+  --font-display: var(--title-font);
+  --font-subtitle: var(--font-serif-lora, serif);
+  font-family: var(--body-font);
+}
+
+/* Button base */
+.marketing-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.marketing-btn:disabled,
+.marketing-btn[aria-disabled="true"] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Sizes (used by pill variants; auth variants have their own padding) */
+.marketing-btn-sm {
+  padding: 0.5rem 1.5rem;
+  font-size: 0.875rem;
+}
+.marketing-btn-md {
+  padding: 1rem 2rem;
+  font-size: 1rem;
+}
+.marketing-btn-lg {
+  padding: 1rem 2.5rem;
+  font-size: 1.125rem;
+}
+
+/* Primary — pill, teal solid */
+.marketing-btn-primary {
+  background: var(--marketing-color-primary);
+  color: #fff;
+  border: 2px solid transparent;
+  border-radius: var(--marketing-radius-pill);
+  box-shadow: var(--marketing-shadow-btn);
+}
+
+.marketing-btn-primary:hover:not(:disabled) {
+  background: var(--marketing-color-primary-hover);
+  transform: scale(1.03);
+}
+
+.marketing-btn-primary:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px var(--marketing-color-primary-focus);
+}
+
+/* Secondary — pill, teal outline */
+.marketing-btn-secondary {
+  background: rgba(255, 255, 255, 0.6);
+  color: var(--marketing-color-primary);
+  border: 2px solid var(--marketing-color-primary);
+  border-radius: var(--marketing-radius-pill);
+}
+
+.marketing-btn-secondary:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.marketing-btn-secondary:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px var(--marketing-color-primary-focus);
+}
+
+/* On-gradient — pill, white bg, teal text (for CTA sections with gradient bg) */
+.marketing-btn-on-gradient {
+  background: #fff;
+  color: var(--marketing-color-on-gradient-text);
+  border: 2px solid transparent;
+  border-radius: var(--marketing-radius-pill);
+  box-shadow:
+    0 10px 15px -3px rgb(0 0 0 / 0.15),
+    0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+.marketing-btn-on-gradient:hover:not(:disabled) {
+  transform: scale(1.05);
+}
+
+/* Ghost — rounded rect, teal outline (cards, testimonials, secondary CTAs) */
+.marketing-btn-ghost {
+  background: transparent;
+  color: var(--marketing-color-primary);
+  border: 1px solid var(--marketing-color-primary);
+  border-radius: var(--marketing-radius-rect);
+}
+
+.marketing-btn-ghost:hover:not(:disabled) {
+  background: var(--marketing-color-primary);
+  color: #fff;
+}
+
+.marketing-btn-ghost:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px #fff,
+    0 0 0 4px var(--marketing-color-primary);
+}
+
+/* Auth — rect, teal solid (form submit buttons) */
+.marketing-btn-auth {
+  background: var(--marketing-color-primary);
+  color: #fff;
+  border: 1px solid transparent;
+  border-radius: var(--marketing-radius-rect);
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+}
+
+.marketing-btn-auth:hover:not(:disabled) {
+  background: var(--marketing-color-primary-hover);
+}
+
+.marketing-btn-auth:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px #fff,
+    0 0 0 4px var(--marketing-color-primary);
+}
+
+/* Auth outline — rect, teal outline (resend/secondary form actions) */
+.marketing-btn-auth-outline {
+  background: transparent;
+  color: var(--marketing-color-primary);
+  border: 1px solid var(--marketing-color-primary);
+  border-radius: var(--marketing-radius-rect);
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+}
+
+.marketing-btn-auth-outline:hover:not(:disabled) {
+  background: rgba(106, 189, 166, 0.08);
+}
+
+.marketing-btn-auth-outline:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px #fff,
+    0 0 0 4px var(--marketing-color-primary);
+}
+
+/* Input — auth form fields with teal focus ring */
+.marketing-input {
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: var(--marketing-radius-rect);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+  outline: none;
+}
+
+.marketing-input:focus {
+  border-color: var(--marketing-color-primary);
+  box-shadow: 0 0 0 2px var(--marketing-color-primary-focus);
+}
+
+/* Link style */
+.marketing-link {
+  color: var(--marketing-color-link);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.marketing-link:hover {
+  color: var(--marketing-color-link-hover);
+  text-decoration: underline;
+}
+
+/* ── Tenant Theme ──────────────────────────────────────────────────────
+#########################################################################
+#########################################################################
+#########################################################################
+   Used for the actual wedding websites. 
+   Allows for specific font overrides without breaking the builder.
+*/
+/* 3. Theme Overrides */
+
+/* TENANT THEME: Uses dynamic font variables */
+.tenant-theme {
+  --font-display: var(--title-font);
+  --font-subtitle: var(--font-playfair-display, var(--font-serif));
+  font-family: var(--body-font), sans-serif;
+}
+
+.tenant-theme h1,
+.tenant-theme .heading-h1 {
+  font-size: clamp(4rem, 10vw, 6.5rem);
+  letter-spacing: 0.01em;
+}
+
+/* Keep h3 using the title font in Tenant */
+.tenant-theme h3,
+.tenant-theme .heading-h3 {
+  font-family: var(--title-font), serif;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out;
 }

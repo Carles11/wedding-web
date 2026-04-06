@@ -1,11 +1,12 @@
-import { supabaseAdmin } from "@/4-shared/lib/supabaseServer";
+import { createSupabaseSSRClient } from "@/4-shared/lib/supabase/server";
 
 /**
  * Fetch the 'bank_data' section row for a given site.
  */
 export async function fetchBankDataSection(siteId: string) {
   if (!siteId) return null;
-  const { data, error } = await supabaseAdmin
+  const supabase = await createSupabaseSSRClient();
+  const { data, error } = await supabase
     .from("sections")
     .select("id, site_id, type, title, subtitle, content, background")
     .eq("site_id", siteId)

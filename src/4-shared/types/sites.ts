@@ -10,7 +10,15 @@ export type Site = {
   default_lang?: string | null;
   languages?: string[] | null;
   domains?: string[] | null;
-  // Add other fields present in the `sites` table as needed.
+  created_at?: string | null;
+  pending_custom_domains?: string[] | null;
+  domain_statuses?: Record<
+    string,
+    "idle" | "saving" | "success" | "error" | "pending" | "verified"
+  > | null;
+  seo_enabled?: boolean | null;
+  title_font?: string | null;
+  body_font?: string | null;
 };
 
 // Helper type for queries that only select `id`.

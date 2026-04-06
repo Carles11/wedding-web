@@ -1,48 +1,80 @@
-// src/4-shared/lib/getSiteByDomain.ts
-import { supabaseAdmin } from "@/4-shared/lib/supabaseServer";
+import { createSupabaseSSRClient } from "@/4-shared/lib/supabase/server";
+import { cache } from "react";
 
 /**
  * Get site row by host (domain or subdomain).
- * Returns: { id, subdomain, default_lang, languages, domains } | null
+ * Wrapped in React cache() to deduplicate requests between metadata and page.
  */
-export async function getSiteByDomain(host: string | null) {
+export const getSiteByDomain = cache(async (host: string | null) => {
   if (!host) return null;
+
   const normalized = host.toLowerCase().trim();
+  const stripped = normalized.startsWith("www.")
+    ? normalized.slice(4)
+    : normalized;
 
   try {
-    // 1) Try domains array contains normalized host (if you store domains as text[] in sites.domains)
-    const { data: byDomain, error: errDomain } = await supabaseAdmin
+    const supabase = await createSupabaseSSRClient();
+
+    const { data, error } = await supabase
       .from("sites")
-      .select("id, subdomain, default_lang, languages, domains")
-      .contains("domains", [normalized])
-      .limit(1)
+      .select(
+        `
+        created_at,
+        id, 
+        owner_user_id, 
+        subdomain, 
+        default_lang, 
+        languages, 
+        domains, 
+        seo_enabled,
+        plan_type,
+        title_font,
+        body_font,
+        last_activity_at,
+        program_events (
+          date,
+          is_main_event
+        )
+      `,
+      )
+      .or(
+        `domains.cs.{${normalized}},domains.cs.{${stripped}},subdomain.eq.${stripped}`,
+      )
       .maybeSingle();
 
-    if (errDomain) {
-      console.error(
-        "[getSiteByDomain] error querying by domains array:",
-        errDomain
-      );
+    if (error) {
+      console.error("[getSiteByDomain] error:", error);
+      return null;
     }
-    if (byDomain) return byDomain;
 
-    // 2) Fallback: try matching subdomain column
-    const { data: bySubdomain, error: errSub } = await supabaseAdmin
-      .from("sites")
-      .select("id, subdomain, default_lang, languages, domains")
-      .eq("subdomain", normalized)
-      .limit(1)
-      .maybeSingle();
+    if (!data) return null;
 
-    if (errSub) {
-      console.error("[getSiteByDomain] error querying by subdomain:", errSub);
+    const planType = data.plan_type || "free";
+    const lastActivityStr = data.last_activity_at;
+
+    // Calculate Legacy Mode (Read-only after 6 months of inactivity)
+    let isLegacyMode = false;
+
+    if (planType === "free") {
+      const lastActivity = lastActivityStr
+        ? new Date(lastActivityStr)
+        : new Date(data.created_at);
+
+      const cutoffDate = new Date(lastActivity);
+      cutoffDate.setMonth(cutoffDate.getMonth() + 6);
+
+      isLegacyMode = new Date() > cutoffDate;
     }
-    if (bySubdomain) return bySubdomain;
 
-    // 3) Not found
-    return null;
+    return {
+      ...data,
+      plan_type: planType,
+      is_legacy_mode: isLegacyMode,
+      is_expired: false, // Legacy Mode is the new standard
+    };
   } catch (err) {
     console.error("[getSiteByDomain] unexpected error:", err);
     return null;
   }
-}
+});

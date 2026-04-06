@@ -1,7 +1,9 @@
-import { supabaseAdmin } from "@/4-shared/lib/supabaseServer";
+"use server";
+
+import { createSupabaseSSRClient } from "@/4-shared/lib/supabase/server";
 import {
-  TranslationDictionary,
   GlobalTranslationRow,
+  TranslationDictionary,
   TranslationRow,
 } from "../types";
 
@@ -44,7 +46,7 @@ function getGlobalCache(): Map<string, GlobalCacheEntry> {
  * Clears the in-memory global translations cache.
  * Useful for testing or admin-triggered invalidation.
  */
-export function clearGlobalTranslationsCache() {
+export async function clearGlobalTranslationsCache() {
   getGlobalCache().clear();
 }
 
@@ -82,8 +84,9 @@ export async function fetchGlobalTranslations(
       : [locale];
 
   try {
+    const supabase = await createSupabaseSSRClient();
     // NOTE: avoid putting a generic type argument on .from(...) to keep compatibility across SDK versions.
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await supabase
       .from("global_translations")
       .select("key, locale, value")
       .in("locale", localesToQuery);
@@ -135,7 +138,8 @@ export async function fetchSiteTranslations(
   locale: string,
 ): Promise<TranslationDictionary> {
   try {
-    const { data, error } = await supabaseAdmin
+    const supabase = await createSupabaseSSRClient();
+    const { data, error } = await supabase
       .from("site_translations")
       .select("key, value")
       .eq("site_id", siteId)
@@ -211,7 +215,7 @@ export async function t(
 /**
  * Invalidate per-site+locale merge cache. Does not touch global translations cache.
  */
-export function invalidateTranslationsCache(
+export async function invalidateTranslationsCache(
   siteId: string | null,
   locale?: string,
 ) {

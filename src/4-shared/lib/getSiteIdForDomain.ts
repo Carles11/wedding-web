@@ -1,46 +1,32 @@
-import { supabase } from "@/4-shared/api/supabaseClient";
-import type { SiteIdLookupResult } from "@/4-shared/types";
+"use server";
 
-/**
- * SSR-safe tenant lookup by domain (host).
- * Searches Supabase "sites" for a row where `domains` contains the incoming host.
- * Always lowercase/trim the domain for consistent matching.
- */
-export async function getSiteIdForDomain(
+import { createSupabaseSSRClient } from "@/4-shared/lib/supabase/server";
+
+export async function getSiteIdForDomainOrSubdomain(
   domain: string,
 ): Promise<string | null> {
-  if (!domain) return null;
-  // Host normalization for lowercase, no whitespace
+  // Try in domains array first (for custom domains)
   const normalizedDomain = domain.toLowerCase().trim();
-
-  // Query for any row where `domains` array contains the normalized host.
-  // Avoid `.from<T>()` generics unless you have generated DB types available.
-  const { data, error } = await supabase
+  const supabase = await createSupabaseSSRClient();
+  const { data: domainsRow } = await supabase
     .from("sites")
     .select("id")
     .contains("domains", [normalizedDomain])
     .maybeSingle();
 
-  if (error) {
-    // Log for debug/monitoring and return null so callers can handle "not found".
-    console.error(
-      "[getSiteIdForDomain] Supabase site lookup error:",
-      error,
-      normalizedDomain,
-    );
-    return null;
-  }
+  if (domainsRow?.id) return domainsRow.id;
 
-  // If no row matched, `data` will be null. Caller should handle null.
-  const row = data as SiteIdLookupResult | null;
-  if (!row?.id) {
-    // Optional: helpful warning during development, safe to remove in production.
-    console.warn(
-      "[getSiteIdForDomain] No site found for domain:",
-      normalizedDomain,
-    );
-    return null;
-  }
+  // If not found, try as subdomain
+  const parts = domain.split(".");
+  let subdomain = parts[0];
+  if (subdomain === "www") subdomain = parts[1];
+  subdomain = subdomain.toLowerCase().trim();
 
-  return row.id;
+  const { data: subdomainRow } = await supabase
+    .from("sites")
+    .select("id")
+    .eq("subdomain", subdomain)
+    .maybeSingle();
+
+  return subdomainRow?.id ?? null;
 }

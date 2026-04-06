@@ -1,0 +1,58 @@
+{
+  "name": "WeddWeb",
+  "short_name": "WeddWeb",
+  "description": "أنشئ موقع زفافك بسهولة. متعدد اللغات، قابل للتخصيص، وتصاميم جميلة.",
+  "lang": "ar",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "theme_color": "#ffffff",
+  "background_color": "#ffffff",
+  "orientation": "any",
+  "categories": [
+    "زفاف",
+    "فعاليات",
+    "موقع إلكتروني",
+    "متعدد اللغات",
+    "قابل للتخصيص"
+  ],
+  "icons": [
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "الأسعار",
+      "url": "/ar/pricing",
+      "description": "عرض خطط الأسعار"
+    },
+    {
+      "name": "الأسئلة الشائعة",
+      "url": "/ar/faq",
+      "description": "الأسئلة المتداولة"
+    },
+    {
+      "name": "سياسة الخصوصية",
+      "url": "/ar/privacy-policy",
+      "description": "اقرأ سياسة الخصوصية الخاصة بنا"
+    },
+    {
+      "name": "شروط الخدمة",
+      "url": "/ar/terms-of-service",
+      "description": "اقرأ شروط الخدمة الخاصة بنا"
+    },
+    {
+      "name": "سياسة ملفات تعريف الارتباط",
+      "url": "/ar/cookie-policy",
+      "description": "اقرأ سياسة ملفات تعريف الارتباط الخاصة بنا"
+    }
+  ]
+}

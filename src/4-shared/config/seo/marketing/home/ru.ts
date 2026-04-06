@@ -1,0 +1,53 @@
+import type { SitewideSEO } from "../../types";
+
+export const seoMetadata: SitewideSEO = {
+  marketing: {
+    title: "WeddWeb - Создавайте красивые свадебные сайты за минуты",
+    description:
+      "Создавайте многоязычные свадебные сайты с RSVP, фотогалереями, собственным доменом и другими функциями. Мобильная версия, приватность и простота использования. Бесплатный тариф навсегда. Не требуется программирование. Доверие пар по всему миру.",
+    ogTitle: "WeddWeb - Красивые свадебные сайты просто",
+    ogDescription: "Самый простой способ создать идеальный свадебный сайт",
+    ogImage: "/assets/og/weddweb-OG.png",
+    twitterCard: "summary_large_image",
+    keywords: [
+      "свадебный сайт",
+      "конструктор свадебных сайтов",
+      "RSVP на свадьбу",
+      "многоязычный свадебный сайт",
+      "бесплатный сайт для свадьбы",
+      "сайт мероприятия",
+      "фотогалерея свадебного сайта",
+      "собственный домен свадебного сайта",
+      "мобильный свадебный сайт",
+      "лучший свадебный сайт",
+      "шаблоны свадебных сайтов",
+      "свадебный сайт для гостей",
+      "отзывы о свадебных сайтах",
+      "простой свадебный сайт",
+      "приватный свадебный сайт",
+      "безопасный свадебный сайт",
+      "как создать свадебный сайт",
+      "какой свадебный сайт лучший",
+      "weddweb",
+      "отзывы weddweb",
+    ],
+    canonicalUrl: "https://weddweb.com/ru",
+    locale: "ru",
+    alternateLanguages: [
+      { locale: "en", url: "https://weddweb.com/en" },
+      { locale: "es", url: "https://weddweb.com/es" },
+      { locale: "ca", url: "https://weddweb.com/ca" },
+      { locale: "zh", url: "https://weddweb.com/zh" },
+      { locale: "hi", url: "https://weddweb.com/hi" },
+      { locale: "ar", url: "https://weddweb.com/ar" },
+      { locale: "fr", url: "https://weddweb.com/fr" },
+      { locale: "de", url: "https://weddweb.com/de" },
+      { locale: "pt", url: "https://weddweb.com/pt" },
+      { locale: "ru", url: "https://weddweb.com/ru" },
+      { locale: "it", url: "https://weddweb.com/it" },
+      { locale: "x-default", url: "https://weddweb.com/en" },
+    ],
+  },
+};
+
+export default seoMetadata;

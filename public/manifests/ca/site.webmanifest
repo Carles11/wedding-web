@@ -1,0 +1,58 @@
+{
+  "name": "WeddWeb",
+  "short_name": "WeddWeb",
+  "description": "Crea fàcilment el teu lloc web de casament. Multilingüe, personalitzable i amb dissenys bonics.",
+  "lang": "ca",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "theme_color": "#ffffff",
+  "background_color": "#ffffff",
+  "orientation": "any",
+  "categories": [
+    "casament",
+    "esdeveniments",
+    "lloc web",
+    "multilingüe",
+    "personalitzable"
+  ],
+  "icons": [
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Preus",
+      "url": "/ca/pricing",
+      "description": "Revisa els plans de preus"
+    },
+    {
+      "name": "Preguntes freqüents",
+      "url": "/ca/faq",
+      "description": "Preguntes freqüents"
+    },
+    {
+      "name": "Política de privadesa",
+      "url": "/ca/privacy-policy",
+      "description": "Llegeix la nostra política de privadesa"
+    },
+    {
+      "name": "Termes de servei",
+      "url": "/ca/terms-of-service",
+      "description": "Llegeix els nostres termes de servei"
+    },
+    {
+      "name": "Política de cookies",
+      "url": "/ca/cookie-policy",
+      "description": "Llegeix la nostra política de cookies"
+    }
+  ]
+}

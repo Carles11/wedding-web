@@ -5,10 +5,16 @@
 export type ImageRow = {
   id: string;
   site_id: string;
+  section_id: string;
   bucket?: string | null;
   path?: string | null; // storage path inside bucket
   url?: string | null; // optional public url
-  section?: string | null; // e.g. 'hero', 'contact', etc.
+  section?: ImageSection | string | null;
   metadata?: Record<string, unknown> | null;
   created_at?: string | null;
 };
+
+export interface ImageSection {
+  type: string;
+  [key: string]: unknown;
+}

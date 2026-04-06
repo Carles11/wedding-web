@@ -1,123 +1,118 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import { supabase } from "@/4-shared/api/supabaseClient";
-import type { User } from "@supabase/supabase-js";
+import { createClient } from "@/4-shared/lib/supabase/client";
 import type { Site } from "@/4-shared/types";
-
-// Use the shared Site type for strong typing
+import type { User } from "@supabase/supabase-js";
+import { useEffect, useRef, useState } from "react";
 
 /**
- * Hook that ensures a `site` row exists for the authenticated user.
- * NOTE: This implementation runs on the client using the regular Supabase client.
- * For security and correctness, consider moving creation logic to a server-side
- * endpoint that uses `supabaseAdmin` (service role key) for initial site provisioning.
+ * Hook to fetch (but NOT create) a `site` row for the authenticated user.
  */
 export function useSite(user: User | null) {
   const [site, setSite] = useState<Site | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [reloadKey, setReloadKey] = useState(0);
+  const lockedSiteId = useRef<string | null>(null);
 
-  useEffect(() => {
-    // Ensure we have a valid authenticated user with an id before running queries.
-    if (!user || !user.id) {
+  // Store a ref to the in-flight fetch resolver so refresh() can await it.
+  const resolveRefresh = useRef<(() => void) | null>(null);
+
+  const fetchSite = async () => {
+    if (!user?.id) {
       setSite(null);
       return;
     }
 
-    let mounted = true;
+    setLoading(true);
+    setError(null);
 
-    async function ensureSite() {
-      setLoading(true);
-      setError(null);
+    const supabase = createClient();
 
-      try {
-        if (!user?.id) {
-          // Handle or throw not-logged-in error
-          return null;
-        }
-        // Do not use generic type parameters for `.from()` unless you have
-        // matching generated DB types. Use runtime casting instead to keep
-        // this code compatible with various Supabase client versions.
-        const { data, error: fetchErr } = await supabase
-          .from("sites")
-          .select("id, subdomain, default_lang, languages, domains")
-          .eq("owner", user.id)
-          .limit(1)
-          .maybeSingle();
+    try {
+      const { data, error: fetchErr } = await supabase
+        .from("sites")
+        .select(
+          `
+          id,
+          title,
+          subdomain,
+          default_lang,
+          languages,
+          domains,
+          created_at,
+          pending_custom_domains,
+          domain_statuses
+        `,
+        )
+        .eq("owner_user_id", user.id)
+        .order("created_at", { ascending: true })
+        .order("id", { ascending: true });
 
-        if (fetchErr) throw fetchErr;
+      if (fetchErr) throw fetchErr;
 
-        if (data) {
-          if (mounted) setSite(data as Site);
-        } else {
-          // Create a minimal site record for this user.
-          // TODO: Move this creation to a server-side endpoint with admin key.
-          const defaultSubdomain = generateSubdomainFromEmail(
-            user?.email || user?.id || "guest",
-          );
-          const { data: created, error: createErr } = await supabase
-            .from("sites")
-            .insert([
-              {
-                owner: user?.id,
-                subdomain: defaultSubdomain,
-                default_lang: "en",
-                languages: ["en"],
-                domains: [],
-              },
-            ])
-            .select("id, subdomain, default_lang, languages, domains")
-            .maybeSingle();
+      const rows = Array.isArray(data) ? data : [];
+      const chosenSite =
+        (lockedSiteId.current
+          ? rows.find((row) => row.id === lockedSiteId.current)
+          : rows[0]) ?? null;
 
-          if (createErr) throw createErr;
-          if (mounted && created) setSite(created as Site);
-        }
-      } catch (err: unknown) {
-        console.error("[useSite] error ensuring site:", err);
-        if (mounted) {
-          if (err instanceof Error) {
-            setError(err.message);
-          } else {
-            setError(String(err));
-          }
-        }
-      } finally {
-        if (mounted) setLoading(false);
+      if (rows.length > 1) {
+        console.warn("[useSite] Multiple site rows found for owner_user_id", {
+          userId: user.id,
+          lockedSiteId: lockedSiteId.current,
+          availableSiteIds: rows.map((row) => row.id),
+          chosenSiteId: chosenSite?.id ?? null,
+        });
       }
+
+      // debug log to verify site locking behavior (should only appear on first load or when the user changes,)
+      // if (chosenSite?.id !== lockedSiteId.current) {
+      //   console.log("[useSite] Active site selection changed", {
+      //     userId: user.id,
+      //     previousSiteId: lockedSiteId.current,
+      //     nextSiteId: chosenSite?.id ?? null,
+      //     availableSiteIds: rows.map((row) => row.id),
+      //   });
+      // }
+
+      lockedSiteId.current = chosenSite?.id ?? null;
+
+      if (chosenSite) {
+        if (typeof chosenSite.domain_statuses === "string") {
+          try {
+            chosenSite.domain_statuses = JSON.parse(chosenSite.domain_statuses);
+          } catch {}
+        }
+        if (!Array.isArray(chosenSite.pending_custom_domains)) {
+          chosenSite.pending_custom_domains = [];
+        }
+      }
+
+      setSite(chosenSite ? { ...chosenSite } : null);
+    } catch (err: unknown) {
+      if (err instanceof Error) setError(err.message);
+      else setError(String(err));
+    } finally {
+      setLoading(false);
+      // Resolve any awaiting refresh() callers
+      resolveRefresh.current?.();
+      resolveRefresh.current = null;
     }
+  };
 
-    ensureSite();
-
-    return () => {
-      mounted = false;
-    };
-  }, [user]);
-
-  // Expose a refresh function so consumers (forms) can re-fetch the site after updates.
-  const refresh = () => setReloadKey((k) => k + 1);
-
-  // Re-run effect when reloadKey changes
   useEffect(() => {
-    if (!user || !user.id) return;
-    // trigger a re-fetch by calling the same effect logic through reloadKey
-    // We'll call the same ensureSite flow by toggling reloadKey; simplest approach
-    // is to call setSite(null) and let the existing effect fetch again via dependency change.
-    // For clarity, we simply call the main effect by updating reloadKey; the main
-    // effect depends on `user` and `reloadKey` in the next edit.
-  }, [reloadKey]);
+    fetchSite();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
+
+  /**
+   * Awaitable refresh: resolves only after the fetch fully completes
+   * and state has been updated.
+   */
+  const refresh = (): Promise<void> => {
+    return new Promise((resolve) => {
+      resolveRefresh.current = resolve;
+      fetchSite();
+    });
+  };
 
   return { site, loading, error, refresh } as const;
-}
-
-function generateSubdomainFromEmail(input: string) {
-  const normalized = (input || "guest").toLowerCase();
-  const prefix = normalized
-    .split("@")[0]
-    .replace(/[^a-z0-9-]/g, "")
-    .slice(0, 24);
-  // Add a short random suffix to reduce collisions in this simple client-side impl.
-  const suffix = Math.random().toString(36).slice(2, 6);
-  return `${prefix}-${suffix}`;
 }

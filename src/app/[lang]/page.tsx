@@ -1,151 +1,169 @@
-import { headers } from "next/headers";
+import MarketingPageComponent from "@/0-pages/(marketing)/MarketingPageComponent";
+import TenantPageComponent from "@/0-pages/(tenant)/TenantPageComponent";
+import MarketingHeader from "@/1-widgets/marketing/ui/MarketingHeader";
+import { fetchMarketingTranslations } from "@/4-shared/api/marketing";
+import { SUPPORTED_LANGUAGES, SupportedLanguage } from "@/4-shared/config/i18n";
+import { getSEOMetadata } from "@/4-shared/config/seo";
 import { getSiteByDomain } from "@/4-shared/lib/getSiteByDomain";
-import { fetchHeroSection } from "@/3-entities/sections/api/fetchHeroSection";
-import { fetchProgramSection } from "@/3-entities/sections/api/fetchProgramSection";
-import { fetchDetailsSection } from "@/3-entities/sections/api/fetchDetailsSection";
-import { fetchAccommodationSection } from "@/3-entities/sections/api/fetchAccommodationSection";
-import { fetchWhatElseSection } from "@/3-entities/sections/api/fetchWhatElseSection";
-import { fetchContactSection } from "@/3-entities/sections/api/fetchContactSection";
-import { fetchBankDataSection } from "@/3-entities/sections/api/fetchBankDataSection";
-
-import HeroSection from "@/3-entities/sections/ui/HeroSection";
-import ProgramSectionComponent from "@/3-entities/sections/ui/ProgramSection";
-import DetailsSection from "@/3-entities/sections/ui/DetailsSection";
-import AccommodationSection from "@/3-entities/sections/ui/AccommodationSection";
-import WhatElseSection from "@/3-entities/sections/ui/WhatElseSection";
-import ContactSection from "@/3-entities/sections/ui/ContactSection";
-import BankDataSection from "@/3-entities/sections/ui/BankDataSection";
-
-import Heading from "@/4-shared/ui/typography/Heading";
-import { LanguageToggle } from "@/2-features/language-toggle/ui/LanguageToggle";
-import TopMenu from "@/2-features/top-menu/ui/TopMenu";
-
 import { getMergedTranslations } from "@/4-shared/lib/i18n";
+import { JsonLd } from "@/4-shared/lib/seo/JsonLd";
+import {
+  BREADCRUMB_LABELS,
+  generateBreadcrumbSchema,
+} from "@/4-shared/lib/seo/generateBreadcrumbSchema";
+import { generateSiteMetadata } from "@/4-shared/lib/seo/generateSiteMetadata";
+import { getMetadataBase } from "@/4-shared/lib/seo/getMetadataBase";
+import { Footer } from "@/4-shared/ui/commons/footer/Footer";
+import { shouldShowBrandBadge, shouldShowFooter } from "@/4-shared/utils";
+import type { Metadata } from "next";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
+
+/**
+ * METADATA GENERATOR
+ */
+export async function generateMetadata({
+  params,
+}: {
+  params?: Promise<{ lang?: string }>;
+}): Promise<Metadata> {
+  const resolvedParams = await (params ?? { lang: "en" });
+  const lang = (resolvedParams.lang as SupportedLanguage) ?? "en";
+
+  const host = ((await headers()).get("host") ?? "").toLowerCase().trim();
+  const site = await getSiteByDomain(host);
+  const { metadataBase, baseUrl } = getMetadataBase(host, !!site);
+
+  if (site) {
+    // 1. Tenant Language Guard (Metadata level)
+    const allowedLangs =
+      site.languages?.length > 0 ? site.languages : [site.default_lang || "en"];
+    if (!allowedLangs.includes(lang)) return { metadataBase };
+
+    // 2. Tenant Metadata Logic
+    const translations = await getMergedTranslations(site.id, lang, "en");
+    const meta = generateSiteMetadata({
+      site,
+      lang,
+      translations,
+      baseUrl,
+      pageKind: "tenant",
+    });
+
+    const finalMeta = { ...meta, metadataBase };
+
+    // 3. SEO Privacy Toggle
+    if (site.seo_enabled === false) {
+      return {
+        ...finalMeta,
+        robots: { index: false, follow: false },
+        title: "Private Wedding Site",
+        description: "This wedding website is not publicly indexed.",
+      };
+    }
+    return finalMeta;
+  } else {
+    // 4. Marketing Metadata Logic
+    const seo = getSEOMetadata(lang, "marketing", "home");
+    const ogImage = "/assets/og/weddweb-OG.png";
+
+    const languages: Record<string, string> = {};
+    SUPPORTED_LANGUAGES.forEach((l) => {
+      languages[l] = `/${l}`;
+    });
+
+    return {
+      metadataBase,
+      title: seo.title,
+      description: seo.description,
+      alternates: {
+        canonical: `/${lang}`,
+        languages: { ...languages, "x-default": "/en" },
+      },
+      openGraph: {
+        title: seo.ogTitle || seo.title,
+        description: seo.ogDescription || seo.description,
+        url: `/${lang}`,
+        siteName: "WeddWeb",
+        images: [ogImage],
+        type: "website",
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: seo.ogTitle || seo.title,
+        description: seo.ogDescription || seo.description,
+        images: [ogImage],
+      },
+      robots: { index: true, follow: true },
+    };
+  }
+}
 
 export const dynamic = "force-dynamic";
 
-export default async function HomePage(props: { params: { lang: string } }) {
-  const realParams = "then" in props.params ? await props.params : props.params;
-  const lang = realParams.lang ?? "ca";
+/**
+ * MAIN PAGE COMPONENT
+ */
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ lang?: string }>;
+}) {
+  const resolvedParams = await params;
+  const langInput = resolvedParams?.lang || "en";
 
-  // Resolve host and site
   const host = ((await headers()).get("host") ?? "").toLowerCase().trim();
   const site = await getSiteByDomain(host);
-  const siteId = site?.id ?? null;
 
-  // available languages for this specific site
-  const availableLangs =
-    Array.isArray(site?.languages) && site.languages.length > 0
-      ? site.languages
-      : site?.default_lang
-        ? [site.default_lang]
-        : ["en"];
+  // --- CASE A: TENANT SITE ---
+  if (site) {
+    const allowedLangs =
+      site.languages?.length > 0 ? site.languages : [site.default_lang || "en"];
 
-  // fetch translations early for localized fallback content
-  const translations = await getMergedTranslations(siteId, lang, "en");
+    // 1. Tenant Language Guard (Redirect)
+    if (!allowedLangs.includes(langInput)) {
+      redirect(`/${site.default_lang || "en"}`);
+    }
 
-  if (!siteId) {
+    // 2. Parallel Data Fetching for Tenant
+    const [translations, showFooter, showBrandBadge] = await Promise.all([
+      getMergedTranslations(site.id, langInput, "en"),
+      shouldShowFooter({ planType: site.plan_type, routeKind: "tenant" }),
+      shouldShowBrandBadge({ planType: site.plan_type, routeKind: "tenant" }),
+    ]);
+
     return (
-      <div className="w-full flex flex-col items-center justify-center min-h-[60vh] p-8">
-        <Heading as="h1" className="text-3xl md:text-4xl mb-4 text-red-700">
-          {translations["event_not_found_title"] ?? "Wedding Event Not Found"}
-        </Heading>
-        <p className="text-lg text-gray-600 max-w-lg text-center">
-          {translations["event_not_found_body"] ??
-            "This wedding website is not yet published or available for this domain:"}{" "}
-          <strong>{host}</strong>
-        </p>
+      <div className="tenant-theme">
+        <TenantPageComponent
+          lang={langInput}
+          translations={translations}
+          showBrandBadge={showBrandBadge}
+        />
+        {showFooter && <Footer lang={langInput} translations={translations} />}
       </div>
     );
   }
 
-  // SSR fetch hero/program and the new sections in parallel, scoped by site
-  const [hero, program, details, accommodation, whatelse, bankData, contact] =
-    await Promise.all([
-      fetchHeroSection(siteId),
-      fetchProgramSection(siteId),
-      fetchDetailsSection(siteId),
-      fetchAccommodationSection(siteId),
-      fetchWhatElseSection(siteId),
-      fetchBankDataSection(siteId),
-      fetchContactSection(siteId),
-    ]);
+  // --- CASE B: MARKETING SITE ---
+  const lang = SUPPORTED_LANGUAGES.includes(langInput as SupportedLanguage)
+    ? (langInput as SupportedLanguage)
+    : "en";
+
+  // Parallel Data Fetching for Marketing
+  const translations = await fetchMarketingTranslations(lang, "en");
+  const { baseUrl } = getMetadataBase(host, false);
+  const labels = BREADCRUMB_LABELS[lang] ?? BREADCRUMB_LABELS.en;
+
+  const breadcrumbSchema = generateBreadcrumbSchema([
+    { name: labels.home, item: `${baseUrl}/${lang}` },
+  ]);
 
   return (
-    <>
-      <div className="relative">
-        {/* Top-left: menu */}
-        <div className="absolute top-3 left-3 z-50 pointer-events-auto">
-          <div className="backdrop-blur-sm rounded-md p-1 shadow-sm">
-            <TopMenu lang={lang} translations={translations} />
-          </div>
-        </div>
-
-        {/* Top-right: language toggle */}
-        <header
-          aria-label="Page controls"
-          className="absolute top-3 right-3 z-50 pointer-events-auto"
-        >
-          <div className="backdrop-blur-sm rounded-md p-1 shadow-sm">
-            <LanguageToggle activeLang={lang} availableLangs={availableLangs} />
-          </div>
-        </header>
-
-        {/* Hero */}
-        {hero && (
-          <>
-            <HeroSection hero={hero} lang={lang} translations={translations} />
-          </>
-        )}
-      </div>
-
-      <main className="flex flex-col gap-0">
-        {/* Program */}
-        {program && (
-          <ProgramSectionComponent
-            program={program}
-            lang={lang}
-            translations={translations}
-          />
-        )}
-
-        {/* Details / Program timeline */}
-        <DetailsSection
-          data={details}
-          lang={lang}
-          translations={translations}
-        />
-
-        {/* Accommodation */}
-        <AccommodationSection
-          data={accommodation}
-          lang={lang}
-          translations={translations}
-        />
-
-        {/* What else to see & do */}
-        <WhatElseSection
-          data={whatelse}
-          lang={lang}
-          translations={translations}
-        />
-
-        {/* Bank Data */}
-        {bankData && (
-          <BankDataSection
-            data={bankData}
-            lang={lang}
-            translations={translations}
-          />
-        )}
-
-        {/* Contact */}
-        <ContactSection
-          data={contact}
-          lang={lang}
-          translations={translations}
-        />
-      </main>
-    </>
+    <div className="marketing-theme">
+      <JsonLd data={breadcrumbSchema} />
+      <MarketingHeader lang={lang} translations={translations} />
+      <MarketingPageComponent initialLang={lang} translations={translations} />
+      <Footer lang={lang} translations={translations} />
+    </div>
   );
 }

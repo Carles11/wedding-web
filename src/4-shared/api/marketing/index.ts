@@ -1,0 +1,1 @@
+export { fetchMarketingTranslations } from "./getTranslations";

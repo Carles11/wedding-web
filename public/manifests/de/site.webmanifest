@@ -1,0 +1,58 @@
+{
+  "name": "WeddWeb",
+  "short_name": "WeddWeb",
+  "description": "Erstelle deine Hochzeitswebsite einfach. Mehrsprachig, anpassbar und mit schönem Design.",
+  "lang": "de",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "theme_color": "#ffffff",
+  "background_color": "#ffffff",
+  "orientation": "any",
+  "categories": [
+    "Hochzeit",
+    "Veranstaltungen",
+    "Webseite",
+    "mehrsprachig",
+    "anpassbar"
+  ],
+  "icons": [
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Preise",
+      "url": "/de/pricing",
+      "description": "Preise und Tarife ansehen"
+    },
+    {
+      "name": "FAQ",
+      "url": "/de/faq",
+      "description": "Häufig gestellte Fragen"
+    },
+    {
+      "name": "Datenschutzerklärung",
+      "url": "/de/privacy-policy",
+      "description": "Unsere Datenschutzerklärung lesen"
+    },
+    {
+      "name": "Nutzungsbedingungen",
+      "url": "/de/terms-of-service",
+      "description": "Unsere Nutzungsbedingungen lesen"
+    },
+    {
+      "name": "Cookie-Richtlinie",
+      "url": "/de/cookie-policy",
+      "description": "Unsere Cookie-Richtlinie lesen"
+    }
+  ]
+}

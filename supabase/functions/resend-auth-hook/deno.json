@@ -1,0 +1,11 @@
+{
+  "nodeModulesDir": "auto",
+  "compilerOptions": {
+    "allowJs": true,
+    "lib": ["deno.ns", "deno.window"]
+  },
+  "imports": {
+    "resend": "npm:resend@3.5.0/dist/index.js",
+    "standardwebhooks": "https://esm.sh/standardwebhooks@1.0.0"
+  }
+}

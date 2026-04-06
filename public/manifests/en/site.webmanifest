@@ -1,0 +1,58 @@
+{
+  "name": "WeddWeb",
+  "short_name": "WeddWeb",
+  "description": "Create your wedding website easily. Multilingual, customizable, and beautiful designs.",
+  "lang": "en",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "theme_color": "#ffffff",
+  "background_color": "#ffffff",
+  "orientation": "any",
+  "categories": [
+    "wedding",
+    "events",
+    "website",
+    "multilingual",
+    "customizable"
+  ],
+  "icons": [
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Pricing",
+      "url": "/en/pricing",
+      "description": "See pricing plans"
+    },
+    {
+      "name": "FAQ",
+      "url": "/en/faq",
+      "description": "Frequently Asked Questions"
+    },
+    {
+      "name": "Privacy Policy",
+      "url": "/en/privacy-policy",
+      "description": "Read our privacy policy"
+    },
+    {
+      "name": "Terms of Service",
+      "url": "/en/terms-of-service",
+      "description": "Read our terms of service"
+    },
+    {
+      "name": "Cookie Policy",
+      "url": "/en/cookie-policy",
+      "description": "Read our cookie policy"
+    }
+  ]
+}

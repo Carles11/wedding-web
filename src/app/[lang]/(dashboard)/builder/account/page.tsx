@@ -1,0 +1,50 @@
+"use server";
+
+import AccountPage from "@/0-pages/(builder)/account/AccountPage";
+import { getAccountInfo } from "@/3-entities/account/api/getAccountInfo";
+import { fetchBuilderTranslations } from "@/4-shared/api/builder/getTranslations";
+import { isValidLanguage } from "@/4-shared/helpers/isValidLanguage";
+import {
+  resolveLanguageFromParams,
+  resolveSearchParams,
+} from "@/4-shared/lib/params/resolveSearchParams";
+import { createSupabaseSSRClient } from "@/4-shared/lib/supabase/server";
+import { CustomLoader } from "@/4-shared/ui/commons/loader/CustomLoader";
+
+export default async function AccountPageSSR({
+  params,
+}: {
+  params: Promise<{ lang?: string }>;
+}) {
+  const resolvedParams = await resolveSearchParams(params);
+  let langCandidate = resolvedParams?.lang;
+
+  if (Array.isArray(langCandidate)) langCandidate = langCandidate[0];
+  const resolvedLang = resolveLanguageFromParams(
+    typeof langCandidate === "string" ? langCandidate : undefined,
+    resolvedParams,
+    isValidLanguage,
+  );
+
+  const supabase = await createSupabaseSSRClient();
+  const translations = await fetchBuilderTranslations(
+    supabase,
+    resolvedLang,
+    "en",
+  );
+
+  // Fetch account info server-side (stub userId for demo)
+  const account = await getAccountInfo();
+
+  if (!account) {
+    return (
+      <CustomLoader
+        message={
+          translations["checkout.status.wait"] ||
+          "Please wait, this may take a moment."
+        }
+      />
+    );
+  }
+  return <AccountPage account={account} translations={translations} />;
+}

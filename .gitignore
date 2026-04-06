@@ -40,3 +40,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Playwright test artifacts
+test-results/
+
+# supabase functions artifacts
+/supabase/functions/resend-auth-hook/node_modules/

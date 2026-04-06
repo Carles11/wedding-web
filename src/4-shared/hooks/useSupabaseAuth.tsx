@@ -1,13 +1,23 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { supabase } from "@/4-shared/api/supabaseClient";
+import { createClient } from "@/4-shared/lib/supabase/client";
 import type { Session, User } from "@supabase/supabase-js";
+import { useEffect, useState } from "react";
 
+/**
+ * Client-side auth hook using cookie-based session management.
+ *
+ * - Manages auth state (session, user, loading)
+ * - Auto-subscribes to auth state changes
+ * - Provides signOut helper
+ *
+ * Use in client components that need auth state.
+ */
 export function useSupabaseAuth() {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const supabase = createClient();
 
   useEffect(() => {
     let mounted = true;
@@ -21,27 +31,24 @@ export function useSupabaseAuth() {
       setSession(initialSession ?? null);
       setUser(initialSession?.user ?? null);
       setLoading(false);
-
-      // Subscribe to auth changes
-      const { data: listener } = supabase.auth.onAuthStateChange(
-        (_, newSession) => {
-          if (!mounted) return;
-          setSession(newSession ?? null);
-          setUser(newSession?.user ?? null);
-        },
-      );
-
-      return () => {
-        mounted = false;
-        listener?.subscription?.unsubscribe();
-      };
     }
 
-    const cleanup = init();
+    init();
+
+    // Subscribe to auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_, newSession) => {
+      if (!mounted) return;
+      setSession(newSession ?? null);
+      setUser(newSession?.user ?? null);
+    });
+
     return () => {
-      // Nothing here; the init() returns cleanup for listener
+      mounted = false;
+      subscription?.unsubscribe();
     };
-  }, []);
+  }, [supabase.auth]);
 
   const signOut = async () => {
     await supabase.auth.signOut();
@@ -49,5 +56,39 @@ export function useSupabaseAuth() {
     setUser(null);
   };
 
-  return { session, user, loading, signOut } as const;
+  /**
+   * Securely change the user's email, requiring their current password.
+   * Returns { success, error }.
+   */
+  const changeEmailWithPassword = async (
+    currentEmail: string,
+    newEmail: string,
+    password: string,
+  ) => {
+    // Step 1: Re-authenticate
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: currentEmail,
+      password,
+    });
+    if (signInError) {
+      return { success: false, error: signInError };
+    }
+    // Step 2: Update email
+    const { error: updateError } = await supabase.auth.updateUser({
+      email: newEmail,
+    });
+    if (updateError) {
+      return { success: false, error: updateError };
+    }
+    return { success: true };
+  };
+
+  return {
+    session,
+    user,
+    loading,
+    signOut,
+    supabase,
+    changeEmailWithPassword,
+  } as const;
 }

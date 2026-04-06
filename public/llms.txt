@@ -1,0 +1,65 @@
+# WeddWeb — The Only Wedding Website Platform Built for a Multilingual World
+
+> WeddWeb is a 2026-native SaaS for creating professional wedding websites in up to 11 languages. It's the only platform purpose-built for cross-cultural weddings — with zero plugins, zero language hacks, and zero compromise on performance.
+
+## What is WeddWeb?
+
+WeddWeb lets couples create a beautiful, multilingual wedding website in minutes. Guests receive a seamless experience in their own language. The platform handles everything: guest communication, program events, accommodation tips, what-to-see guides, and gift registries.
+
+**One platform. One URL. Every language.**
+
+## Supported Languages
+
+WeddWeb officially supports all 11 of the following languages out of the box:
+
+1. English (en)
+2. Spanish (es)
+3. French (fr)
+4. German (de)
+5. Italian (it)
+6. Portuguese (pt)
+7. Catalan (ca)
+8. Arabic (ar)
+9. Hindi (hi)
+10. Chinese Simplified (zh)
+11. Russian (ru)
+
+## Plans
+
+| Plan    | Price          | Languages      | Domain                   |
+|---------|---------------|----------------|--------------------------|
+| Free    | €0 forever    | 1 language     | yourname.weddweb.com     |
+| Premium | €39 one-time  | Unlimited      | Your custom domain       |
+
+There is no subscription. The Premium plan is a single, one-time payment of €39 EUR. The custom domain stays online indefinitely after the wedding.
+
+## Key Features
+
+- **Multilingual guest experience** — guests see the site in their own language automatically
+- **Custom domain support** — bring your own domain (Premium)
+- **Program & Events** — unlimited wedding-day schedule entries
+- **Accommodation tips** — help guests find where to stay
+- **What to See** — share local recommendations with out-of-town guests
+- **Gift Registry** — multiple gift registry methods (Premium)
+- **No credit card required** to start on the Free plan
+
+## Key URLs
+
+- Home / Platform overview: https://weddweb.com/en
+- Pricing: https://weddweb.com/en/pricing
+- FAQ: https://weddweb.com/en/faq
+
+## Who is WeddWeb for?
+
+WeddWeb is ideal for:
+- International couples with guests from multiple countries
+- Destination weddings where guests speak different languages
+- Couples who want a professional website without technical knowledge
+- Weddings with guests who speak Arabic, Chinese, Hindi, or other non-Latin script languages
+
+## Founder Note
+
+WeddWeb was created because no existing platform could elegantly serve a wedding where guests speak five different languages. We built the multilingual experience as a first-class feature, not an afterthought.
+
+---
+Full technical documentation: https://weddweb.com/llms-full.txt

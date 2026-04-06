@@ -1,0 +1,265 @@
+"use client";
+
+import { isValidLanguage } from "@/4-shared/helpers/isValidLanguage";
+import { t } from "@/4-shared/helpers/t";
+import { CheckoutClientProps, CheckoutResponse } from "@/4-shared/types";
+import { CustomLoader } from "@/4-shared/ui/commons/loader/CustomLoader";
+import Heading from "@/4-shared/ui/commons/typography/Heading";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
+
+export default function CheckoutClient({
+  translations,
+  lang,
+  initialPlan,
+  isSuccess,
+  sessionId,
+}: CheckoutClientProps) {
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [errorCode, setErrorCode] = useState<string | null>(null);
+
+  const validatedLang = isValidLanguage(lang) ? lang : "en";
+
+  const handleCheckout = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      setErrorCode(null);
+
+      // 1. Handle Stripe Success Redirect
+      if (isSuccess && sessionId) {
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+        router.push(`/${validatedLang}/builder`);
+        return;
+      }
+
+      // 2. Initiate Stripe Session or Free Plan Completion
+      const plan = initialPlan === "premium" ? "premium" : "free";
+      const response = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          planType: plan,
+          language: validatedLang,
+        }),
+      });
+
+      const data: CheckoutResponse = await response.json();
+
+      if (!data.success) {
+        setErrorCode(data.code ?? null);
+
+        if (data.code === "ALREADY_PREMIUM") {
+          setError(
+            t(
+              translations,
+              "checkout.info.already_premium",
+              "You are already on a premium plan.",
+            ),
+          );
+        } else if (data.code === "DOWNGRADE_NOT_AVAILABLE") {
+          setError(
+            t(
+              translations,
+              "checkout.info.downgrade_not_available",
+              "Downgrading to Free is not available yet.",
+            ),
+          );
+        } else if (response.status === 401) {
+          setError(
+            t(
+              translations,
+              "checkout.error.unauthorized",
+              "Please sign in to continue.",
+            ),
+          );
+        } else {
+          setError(
+            data.message ||
+              t(
+                translations,
+                "checkout.error.create_session",
+                "Failed to create checkout session",
+              ),
+          );
+        }
+        setLoading(false);
+        return;
+      }
+
+      // 3. Handle Free Plan Redirect (FIXED FOR DOUBLE LANG PREFIX)
+      if (data.planType === "free" && data.redirectTo) {
+        await new Promise((resolve) => setTimeout(resolve, 800));
+
+        const targetPath = data.redirectTo;
+        const langPrefix = `/${validatedLang}`;
+
+        // If the API already returned a path starting with /de or /en, use it directly.
+        // Otherwise, prepend the validated language.
+        if (targetPath.startsWith(langPrefix)) {
+          router.push(targetPath);
+        } else {
+          const cleanPath = targetPath.startsWith("/")
+            ? targetPath
+            : `/${targetPath}`;
+          router.push(`${langPrefix}${cleanPath}`);
+        }
+        return;
+      }
+
+      // 4. Handle Premium (Stripe) Redirect
+      if (data.planType === "premium" && data.url) {
+        window.location.href = data.url;
+        return;
+      }
+
+      throw new Error("Invalid server response");
+    } catch (err) {
+      console.error("[Checkout] Error:", err);
+      setError(
+        t(
+          translations,
+          "checkout.error.unexpected",
+          "An unexpected error occurred",
+        ),
+      );
+      setLoading(false);
+    }
+  }, [isSuccess, sessionId, initialPlan, validatedLang, router, t]);
+
+  useEffect(() => {
+    handleCheckout();
+  }, [handleCheckout]);
+
+  // ERROR UI
+  if (error) {
+    const isAlreadyPremium = errorCode === "ALREADY_PREMIUM";
+    const isDowngradeNotAvailable = errorCode === "DOWNGRADE_NOT_AVAILABLE";
+
+    return (
+      <main className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+        <div className="max-w-md w-full text-center">
+          <div
+            className={`rounded-lg shadow-sm border p-8 ${isAlreadyPremium ? "bg-(--builder-color-primary)/10 border-(--builder-color-primary)/20" : "bg-white border-red-200"}`}
+          >
+            <Heading
+              as="h2"
+              className={`mb-3 ${isAlreadyPremium ? "text-(--builder-color-primary)" : isDowngradeNotAvailable ? "text-amber-700" : "text-red-700"}`}
+            >
+              {isAlreadyPremium
+                ? t(
+                    translations,
+                    "checkout.info.already_premium_title",
+                    "Already Premium",
+                  )
+                : isDowngradeNotAvailable
+                  ? t(
+                      translations,
+                      "checkout.error.plan_change_not_available",
+                      "Plan Change Not Available",
+                    )
+                  : t(translations, "checkout.error.title", "Checkout Error")}
+            </Heading>
+            <p className="text-gray-600 mb-8">{error}</p>
+
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={() => router.push(`/${validatedLang}/builder`)}
+                className="px-6 py-2 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700 transition cursor-pointer"
+              >
+                {t(
+                  translations,
+                  "checkout.action.go_to_dashboard",
+                  "Go to Dashboard",
+                )}
+              </button>
+              <button
+                onClick={() => router.push(`/${validatedLang}/pricing`)}
+                className="px-6 py-2 bg-gray-200 text-gray-800 rounded-md font-medium hover:bg-gray-300 transition cursor-pointer"
+              >
+                {t(
+                  translations,
+                  "checkout.action.back_to_pricing",
+                  "Back to Pricing",
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  // LOADING / PROCESSING UI
+  return (
+    <main className="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-50 to-white px-4">
+      <div className="max-w-md w-full text-center">
+        <div className="bg-white rounded-lg shadow-lg p-8 border border-gray-100">
+          <div className="mb-6 inline-block">
+            <div className="relative w-12 h-12 mx-auto">
+              <div className="absolute inset-0 rounded-full border-4 border-blue-100" />
+              <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-blue-600 animate-spin" />
+            </div>
+          </div>
+
+          <Heading as="h2" className="text-2xl font-bold text-gray-900 mb-2">
+            {isSuccess
+              ? t(
+                  translations,
+                  "checkout.status.payment_success_title",
+                  "Payment Successful!",
+                )
+              : t(
+                  translations,
+                  "checkout.status.processing_title",
+                  "Processing...",
+                )}
+          </Heading>
+
+          <p className="text-gray-600 mb-6">
+            {isSuccess
+              ? t(
+                  translations,
+                  "checkout.status.payment_success_desc",
+                  "Your payment has been processed. Redirecting...",
+                )
+              : initialPlan === "free"
+                ? t(
+                    translations,
+                    "checkout.status.setting_up_free",
+                    "Setting up your free plan...",
+                  )
+                : t(
+                    translations,
+                    "checkout.status.preparing_checkout",
+                    "Preparing secure checkout...",
+                  )}
+          </p>
+
+          {loading && (
+            <CustomLoader
+              message={t(
+                translations,
+                "checkout.status.wait",
+                "Please wait, this may take a moment.",
+              )}
+            />
+          )}
+        </div>
+
+        <div className="mt-8 pt-6 border-t border-gray-200 text-sm text-gray-500">
+          <p className="flex items-center justify-center gap-2">
+            <span>🔒</span>
+            {t(
+              translations,
+              "checkout.badge.secure_by_stripe",
+              "Secure payment processing by Stripe",
+            )}
+          </p>
+        </div>
+      </div>
+    </main>
+  );
+}
