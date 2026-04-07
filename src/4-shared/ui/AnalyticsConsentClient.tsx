@@ -17,18 +17,27 @@ export function AnalyticsConsentClient({
   useEffect(() => {
     const localConsent = localStorage.getItem("cookie_consent");
     const localVersion = localStorage.getItem("cookie_consent_version");
-    setConsent(
-      localConsent === "true" && localVersion === COOKIE_CONSENT_VERSION,
-    );
+
+    const isConsented =
+      localConsent === "true" && localVersion === COOKIE_CONSENT_VERSION;
+
+    setConsent(isConsented);
     setChecked(true);
   }, []);
 
   const handleAccept = () => setConsent(true);
 
+  // 1. We still wait for the check to avoid showing the banner to people who already accepted
   if (!checked) return null;
 
   return (
     <>
+      {/* 2. THE FIX: Always render the GA component in production */}
+      {/* This ensures it shows up in view-source and Tag Assistant finds it */}
+      {process.env.NODE_ENV === "production" && (
+        <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID!} />
+      )}
+
       {!consent && (
         <CookiesConsentBanner
           onAccept={handleAccept}
@@ -37,9 +46,6 @@ export function AnalyticsConsentClient({
           userId={userProfile?.id ?? null}
           userProfile={userProfile}
         />
-      )}
-      {consent && process.env.NODE_ENV === "production" && (
-        <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID!} />
       )}
     </>
   );
