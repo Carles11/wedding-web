@@ -6,7 +6,7 @@
  */
 
 /** The date WeddWeb first launched. Historical fact — never changes. */
-export const SITE_LAUNCH_DATE = "2024-01-01";
+export const SITE_LAUNCH_DATE = "2026-04-06";
 
 /**
  * Returns the ISO 8601 date string for December 31st of the year
