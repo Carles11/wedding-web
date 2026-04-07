@@ -149,6 +149,41 @@ async function handleCheckoutSessionCompleted(
       "[Stripe Webhook] Profile updated successfully:",
       updatedProfile,
     );
+    try {
+      await fetch(
+        `https://www.google-analytics.com/mp/collect?measurement_id=${process.env.NEXT_PUBLIC_GA_ID}&api_secret=${process.env.GA_API_SECRET}`,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            // client_id is required. Using userId here is fine as long as it's consistent
+            client_id: userId,
+            user_id: userId, // This helps GA4 link the server hit to the browser session
+            events: [
+              {
+                name: "purchase",
+                params: {
+                  transaction_id: session.id,
+                  value: (session.amount_total ?? 0) / 100,
+                  currency: session.currency?.toUpperCase() || "EUR",
+                  // Adding more metadata helps the ROI reports
+                  payment_type: session.payment_method_types?.[0] || "card",
+                  items: [
+                    {
+                      item_id: planType,
+                      item_name: `${planType.charAt(0).toUpperCase() + planType.slice(1)} Plan`,
+                      price: (session.amount_total ?? 0) / 100,
+                      quantity: 1,
+                    },
+                  ],
+                },
+              },
+            ],
+          }),
+        },
+      );
+    } catch (e) {
+      console.error("GA4 Purchase Tracking Failed", e);
+    }
   }
 
   console.log(

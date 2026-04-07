@@ -17,30 +17,31 @@ export function AnalyticsConsentClient({
   useEffect(() => {
     const localConsent = localStorage.getItem("cookie_consent");
     const localVersion = localStorage.getItem("cookie_consent_version");
-
     const isConsented =
       localConsent === "true" && localVersion === COOKIE_CONSENT_VERSION;
 
     setConsent(isConsented);
     setChecked(true);
-  }, []);
 
-  const handleAccept = () => setConsent(true);
+    // If we have a user and they consented, link their ID to GA4
+    if (isConsented && userProfile?.id && (window as any).gtag) {
+      (window as any).gtag("config", process.env.NEXT_PUBLIC_GA_ID, {
+        user_id: userProfile.id,
+      });
+    }
+  }, [userProfile?.id]);
 
-  // 1. We still wait for the check to avoid showing the banner to people who already accepted
   if (!checked) return null;
 
   return (
     <>
-      {/* 2. THE FIX: Always render the GA component in production */}
-      {/* This ensures it shows up in view-source and Tag Assistant finds it */}
       {process.env.NODE_ENV === "production" && (
         <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID!} />
       )}
 
       {!consent && (
         <CookiesConsentBanner
-          onAccept={handleAccept}
+          onAccept={() => setConsent(true)}
           translations={translations}
           lang={lang}
           userId={userProfile?.id ?? null}

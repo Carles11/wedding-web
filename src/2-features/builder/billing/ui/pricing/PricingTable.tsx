@@ -145,7 +145,7 @@ export default function PricingTable({
                           prop.replace(/([A-Z])/g, " $1").trim(),
                         )}
                       </span>
-                      <span className="font-medium text-[var(--foreground)]">
+                      <span className="font-medium text-(--foreground)">
                         {formatLimit(val as number, translations, prop)}
                       </span>
                     </div>
@@ -168,7 +168,26 @@ export default function PricingTable({
                   hover:brightness-110 active:scale-95
                   ${isLoading ? "cursor-not-allowed" : "cursor-pointer shadow-md"}
                 `}
-                onClick={() => onSelect(plan)}
+                onClick={() => {
+                  if (
+                    plan !== "free" &&
+                    typeof window !== "undefined" &&
+                    (window as any).gtag
+                  ) {
+                    (window as any).gtag("event", "begin_checkout", {
+                      currency: def.currency,
+                      value: def.price / 100, // GA4 expects major units (e.g. 19.00)
+                      items: [
+                        {
+                          item_id: plan,
+                          item_name: planName,
+                          price: def.price / 100,
+                        },
+                      ],
+                    });
+                  }
+                  onSelect(plan);
+                }}
               >
                 {isLoading
                   ? (translations["loading"] ?? "Almost there…")
