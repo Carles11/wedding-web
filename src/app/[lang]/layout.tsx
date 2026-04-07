@@ -25,7 +25,12 @@ export default async function LangLayout({
   const fontVariables = allFontInstances.map((f) => f.variable).join(" ");
 
   return (
-    <html lang={lang} dir={isRTL ? "rtl" : "ltr"} data-scroll-behavior="smooth">
+    <html
+      lang={lang}
+      dir={isRTL ? "rtl" : "ltr"}
+      data-scroll-behavior="smooth"
+      suppressHydrationWarning
+    >
       <head>
         <link rel="alternate" type="text/plain" href="/llms.txt" />
         {ICONS.filter((icon) => icon.rel !== "manifest").map((icon, i) => (

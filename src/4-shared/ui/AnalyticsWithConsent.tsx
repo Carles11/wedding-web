@@ -12,6 +12,12 @@ export async function AnalyticsWithConsent({ lang }: { lang: string }) {
     "en",
   );
 
+  console.log("AnalyticsWithConsent props:", {
+    lang,
+    userProfile,
+    translations,
+  });
+
   return (
     <AnalyticsConsentClient
       lang={lang}
