@@ -4,7 +4,6 @@
 import { COOKIE_CONSENT_VERSION } from "@/4-shared/config/consents/versions";
 import { CookiesConsentBanner } from "@/4-shared/ui/CookiesConsentBanner";
 import { GoogleAnalytics } from "@next/third-parties/google";
-import Script from "next/script";
 import { useEffect, useState } from "react";
 
 export function AnalyticsConsentClient({
@@ -18,7 +17,6 @@ export function AnalyticsConsentClient({
   useEffect(() => {
     const localConsent = localStorage.getItem("cookie_consent");
     const localVersion = localStorage.getItem("cookie_consent_version");
-
     setConsent(
       localConsent === "true" && localVersion === COOKIE_CONSENT_VERSION,
     );
@@ -31,20 +29,6 @@ export function AnalyticsConsentClient({
 
   return (
     <>
-      {/* 1. Mandatory for "Verify Consent": Set default state to denied */}
-      <Script id="ga-consent-defaults" strategy="afterInteractive">
-        {`
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('consent', 'default', {
-            'analytics_storage': 'denied',
-            'ad_storage': 'denied',
-            'ad_user_data': 'denied',
-            'ad_personalization': 'denied'
-          });
-        `}
-      </Script>
-
       {!consent && (
         <CookiesConsentBanner
           onAccept={handleAccept}
@@ -54,7 +38,6 @@ export function AnalyticsConsentClient({
           userProfile={userProfile}
         />
       )}
-
       {consent && process.env.NODE_ENV === "production" && (
         <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID!} />
       )}
