@@ -1,18 +1,26 @@
 import { supabaseAdmin } from "@/4-shared/lib/supabase/supabaseServer";
-import { Subscription } from "@/4-shared/types/billing";
 
-export async function upsertCurrentUserSubscription(
-  subscriptionPayload: Partial<Subscription>,
-) {
-  // We return the result of the query directly
+export async function upsertCurrentUserSubscription(subscriptionPayload: any) {
+  console.log(
+    "[DB Debug] Attempting upsert with:",
+    JSON.stringify(subscriptionPayload),
+  );
+
   const { data, error } = await supabaseAdmin
     .from("subscriptions")
     .upsert(subscriptionPayload, {
       onConflict: "user_id",
-      ignoreDuplicates: false,
     })
-    .select()
-    .single();
+    .select(); // Remove .single() for the test to see if it's returning an array
 
-  return { data, error };
+  if (error) {
+    console.error("[DB Debug] Detailed Postgres Error:", {
+      code: error.code,
+      message: error.message,
+      details: error.details,
+      hint: error.hint,
+    });
+  }
+
+  return { data: data?.[0] || null, error };
 }

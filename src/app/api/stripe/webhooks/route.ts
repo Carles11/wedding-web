@@ -80,7 +80,7 @@ async function handleCheckoutSessionCompleted(
     return;
   }
 
-  // Verification check: Only process if paid
+  // 1. Verification check
   if (
     session.payment_status !== "paid" &&
     session.payment_status !== "no_payment_required"
@@ -89,18 +89,17 @@ async function handleCheckoutSessionCompleted(
     return;
   }
 
-  // Fetch line items to get the Price ID and amount
+  // 2. Data Resolution
   const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
   const firstItem = lineItems.data[0];
   const stripePriceId = firstItem?.price?.id ?? null;
 
-  // Determine Plan Type
   const planType: PlanType =
     (session.metadata?.planType as PlanType | undefined) ??
     resolvePlanTypeFromStripePriceId(stripePriceId) ??
     "premium";
 
-  // Construct the payload for our DB
+  // 3. Database Updates
   const subscriptionPayload = {
     user_id: userId,
     plan_type: planType,
@@ -114,59 +113,48 @@ async function handleCheckoutSessionCompleted(
     started_at: new Date().toISOString(),
     stripe_customer_id:
       typeof session.customer === "string" ? session.customer : null,
-    stripe_subscription_id: null, // null for 'payment' mode (one-time)
+    stripe_subscription_id: null,
     stripe_price_id: stripePriceId,
     updated_at: new Date().toISOString(),
   };
 
-  /**
-   * UPSERT LOGIC
-   * We use .upsert() targeting 'user_id' to ensure a user only ever has
-   * one active subscription record in the table.
-   */
-  const { error } = await upsertCurrentUserSubscription(subscriptionPayload);
-
-  if (error) {
-    // This log will now contain the actual Postgrest error message
-    console.error("[Stripe Webhook] DB Update Error:", error.message);
-
-    // Re-throwing tells Stripe "I failed, try again in an hour"
-    throw new Error(`Database Upsert Failed: ${error.message}`);
+  // Try Sub Update
+  const { error: subError } =
+    await upsertCurrentUserSubscription(subscriptionPayload);
+  if (subError) {
+    console.error("[Stripe Webhook] DB Subscription Error:", subError);
+    // We continue even if DB fails so we at least try to track the money in GA4
   }
 
-  // Mark onboarding as complete for this user (for premium signups)
-
-  const { data: updatedProfile, error: onboardingError } =
-    await updateUserProfile(userId, { onboarding_completed: true });
-
+  // Try Profile Update
+  const { error: onboardingError } = await updateUserProfile(userId, {
+    onboarding_completed: true,
+  });
   if (onboardingError) {
-    console.error(
-      "[Stripe Webhook] Failed to update profile:",
-      onboardingError,
-    );
-  } else {
-    console.log(
-      "[Stripe Webhook] Profile updated successfully:",
-      updatedProfile,
-    );
-    try {
+    console.error("[Stripe Webhook] Profile Update Error:", onboardingError);
+  }
+
+  // 4. GA4 Purchase Tracking (Isolated so it won't crash the webhook)
+  try {
+    const gaId = process.env.NEXT_PUBLIC_GA_ID;
+    const gaSecret = process.env.GA_API_SECRET;
+
+    if (gaId && gaSecret) {
       await fetch(
-        `https://www.google-analytics.com/mp/collect?measurement_id=${process.env.NEXT_PUBLIC_GA_ID}&api_secret=${process.env.GA_API_SECRET}`,
+        `https://www.google-analytics.com/mp/collect?measurement_id=${gaId}&api_secret=${gaSecret}`,
         {
           method: "POST",
           body: JSON.stringify({
-            // client_id is required. Using userId here is fine as long as it's consistent
             client_id: userId,
-            user_id: userId, // This helps GA4 link the server hit to the browser session
+            user_id: userId,
             events: [
               {
                 name: "purchase",
                 params: {
                   transaction_id: session.id,
+                  // Use amount_total for the actual money paid (will be 0 for your discount test)
                   value: (session.amount_total ?? 0) / 100,
                   currency: session.currency?.toUpperCase() || "EUR",
-                  // Adding more metadata helps the ROI reports
-                  payment_type: session.payment_method_types?.[0] || "card",
                   items: [
                     {
                       item_id: planType,
@@ -181,12 +169,15 @@ async function handleCheckoutSessionCompleted(
           }),
         },
       );
-    } catch (e) {
-      console.error("GA4 Purchase Tracking Failed", e);
+      console.log("[Stripe Webhook] GA4 Purchase tracked successfully");
+    } else {
+      console.warn(
+        "[Stripe Webhook] GA4 credentials missing in environment variables",
+      );
     }
+  } catch (e) {
+    console.error("[Stripe Webhook] GA4 Tracking Error:", e);
   }
 
-  console.log(
-    `[Stripe Webhook] Successfully activated ${planType} for user ${userId}`,
-  );
+  console.log(`[Stripe Webhook] Processed ${planType} for user ${userId}`);
 }
