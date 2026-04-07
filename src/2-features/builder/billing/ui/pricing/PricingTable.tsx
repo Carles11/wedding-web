@@ -176,12 +176,12 @@ export default function PricingTable({
                   ) {
                     (window as any).gtag("event", "begin_checkout", {
                       currency: def.currency,
-                      value: def.price / 100, // GA4 expects major units (e.g. 19.00)
+                      value: def.price, // GA4 expects major units (e.g. 19.00)
                       items: [
                         {
                           item_id: plan,
                           item_name: planName,
-                          price: def.price / 100,
+                          price: def.price,
                         },
                       ],
                     });
