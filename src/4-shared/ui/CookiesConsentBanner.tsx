@@ -4,7 +4,6 @@ import { MarketingButton } from "@/4-shared/ui/marketing";
 import { useEffect, useState } from "react";
 import { COOKIE_CONSENT_VERSION } from "../config/consents/versions";
 
-// You can pass translations and lang as props for i18n
 export function CookiesConsentBanner({
   onAccept,
   translations,
@@ -26,6 +25,18 @@ export function CookiesConsentBanner({
   const [visible, setVisible] = useState(false);
   const [synced, setSynced] = useState(false);
 
+  // Helper to notify Google Analytics of the consent change
+  const notifyGA4 = (granted: boolean) => {
+    if (typeof window !== "undefined" && (window as any).gtag) {
+      (window as any).gtag("consent", "update", {
+        analytics_storage: granted ? "granted" : "denied",
+        ad_storage: granted ? "granted" : "denied",
+        ad_user_data: granted ? "granted" : "denied",
+        ad_personalization: granted ? "granted" : "denied",
+      });
+    }
+  };
+
   useEffect(() => {
     if (typeof window === "undefined") return;
     const localConsent = localStorage.getItem("cookie_consent");
@@ -33,18 +44,19 @@ export function CookiesConsentBanner({
     const dbConsent = userProfile?.cookie_consent;
     const dbVersion = userProfile?.cookie_consent_version;
 
-    // If DB says consent is given and version matches, sync localStorage and hide banner
+    // Case 1: DB has consent. Sync to local and tell GA4.
     if (userId && dbConsent && dbVersion === COOKIE_CONSENT_VERSION) {
       if (localConsent !== "true" || localVersion !== COOKIE_CONSENT_VERSION) {
         localStorage.setItem("cookie_consent", "true");
         localStorage.setItem("cookie_consent_version", COOKIE_CONSENT_VERSION);
       }
+      notifyGA4(true);
       setVisible(false);
       setSynced(true);
       return;
     }
 
-    // If localStorage says consent but DB does not, update DB
+    // Case 2: Local has consent but DB doesn't. Sync to DB and tell GA4.
     if (
       userId &&
       localConsent === "true" &&
@@ -59,26 +71,37 @@ export function CookiesConsentBanner({
           consent: true,
           version: COOKIE_CONSENT_VERSION,
         }),
-      }).catch((err) => {
-        // eslint-disable-next-line no-console
-        console.error("Failed to sync cookie consent to DB", err);
-      });
+      }).catch((err) => console.error("Failed to sync consent to DB", err));
+
+      notifyGA4(true);
       setVisible(false);
       setSynced(true);
       return;
     }
 
-    // Otherwise, show banner if not accepted
-    setVisible(
-      localConsent !== "true" || localVersion !== COOKIE_CONSENT_VERSION,
-    );
+    // Case 3: No consent found anywhere.
+    const hasPriorLocalConsent =
+      localConsent === "true" && localVersion === COOKIE_CONSENT_VERSION;
+    if (hasPriorLocalConsent) {
+      notifyGA4(true);
+    }
+
+    setVisible(!hasPriorLocalConsent);
     setSynced(true);
   }, [userId, userProfile]);
 
   const handleAccept = () => {
+    // 1. Update Local Storage
     localStorage.setItem("cookie_consent", "true");
     localStorage.setItem("cookie_consent_version", COOKIE_CONSENT_VERSION);
+
+    // 2. Update GA4 state immediately
+    notifyGA4(true);
+
+    // 3. UI Update
     setVisible(false);
+
+    // 4. Sync to DB if logged in
     if (userId) {
       fetch("/api/updateCookieConsent", {
         method: "POST",
@@ -88,11 +111,9 @@ export function CookiesConsentBanner({
           consent: true,
           version: COOKIE_CONSENT_VERSION,
         }),
-      }).catch((err) => {
-        // eslint-disable-next-line no-console
-        console.error("Failed to sync cookie consent to DB", err);
-      });
+      }).catch((err) => console.error("Failed to sync consent to DB", err));
     }
+
     onAccept?.();
   };
 

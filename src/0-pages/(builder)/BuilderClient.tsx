@@ -17,7 +17,6 @@ import { createClient } from "@/4-shared/lib/supabase/client";
 import { BuilderClientProps, ImageSection, StepStatus } from "@/4-shared/types";
 import { BuilderHeader } from "@/4-shared/ui/builder";
 import { CustomLoader } from "@/4-shared/ui/commons/loader/CustomLoader";
-import { CookiesConsentBanner } from "@/4-shared/ui/CookiesConsentBanner";
 import { isValidEmail } from "@/4-shared/utils/validations";
 import { usePlan } from "@/app/providers";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -239,12 +238,7 @@ export default function BuilderClient({
           }
         />
       )}
-      <CookiesConsentBanner
-        translations={translations}
-        lang={currentLang}
-        userId={userId}
-        userProfile={userProfile}
-      />
+
       <BuilderHeader
         translations={translations}
         site={site}

@@ -13,7 +13,6 @@ import { useSupabaseAuth } from "@/4-shared/hooks/useSupabaseAuth";
 import { JsonLd } from "@/4-shared/lib/seo/JsonLd";
 import { generateWebPageSchema } from "@/4-shared/lib/seo/generateGraphSchema";
 import type { MarketingPageProps } from "@/4-shared/types";
-import { CookiesConsentBanner } from "@/4-shared/ui/CookiesConsentBanner";
 import { useRouter } from "next/navigation";
 
 /**
@@ -130,12 +129,6 @@ export default function MarketingPageComponent({
           primaryHref={primaryHref}
         />
       </main>
-
-      <CookiesConsentBanner
-        translations={translations}
-        lang={initialLang}
-        userId={user?.id}
-      />
     </>
   );
 }
