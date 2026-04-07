@@ -19,8 +19,8 @@ import TenantHeroShell from "@/1-widgets/tenant/page/ui/TenantHeroShell";
 import TenantNotFoundState from "@/1-widgets/tenant/page/ui/TenantNotFoundState";
 import TenantSectionsContent from "@/1-widgets/tenant/page/ui/TenantSectionsContent";
 import { ProgramSection } from "@/4-shared/types";
+import { TenantAnalyticsTracker } from "@/4-shared/ui/TenantAnalyticsTracker";
 import { headers } from "next/headers";
-
 // --- MAIN MULTILINGUAL TENANT PAGE COMPONENT ---
 export default async function TenantPageComponent({
   lang = "en",
@@ -49,6 +49,10 @@ export default async function TenantPageComponent({
   if (!siteId) {
     return <TenantNotFoundState host={host} translations={translations} />;
   }
+
+  // Determine if it's a custom domain or a weddweb subdomain
+  const isCustomDomain =
+    !host.includes("weddweb.com") && !host.includes("localhost");
 
   // for hero-section
   const heroFromi18n = {
@@ -156,6 +160,8 @@ export default async function TenantPageComponent({
         } as React.CSSProperties
       }
     >
+      {/* Analytics Trigger */}
+      <TenantAnalyticsTracker siteId={siteId} isCustomDomain={isCustomDomain} />
       {/* JSON-LD SEO */}
       <JsonLd data={eventSchema} />
       <TenantHeroShell
