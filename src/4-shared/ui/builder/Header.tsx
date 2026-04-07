@@ -19,6 +19,22 @@ export function BuilderHeader({
   const requiredSteps = stepStatus?.filter((s, i) => s !== "optional") ?? [];
   const allRequiredDone = requiredSteps.every((s) => s === "done");
 
+  // --- Analytics Handler ---
+  const trackSitePreview = (subdomain: string) => {
+    if (typeof window !== "undefined" && (window as any).gtag) {
+      (window as any).gtag("event", "site_preview_opened", {
+        event_category: "engagement",
+        event_label: subdomain,
+        // We track if they are launching from local vs production
+        environment:
+          window.location.hostname === "localhost"
+            ? "development"
+            : "production",
+        language: currentLang,
+      });
+    }
+  };
+
   return (
     <header className="border-b bg-white p-4 sm:p-6">
       <div className="max-w-[95vw] mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
@@ -44,8 +60,6 @@ export function BuilderHeader({
                   if (hostname === "localhost") {
                     previewUrl = `http://${site.subdomain}.localhost:3000`;
                   } else if (hostname.includes("vercel.app")) {
-                    // Use the current host as the base, replacing the first part with the subdomain
-                    // e.g. subdomain.weddwebcom-git-beta-deploy-carles-projects-5a7d39cc.vercel.app
                     const hostParts = hostname.split(".");
                     hostParts[0] = site.subdomain;
                     previewUrl = `${window.location.protocol}//${hostParts.join(".")}`;
@@ -63,8 +77,14 @@ export function BuilderHeader({
                       if (!allRequiredDone) {
                         e.preventDefault();
                         notify.error(
-                          "Please complete all required steps before previewing your site.",
+                          translations["builder.header.error.incomplete"] ||
+                            "Please complete all required steps before previewing your site.",
                         );
+                        return;
+                      }
+                      // Trigger the analytics event only on successful click
+                      if (site?.subdomain) {
+                        trackSitePreview(site.subdomain);
                       }
                     }}
                     tabIndex={allRequiredDone ? 0 : -1}
