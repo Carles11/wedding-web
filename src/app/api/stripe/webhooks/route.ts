@@ -13,10 +13,6 @@ import Stripe from "stripe";
 
 const stripe = new Stripe(STRIPE_SECRET_KEY);
 
-/**
- * STRIPE WEBHOOK HANDLER
- * Processes asynchronous events from Stripe (Payments, Subscriptions, etc.)
- */
 export async function POST(req: NextRequest) {
   const webhookSecret = STRIPE_WEBHOOK_SECRET;
 
@@ -33,7 +29,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "No signature" }, { status: 400 });
     }
 
-    // 1. Verify the event came from Stripe
     let event: Stripe.Event;
     try {
       event = stripe.webhooks.constructEvent(rawBody, signature, webhookSecret);
@@ -43,20 +38,21 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid Signature" }, { status: 400 });
     }
 
-    // 2. Route the event
     switch (event.type) {
       case "checkout.session.completed":
         const session = event.data.object as Stripe.Checkout.Session;
         await handleCheckoutSessionCompleted(session);
         break;
-
-      // Optional: Add more cases here as you scale (e.g., invoice.payment_failed)
       default:
         console.log(`[Stripe Webhook] Unhandled event type: ${event.type}`);
     }
 
     return NextResponse.json({ received: true }, { status: 200 });
   } catch (error) {
+    console.error(
+      "[Stripe Webhook] Unhandled error:",
+      error instanceof Error ? error.message : JSON.stringify(error),
+    );
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 },
@@ -64,9 +60,6 @@ export async function POST(req: NextRequest) {
   }
 }
 
-/**
- * Handle successful checkout completion
- */
 async function handleCheckoutSessionCompleted(
   session: Stripe.Checkout.Session,
 ) {
@@ -80,7 +73,6 @@ async function handleCheckoutSessionCompleted(
     return;
   }
 
-  // 1. Verification check
   if (
     session.payment_status !== "paid" &&
     session.payment_status !== "no_payment_required"
@@ -89,7 +81,6 @@ async function handleCheckoutSessionCompleted(
     return;
   }
 
-  // 2. Data Resolution
   const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
   const firstItem = lineItems.data[0];
   const stripePriceId = firstItem?.price?.id ?? null;
@@ -99,7 +90,6 @@ async function handleCheckoutSessionCompleted(
     resolvePlanTypeFromStripePriceId(stripePriceId) ??
     "premium";
 
-  // 3. Database Updates
   const subscriptionPayload = {
     user_id: userId,
     plan_type: planType,
@@ -118,23 +108,42 @@ async function handleCheckoutSessionCompleted(
     updated_at: new Date().toISOString(),
   };
 
-  // Try Sub Update
-  const { error: subError } =
-    await upsertCurrentUserSubscription(subscriptionPayload);
-  if (subError) {
-    console.error("[Stripe Webhook] DB Subscription Error:", subError);
-    // We continue even if DB fails so we at least try to track the money in GA4
+  // === ISOLATED: Subscription Upsert ===
+  try {
+    const { error: subError } =
+      await upsertCurrentUserSubscription(subscriptionPayload);
+    if (subError) {
+      console.error(
+        "[Stripe Webhook] DB Subscription Error:",
+        JSON.stringify(subError),
+      );
+    }
+  } catch (e) {
+    console.error(
+      "[Stripe Webhook] DB Subscription THREW:",
+      e instanceof Error ? e.message : JSON.stringify(e),
+    );
   }
 
-  // Try Profile Update
-  const { error: onboardingError } = await updateUserProfile(userId, {
-    onboarding_completed: true,
-  });
-  if (onboardingError) {
-    console.error("[Stripe Webhook] Profile Update Error:", onboardingError);
+  // === ISOLATED: Profile Update ===
+  try {
+    const { error: profileError } = await updateUserProfile(userId, {
+      onboarding_completed: true,
+    });
+    if (profileError) {
+      console.error(
+        "[Stripe Webhook] Profile Update Error:",
+        JSON.stringify(profileError),
+      );
+    }
+  } catch (e) {
+    console.error(
+      "[Stripe Webhook] Profile Update THREW:",
+      e instanceof Error ? e.message : JSON.stringify(e),
+    );
   }
 
-  // 4. GA4 Purchase Tracking (Isolated so it won't crash the webhook)
+  // === ISOLATED: GA4 Purchase Tracking ===
   try {
     const gaId = process.env.NEXT_PUBLIC_GA_ID;
     const gaSecret = process.env.GA_API_SECRET;
@@ -152,7 +161,6 @@ async function handleCheckoutSessionCompleted(
                 name: "purchase",
                 params: {
                   transaction_id: session.id,
-                  // Use amount_total for the actual money paid (will be 0 for your discount test)
                   value: (session.amount_total ?? 0) / 100,
                   currency: session.currency?.toUpperCase() || "EUR",
                   items: [

@@ -6,7 +6,9 @@ import { CheckoutClientProps, CheckoutResponse } from "@/4-shared/types";
 import { CustomLoader } from "@/4-shared/ui/commons/loader/CustomLoader";
 import Heading from "@/4-shared/ui/commons/typography/Heading";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+
+type PostPaymentState = "polling" | "confirmed" | "timeout" | "error";
 
 export default function CheckoutClient({
   translations,
@@ -19,8 +21,45 @@ export default function CheckoutClient({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [errorCode, setErrorCode] = useState<string | null>(null);
+  const [postPaymentState, setPostPaymentState] =
+    useState<PostPaymentState | null>(null);
+  const [confirmedPlan, setConfirmedPlan] = useState<string | null>(null);
+  const pollRef = useRef(false);
 
   const validatedLang = isValidLanguage(lang) ? lang : "en";
+
+  // --- Polling logic for post-payment ---
+  const pollSubscriptionStatus = useCallback(async () => {
+    if (pollRef.current) return;
+    pollRef.current = true;
+    setPostPaymentState("polling");
+
+    const MAX_ATTEMPTS = 5;
+    const INTERVAL_MS = 2000;
+
+    for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+      try {
+        const res = await fetch("/api/subscription-status");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.planType && data.planType !== "free") {
+            setConfirmedPlan(data.planType);
+            setPostPaymentState("confirmed");
+            return;
+          }
+        }
+      } catch {
+        // Network error — continue polling
+      }
+
+      if (attempt < MAX_ATTEMPTS - 1) {
+        await new Promise((resolve) => setTimeout(resolve, INTERVAL_MS));
+      }
+    }
+
+    // Exhausted all attempts
+    setPostPaymentState("timeout");
+  }, []);
 
   const handleCheckout = useCallback(async () => {
     try {
@@ -28,10 +67,10 @@ export default function CheckoutClient({
       setError(null);
       setErrorCode(null);
 
-      // 1. Handle Stripe Success Redirect
+      // 1. Handle Stripe Success Redirect — start polling
       if (isSuccess && sessionId) {
-        await new Promise((resolve) => setTimeout(resolve, 1500));
-        router.push(`/${validatedLang}/builder`);
+        await pollSubscriptionStatus();
+        setLoading(false);
         return;
       }
 
@@ -89,15 +128,13 @@ export default function CheckoutClient({
         return;
       }
 
-      // 3. Handle Free Plan Redirect (FIXED FOR DOUBLE LANG PREFIX)
+      // 3. Handle Free Plan Redirect
       if (data.planType === "free" && data.redirectTo) {
         await new Promise((resolve) => setTimeout(resolve, 800));
 
         const targetPath = data.redirectTo;
         const langPrefix = `/${validatedLang}`;
 
-        // If the API already returned a path starting with /de or /en, use it directly.
-        // Otherwise, prepend the validated language.
         if (targetPath.startsWith(langPrefix)) {
           router.push(targetPath);
         } else {
@@ -127,11 +164,139 @@ export default function CheckoutClient({
       );
       setLoading(false);
     }
-  }, [isSuccess, sessionId, initialPlan, validatedLang, router, t]);
+  }, [
+    isSuccess,
+    sessionId,
+    initialPlan,
+    validatedLang,
+    router,
+    translations,
+    pollSubscriptionStatus,
+  ]);
 
   useEffect(() => {
     handleCheckout();
   }, [handleCheckout]);
+
+  // --- POST-PAYMENT: Confirmed UI ---
+  if (postPaymentState === "confirmed") {
+    return (
+      <main className="min-h-screen flex items-center justify-center bg-linear-to-br from-green-50 to-white px-4">
+        <div className="max-w-md w-full text-center">
+          <div className="bg-white rounded-lg shadow-lg p-8 border border-green-200">
+            <div className="text-5xl mb-4">🎉</div>
+            <Heading as="h2" className="text-2xl font-bold text-gray-900 mb-3">
+              {t(translations, "checkout.success.title", "Payment Confirmed!")}
+            </Heading>
+            <p className="text-gray-600 mb-2">
+              {t(
+                translations,
+                "checkout.success.plan_activated",
+                `Your ${confirmedPlan} plan is now active.`,
+              ).replace("{{plan}}", confirmedPlan ?? "premium")}
+            </p>
+            <p className="text-gray-500 text-sm mb-8">
+              {t(
+                translations,
+                "checkout.success.description",
+                "All premium features are now unlocked. Start building your dream wedding website!",
+              )}
+            </p>
+            <button
+              onClick={() => router.replace(`/${validatedLang}/builder`)}
+              className="w-full px-6 py-3 bg-green-600 text-white rounded-md font-semibold hover:bg-green-700 transition cursor-pointer"
+            >
+              {t(
+                translations,
+                "checkout.action.go_to_builder",
+                "Go to Builder →",
+              )}
+            </button>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  // --- POST-PAYMENT: Timeout / Fallback UI ---
+  if (postPaymentState === "timeout") {
+    return (
+      <main className="min-h-screen flex items-center justify-center bg-linear-to-br from-amber-50 to-white px-4">
+        <div className="max-w-md w-full text-center">
+          <div className="bg-white rounded-lg shadow-lg p-8 border border-amber-200">
+            <div className="text-4xl mb-4">✅</div>
+            <Heading as="h2" className="text-2xl font-bold text-gray-900 mb-3">
+              {t(translations, "checkout.timeout.title", "Payment Confirmed!")}
+            </Heading>
+            <p className="text-gray-600 mb-6">
+              {t(
+                translations,
+                "checkout.timeout.description",
+                "Your features are being activated. If this takes more than a minute, please refresh the page or contact support.",
+              )}
+            </p>
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={() => window.location.reload()}
+                className="w-full px-6 py-3 bg-amber-600 text-white rounded-md font-semibold hover:bg-amber-700 transition cursor-pointer"
+              >
+                {t(translations, "checkout.action.refresh", "Refresh Page")}
+              </button>
+              <button
+                onClick={() => router.replace(`/${validatedLang}/builder`)}
+                className="w-full px-6 py-2 bg-gray-200 text-gray-800 rounded-md font-medium hover:bg-gray-300 transition cursor-pointer"
+              >
+                {t(
+                  translations,
+                  "checkout.action.go_to_builder",
+                  "Go to Builder →",
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  // --- POST-PAYMENT: Polling / Loading UI ---
+  if (postPaymentState === "polling") {
+    return (
+      <main className="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-50 to-white px-4">
+        <div className="max-w-md w-full text-center">
+          <div className="bg-white rounded-lg shadow-lg p-8 border border-gray-100">
+            <div className="mb-6 inline-block">
+              <div className="relative w-12 h-12 mx-auto">
+                <div className="absolute inset-0 rounded-full border-4 border-blue-100" />
+                <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-blue-600 animate-spin" />
+              </div>
+            </div>
+            <Heading as="h2" className="text-2xl font-bold text-gray-900 mb-2">
+              {t(
+                translations,
+                "checkout.status.confirming_title",
+                "Confirming Your Payment...",
+              )}
+            </Heading>
+            <p className="text-gray-600 mb-6">
+              {t(
+                translations,
+                "checkout.status.confirming_desc",
+                "Please wait while we activate your premium features.",
+              )}
+            </p>
+            <CustomLoader
+              message={t(
+                translations,
+                "checkout.status.wait",
+                "Please wait, this may take a moment.",
+              )}
+            />
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   // ERROR UI
   if (error) {
@@ -192,7 +357,7 @@ export default function CheckoutClient({
     );
   }
 
-  // LOADING / PROCESSING UI
+  // LOADING / INITIAL PROCESSING UI
   return (
     <main className="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-50 to-white px-4">
       <div className="max-w-md w-full text-center">
@@ -205,37 +370,25 @@ export default function CheckoutClient({
           </div>
 
           <Heading as="h2" className="text-2xl font-bold text-gray-900 mb-2">
-            {isSuccess
-              ? t(
-                  translations,
-                  "checkout.status.payment_success_title",
-                  "Payment Successful!",
-                )
-              : t(
-                  translations,
-                  "checkout.status.processing_title",
-                  "Processing...",
-                )}
+            {t(
+              translations,
+              "checkout.status.processing_title",
+              "Processing...",
+            )}
           </Heading>
 
           <p className="text-gray-600 mb-6">
-            {isSuccess
+            {initialPlan === "free"
               ? t(
                   translations,
-                  "checkout.status.payment_success_desc",
-                  "Your payment has been processed. Redirecting...",
+                  "checkout.status.setting_up_free",
+                  "Setting up your free plan...",
                 )
-              : initialPlan === "free"
-                ? t(
-                    translations,
-                    "checkout.status.setting_up_free",
-                    "Setting up your free plan...",
-                  )
-                : t(
-                    translations,
-                    "checkout.status.preparing_checkout",
-                    "Preparing secure checkout...",
-                  )}
+              : t(
+                  translations,
+                  "checkout.status.preparing_checkout",
+                  "Preparing secure checkout...",
+                )}
           </p>
 
           {loading && (
