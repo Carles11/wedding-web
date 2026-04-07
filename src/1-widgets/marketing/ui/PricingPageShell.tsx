@@ -1,3 +1,4 @@
+import { Heading } from "@/4-shared/ui/commons/typography/Heading";
 import { ReactNode } from "react";
 
 export interface PricingPageShellProps {
@@ -24,7 +25,13 @@ export default function PricingPageShell({
       <div className="max-w-5xl mx-auto px-6 py-20">
         {/* HERO */}
         <div className="text-center mb-20">
-          <h1 className="text-5xl font-bold tracking-tight mb-6">{title}</h1>
+          <Heading
+            as="h1"
+            className="text-3xl md:text-4xl font-bold text-center pt-0 md:pt-4 pb-8"
+            style={{ color: "var(--marketing-color-on-gradient-text)" }}
+          >
+            {title}
+          </Heading>
           <p className="text-gray-600 text-lg max-w-2xl mx-auto leading-relaxed">
             {summary}
           </p>

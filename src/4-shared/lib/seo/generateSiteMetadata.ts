@@ -4,9 +4,9 @@ import type { Metadata } from "next";
 
 /**
  * Generates SEO metadata for marketing and tenant pages.
- *
- * - Handles dynamic locale mapping for all supported languages.
+ * * - Handles dynamic locale mapping for all supported languages.
  * - Manages canonical and hreflang for custom domains vs subdomains.
+ * - Enforces robots policy based on site settings or page kind.
  */
 export function generateSiteMetadata({
   site,
@@ -57,6 +57,12 @@ export function generateSiteMetadata({
       ? site.ogImage
       : `${baseUrl}/assets/og/weddweb-OG.png`;
 
+  // ROBOTS LOGIC:
+  // Marketing pages are always indexed.
+  // Tenant pages are indexed only if seo_enabled is true.
+  const shouldIndex =
+    pageKind === "marketing" || (isTenant && site?.seo_enabled !== false);
+
   return {
     title,
     description,
@@ -66,7 +72,7 @@ export function generateSiteMetadata({
       type: "website",
       url: canonicalUrl,
       siteName: isTenant ? title : "WeddWeb",
-      locale: getOGLocale(lang), // Dynamic locale mapping
+      locale: getOGLocale(lang),
       images: [ogImage],
     },
     twitter: {
@@ -80,8 +86,13 @@ export function generateSiteMetadata({
       languages,
     },
     robots: {
-      index: pageKind === "marketing" || isTenant, // Ensure marketing/tenants are indexed
+      index: shouldIndex,
       follow: true,
+      nocache: !shouldIndex,
+      googleBot: {
+        index: shouldIndex,
+        follow: true,
+      },
     },
   };
 }

@@ -54,7 +54,7 @@ export default function MarketingHeader({ translations, lang }: Props) {
             {t(translations, "marketing.nav.features", "Multilingual")}
           </Link>
           <a
-            href={`${langPrefix}/#pricing`}
+            href={`${langPrefix}/pricing`}
             className="text-sm font-medium text-slate-600 hover:text-emerald-600 transition-colors"
           >
             {t(translations, "marketing.nav.pricing", "Pricing")}
@@ -160,7 +160,7 @@ export default function MarketingHeader({ translations, lang }: Props) {
               {t(translations, "marketing.nav.features", "Multilingual")}
             </Link>
             <a
-              href={`${langPrefix}/#pricing`}
+              href={`${langPrefix}/pricing`}
               onClick={() => setIsMenuOpen(false)}
               className="text-lg font-medium text-slate-900"
             >

@@ -10,6 +10,7 @@ const priorityMap: Record<string, { p: string; f: string }> = {
   "": { p: "1.0", f: "daily" }, // Home
   pricing: { p: "0.9", f: "weekly" },
   faq: { p: "0.8", f: "weekly" },
+  "features/multilingual-wedding-website": { p: "0.85", f: "weekly" },
   "privacy-policy": { p: "0.3", f: "monthly" },
   "terms-of-service": { p: "0.3", f: "monthly" },
   "cookie-policy": { p: "0.3", f: "monthly" },
@@ -21,6 +22,7 @@ const marketingPages: string[] = [
   "privacy-policy",
   "terms-of-service",
   "cookie-policy",
+  "features/multilingual-wedding-website",
 ];
 function escapeXml(unsafe: string): string {
   return unsafe.replace(/[<>&'\"]/g, function (c) {

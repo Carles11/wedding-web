@@ -62,6 +62,7 @@ export function generateSoftwareSchema(
       // Always Dec 31 of next year — guarantees ≥12 months validity,
       // keeping Google price rich-snippets permanently fresh.
       priceValidUntil: getPriceValidUntil(),
+      availability: "https://schema.org/InStock",
     },
   };
 }

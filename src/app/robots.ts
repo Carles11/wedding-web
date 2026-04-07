@@ -47,6 +47,7 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
               allow: [
                 "/*/pricing/",
                 "/*/faq/",
+                "/*/features/multilingual-wedding-website",
                 "/en/",
                 "/es/",
                 "/fr/",
