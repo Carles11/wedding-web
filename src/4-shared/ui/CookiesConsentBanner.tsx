@@ -28,12 +28,18 @@ export function CookiesConsentBanner({
   // Helper to notify Google Analytics of the consent change
   const notifyGA4 = (granted: boolean) => {
     if (typeof window !== "undefined" && (window as any).gtag) {
+      // 1. Update the permission
       (window as any).gtag("consent", "update", {
         analytics_storage: granted ? "granted" : "denied",
         ad_storage: granted ? "granted" : "denied",
         ad_user_data: granted ? "granted" : "denied",
         ad_personalization: granted ? "granted" : "denied",
       });
+
+      // 2. IMPORTANT: If granted, tell GA4 to actually start the session now
+      if (granted) {
+        (window as any).gtag("config", process.env.NEXT_PUBLIC_GA_ID);
+      }
     }
   };
 
