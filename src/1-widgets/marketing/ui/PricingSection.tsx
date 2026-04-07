@@ -24,14 +24,7 @@ export default function PricingSection({
   const premiumFeaturesList = premiumPlanFeatures ?? [];
 
   return (
-    <section
-      aria-labelledby="pricing-heading"
-      className="py-12 bg-gray-50"
-      itemScope
-      itemType="https://schema.org/Product"
-    >
-      <meta itemProp="name" content="WeddWeb Wedding Website Plans" />
-
+    <section aria-labelledby="pricing-heading" className="py-12 bg-gray-50">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2
           id="pricing-heading"
@@ -42,26 +35,15 @@ export default function PricingSection({
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
           {/* Free Plan */}
-          <div
-            className="flex flex-col h-full bg-white border border-gray-200 rounded-lg shadow-md p-6 hover:shadow-lg transition transform duration-150"
-            itemProp="offers"
-            itemScope
-            itemType="https://schema.org/Offer"
-          >
+          <div className="flex flex-col h-full bg-white border border-gray-200 rounded-lg shadow-md p-6 hover:shadow-lg transition transform duration-150">
             <div className="flex items-center justify-between">
-              <h3 className="text-xl md:text-2xl font-bold" itemProp="name">
-                {freePlanName}
-              </h3>
+              <h3 className="text-xl md:text-2xl font-bold">{freePlanName}</h3>
             </div>
 
             <div className="mt-6 flex-1">
               <div className="text-4xl md:text-5xl font-extrabold text-gray-900">
-                <span itemProp="priceCurrency" content="USD">
-                  $
-                </span>
-                <span itemProp="price" content="0">
-                  {freePlanPrice}
-                </span>
+                <span>$</span>
+                <span>{freePlanPrice}</span>
               </div>
 
               <ul className="mt-6 space-y-3 text-sm text-gray-700">
@@ -92,12 +74,7 @@ export default function PricingSection({
           </div>
 
           {/* Premium Plan */}
-          <div
-            className="relative flex flex-col h-full bg-white rounded-lg shadow-lg border-2 border-[#6ABDA6] p-6 transform transition duration-150 hover:scale-[1.01]"
-            itemProp="offers"
-            itemScope
-            itemType="https://schema.org/Offer"
-          >
+          <div className="relative flex flex-col h-full bg-white rounded-lg shadow-lg border-2 border-[#6ABDA6] p-6 transform transition duration-150 hover:scale-[1.01]">
             <div
               className="absolute -top-3 right-4 px-3 py-1 rounded-full text-xs font-semibold text-white"
               style={{ background: "var(--marketing-color-primary)" }}
@@ -106,23 +83,15 @@ export default function PricingSection({
             </div>
 
             <div className="flex items-center justify-between">
-              <h3 className="text-xl md:text-2xl font-bold" itemProp="name">
+              <h3 className="text-xl md:text-2xl font-bold">
                 {premiumPlanName}
               </h3>
             </div>
 
             <div className="mt-6 flex-1">
               <div className="text-4xl md:text-5xl font-extrabold text-gray-900">
-                <span itemProp="priceCurrency" content="USD">
-                  $
-                </span>
-                {/* Assuming price string like '$29' - AI prefers the raw number in meta */}
-                <span
-                  itemProp="price"
-                  content={premiumPlanPrice.replace(/[^0-9]/g, "")}
-                >
-                  {premiumPlanPrice}
-                </span>
+                <span>$</span>
+                <span>{premiumPlanPrice}</span>
               </div>
               <div className="text-sm text-gray-600 mt-2">{perSiteText}</div>
 
