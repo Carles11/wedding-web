@@ -148,4 +148,116 @@ https://www.notion.so/32f83b723884451893ed83b4c4722a10?v=5bcada60b2b24b0294ab8d5
 
 ---
 
+# Sitemap Architecture Audit
+
+## ✅ Summary
+
+All four sitemap-related files are **correctly implemented, consistent, and aligned with SEO best practices**.
+
+The architecture is clean, scalable, and fully compatible with Google’s expectations.
+
+---
+
+## 1. `sitemap.xml/route.ts` — Root Router
+
+- **Main domain (`weddweb.com`)**
+  - Returns the **only `<sitemapindex>`** in the entire system
+  - References:
+    - `sitemap-marketing.xml`
+    - `sitemap-tenants.xml`
+
+- **Custom domains**
+  - Delegates to `sitemap-tenant.xml`
+  - Returns a `<urlset>` directly
+
+- **Result**
+  - No nested sitemap indexes
+  - Clear entry point for search engines
+
+---
+
+## 2. `sitemap-marketing.xml/route.ts` — Marketing Pages
+
+- Returns a `<urlset>` with:
+  - All marketing routes
+  - All supported languages
+
+- Includes:
+  - `escapeXml` sanitization
+  - `hreflang` alternates (with `x-default`)
+  - `<lastmod>`
+  - `<changefreq>`
+  - `<priority>`
+
+- **Result**
+  - Fully optimized for multilingual SEO
+  - Clean and standards-compliant
+
+---
+
+## 3. `sitemap-tenants.xml/route.ts` — All Tenants
+
+- Returns a `<urlset>` (**not `<sitemapindex>`**) ✅
+
+- Behavior:
+  - Queries all `seo_enabled` sites
+  - Expands:
+    - each domain × each language
+  - Outputs direct `<url>` entries
+
+- Includes:
+  - `escapeXml`
+  - `hreflang` alternates (with `x-default`)
+  - `<lastmod>`
+  - `<changefreq>`
+  - `<priority>`
+
+- **Key Fix**
+  - Flattened from `<sitemapindex>` → `<urlset>`
+  - Resolves Google Search Console parsing issues
+
+---
+
+## 4. `sitemap-tenant.xml/route.ts` — Single Tenant
+
+- Returns a `<urlset>` for a single tenant
+- Resolved via request `host`
+
+- Used when:
+  - Accessing custom domains
+  - Delegated from root sitemap logic
+
+- Includes:
+  - `escapeXml`
+  - `hreflang` alternates (with `x-default`)
+  - `<lastmod>`
+  - `<changefreq>`
+  - `<priority>`
+
+- **Result**
+  - Fully dynamic, per-tenant SEO coverage
+
+---
+
+## ✅ Final Verdict
+
+- Architecture is **correct and scalable**
+- No nested sitemap indexes
+- Proper separation:
+  - Marketing
+  - Multi-tenant index
+  - Single-tenant sitemap
+
+- The only required fix:
+  - `sitemap-tenants.xml` → flattened to `<urlset>` ✅
+
+---
+
+## 🚀 Status
+
+✔ Fully compliant with Google  
+✔ Multilingual SEO ready  
+✔ Multi-tenant scalable  
+✔ No further changes required
+
 **License:** MIT — Copyright (c) 2026 Carles
