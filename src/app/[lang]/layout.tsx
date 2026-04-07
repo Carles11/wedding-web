@@ -7,6 +7,7 @@ import { isValidLanguage } from "@/4-shared/helpers/isValidLanguage";
 import { allFontInstances } from "@/4-shared/lib/fonts/fontRegistry";
 import { generateGraphSchema } from "@/4-shared/lib/seo/generateGraphSchema";
 import { JsonLd } from "@/4-shared/lib/seo/JsonLd";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import { ReactNode } from "react";
 import "../globals.css";
 
@@ -56,6 +57,10 @@ export default async function LangLayout({
       <body className={`${fontVariables} antialiased`}>
         <JsonLd data={generateGraphSchema({}, lang)} />
         {children}
+        {/* Only load in production to keep dev data clean */}
+        {process.env.NODE_ENV === "production" && (
+          <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID!} />
+        )}
       </body>
     </html>
   );
