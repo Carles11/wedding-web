@@ -17,13 +17,13 @@ export default function FAQPageShell({
 }: FAQPageShellProps) {
   return (
     <section
-      className="min-h-screen pt-20 pb-12 px-4"
+      className="min-h-screen pt-12 pb-12 px-4"
       style={{ background: "var(--marketing-bg-gradient)" }}
     >
       <header className="max-w-4xl mx-auto mb-12 text-center animate-fadeIn">
         <Heading
-          as="h2"
-          className="text-3xl md:text-4xl font-bold text-center pt-2 md:pt-10 pb-6"
+          as="h1"
+          className="text-3xl md:text-4xl font-bold text-center pt-0 md:pt-4 pb-8"
           style={{ color: "var(--marketing-color-on-gradient-text)" }}
         >
           {title}

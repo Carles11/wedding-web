@@ -16,9 +16,9 @@ export const MultilingualMatrixPage = ({ translations, lang }: Props) => {
     <div className="pt-0 md:pt-12">
       {" "}
       <Heading
-        as="h2"
+        as="h1"
         id="ml-title"
-        className="text-3xl md:text-4xl font-bold text-center pt-24 md:pt-8"
+        className="text-3xl md:text-4xl font-bold text-center p-8"
       >
         {t(
           translations,

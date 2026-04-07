@@ -1,5 +1,6 @@
 import { t } from "@/4-shared/helpers/t";
 import type { MarketingTranslations } from "@/4-shared/types/marketingPage";
+import { Heading } from "@/4-shared/ui/commons/typography/Heading";
 import {
   PrivacyCollectSection,
   PrivacyContactSection,
@@ -24,16 +25,17 @@ export default function PrivacyPolicyPage({ translations, lang }: Props) {
       style={{ background: "var(--marketing-bg-gradient)" }}
     >
       {/* Hero Header */}
-      <header className="pt-24 pb-16 px-4 text-center border-b border-black/5">
+      <header className="py-12 px-4 text-center border-b border-black/5">
         <div className="inline-block px-3 py-1 mb-4 text-[10px] font-bold tracking-[0.2em] uppercase rounded-full bg-teal-50 text-teal-600 border border-teal-100">
           {t(translations, "marketing.legal.privacy.badge", "Privacy First")}
         </div>
-        <h1
-          className="font-display text-4xl md:text-6xl mb-6"
+        <Heading
+          as="h1"
+          className="font-display text-4xl md:text-6xl pb-6"
           style={{ color: "var(--marketing-color-on-gradient-text)" }}
         >
           {t(translations, "marketing.legal.privacy.title", "Privacy Policy")}
-        </h1>
+        </Heading>
         <p className="max-w-2xl mx-auto text-lg opacity-70 font-plus-jakarta leading-relaxed">
           {t(
             translations,

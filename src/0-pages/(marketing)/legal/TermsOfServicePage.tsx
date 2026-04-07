@@ -1,5 +1,6 @@
 import { t } from "@/4-shared/helpers/t";
 import type { MarketingTranslations } from "@/4-shared/types/marketingPage";
+import { Heading } from "@/4-shared/ui/commons/typography/Heading";
 import {
   TermsAccountSection,
   TermsChangesSection,
@@ -26,13 +27,14 @@ export default function TermsOfServicePage({ translations, lang }: Props) {
       style={{ background: "var(--marketing-bg-gradient)" }}
     >
       {/* Hero Header */}
-      <header className="pt-20 pb-12 px-4 text-center border-b border-black/5">
-        <h1
-          className="font-display text-4xl md:text-5xl mb-4"
+      <header className="py-12 px-4 text-center border-b border-black/5">
+        <Heading
+          as="h1"
+          className="font-display text-4xl md:text-6xl mb-6"
           style={{ color: "var(--marketing-color-on-gradient-text)" }}
         >
           {t(translations, "marketing.legal.terms.title", "Terms of Service")}
-        </h1>
+        </Heading>
         <p className="max-w-2xl mx-auto opacity-70 text-lg font-plus-jakarta">
           {t(
             translations,

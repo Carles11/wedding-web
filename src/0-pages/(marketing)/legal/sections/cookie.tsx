@@ -61,7 +61,7 @@ export function CookieTypesSection({ translations }: SectionProps) {
       id="types"
       className="mb-16 scroll-mt-24 border-t border-black/5 pt-12"
     >
-      <Heading as="h2" className="font-display text-3xl mb-8">
+      <Heading as="h2" className="font-display text-3xl pb-4">
         {t(
           translations,
           "marketing.legal.cookie.types.title",
@@ -121,7 +121,7 @@ export function CookieUsageSection({ translations }: SectionProps) {
 export function CookieManageSection({ translations }: SectionProps) {
   return (
     <section id="manage" className="mb-16 scroll-mt-24">
-      <Heading as="h2" className="font-display text-2xl pb-4">
+      <Heading as="h2" className="font-display text-3xl pb-4">
         {t(
           translations,
           "marketing.legal.cookie.manage.title",
@@ -142,7 +142,7 @@ export function CookieManageSection({ translations }: SectionProps) {
 export function CookieThirdPartySection({ translations }: SectionProps) {
   return (
     <section id="third-party" className="mb-16 scroll-mt-24">
-      <Heading as="h2" className="font-display text-2xl pb-4">
+      <Heading as="h2" className="font-display text-3xl pb-4">
         {t(
           translations,
           "marketing.legal.cookie.third_party.title",
@@ -163,7 +163,7 @@ export function CookieThirdPartySection({ translations }: SectionProps) {
 export function CookieUpdatesSection({ translations }: SectionProps) {
   return (
     <section id="updates" className="mb-16 scroll-mt-24">
-      <Heading as="h2" className="font-display text-2xl pb-4">
+      <Heading as="h2" className="font-display text-3xl pb-4">
         {t(translations, "marketing.legal.cookie.updates.title", "6. Updates")}
       </Heading>
       <p className="text-gray-700 leading-relaxed opacity-90">

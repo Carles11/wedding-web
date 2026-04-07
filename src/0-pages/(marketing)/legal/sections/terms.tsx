@@ -9,7 +9,7 @@ type SectionProps = {
 export function TermsUseSection({ translations }: SectionProps) {
   return (
     <section id="use" className="mb-14 scroll-mt-24">
-      <Heading as="h2" className="font-display text-2xl pb-4">
+      <Heading as="h2" className="font-display text-3xl pb-4">
         {t(
           translations,
           "marketing.legal.terms.use.title",
@@ -30,7 +30,7 @@ export function TermsUseSection({ translations }: SectionProps) {
 export function TermsAccountSection({ translations }: SectionProps) {
   return (
     <section id="account" className="mb-14 scroll-mt-24">
-      <Heading as="h2" className="font-display text-2xl pb-4">
+      <Heading as="h2" className="font-display text-3xl pb-4">
         {t(
           translations,
           "marketing.legal.terms.account.title",
@@ -51,7 +51,7 @@ export function TermsAccountSection({ translations }: SectionProps) {
 export function TermsContentSection({ translations }: SectionProps) {
   return (
     <section id="content" className="mb-14 scroll-mt-24">
-      <Heading as="h2" className="font-display text-2xl pb-4">
+      <Heading as="h2" className="font-display text-3xl pb-4">
         {t(
           translations,
           "marketing.legal.terms.content.title",
@@ -72,7 +72,7 @@ export function TermsContentSection({ translations }: SectionProps) {
 export function TermsUserContentSection({ translations }: SectionProps) {
   return (
     <section id="user-content" className="mb-14 scroll-mt-24">
-      <Heading as="h2" className="font-display text-2xl pb-4">
+      <Heading as="h2" className="font-display text-3xl pb-4">
         {t(
           translations,
           "marketing.legal.terms.user_content.title",
@@ -96,7 +96,7 @@ export function TermsProhibitedSection({ translations }: SectionProps) {
       id="prohibited"
       className="mb-14 scroll-mt-24 p-8 rounded-3xl bg-white/50 border border-white/80 shadow-sm"
     >
-      <Heading as="h2" className="font-display text-2xl mb-6 pb-6">
+      <Heading as="h2" className="font-display text-3xl pb-4">
         {t(
           translations,
           "marketing.legal.terms.prohibited.title",
@@ -142,7 +142,7 @@ export function TermsProhibitedSection({ translations }: SectionProps) {
 export function TermsTerminationSection({ translations }: SectionProps) {
   return (
     <section id="termination" className="mb-14 scroll-mt-24">
-      <Heading as="h2" className="font-display text-2xl pb-4">
+      <Heading as="h2" className="font-display text-3xl pb-4">
         {t(
           translations,
           "marketing.legal.terms.termination.title",
@@ -163,7 +163,7 @@ export function TermsTerminationSection({ translations }: SectionProps) {
 export function TermsDisclaimerSection({ translations }: SectionProps) {
   return (
     <section id="disclaimer" className="mb-14 scroll-mt-24">
-      <Heading as="h2" className="font-display text-2xl pb-4">
+      <Heading as="h2" className="font-display text-3xl pb-4">
         {t(
           translations,
           "marketing.legal.terms.disclaimer.title",
@@ -184,7 +184,7 @@ export function TermsDisclaimerSection({ translations }: SectionProps) {
 export function TermsChangesSection({ translations }: SectionProps) {
   return (
     <section id="changes" className="mb-14 scroll-mt-24">
-      <Heading as="h2" className="font-display text-2xl pb-4">
+      <Heading as="h2" className="font-display text-3xl pb-4">
         {t(
           translations,
           "marketing.legal.terms.changes.title",
@@ -208,7 +208,7 @@ export function TermsContactSection({ translations }: SectionProps) {
       id="contact"
       className="mb-14 scroll-mt-24 pt-10 border-t border-black/5"
     >
-      <Heading as="h2" className="font-display text-2xl pb-4">
+      <Heading as="h2" className="font-display text-3xl pb-4">
         {t(translations, "marketing.legal.terms.contact.title", "9. Contact")}
       </Heading>
       <p className="text-gray-700">

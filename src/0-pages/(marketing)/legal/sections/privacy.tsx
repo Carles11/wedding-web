@@ -93,7 +93,7 @@ export function PrivacyUseSection({ translations }: SectionProps) {
       id="use"
       className="mb-16 scroll-mt-24 p-8 rounded-3xl bg-white/40 border border-white/80 shadow-sm"
     >
-      <Heading as="h2" className="font-display text-2xl pb-4">
+      <Heading as="h2" className="font-display text-3xl pb-4">
         {t(
           translations,
           "marketing.legal.privacy.use.title",
@@ -120,7 +120,7 @@ export function PrivacyUseSection({ translations }: SectionProps) {
 export function PrivacySharingSection({ translations }: SectionProps) {
   return (
     <section id="sharing" className="mb-16 scroll-mt-24">
-      <Heading as="h2" className="font-display text-2xl pb-4">
+      <Heading as="h2" className="font-display text-3xl pb-4">
         {t(
           translations,
           "marketing.legal.privacy.sharing.title",
@@ -141,7 +141,7 @@ export function PrivacySharingSection({ translations }: SectionProps) {
 export function PrivacyTransfersSection({ translations }: SectionProps) {
   return (
     <section id="transfers" className="mb-16 scroll-mt-24">
-      <Heading as="h2" className="font-display text-2xl pb-4">
+      <Heading as="h2" className="font-display text-3xl pb-4">
         {t(
           translations,
           "marketing.legal.privacy.transfers.title",
@@ -199,7 +199,7 @@ export function PrivacyRightsSection({ translations }: SectionProps) {
 export function PrivacySecuritySection({ translations }: SectionProps) {
   return (
     <section id="security" className="mb-16 scroll-mt-24">
-      <Heading as="h2" className="font-display text-2xl pb-4">
+      <Heading as="h2" className="font-display text-3xl pb-4">
         {t(
           translations,
           "marketing.legal.privacy.security.title",
@@ -220,7 +220,7 @@ export function PrivacySecuritySection({ translations }: SectionProps) {
 export function PrivacyRetentionSection({ translations }: SectionProps) {
   return (
     <section id="retention" className="mb-16 scroll-mt-24">
-      <Heading as="h2" className="font-display text-2xl pb-4">
+      <Heading as="h2" className="font-display text-3xl pb-4">
         {t(
           translations,
           "marketing.legal.privacy.retention.title",
@@ -241,7 +241,7 @@ export function PrivacyRetentionSection({ translations }: SectionProps) {
 export function PrivacyUpdatesSection({ translations }: SectionProps) {
   return (
     <section id="updates" className="mb-16 scroll-mt-24">
-      <Heading as="h2" className="font-display text-2xl pb-4">
+      <Heading as="h2" className="font-display text-3xl pb-4">
         {t(
           translations,
           "marketing.legal.privacy.updates.title",

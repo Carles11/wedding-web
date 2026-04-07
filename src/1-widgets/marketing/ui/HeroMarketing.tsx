@@ -30,7 +30,7 @@ export default function HeroMarketing({
         style={{ background: "var(--marketing-bg-gradient)" }}
       >
         <div className="mx-auto max-w-4xl px-6 text-center">
-          <Heading as="h1" id="hero-title">
+          <Heading as="h1" id="hero-title" className="heading-hero">
             {headline}
           </Heading>
           <p

@@ -657,30 +657,79 @@ Builder theme tokens and reusable surface/button styles.
 
 /* ── Tenant Theme ──────────────────────────────────────────────────────
 #########################################################################
+   Refined Hierarchy:
+   H1: Hero Title (Extra Large)
+   H2: Section Headers (Large)
+   H3: Sub-headers/Dates (Medium)
 #########################################################################
-#########################################################################
-   Used for the actual wedding websites. 
-   Allows for specific font overrides without breaking the builder.
 */
-/* 3. Theme Overrides */
 
-/* TENANT THEME: Uses dynamic font variables */
 .tenant-theme {
-  --font-display: var(--title-font);
+  /* Dynamic fonts injected via React Style Props */
+  --font-display: var(--title-font), serif;
+  --font-body: var(--body-font), sans-serif;
+
+  /* Standardized Subtitle (optional override) */
   --font-subtitle: var(--font-playfair-display, var(--font-serif));
-  font-family: var(--body-font), sans-serif;
+
+  /* Set the default body font for the entire container */
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
 }
 
+/* 2. Apply Display Font to Headings */
+.tenant-theme h1,
+.tenant-theme .heading-h1,
+.tenant-theme h2,
+.tenant-theme .heading-h2,
+.tenant-theme h3,
+.tenant-theme .heading-h3 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  margin: 0;
+}
+
+/* 3. Typography Scale (Responsive with Clamp) */
 .tenant-theme h1,
 .tenant-theme .heading-h1 {
-  font-size: clamp(4rem, 10vw, 6.5rem);
+  /* Desktop: Increased slightly for more impact */
+  font-size: clamp(3.5rem, 12vw, 9.5rem);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+}
+
+.tenant-theme h2,
+.tenant-theme .heading-h2 {
+  /* Desktop: Scaled down to prevent H1/H2 collision */
+  font-size: clamp(2.5rem, 7vw, 4.5rem);
+  line-height: 1.1;
   letter-spacing: 0.01em;
 }
 
-/* Keep h3 using the title font in Tenant */
 .tenant-theme h3,
 .tenant-theme .heading-h3 {
-  font-family: var(--title-font), serif;
+  /* Desktop: Clearly smaller sub-header */
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  line-height: 1.2;
+}
+
+/* Mobile Overrides for Tenant (Specifically for 468px and below) */
+@media screen and (max-width: 468px) {
+  .tenant-theme h1,
+  .tenant-theme .heading-h1 {
+    /* Prevent overflow on narrow screens while keeping it "Hero" sized */
+    font-size: clamp(2.8rem, 15vw, 4rem);
+  }
+
+  .tenant-theme h2,
+  .tenant-theme .heading-h2 {
+    font-size: clamp(2rem, 10vw, 2.8rem);
+  }
+
+  .tenant-theme h3,
+  .tenant-theme .heading-h3 {
+    font-size: clamp(1.5rem, 8vw, 2rem);
+  }
 }
 
 @keyframes fadeIn {

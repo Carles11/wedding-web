@@ -48,7 +48,7 @@ export default function HeroSection({
         <Heading
           id="hero-title"
           as="h1"
-          className="font-light text-white text-center tracking-wide drop-shadow-lg max-w-[90%] md:max-w-3xl"
+          className="font-light text-white text-lg text-center tracking-wide drop-shadow-lg max-w-[90%] md:max-w-3xl"
         >
           {title}
         </Heading>
