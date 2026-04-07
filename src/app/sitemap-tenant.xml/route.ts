@@ -25,7 +25,7 @@ export async function GET(request: Request) {
   const supabase = await createSupabaseSSRClient();
   const { data: site, error } = await supabase
     .from("sites")
-    .select("languages, updated_at, seo_enabled")
+    .select("languages, default_lang, updated_at, seo_enabled")
     .contains("domains", [host])
     .eq("seo_enabled", true)
     .single();
@@ -45,11 +45,14 @@ export async function GET(request: Request) {
     ? new Date(site.updated_at).toISOString().split("T")[0]
     : new Date().toISOString().split("T")[0];
 
+  // x-default uses the site's actual default language (matches <head> hreflang)
+  const defaultLang = site.default_lang || "en";
+
   // Only generate URLs for enabled languages, with x-default always present
   const urls = siteLangs.map((lang) => {
     const loc = `https://${escapeXml(host)}/${lang}`;
     const alternates = [
-      `<xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://${escapeXml(host)}/en\" />`,
+      `<xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://${escapeXml(host)}/${defaultLang}\" />`,
       ...siteLangs.map(
         (l) =>
           `<xhtml:link rel=\"alternate\" hreflang=\"${l}\" href=\"https://${escapeXml(host)}/${l}\" />`,

@@ -4,6 +4,7 @@ import { Toggle } from "@/4-shared/ui/commons/buttons/Toggle";
 import { useState } from "react";
 import { PasswordChangeModal } from "../PasswordChangeModal";
 
+import { triggerSeoSync } from "@/4-shared/api/seo/triggerSeoSync";
 import { useSite } from "@/4-shared/hooks/useSite";
 import { useSupabaseAuth } from "@/4-shared/hooks/useSupabaseAuth";
 import Heading from "@/4-shared/ui/commons/typography/Heading";
@@ -43,6 +44,7 @@ export const SecurityTab = ({
       return;
     }
     if (!site) return;
+    const wasDisabled = !seoEnabled;
     setSeoLoading(true);
     setSeoEnabled(value);
     try {
@@ -52,6 +54,11 @@ export const SecurityTab = ({
         .from("sites")
         .update({ seo_enabled: value })
         .eq("id", site.id);
+
+      // Trigger IndexNow when SEO is enabled (false → true)
+      if (value && wasDisabled) {
+        void triggerSeoSync(site.id);
+      }
     } finally {
       setSeoLoading(false);
     }

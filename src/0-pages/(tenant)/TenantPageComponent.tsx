@@ -5,6 +5,7 @@ import {
 } from "@/4-shared/lib/fonts/fontRegistry";
 import { getSiteByDomain } from "@/4-shared/lib/getSiteByDomain";
 import { generateEventSchema } from "@/4-shared/lib/seo/generateEventSchema";
+import { getPrimaryDomain } from "@/4-shared/lib/seo/getPrimaryDomain";
 import { JsonLd } from "@/4-shared/lib/seo/JsonLd";
 
 import { fetchAccommodationEntriesForTenant } from "@/3-entities/accommodation/api/fetchAccommodationEntriesForTenant";
@@ -105,8 +106,8 @@ export default async function TenantPageComponent({
       }
     : null;
 
-  // Structured data for SEO
-  const baseUrl = `https://${host}/${lang}`;
+  // Structured data for SEO — use verified custom domain if available
+  const baseUrl = `https://${getPrimaryDomain(site, host)}/${lang}`;
   const eventSchema = generateEventSchema({
     hero: heroFromi18n,
     program: programSectionForSEO,

@@ -5,56 +5,62 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
   const host = ((await headers()).get("host") ?? "").toLowerCase().trim();
   const baseUrl = host ? `https://${host}` : "https://weddweb.com";
 
+  // Check if we are on the main marketing domain
+  const isMainDomain = host === "weddweb.com" || host === "www.weddweb.com";
+
   return {
     rules: [
-      // ── Standard crawlers ─────────────────────────────────────────────────
+      // ── Standard Search Engines (Google, Bing, Yandex) ──────────────────────
       {
         userAgent: "*",
         allow: "/",
         disallow: [
-          // Auth routes under every language segment
           "/*/auth/",
-          // Builder/Dashboard routes (Invisible route group (dashboard))
           "/*/builder/",
-          // Internal API routes
           "/api/",
-          // Legacy/Direct root paths
           "/auth/",
           "/builder/",
-          // Next.js internal
           "/_next/",
         ],
       },
 
-      // ── AI training crawlers — allow indexing marketing content only ──────
+      // ── AI training crawlers ──────────────────────────────────────────────
       {
         userAgent: [
-          "GPTBot", // OpenAI
-          "Google-Extended", // Google Gemini training
-          "anthropic-ai", // Anthropic training
-          "ClaudeBot", // Anthropic browsing
-          "PerplexityBot", // Perplexity AI
-          "AmazonBot", // Amazon / Alexa / Bedrock
-          "Meta-ExternalAgent", // Meta AI
-          "Applebot-Extended", // Apple Intelligence
-          "Bytespider", // ByteDance / TikTok
+          "GPTBot",
+          "Google-Extended",
+          "anthropic-ai",
+          "ClaudeBot",
+          "PerplexityBot",
+          "AmazonBot",
+          "Meta-ExternalAgent",
+          "Applebot-Extended",
+          "Bytespider",
         ],
-        allow: [
-          "/*/pricing/",
-          "/*/faq/",
-          "/en/",
-          "/es/",
-          "/fr/",
-          "/de/",
-          "/pt/",
-          "/it/",
-          "/ca/",
-          "/ar/",
-          "/hi/",
-          "/zh/",
-          "/ru/",
-        ],
-        disallow: ["/*/auth/", "/*/builder/", "/api/"],
+        ...(isMainDomain
+          ? {
+              // Tight allowlist — only marketing content for LLM training
+              allow: [
+                "/*/pricing/",
+                "/*/faq/",
+                "/en/",
+                "/es/",
+                "/fr/",
+                "/de/",
+                "/pt/",
+                "/it/",
+                "/ca/",
+                "/ar/",
+                "/hi/",
+                "/zh/",
+                "/ru/",
+              ],
+              disallow: ["/*/auth/", "/*/builder/", "/api/"],
+            }
+          : {
+              // Absolute block — protect tenant wedding data from AI training
+              disallow: "/",
+            }),
       },
     ],
     sitemap: `${baseUrl}/sitemap.xml`,

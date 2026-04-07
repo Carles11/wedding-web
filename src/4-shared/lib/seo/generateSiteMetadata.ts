@@ -1,4 +1,5 @@
 import { getOGLocale } from "@/4-shared/config/i18n";
+import { getPrimaryDomain } from "@/4-shared/lib/seo/getPrimaryDomain";
 import type { Metadata } from "next";
 
 /**
@@ -31,11 +32,9 @@ export function generateSiteMetadata({
     ? translations["sections.hero.description"] || ""
     : translations["meta.marketing_description"] || "";
 
-  // Canonical logic: sanitize protocol and prioritize custom domains
-  let canonicalHost = baseUrl.replace(/^https?:\/\//, "");
-  if (isTenant && site?.custom_domain) {
-    canonicalHost = site.custom_domain;
-  }
+  // Canonical logic: use verified custom domain for tenants, raw host otherwise
+  const rawHost = baseUrl.replace(/^https?:\/\//, "");
+  const canonicalHost = isTenant ? getPrimaryDomain(site, rawHost) : rawHost;
   const canonicalUrl = `https://${canonicalHost}/${lang}`;
 
   // Hreflang/alternates logic: Map all languages supported by this specific site

@@ -1,5 +1,6 @@
 import { getCurrentUserSubscription } from "@/3-entities/user/api/getCurrentUserSubscription";
 import { fetchBuilderTranslations } from "@/4-shared/api/builder/getTranslations";
+import { triggerSeoSync } from "@/4-shared/api/seo/triggerSeoSync";
 import { requireSiteAccess } from "@/4-shared/lib/requireSiteAccess";
 import { getParams, RouteContext } from "@/4-shared/lib/route-context";
 import { createSupabaseSSRClient } from "@/4-shared/lib/supabase/server";
@@ -7,7 +8,7 @@ import {
   addCustomDomainWithRedirectVariants,
   DomainFlowError,
 } from "@/4-shared/lib/vercel/addCustomDomainWithRedirectVariants";
-import { NextRequest, NextResponse } from "next/server";
+import { after, NextRequest, NextResponse } from "next/server";
 
 // Helper to select the language (default fallback 'en' if not specified/requested)
 function getLang(req: NextRequest): string {
@@ -115,7 +116,10 @@ export async function POST(
       console.error("Failed to log domain change action:", logError);
     }
 
-    // 3. Respond to client as usual
+    // 3. Non-blocking SEO sync — notify search engines of new domain
+    after(() => triggerSeoSync(id));
+
+    // 4. Respond to client as usual
     return NextResponse.json(result, { status: 200 });
   } catch (error) {
     if (error instanceof DomainFlowError) {

@@ -1,3 +1,4 @@
+import { triggerSeoSync } from "@/4-shared/api/seo/triggerSeoSync";
 import type { SupportedLanguage } from "@/4-shared/config/i18n";
 import { createClient } from "@/4-shared/lib/supabase/client";
 import { GlobalTranslationRow } from "@/4-shared/types";
@@ -89,6 +90,11 @@ export async function saveSiteGeneralContent({
         .eq("id", site_id);
 
       if (error) throw error;
+
+      // Non-blocking SEO sync when languages change—Bing discovers new locale paths
+      if (languages) {
+        void triggerSeoSync(site_id);
+      }
     }
   }
 }

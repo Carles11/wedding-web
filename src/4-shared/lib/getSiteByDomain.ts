@@ -27,6 +27,7 @@ export const getSiteByDomain = cache(async (host: string | null) => {
         default_lang, 
         languages, 
         domains, 
+        domain_statuses,
         seo_enabled,
         plan_type,
         title_font,

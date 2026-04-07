@@ -1,8 +1,10 @@
 "use server";
 
+import { triggerSeoSync } from "@/4-shared/api/seo/triggerSeoSync";
 import { isValidLanguage } from "@/4-shared/helpers/isValidLanguage";
 import { supabaseAdmin } from "@/4-shared/lib/supabase/supabaseServer";
 import type { Site } from "@/4-shared/types";
+import { after } from "next/server";
 
 export async function createSiteForUser(user: {
   id: string;
@@ -45,7 +47,7 @@ export async function createSiteForUser(user: {
         domains: defaultDomains,
       },
     ])
-    .select("id, subdomain, default_lang, languages, domains")
+    .select("id, subdomain, default_lang, languages, domains, seo_enabled")
     .maybeSingle();
 
   if (siteError || !siteData || !siteData.id) {
@@ -66,6 +68,9 @@ export async function createSiteForUser(user: {
   if (userSitesError) {
     throw userSitesError;
   }
+
+  // Non-blocking SEO sync — runs after the response is sent
+  after(() => triggerSeoSync(siteData.id));
 
   return siteData as Site;
 }

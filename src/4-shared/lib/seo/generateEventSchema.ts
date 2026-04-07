@@ -35,6 +35,7 @@ export function generateEventSchema(params: {
     "@type": "Event",
     name: eventName,
     description: description,
+    inLanguage: lang,
     organizer: {
       "@type": "Person",
       name: eventName,

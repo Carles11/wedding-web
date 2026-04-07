@@ -123,7 +123,7 @@ export default function MarketingHeader({ translations, lang }: Props) {
           {/* SIGNUP - Hidden on mobile to avoid overflow */}
           <Link
             href={logInRef}
-            className="text-lg font-medium text-emerald-600"
+            className="text-md font-medium text-emerald-600"
           >
             {t(translations, "marketing.nav.login", "Log in")}
           </Link>
@@ -176,7 +176,7 @@ export default function MarketingHeader({ translations, lang }: Props) {
             <hr className="border-gray-100" />
             <Link
               href={logInRef}
-              className="text-lg font-medium text-emerald-600"
+              className="text-md font-medium text-emerald-600"
             >
               {t(translations, "marketing.nav.login", "Log in")}
             </Link>

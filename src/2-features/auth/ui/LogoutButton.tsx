@@ -5,13 +5,11 @@ import { BuilderButton } from "@/4-shared/ui/builder";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-export default function LogoutButton() {
+export default function LogoutButton({ currentLang }: { currentLang: string }) {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const { signOut } = useSupabaseAuth();
   const router = useRouter();
 
-  // TODO: Replace with actual lang from route context
-  const currentLang = "en";
   const handleLogout = async () => {
     setIsLoggingOut(true);
     try {

@@ -80,7 +80,7 @@ export function BuilderHeader({
                 {translations["builder.header.no_site_yet"]}
               </span>
             )}
-            <LogoutButton />
+            <LogoutButton currentLang={currentLang} />
           </div>
 
           {/* Language Selector Container */}
