@@ -13,14 +13,18 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
       // ── Standard Search Engines (Google, Bing, Yandex) ──────────────────────
       {
         userAgent: "*",
-        allow: "/",
+        allow: [
+          "/",
+          "/_next/static/", // ALLOW Google to see your CSS and JS for rendering
+          "/_next/image/", // ALLOW Google to see optimized Next.js images
+        ],
         disallow: [
+          "/_next/", // Block the rest (JSON data, build manifests, etc.)
           "/*/auth/",
           "/*/builder/",
           "/api/",
           "/auth/",
           "/builder/",
-          "/_next/",
         ],
       },
 
