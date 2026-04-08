@@ -5,13 +5,21 @@ import { createClient } from "@/4-shared/lib/supabase/client";
 import { CustomLoader } from "@/4-shared/ui/commons/loader/CustomLoader";
 import { User } from "@supabase/supabase-js";
 import { useRouter, useSearchParams } from "next/navigation";
+
+import { t } from "@/4-shared/helpers/t";
 import { useEffect, useRef, useState } from "react";
 
 export default function DomainConnectCallback() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [user, setUser] = useState<User | null>(null);
-  const [status, setStatus] = useState("Finalizing Connection...");
+  const [status, setStatus] = useState(
+    t(
+      {},
+      "builder.domain.callback.status.finalizing",
+      "Finalizing Connection...",
+    ),
+  );
   const hasRun = useRef(false); // Prevent double-triggering in StrictMode
 
   const { site, verifyDomain } = useSite(user);
@@ -29,7 +37,13 @@ export default function DomainConnectCallback() {
 
     const finalize = async () => {
       hasRun.current = true;
-      setStatus("Confirming DNS with Registrar...");
+      setStatus(
+        t(
+          {},
+          "builder.domain.callback.status.confirming",
+          "Confirming DNS with Registrar...",
+        ),
+      );
 
       try {
         // GoDaddy usually returns the domain in the query string
@@ -39,13 +53,30 @@ export default function DomainConnectCallback() {
 
         if (domain) {
           await verifyDomain(domain);
-          setStatus("Success! Domain Verified.");
+          setStatus(
+            t(
+              {},
+              "builder.domain.callback.status.success",
+              "Success! Domain Verified.",
+            ),
+          );
         } else {
-          setStatus("Syncing Status...");
+          setStatus(
+            t(
+              {},
+              "builder.domain.callback.status.syncing",
+              "Syncing Status...",
+            ),
+          );
         }
       } catch (err) {
-        console.warn("Handshake verification pending:", err);
-        setStatus("DNS is updating...");
+        setStatus(
+          t(
+            {},
+            "builder.domain.callback.status.updating",
+            "DNS is updating...",
+          ),
+        );
       } finally {
         // Short delay so they see the final status message
         setTimeout(() => router.push("/builder/settings/domain"), 2000);

@@ -28,7 +28,11 @@ export default function DnsModalContent({
     // If we haven't discovered the provider URL yet, we can't show the button
     if (!domainProviderApiUrl) {
       return notify.error(
-        "We couldn't detect your registrar's auto-setup API.",
+        t(
+          translations,
+          "builder.domain.dns_modal.magic_error",
+          "We couldn't detect your registrar's auto-setup API.",
+        ),
       );
     }
 
@@ -116,7 +120,7 @@ export default function DnsModalContent({
         <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">
           {t(
             translations,
-            "builder.domain.dns_modal.help_title",
+            "builder.domain.social.help_title",
             "No idea what DNS is all about?",
           )}
         </h4>
@@ -132,13 +136,16 @@ export default function DnsModalContent({
               📧{" "}
               {t(
                 translations,
-                "builder.domain.dns_modal.delegate",
-                "Delegate to a tech-savvy friend",
+                "builder.domain.social.button",
+                "Forward to a tech-savvy friend",
               )}
             </span>
             <p className="text-xs text-slate-500 mt-1 max-w-fit px-4">
-              We have already drafted a professional email with all the records
-              and a note for you to provide login details via WhatsApp.
+              {t(
+                translations,
+                "builder.domain.social.email_closing",
+                "Drop me a message or call me once you see this—I can give you my registrar login if that's easier. Thanks a million!",
+              )}
             </p>
           </div>
           <div className="bg-neutral-800 p-2 rounded-full group-hover:bg-indigo-500/20 transition-colors">

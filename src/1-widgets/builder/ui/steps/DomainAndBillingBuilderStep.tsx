@@ -4,20 +4,16 @@ import MembershipSection from "@/2-features/builder/billing/ui/MembershipSection
 import CustomDomainSection from "@/2-features/builder/custom-domain/components/CustomDomainSection";
 import SubdomainManager from "@/2-features/builder/custom-domain/components/SubdomainManager";
 import { notify } from "@/4-shared/lib/toast/toast";
-import type { DomainAndBillingBuilderStepProps } from "@/4-shared/types";
+import type {
+  DomainAndBillingBuilderStepProps,
+  ShareTarget,
+} from "@/4-shared/types";
 import { BuilderButton } from "@/4-shared/ui/builder";
 import MainModal from "@/4-shared/ui/commons/modals/MainModal";
+import { ShareTargetCard } from "@/4-shared/ui/commons/share/shareTargetCard";
 import { copyToClipboard } from "@/4-shared/utils/copyToClipboard";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-
-type ShareTarget = {
-  id: string;
-  label: string;
-  description: string;
-  url: string | null;
-  shareText: string;
-};
 
 export default function DomainAndBillingBuilderStep({
   site,
@@ -154,11 +150,12 @@ export default function DomainAndBillingBuilderStep({
           </div>
 
           <BuilderButton
-            size="sm"
+            variant="secondary"
+            size="md"
             className="self-start whitespace-nowrap"
             onClick={() => setShareModalOpen(true)}
           >
-            {translations["builder.share.cta"] || "Share"}
+            {translations["builder.share.cta"] || "Share with guests"}
           </BuilderButton>
         </div>
         <SubdomainManager
@@ -210,140 +207,5 @@ export default function DomainAndBillingBuilderStep({
         </div>
       </MainModal>
     </>
-  );
-}
-
-function buildShareHref(
-  kind: "email" | "whatsapp" | "facebook" | "x" | "linkedin",
-  url: string,
-  text: string,
-) {
-  const encodedUrl = encodeURIComponent(url);
-  const encodedText = encodeURIComponent(text);
-
-  switch (kind) {
-    case "email":
-      return `mailto:?subject=${encodeURIComponent("Wedding link")}&body=${encodedText}%0A%0A${encodedUrl}`;
-    case "whatsapp":
-      return `https://wa.me/?text=${encodedText}%20${encodedUrl}`;
-    case "facebook":
-      return `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`;
-    case "x":
-      return `https://twitter.com/intent/tweet?text=${encodedText}&url=${encodedUrl}`;
-    case "linkedin":
-      return `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`;
-    default:
-      return url;
-  }
-}
-
-function ShareTargetCard({
-  target,
-  translations,
-  onShare,
-  onCopy,
-}: {
-  target: ShareTarget;
-  translations: Record<string, string>;
-  onShare: (target: ShareTarget) => Promise<void>;
-  onCopy: (url: string) => Promise<void>;
-}) {
-  const isAvailable = Boolean(target.url);
-  const socialLinkClass =
-    "inline-flex items-center rounded-md border border-gray-200 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-700 hover:border-(--builder-color-primary) hover:text-(--builder-color-primary) transition-colors";
-
-  return (
-    <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 shadow-sm">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <h3 className="text-sm font-semibold text-gray-900">
-            {target.label}
-          </h3>
-          <p className="mt-1 text-xs text-gray-500">{target.description}</p>
-        </div>
-
-        {target.url ? (
-          <a
-            href={target.url}
-            target="_blank"
-            rel="noreferrer"
-            className="text-xs font-medium text-(--builder-color-primary) hover:underline"
-          >
-            {translations["builder.domain.visit_site"] || "Visit"}
-          </a>
-        ) : (
-          <span className="text-xs text-gray-400">
-            {translations["builder.share.unavailable"] || "Unavailable"}
-          </span>
-        )}
-      </div>
-
-      <div className="mt-3 rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs text-gray-700 break-all">
-        {target.url ||
-          translations["builder.share.no_custom_domain"] ||
-          "No custom domain connected yet."}
-      </div>
-
-      <div className="mt-3 flex flex-wrap gap-2">
-        <BuilderButton
-          size="sm"
-          onClick={() => void onShare(target)}
-          disabled={!isAvailable}
-        >
-          {translations["builder.share.action_share"] || "Share"}
-        </BuilderButton>
-        <BuilderButton
-          variant="secondary"
-          size="sm"
-          onClick={() => target.url && void onCopy(target.url)}
-          disabled={!isAvailable}
-        >
-          {translations["builder.share.action_copy"] || "Copy link"}
-        </BuilderButton>
-
-        {target.url && (
-          <>
-            <a
-              href={buildShareHref("email", target.url, target.shareText)}
-              className={socialLinkClass}
-            >
-              {translations["builder.share.action_email"] || "Email"}
-            </a>
-            <a
-              href={buildShareHref("whatsapp", target.url, target.shareText)}
-              target="_blank"
-              rel="noreferrer"
-              className={socialLinkClass}
-            >
-              WhatsApp
-            </a>
-            <a
-              href={buildShareHref("facebook", target.url, target.shareText)}
-              target="_blank"
-              rel="noreferrer"
-              className={socialLinkClass}
-            >
-              Facebook
-            </a>
-            <a
-              href={buildShareHref("x", target.url, target.shareText)}
-              target="_blank"
-              rel="noreferrer"
-              className={socialLinkClass}
-            >
-              X
-            </a>
-            <a
-              href={buildShareHref("linkedin", target.url, target.shareText)}
-              target="_blank"
-              rel="noreferrer"
-              className={socialLinkClass}
-            >
-              LinkedIn
-            </a>
-          </>
-        )}
-      </div>
-    </div>
   );
 }

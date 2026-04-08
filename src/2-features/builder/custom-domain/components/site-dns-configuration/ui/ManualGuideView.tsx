@@ -49,6 +49,53 @@ export const ManualGuideView = ({
       )}
       translations={translations}
     />
-    {/* ... The rest of your current SVG note and Vercel/Registrar links ... */}
+    <div className="flex flex-col gap-1.5 mt-4">
+      <a
+        href="https://vercel.com/docs/concepts/projects/custom-domains#step-2--add-your-domain-to-vercel"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center gap-1.5 text-xs text-indigo-600 font-medium hover:text-indigo-800 transition"
+      >
+        {t(
+          translations,
+          "builder.domain.dns_modal.link_vercel_guide",
+          "View Vercel DNS setup guide",
+        )}
+        <svg
+          width={10}
+          height={10}
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={2.5}
+          strokeLinecap="round"
+        >
+          <path d="M7 17L17 7M7 7h10v10" />
+        </svg>
+      </a>
+      <a
+        href="https://pressific.com/articles/how-to-update-your-dns-records-on/#2-namecheap"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center gap-1.5 text-xs text-blue-700 font-medium hover:text-blue-900 transition"
+      >
+        {t(
+          translations,
+          "builder.domain.dns_modal.link_registrars_guide",
+          "Most common registrars: DNS instructions",
+        )}
+        <svg
+          width={10}
+          height={10}
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={2.5}
+          strokeLinecap="round"
+        >
+          <path d="M7 17L17 7M7 7h10v10" />
+        </svg>
+      </a>
+    </div>
   </>
 );

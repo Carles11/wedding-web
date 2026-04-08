@@ -20,3 +20,11 @@ export interface DomainAndBillingBuilderStepProps {
   translations: TranslationDictionary;
   planType: PlanType;
 }
+
+export type ShareTarget = {
+  id: string;
+  label: string;
+  description: string;
+  url: string | null;
+  shareText: string;
+};
