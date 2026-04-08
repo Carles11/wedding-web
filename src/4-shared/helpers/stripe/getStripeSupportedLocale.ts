@@ -1,0 +1,48 @@
+export function getStripeSupportedLocale(lang: string): any {
+  const supported = [
+    "bg",
+    "cs",
+    "da",
+    "de",
+    "el",
+    "en",
+    "en-GB",
+    "es",
+    "es-419",
+    "et",
+    "fi",
+    "fil",
+    "fr",
+    "fr-CA",
+    "hr",
+    "hu",
+    "id",
+    "it",
+    "ja",
+    "ko",
+    "lt",
+    "lv",
+    "ms",
+    "mt",
+    "nb",
+    "nl",
+    "pl",
+    "pt",
+    "pt-BR",
+    "ro",
+    "ru",
+    "sk",
+    "sl",
+    "sv",
+    "th",
+    "tr",
+    "vi",
+    "zh",
+    "zh-HK",
+    "zh-TW",
+  ];
+
+  if (supported.includes(lang)) return lang;
+  if (lang === "ca") return "es"; // Fallback Catalan users to Spanish for payment
+  return "auto"; // Default fallback
+}

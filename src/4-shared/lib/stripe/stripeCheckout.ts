@@ -1,4 +1,5 @@
 import { PLAN_CATALOG } from "@/4-shared/config/plans/planCatalog";
+import { getStripeSupportedLocale } from "@/4-shared/helpers/stripe/getStripeSupportedLocale";
 import type { PlanType } from "@/4-shared/types";
 import Stripe from "stripe";
 import { STRIPE_SECRET_KEY, getStripePriceIdForPlan } from "./stripeConfig";
@@ -54,6 +55,7 @@ export async function createCheckoutSession(
   if (planType === "free") return null;
 
   const priceId = getPriceIdForPlan(planType);
+  // Helper to ensure we only send locales Stripe actually supports
 
   // We use customer_email so Stripe pre-fills the checkout page.
   // We set customer_creation to 'always' to ensure we get a Customer ID in the webhook.
@@ -72,8 +74,7 @@ export async function createCheckoutSession(
       userId,
       planType,
     },
-    locale: language as any,
-    // Adding the language to the success URL ensures the user returns to the right UI
+    locale: getStripeSupportedLocale(language), // Adding the language to the success URL ensures the user returns to the right UI
     success_url: `${baseUrl}/${language}/builder/checkout?success=true&session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${baseUrl}/${language}/pricing`,
   });
