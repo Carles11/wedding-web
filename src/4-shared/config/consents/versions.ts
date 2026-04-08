@@ -1,2 +1,3 @@
-export const TERMS_VERSION = "2026-03-27";
-export const COOKIE_CONSENT_VERSION = "2026-03-27";
+export const TERMS_VERSION = "2026-04-08";
+export const COOKIE_CONSENT_VERSION = "2026-04-08";
+export const PRIVACY_POLICY_VERSION = "2026-04-08";

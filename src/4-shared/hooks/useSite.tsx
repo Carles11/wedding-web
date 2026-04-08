@@ -39,6 +39,7 @@ export function useSite(user: User | null) {
           domains,
           created_at,
           pending_custom_domains,
+          domain_provider_api_url,
           domain_statuses
         `,
         )

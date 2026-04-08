@@ -20,6 +20,7 @@ export const CustomDomainSection: React.FC<CustomDomainSectionProps> = ({
   verifiedDomains: verifiedDomainsProp,
   pendingDomains: pendingDomainsProp,
   domainStatuses: domainStatusesProp,
+  domainProviderApiUrl,
   onUpgradeClick,
   refetchDomains,
   loading = false,
@@ -414,7 +415,11 @@ export const CustomDomainSection: React.FC<CustomDomainSectionProps> = ({
         }
         onClose={() => setDnsModalDomain(null)}
       >
-        <DnsModalContent translations={translations} />
+        <DnsModalContent
+          translations={translations}
+          domainName={dnsModalDomain ?? ""}
+          domainConnectId={domainProviderApiUrl ?? undefined}
+        />
       </MainModal>
     </section>
   );

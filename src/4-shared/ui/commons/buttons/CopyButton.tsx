@@ -2,9 +2,11 @@ import { useState } from "react";
 export default function CopyButton({
   text,
   label,
+  className = "",
 }: {
   text: string;
   label: string;
+  className?: string;
 }) {
   const [copied, setCopied] = useState(false);
   const handleCopy = () => {
@@ -20,7 +22,7 @@ export default function CopyButton({
           copied
             ? "bg-green-400/10 border-green-400/25 text-green-400"
             : "bg-indigo-400/10 border-indigo-400/25 text-indigo-300"
-        }`}
+        } ${className}`}
       style={{ fontFamily: "'DM Mono', monospace" }}
     >
       {copied ? (

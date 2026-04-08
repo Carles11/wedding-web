@@ -1,186 +1,161 @@
-import CopyButton from "@/4-shared/ui/commons/buttons/CopyButton";
-
-function t(
-  translations: Record<string, string>,
-  key: string,
-  fallback: string,
-): string {
-  return translations[key] || fallback;
-}
-
-const DnsRecord = ({
-  step,
-  type,
-  name,
-  value,
-  copyLabel,
-  typeColor,
-  translations,
-}: {
-  step: number;
-  type: string;
-  name: string;
-  value: string;
-  copyLabel: string;
-  typeColor: { bg: string; border: string; text: string };
-  translations: Record<string, string>;
-}) => (
-  <div className="rounded-xl p-4 mb-3 bg-neutral-800 border border-neutral-700">
-    <div className="flex items-center gap-2 mb-3">
-      <span className="text-xs font-bold rounded-md px-2 py-0.5 bg-neutral-900 border border-neutral-800 text-slate-400  ">
-        {t(translations, "builder.domain.dns_modal.step", "Step")} {step}
-      </span>
-      <span
-        className={`text-xs font-semibold rounded-md px-2 py-0.5 ${typeColor.bg} ${typeColor.text}   border ${typeColor.border}`}
-      >
-        {type}
-      </span>
-    </div>
-    <div className="grid grid-cols-2 gap-3">
-      <div>
-        <div className="text-xs mb-1.5 text-slate-500 font-medium font-sans">
-          {t(translations, "builder.domain.dns_modal.name_host", "Name / Host")}
-        </div>
-        <div className="rounded-lg px-3 py-2 text-xs bg-neutral-900 border border-neutral-800 text-slate-300   break-all">
-          {name}
-        </div>
-      </div>
-      <div>
-        <div className="text-xs mb-1.5 text-slate-500 font-medium font-sans">
-          {t(
-            translations,
-            "builder.domain.dns_modal.points_to_value",
-            "Points to / Value",
-          )}
-        </div>
-        <div className="rounded-lg px-3 py-2 text-xs flex items-center justify-between gap-2 bg-neutral-900 border border-neutral-800 text-slate-300   break-all">
-          <span>{value}</span>
-          <CopyButton text={value} label={copyLabel} />
-        </div>
-      </div>
-    </div>
-  </div>
-);
+import { interpolate } from "@/4-shared/helpers/interpolateVars";
+import { t } from "@/4-shared/helpers/t";
+import { notify } from "@/4-shared/lib/toast/toast";
+import { useState } from "react";
+import { ManualGuideView } from "./site-dns-configuration/ui/ManualGuideView";
+import { handleDelegateEmail } from "./site-dns-configuration/ui/delegateEmailContent";
+import { buildMagicLink } from "./site-dns-configuration/ui/generateDnsProviderMagicLink";
 
 export default function DnsModalContent({
   translations,
+  domainConnectId, // From your new DB schema
+  domainName,
 }: {
   translations: Record<string, string>;
+  domainConnectId?: string;
+  domainName: string;
 }) {
+  const [view, setView] = useState<"selection" | "manual">("selection");
+  const domainProviderApiUrl = domainConnectId
+    ? domainConnectId
+        .replace(/^https?:\/\//i, "")
+        .replace(/\/+$/, "")
+        .replace(/\/v2$/i, "")
+    : undefined;
+
+  // Magic Pillar: Domain Connect Handshake
+  const handleMagicSetup = () => {
+    // If we haven't discovered the provider URL yet, we can't show the button
+    if (!domainProviderApiUrl) {
+      return notify.error(
+        "We couldn't detect your registrar's auto-setup API.",
+      );
+    }
+
+    const magicUrl = buildMagicLink(domainProviderApiUrl, domainName);
+
+    if (magicUrl) {
+      window.open(magicUrl, "_blank");
+    }
+  };
+
+  if (view === "manual") {
+    return (
+      <div className="animate-in fade-in duration-300">
+        <button
+          onClick={() => setView("selection")}
+          className="text-[10px] text-slate-500 hover:text-slate-400 mb-4 flex items-center gap-1 cursor-pointer"
+        >
+          ← {t(translations, "common.back", "Back to options")}
+        </button>
+        <ManualGuideView translations={translations} />
+      </div>
+    );
+  }
+
   return (
-    <>
-      <DnsRecord
-        step={1}
-        type={t(
-          translations,
-          "builder.domain.dns_modal.record_type_a",
-          "A Record",
-        )}
-        typeColor={{
-          bg: "bg-red-600/10",
-          border: "border-red-300/25",
-          text: "text-red-400",
-        }}
-        name="@"
-        value="216.198.79.1"
-        copyLabel={t(
-          translations,
-          "builder.domain.dns_modal.copy_label_ip",
-          "IP",
-        )}
-        translations={translations}
-      />
-      <DnsRecord
-        step={2}
-        type={t(
-          translations,
-          "builder.domain.dns_modal.record_type_cname",
-          "CNAME Record",
-        )}
-        typeColor={{
-          bg: "bg-blue-500/10",
-          border: "border-blue-300/25",
-          text: "text-blue-300",
-        }}
-        name="www"
-        value="7c2ca668cf1fda1e.vercel-dns-017.com"
-        copyLabel={t(
-          translations,
-          "builder.domain.dns_modal.copy_label_cname",
-          "CNAME",
-        )}
-        translations={translations}
-      />
-      <div className="flex items-start gap-2 rounded-xl px-4 py-3 mt-1 bg-yellow-300/10 border border-yellow-300/25">
-        <svg
-          className="mt-0.5 shrink-0"
-          width={13}
-          height={13}
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="#fbbf24"
-          strokeWidth={2}
-          strokeLinecap="round"
+    <div className="flex flex-col gap-3 animate-in fade-in zoom-in-95 duration-200">
+      {/* PILLAR 1: MAGIC (Only show if provider supports Domain Connect) */}
+      {domainProviderApiUrl && (
+        <button
+          onClick={handleMagicSetup}
+          className="flex items-center gap-4 p-4 rounded-xl bg-(--builder-color-primary) hover:bg-(--builder-color-primary-hover) border border-indigo-400/30 transition-all group"
         >
-          <circle cx="12" cy="12" r="10" />
-          <path d="M12 8v4m0 4h.01" />
-        </svg>
-        <p className="text-xs leading-relaxed text-gray-600 font-sans">
+          <div className="bg-white/10 p-2 rounded-lg group-hover:scale-110 transition-transform">
+            ✨
+          </div>
+          <div className="text-left cursor-pointer">
+            <p className="text-sm font-bold text-white">
+              {t(
+                translations,
+                "builder.domain.dns_modal.magic_title",
+                "Automatic Setup",
+              )}
+            </p>
+            <p className="text-xs text-white">
+              {interpolate(
+                t(
+                  translations,
+                  "builder.domain.dns_modal.magic_desc",
+                  "We'll configure {dnsProvider} for you in 2 clicks.",
+                ),
+                { dnsProvider: domainProviderApiUrl },
+              )}
+            </p>
+          </div>
+        </button>
+      )}
+
+      {/* PILLAR 3: GUIDED MANUAL (Your existing code) */}
+      <button
+        onClick={() => setView("manual")}
+        className="flex items-center gap-4 p-4 rounded-xl bg-neutral-800 border border-neutral-700 hover:border-neutral-500 transition-all group"
+      >
+        <div className="bg-neutral-300 p-2 rounded-lg group-hover:bg-neutral-600 transition-colors">
+          🛠
+        </div>
+        <div className="text-left cursor-pointer">
+          <p className="text-sm font-bold text-slate-200">
+            {t(
+              translations,
+              "builder.domain.dns_modal.manual_title",
+              "Manual Configuration",
+            )}
+          </p>
+          <p className="text-xs text-slate-200">
+            {t(
+              translations,
+              "builder.domain.dns_modal.manual_desc",
+              "I'll copy and paste the records myself.",
+            )}
+          </p>
+        </div>
+      </button>
+
+      <div className="mt-4 pt-4 border-t border-neutral-800">
+        <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">
           {t(
             translations,
-            "builder.domain.dns_modal.instructions_note",
-            "Add these records in your DNS provider (Namecheap, GoDaddy, Google Domains, Cloudflare, etc.). If Vercel shows a different CNAME target for your domain, use the exact value from Vercel. Changes can take up to 48 hours.",
+            "builder.domain.dns_modal.help_title",
+            "No idea what DNS is all about?",
           )}
-        </p>
+        </h4>
+
+        <button
+          onClick={() =>
+            handleDelegateEmail({ translations, domainName: domainName })
+          }
+          className="w-full flex items-center justify-between p-4 rounded-xl border border-dashed border-neutral-700 hover:bg-neutral-100 hover:border-neutral-500 transition-all cursor-pointer group"
+        >
+          <div className="text-left">
+            <span className="text-xs font-semibold text-slate-800 transition-colors">
+              📧{" "}
+              {t(
+                translations,
+                "builder.domain.dns_modal.delegate",
+                "Delegate to a tech-savvy friend",
+              )}
+            </span>
+            <p className="text-xs text-slate-500 mt-1 max-w-fit px-4">
+              We have already drafted a professional email with all the records
+              and a note for you to provide login details via WhatsApp.
+            </p>
+          </div>
+          <div className="bg-neutral-800 p-2 rounded-full group-hover:bg-indigo-500/20 transition-colors">
+            <svg
+              width={14}
+              height={14}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2.5}
+              className="text-slate-500 group-hover:text-indigo-400 transition-colors"
+            >
+              <path d="M5 12h14M12 5l7 7-7 7" />
+            </svg>
+          </div>
+        </button>
       </div>
-      <div className="flex flex-col gap-1.5 mt-4">
-        <a
-          href="https://vercel.com/docs/concepts/projects/custom-domains#step-2--add-your-domain-to-vercel"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 text-xs text-indigo-600 font-medium hover:text-indigo-800 transition"
-        >
-          {t(
-            translations,
-            "builder.domain.dns_modal.link_vercel_guide",
-            "View Vercel DNS setup guide",
-          )}
-          <svg
-            width={10}
-            height={10}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2.5}
-            strokeLinecap="round"
-          >
-            <path d="M7 17L17 7M7 7h10v10" />
-          </svg>
-        </a>
-        <a
-          href="https://pressific.com/articles/how-to-update-your-dns-records-on/#2-namecheap"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 text-xs text-blue-700 font-medium hover:text-blue-900 transition"
-        >
-          {t(
-            translations,
-            "builder.domain.dns_modal.link_registrars_guide",
-            "Most common registrars: DNS instructions",
-          )}
-          <svg
-            width={10}
-            height={10}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2.5}
-            strokeLinecap="round"
-          >
-            <path d="M7 17L17 7M7 7h10v10" />
-          </svg>
-        </a>
-      </div>
-    </>
+    </div>
   );
 }
