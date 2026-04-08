@@ -2,6 +2,7 @@
 
 import { isValidLanguage } from "@/4-shared/helpers/isValidLanguage";
 import { t } from "@/4-shared/helpers/t";
+import { notify } from "@/4-shared/lib/toast/toast";
 import { CheckoutClientProps, CheckoutResponse } from "@/4-shared/types";
 import { CustomLoader } from "@/4-shared/ui/commons/loader/CustomLoader";
 import Heading from "@/4-shared/ui/commons/typography/Heading";
@@ -45,6 +46,13 @@ export default function CheckoutClient({
           if (data.planType && data.planType !== "free") {
             setConfirmedPlan(data.planType);
             setPostPaymentState("confirmed");
+            notify.success(
+              t(
+                translations,
+                "checkout.status.payment_success_title",
+                "Payment Successful!",
+              ),
+            );
             return;
           }
         }
@@ -91,38 +99,36 @@ export default function CheckoutClient({
         setErrorCode(data.code ?? null);
 
         if (data.code === "ALREADY_PREMIUM") {
-          setError(
-            t(
-              translations,
-              "checkout.info.already_premium",
-              "You are already on a premium plan.",
-            ),
+          const msg = t(
+            translations,
+            "checkout.info.already_premium",
+            "You are already on a premium plan.",
           );
+          setError(msg);
         } else if (data.code === "DOWNGRADE_NOT_AVAILABLE") {
-          setError(
-            t(
-              translations,
-              "checkout.info.downgrade_not_available",
-              "Downgrading to Free is not available yet.",
-            ),
+          const msg = t(
+            translations,
+            "checkout.info.downgrade_not_available",
+            "Downgrading to Free is not available yet.",
           );
+          setError(msg);
         } else if (response.status === 401) {
-          setError(
+          const msg = t(
+            translations,
+            "checkout.error.unauthorized",
+            "Please sign in to continue.",
+          );
+          setError(msg);
+        } else {
+          const msg =
+            data.message ||
             t(
               translations,
-              "checkout.error.unauthorized",
-              "Please sign in to continue.",
-            ),
-          );
-        } else {
-          setError(
-            data.message ||
-              t(
-                translations,
-                "checkout.error.create_session",
-                "Failed to create checkout session",
-              ),
-          );
+              "checkout.error.create_session",
+              "Failed to create checkout session",
+            );
+          setError(msg);
+          notify.error(msg);
         }
         setLoading(false);
         return;
@@ -155,13 +161,13 @@ export default function CheckoutClient({
       throw new Error("Invalid server response");
     } catch (err) {
       console.error("[Checkout] Error:", err);
-      setError(
-        t(
-          translations,
-          "checkout.error.unexpected",
-          "An unexpected error occurred",
-        ),
+      const msg = t(
+        translations,
+        "checkout.error.unexpected",
+        "An unexpected error occurred",
       );
+      setError(msg);
+      notify.error(msg);
       setLoading(false);
     }
   }, [
@@ -185,7 +191,7 @@ export default function CheckoutClient({
         <div className="max-w-md w-full text-center">
           <div className="bg-white rounded-lg shadow-lg p-8 border border-green-200">
             <div className="text-5xl mb-4">🎉</div>
-            <Heading as="h2" className="text-2xl font-bold text-gray-900 mb-3">
+            <Heading as="h2" className="text-2xl font-bold text-gray-900 pb-4">
               {t(translations, "checkout.success.title", "Payment Confirmed!")}
             </Heading>
             <p className="text-gray-600 mb-2">
@@ -204,7 +210,7 @@ export default function CheckoutClient({
             </p>
             <button
               onClick={() => router.replace(`/${validatedLang}/builder`)}
-              className="w-full px-6 py-3 bg-green-600 text-white rounded-md font-semibold hover:bg-green-700 transition cursor-pointer"
+              className="w-full px-6 py-3 bg-(--builder-color-primary) text-white rounded-md font-semibold hover:bg-green-700 transition cursor-pointer"
             >
               {t(
                 translations,
@@ -225,7 +231,7 @@ export default function CheckoutClient({
         <div className="max-w-md w-full text-center">
           <div className="bg-white rounded-lg shadow-lg p-8 border border-amber-200">
             <div className="text-4xl mb-4">✅</div>
-            <Heading as="h2" className="text-2xl font-bold text-gray-900 mb-3">
+            <Heading as="h2" className="text-2xl font-bold text-gray-900 pb-4">
               {t(translations, "checkout.timeout.title", "Payment Confirmed!")}
             </Heading>
             <p className="text-gray-600 mb-6">
@@ -238,7 +244,7 @@ export default function CheckoutClient({
             <div className="flex flex-col gap-3">
               <button
                 onClick={() => window.location.reload()}
-                className="w-full px-6 py-3 bg-amber-600 text-white rounded-md font-semibold hover:bg-amber-700 transition cursor-pointer"
+                className="w-full px-6 py-3 bg-(--builder-color-primary) text-white rounded-md font-semibold hover:bg-amber-700 transition cursor-pointer"
               >
                 {t(translations, "checkout.action.refresh", "Refresh Page")}
               </button>
@@ -271,7 +277,7 @@ export default function CheckoutClient({
                 <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-blue-600 animate-spin" />
               </div>
             </div>
-            <Heading as="h2" className="text-2xl font-bold text-gray-900 mb-2">
+            <Heading as="h2" className="text-2xl font-bold text-gray-900 pb-4">
               {t(
                 translations,
                 "checkout.status.confirming_title",
@@ -369,7 +375,7 @@ export default function CheckoutClient({
             </div>
           </div>
 
-          <Heading as="h2" className="text-2xl font-bold text-gray-900 mb-2">
+          <Heading as="h2" className="text-2xl font-bold text-gray-900 pb-4">
             {t(
               translations,
               "checkout.status.processing_title",

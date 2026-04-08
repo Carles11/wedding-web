@@ -20,7 +20,7 @@ export function TermsUseSection({ translations }: SectionProps) {
         {t(
           translations,
           "marketing.legal.terms.use.desc",
-          "You must be at least 18 years old to use WeddWeb. You agree to use the service only for lawful purposes.",
+          "You must be at least 18 years old to use WeddWeb. You agree to use the service only for lawful purposes related to event planning and personal celebrations.",
         )}
       </p>
     </section>
@@ -41,7 +41,31 @@ export function TermsAccountSection({ translations }: SectionProps) {
         {t(
           translations,
           "marketing.legal.terms.account.desc",
-          "You are responsible for maintaining the confidentiality of your account credentials.",
+          "You are responsible for maintaining the confidentiality of your account credentials and all activities under your account. We use Supabase for secure authentication.",
+        )}
+      </p>
+    </section>
+  );
+}
+
+/**
+ * Added clarity on "Legacy Mode" and One-time payments
+ */
+export function TermsSubscriptionSection({ translations }: SectionProps) {
+  return (
+    <section id="billing" className="mb-14 scroll-mt-24">
+      <Heading as="h2" className="font-display text-3xl pb-4">
+        {t(
+          translations,
+          "marketing.legal.terms.billing.title",
+          "3. Payments & Subscriptions",
+        )}
+      </Heading>
+      <p className="text-gray-700 leading-relaxed opacity-90">
+        {t(
+          translations,
+          "marketing.legal.terms.billing.desc",
+          "Payments are processed securely via Stripe. Premium plans are one-time payments. Free accounts may transition to 'Legacy Mode' (view-only) after 6 months of inactivity to preserve platform resources.",
         )}
       </p>
     </section>
@@ -55,14 +79,14 @@ export function TermsContentSection({ translations }: SectionProps) {
         {t(
           translations,
           "marketing.legal.terms.content.title",
-          "3. Content & Intellectual Property",
+          "4. Intellectual Property",
         )}
       </Heading>
       <p className="text-gray-700 leading-relaxed opacity-90">
         {t(
           translations,
           "marketing.legal.terms.content.desc",
-          "All content on WeddWeb, including text, images, and code, is owned by WeddWeb or its licensors.",
+          "All platform software, design, and localized technical search engine implementations are owned by WeddWeb.",
         )}
       </p>
     </section>
@@ -76,14 +100,14 @@ export function TermsUserContentSection({ translations }: SectionProps) {
         {t(
           translations,
           "marketing.legal.terms.user_content.title",
-          "4. User Content",
+          "5. User Content",
         )}
       </Heading>
       <p className="text-gray-700 leading-relaxed opacity-90">
         {t(
           translations,
           "marketing.legal.terms.user_content.desc",
-          "You retain ownership of content you upload but grant WeddWeb a license to use, display, and distribute it as needed to provide the service.",
+          "You retain ownership of the photos and text you upload. By using WeddWeb, you grant us a worldwide license to host and display this content specifically to provide your wedding website services.",
         )}
       </p>
     </section>
@@ -100,26 +124,28 @@ export function TermsProhibitedSection({ translations }: SectionProps) {
         {t(
           translations,
           "marketing.legal.terms.prohibited.title",
-          "5. Prohibited Conduct",
+          "6. Prohibited Conduct",
         )}
       </Heading>
       <ul className="grid gap-4">
         {[
           {
             key: "marketing.legal.terms.prohibited.laws",
-            label: "Violating any laws",
+            label: "Violating any local or international laws",
           },
           {
             key: "marketing.legal.terms.prohibited.ip",
-            label: "Infringing IP rights",
+            label:
+              "Uploading content that infringes on third-party intellectual property",
           },
           {
             key: "marketing.legal.terms.prohibited.malicious",
-            label: "Malicious content",
+            label:
+              "Attempting to reverse engineer or interfere with platform technical SEO or search engine implementations",
           },
           {
             key: "marketing.legal.terms.prohibited.access",
-            label: "Unauthorized access",
+            label: "Unauthorized access to other users' event data",
           },
           {
             key: "marketing.legal.terms.prohibited.domain_abuse",
@@ -146,14 +172,14 @@ export function TermsTerminationSection({ translations }: SectionProps) {
         {t(
           translations,
           "marketing.legal.terms.termination.title",
-          "6. Termination",
+          "7. Termination",
         )}
       </Heading>
       <p className="text-gray-700 leading-relaxed opacity-90">
         {t(
           translations,
           "marketing.legal.terms.termination.desc",
-          "We may suspend or terminate your account if you violate these Terms or misuse the service.",
+          "We reserve the right to suspend or terminate accounts that violate these Terms or negatively impact platform stability.",
         )}
       </p>
     </section>
@@ -167,14 +193,14 @@ export function TermsDisclaimerSection({ translations }: SectionProps) {
         {t(
           translations,
           "marketing.legal.terms.disclaimer.title",
-          "7. Disclaimers & Liability",
+          "8. Disclaimers & Liability",
         )}
       </Heading>
       <div className="p-6 rounded-2xl bg-slate-900/5 italic text-sm border-l-4 border-slate-300">
         {t(
           translations,
           "marketing.legal.terms.disclaimer.desc",
-          'WeddWeb is provided "as is" without warranties of any kind.',
+          'WeddWeb is provided "as is". We are not liable for any third-party content, server downtime, or loss of data beyond the one-time purchase price paid.',
         )}
       </div>
     </section>
@@ -188,14 +214,14 @@ export function TermsChangesSection({ translations }: SectionProps) {
         {t(
           translations,
           "marketing.legal.terms.changes.title",
-          "8. Changes to Terms",
+          "9. Changes to Terms",
         )}
       </Heading>
       <p className="text-gray-700 leading-relaxed opacity-90">
         {t(
           translations,
           "marketing.legal.terms.changes.desc",
-          "We may update these Terms from time to time. Changes will be posted on this page.",
+          "We update these terms as our SaaS features evolve. The 'Last Updated' date will be updated accordingly.",
         )}
       </p>
     </section>
@@ -209,7 +235,7 @@ export function TermsContactSection({ translations }: SectionProps) {
       className="mb-14 scroll-mt-24 pt-10 border-t border-black/5"
     >
       <Heading as="h2" className="font-display text-3xl pb-4">
-        {t(translations, "marketing.legal.terms.contact.title", "9. Contact")}
+        {t(translations, "marketing.legal.terms.contact.title", "10. Contact")}
       </Heading>
       <p className="text-gray-700">
         {t(

@@ -1,4 +1,5 @@
 "use client";
+import { renderAnswerWithEmail } from "@/4-shared/helpers/renderTextWithEmail";
 import { useState } from "react";
 
 interface FAQItemProps {
@@ -44,7 +45,7 @@ export default function FAQItem({ question, answer }: FAQItemProps) {
         className={`transition-all duration-300 ease-in-out ${isOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"}`}
       >
         <div className="p-5 pt-0 text-gray-600 leading-relaxed border-t border-gray-50">
-          {answer}
+          {renderAnswerWithEmail(answer)}
         </div>
       </div>
     </div>

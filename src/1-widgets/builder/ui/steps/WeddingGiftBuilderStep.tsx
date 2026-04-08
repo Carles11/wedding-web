@@ -285,6 +285,7 @@ export default function WeddingGiftBuilderStep({
     }
 
     const methodsCount = countWeddingGiftMethods(draftGift);
+
     if (giftMethodLimit !== -1 && methodsCount > giftMethodLimit) {
       notify.error(
         interpolate(

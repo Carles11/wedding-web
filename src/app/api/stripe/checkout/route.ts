@@ -1,5 +1,6 @@
 import { getCurrentUser } from "@/3-entities/user/api/getCurrentUser";
 import { getCurrentUserSubscription } from "@/3-entities/user/api/getCurrentUserSubscription";
+import { getStripeSupportedLocale } from "@/4-shared/helpers/stripe/getStripeSupportedLocale";
 import { createCheckoutSession } from "@/4-shared/lib/stripe/stripeCheckout";
 import type { PlanType } from "@/4-shared/types";
 import { NextRequest, NextResponse } from "next/server";
@@ -67,6 +68,9 @@ export async function POST(req: NextRequest) {
         );
       }
 
+      // If free user clicks on free plan,
+      // we simply return success and the frontend
+      // can handle redirection
       return NextResponse.json({
         success: true,
         planType: "free",
@@ -97,7 +101,7 @@ export async function POST(req: NextRequest) {
       user.email,
       planType as PlanType,
       baseUrl,
-      language,
+      getStripeSupportedLocale(language),
     );
 
     if (!result) {

@@ -22,7 +22,7 @@ export function CookieWhatSection({ translations }: SectionProps) {
         {t(
           translations,
           "marketing.legal.cookie.what_are_cookies.desc",
-          "Cookies are small text files stored on your device by your browser when you visit websites. They help websites remember your preferences, enhance your experience, and provide analytics.",
+          "Cookies are small text files stored on your device. They allow us to recognize your session, secure your payments, and analyze platform performance to improve our technical SEO and AI search features.",
         )}
       </p>
     </section>
@@ -35,25 +35,28 @@ export function CookieTypesSection({ translations }: SectionProps) {
       key: "essential",
       title: "marketing.legal.cookie.types.essential",
       desc: "marketing.legal.cookie.types.essential_desc",
+      defaultLabel: "Essential Cookies",
+      defaultDesc:
+        "Required for authentication (Supabase) and secure payment processing (Stripe). The service cannot function without these.",
       color: "var(--marketing-color-primary)",
     },
     {
       key: "analytics",
       title: "marketing.legal.cookie.types.analytics",
       desc: "marketing.legal.cookie.types.analytics_desc",
+      defaultLabel: "Analytical Cookies",
+      defaultDesc:
+        "Provided by Google Analytics 4 (GA4). These help us understand how you use the builder and which features are most valuable.",
       color: "var(--marketing-color-accent)",
     },
     {
       key: "preference",
       title: "marketing.legal.cookie.types.preference",
       desc: "marketing.legal.cookie.types.preference_desc",
+      defaultLabel: "Preference Cookies",
+      defaultDesc:
+        "Used to remember your UI settings, such as your preferred language (English, Catalan, Spanish, etc.).",
       color: "#6366f1",
-    },
-    {
-      key: "third_party",
-      title: "marketing.legal.cookie.types.third_party",
-      desc: "marketing.legal.cookie.types.third_party_desc",
-      color: "#94a3b8",
     },
   ];
   return (
@@ -65,7 +68,7 @@ export function CookieTypesSection({ translations }: SectionProps) {
         {t(
           translations,
           "marketing.legal.cookie.types.title",
-          "2. Types We Use",
+          "2. Specific Cookies We Use",
         )}
       </Heading>
       <div className="grid gap-6">
@@ -80,14 +83,10 @@ export function CookieTypesSection({ translations }: SectionProps) {
             />
             <div>
               <h3 className="font-bold text-gray-900 mb-2">
-                {t(
-                  translations,
-                  cookie.title,
-                  `${cookie.key.charAt(0).toUpperCase() + cookie.key.slice(1)} Cookies:`,
-                )}
+                {t(translations, cookie.title, cookie.defaultLabel)}
               </h3>
               <p className="text-sm text-gray-600 leading-relaxed">
-                {t(translations, cookie.desc, "Description pending.")}
+                {t(translations, cookie.desc, cookie.defaultDesc)}
               </p>
             </div>
           </div>
@@ -104,14 +103,14 @@ export function CookieUsageSection({ translations }: SectionProps) {
         {t(
           translations,
           "marketing.legal.cookie.usage.title",
-          "3. How We Use Them",
+          "3. Our Usage Policy",
         )}
       </Heading>
       <p className="mb-6 text-gray-700">
         {t(
           translations,
           "marketing.legal.cookie.usage.current",
-          "Currently, we only use essential cookies required for authentication and security (such as Supabase session cookies). No analytics or preference cookies are set at this time. In the future, we may use Google Analytics cookies to help us understand site usage, but you will be notified and able to consent before these are set.",
+          "We use cookies to maintain your session via Supabase, process payments via Stripe, and track platform growth via Google Analytics. We prioritize your privacy: analytical cookies are only activated if you provide explicit consent through our cookie banner.",
         )}
       </p>
     </section>
@@ -125,14 +124,14 @@ export function CookieManageSection({ translations }: SectionProps) {
         {t(
           translations,
           "marketing.legal.cookie.manage.title",
-          "4. Managing Your Cookie Preferences",
+          "4. Managing Your Preferences",
         )}
       </Heading>
       <p className="text-gray-700 leading-relaxed opacity-90">
         {t(
           translations,
           "marketing.legal.cookie.manage.current",
-          "Because we only use essential cookies for authentication, there are currently no preferences to manage. When we introduce analytics cookies (such as Google Analytics), you will be able to manage your preferences and provide consent via a cookie banner.",
+          "You can withdraw your consent for analytical cookies at any time via the settings icon on the bottom of the screen. Essential cookies required for security and account access cannot be disabled through our settings but can be blocked via your browser (which may break the site).",
         )}
       </p>
     </section>
@@ -146,14 +145,14 @@ export function CookieThirdPartySection({ translations }: SectionProps) {
         {t(
           translations,
           "marketing.legal.cookie.third_party.title",
-          "5. Third-Party Services",
+          "5. Third-Party Cookies",
         )}
       </Heading>
       <p className="text-gray-700 leading-relaxed opacity-90">
         {t(
           translations,
           "marketing.legal.cookie.third_party.current",
-          "We do not currently use any third-party analytics or advertising cookies. In the future, we plan to use Google Analytics to help us understand how visitors use our site. You will be notified and able to consent before any such cookies are set.",
+          "We use Google Analytics (Google LLC) and Stripe (Stripe, Inc.) for analytics and payment security. These third parties may set cookies according to their own privacy policies. We do not use third-party advertising or tracking cookies for marketing purposes.",
         )}
       </p>
     </section>
@@ -164,13 +163,17 @@ export function CookieUpdatesSection({ translations }: SectionProps) {
   return (
     <section id="updates" className="mb-16 scroll-mt-24">
       <Heading as="h2" className="font-display text-3xl pb-4">
-        {t(translations, "marketing.legal.cookie.updates.title", "6. Updates")}
+        {t(
+          translations,
+          "marketing.legal.cookie.updates.title",
+          "6. Policy Updates",
+        )}
       </Heading>
       <p className="text-gray-700 leading-relaxed opacity-90">
         {t(
           translations,
           "marketing.legal.cookie.updates.desc",
-          "Policy details.",
+          "As we introduce new features or localized search engine improvements, our use of cookies may evolve. Significant changes will be posted here.",
         )}
       </p>
     </section>
@@ -184,14 +187,18 @@ export function CookieContactSection({ translations }: SectionProps) {
       className="mb-16 scroll-mt-24 pt-10 border-t border-black/5"
     >
       <Heading as="h2" className="font-display text-3xl pb-4">
-        {t(translations, "marketing.legal.cookie.contact.title", "7. Contact")}
+        {t(
+          translations,
+          "marketing.legal.cookie.contact.title",
+          "7. Cookie Inquiries",
+        )}
       </Heading>
       <div className="p-8 rounded-3xl bg-white border border-black/5 shadow-xl shadow-black/5">
         <p className="text-gray-700 pb-4">
           {t(
             translations,
             "marketing.legal.cookie.contact.desc",
-            "If you have any questions about our use of cookies, please contact us at:",
+            "For specific questions regarding our use of cookies and how we process GA4 identifiers, please contact:",
           )}
         </p>
         <a
