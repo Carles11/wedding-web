@@ -3,8 +3,9 @@
 export const buildMagicLink = (
   providerApiUrl: string, // Retrieved via DNS TXT lookup
   userDomain: string,
-  serviceId: string = "weddweb",
-  templateId: string = "root-and-www",
+  // Use Vercel's IDs which are already white-listed globally
+  serviceId: string = "vercel.com",
+  templateId: string = "dns",
 ) => {
   if (!providerApiUrl) return null;
 
@@ -18,7 +19,7 @@ export const buildMagicLink = (
   const params = new URLSearchParams({
     domain: userDomain,
     // After success, they come back to your app
-    redirect_uri: `https://app.weddweb.com/builder/settings/domain/callback`,
+    redirect_uri: `https://app.weddweb.com/builder/domain/callback`,
   });
 
   // 3. The Gold Standard path

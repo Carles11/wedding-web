@@ -261,3 +261,27 @@ The architecture is clean, scalable, and fully compatible with Google’s expect
 ✔ No further changes required
 
 **License:** MIT — Copyright (c) 2026 Carles
+
+#### DNS HANDLING - CUSTOM DOMAINS
+
+### 🌐 Custom Domain Engine (4-Pillar UX) 🏛️ The 4-Pillar Architecture
+
+WeddWeb features a "Gold Standard" domain onboarding flow, designed to make the most technical part of a wedding website completely friction-free for non-technical users.
+
+## ✨ Magic Handshake (Pillar 1): Automatic DNS configuration via Domain Connect. Supports GoDaddy, IONOS, and more with one-click authorization.
+
+## 🤝 Social Resilience (Pillar 2): "Share with a Friend" feature. Generates pre-formatted technical requirements for users to delegate setup to tech-savvy peers.
+
+## 📋 Manual Transparency (Pillar 3): Clean, copy-pasteable DNS records (A/CNAME) fetched in real-time from Vercel for power users.
+
+## 🧠 Intelligence (Pillar 4): Human-friendly error mapping. Technical failures like CAA conflicts or domain_taken are translated into empathetic, actionable advice.
+
+## ⚙️ Technical Highlights
+
+Atomic Operations: Every domain add/remove is wrapped in a rollback logic that keeps Supabase and Vercel perfectly synced.
+
+Edge-Powered Discovery: Supabase Edge Functions handle high-speed DNS TXT/CNAME lookups to identify registrar capabilities.
+
+Automated Callback: A dedicated verification route with a high-end UI loader handles the return trip from registrars, providing instant status updates.
+
+Built for Vercel: Fully integrated with the Vercel Domain API and global DNS templates.

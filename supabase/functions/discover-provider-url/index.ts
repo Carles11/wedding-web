@@ -1,22 +1,29 @@
+// supabase/functions/discover-provider-url/index.ts
+
+// 1. Types & Config
 type DenoRuntime = {
-  serve: (handler: (req: Request) => Response | Promise<Response>) => void;
-  resolveTxt: (query: string) => Promise<string[][]>;
+  resolveDns: (
+    query: string,
+    recordType: "TXT" | "CNAME",
+  ) => Promise<string[] | string[][]>;
 };
 
-declare const Deno: DenoRuntime;
+declare const Deno: DenoRuntime & {
+  serve: (handler: (req: Request) => Response | Promise<Response>) => void;
+};
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Content-Type": "application/json",
 };
 
+// 2. Helpers
 function jsonResponse(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: corsHeaders,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
 }
 
@@ -39,21 +46,62 @@ function normalizeProviderUrl(value: string): string | null {
     .replace(/^https?:\/\//i, "")
     .replace(/\/+$/, "")
     .replace(/\/v2$/i, "");
-
   if (!candidate) return null;
-
   return /^[a-z0-9.-]+\.[a-z]{2,}(?:\/[^\s'"`]+)?$/i.test(candidate)
     ? candidate
     : null;
 }
 
-function extractProviderUrl(records: string[][]): string | null {
+Deno.serve(async (req) => {
+  if (req.method === "OPTIONS")
+    return new Response("ok", { headers: corsHeaders });
+
+  try {
+    const { domain } = await req.json();
+    const apex = toApexDomain(domain);
+    const host = `_domainconnect.${apex}`;
+    let providerUrl: string | null = null;
+
+    console.log(`🔎 Querying: ${host}`);
+
+    // Try TXT first
+    try {
+      const txt = await Deno.resolveDns(host, "TXT");
+      providerUrl = extractProviderUrl(txt);
+    } catch {
+      console.log("No TXT record.");
+    }
+
+    // Try CNAME fallback (Common for Ionos/GoDaddy users)
+    if (!providerUrl) {
+      try {
+        const cname = await Deno.resolveDns(host, "CNAME");
+        if (cname.length > 0) {
+          // CNAME returns the URL/Host directly
+          providerUrl = normalizeProviderUrl(
+            Array.isArray(cname[0]) ? cname[0].join("") : cname[0],
+          );
+        }
+      } catch {
+        console.log("No CNAME record.");
+      }
+    }
+
+    console.log(`🎯 Discovery for ${apex}: ${providerUrl}`);
+    return jsonResponse({ providerUrl, domain: apex });
+  } catch (error) {
+    return jsonResponse({ providerUrl: null }, 200);
+  }
+});
+
+function extractProviderUrl(records: string[] | string[][]): string | null {
   const rawValues = records
-    .map((record) => record.join(""))
+    .map((record) => (Array.isArray(record) ? record.join("") : record))
     .map((value) => value.trim())
     .filter(Boolean);
 
   for (const rawValue of rawValues) {
+    // FIXED REGEX: Changed (??: to (?:
     const keyedMatch = rawValue.match(
       /(?:^|[;\s])(?:url|api|provider[_-]?url|domainconnect)\s*=\s*(?:['"])?([^;'"\s]+)(?:['"])?/i,
     );
@@ -72,7 +120,6 @@ function extractProviderUrl(records: string[][]): string | null {
       if (normalized) return normalized;
     }
   }
-
   return null;
 }
 
@@ -83,6 +130,7 @@ function isMissingTxtRecord(error: unknown): boolean {
   );
 }
 
+// 3. Main Handler
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -94,7 +142,6 @@ Deno.serve(async (req) => {
 
   try {
     let body: { domain?: string } | null = null;
-
     try {
       body = (await req.json()) as { domain?: string };
     } catch {
@@ -110,7 +157,10 @@ Deno.serve(async (req) => {
     }
 
     try {
-      const txtRecords = await Deno.resolveTxt(`_domainconnect.${apexDomain}`);
+      const txtRecords = await Deno.resolveDns(
+        `_domainconnect.${apexDomain}`,
+        "TXT",
+      );
       const providerUrl = extractProviderUrl(txtRecords);
 
       return jsonResponse({ providerUrl, domain: apexDomain });
@@ -118,12 +168,10 @@ Deno.serve(async (req) => {
       if (isMissingTxtRecord(error)) {
         return jsonResponse({ providerUrl: null, domain: apexDomain });
       }
-
       throw error;
     }
   } catch (error) {
     console.error("discover-provider-url failed", error);
-
     return jsonResponse(
       {
         error:

@@ -14,9 +14,7 @@ export async function addCustomDomain(siteId: string, domain: string) {
 
   const { data: site, error: fetchError } = await supabase
     .from("sites")
-    .select(
-      "pending_custom_domains, domain_statuses, domains, domain_provider_api_url",
-    )
+    .select("pending_custom_domains, domain_statuses, domains")
     .eq("id", siteId)
     .maybeSingle();
   if (fetchError || !site) throw new Error("Site not found");
@@ -27,34 +25,6 @@ export async function addCustomDomain(siteId: string, domain: string) {
     (site.domain_statuses && site.domain_statuses[cleanDomain])
   ) {
     throw new Error("Domain already exists for this site");
-  }
-
-  let providerUrl: string | null = site.domain_provider_api_url ?? null;
-
-  try {
-    console.log("🚀 ATTEMPTING DISCOVERY FOR:", cleanDomain);
-    const { data: discoveryData, error: discoveryError } =
-      await supabase.functions.invoke("discover-provider-url", {
-        body: { domain: cleanDomain },
-      });
-
-    if (discoveryError) {
-      console.error("❌ EDGE FUNCTION ERROR:", discoveryError); // Changed to console.error
-    } else {
-      console.log("✅ EDGE FUNCTION RESULT:", discoveryData);
-    }
-
-    if (discoveryError) {
-      console.warn("Domain Connect discovery failed:", discoveryError.message);
-    } else if (
-      discoveryData &&
-      typeof discoveryData.providerUrl === "string" &&
-      discoveryData.providerUrl.trim()
-    ) {
-      providerUrl = discoveryData.providerUrl.trim();
-    }
-  } catch (error) {
-    console.warn("Domain Connect discovery failed:", error);
   }
 
   // Append to pending in DB first (so UI updates immediately)
@@ -70,11 +40,7 @@ export async function addCustomDomain(siteId: string, domain: string) {
   // Save to DB before starting Vercel API call (*UX improvement)
   await supabase
     .from("sites")
-    .update({
-      pending_custom_domains,
-      domain_statuses,
-      domain_provider_api_url: providerUrl,
-    })
+    .update({ pending_custom_domains, domain_statuses })
     .eq("id", siteId);
 
   // Now actually add domain to Vercel

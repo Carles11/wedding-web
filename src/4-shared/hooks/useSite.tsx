@@ -115,5 +115,26 @@ export function useSite(user: User | null) {
     });
   };
 
-  return { site, loading, error, refresh } as const;
+  const verifyDomain = async (domain: string) => {
+    if (!lockedSiteId.current) return; // Use the ref to ensure we have the site ID
+
+    const res = await fetch(
+      `/api/sites/${lockedSiteId.current}/verify-domain`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ domain }),
+      },
+    );
+
+    if (!res.ok) {
+      const errData = await res.json();
+      throw new Error(errData.error || "Verification failed");
+    }
+
+    // After a successful POST, refresh local state to get the 'verified' status
+    await refresh();
+  };
+
+  return { site, loading, error, refresh, verifyDomain } as const;
 }
