@@ -24,7 +24,7 @@ export default async function MarketingLayout({
       <MarketingHeader lang={lang} translations={translations} />
 
       {/* 2. Main content grows to fill space */}
-      <div className="flex-grow">{children}</div>
+      <div className="grow">{children}</div>
 
       {/* 3. Footer is now global, no more manual imports in pages! */}
       <Footer lang={lang} translations={translations} />

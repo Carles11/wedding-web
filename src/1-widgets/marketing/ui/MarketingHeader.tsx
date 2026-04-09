@@ -121,18 +121,21 @@ export default function MarketingHeader({ translations, lang }: Props) {
           </div>
 
           {/* SIGNUP - Hidden on mobile to avoid overflow */}
-          <Link
-            href={logInRef}
-            className="text-md font-medium text-emerald-600"
-          >
-            {t(translations, "marketing.nav.login", "Log in")}
-          </Link>
-          <Link
-            href={signUpRef}
-            className="hidden sm:block rounded-full bg-emerald-600 px-4 py-2 text-xs md:text-sm font-bold text-white shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 transition-all"
-          >
-            {t(translations, "pricing.cta", "Get Started")}
-          </Link>
+          {!user ? (
+            <Link
+              href={logInRef}
+              className="text-md font-medium text-emerald-600"
+            >
+              {t(translations, "marketing.nav.login", "Log in")}
+            </Link>
+          ) : (
+            <Link
+              href={signUpRef}
+              className="hidden sm:block rounded-full bg-emerald-600 px-4 py-2 text-xs md:text-sm font-bold text-white shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 transition-all"
+            >
+              {t(translations, "pricing.cta", "Get Started")}
+            </Link>
+          )}
 
           {/* MOBILE MENU TOGGLE */}
           <button
@@ -174,18 +177,21 @@ export default function MarketingHeader({ translations, lang }: Props) {
               {t(translations, "marketing.nav.faq", "FAQ")}
             </Link>
             <hr className="border-gray-100" />
-            <Link
-              href={logInRef}
-              className="text-md font-medium text-emerald-600"
-            >
-              {t(translations, "marketing.nav.login", "Log in")}
-            </Link>
-            <Link
-              href={signUpRef}
-              className="w-full text-center rounded-xl bg-emerald-600 py-4 font-bold text-white shadow-lg shadow-emerald-600/10"
-            >
-              {t(translations, "pricing.cta", "Get Started")}
-            </Link>
+            {!user ? (
+              <Link
+                href={logInRef}
+                className="text-md font-medium text-emerald-600"
+              >
+                {t(translations, "marketing.nav.login", "Log in")}
+              </Link>
+            ) : (
+              <Link
+                href={signUpRef}
+                className="w-full text-center rounded-xl bg-emerald-600 py-4 font-bold text-white shadow-lg shadow-emerald-600/10"
+              >
+                {t(translations, "pricing.cta", "Get Started")}
+              </Link>
+            )}
           </nav>
         </div>
       )}
