@@ -35,6 +35,7 @@ export default async function DashboardLayout({
 
   return (
     <div className="builder-theme">
+      {/* Global css for the builder above */}
       <PlanProvider subscription={subscription}>
         {children}
         <ToastProvider />

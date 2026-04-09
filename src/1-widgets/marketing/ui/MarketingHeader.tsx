@@ -1,5 +1,6 @@
 "use client";
 
+import { updateAccountInfo } from "@/3-entities/account/api/accountCrud";
 import {
   SUPPORTED_LANGUAGE_LABELS,
   SUPPORTED_LANGUAGES,
@@ -29,6 +30,12 @@ export default function MarketingHeader({ translations, lang }: Props) {
   const logInRef = user ? `/${lang}/builder` : `/${lang}/auth/login`;
 
   const handleLanguageChange = (newLang: string) => {
+    // update preferred language in user account if logged in
+    if (user?.id) {
+      updateAccountInfo(user.id, { preferred_language: newLang });
+    }
+
+    // update URL to reflect new language
     const segments = pathname.split("/");
     segments[1] = newLang;
     router.push(segments.join("/"));
@@ -85,7 +92,7 @@ export default function MarketingHeader({ translations, lang }: Props) {
               />
             </button>
 
-            {/* Dropdown Menu */}
+            {/* Dropdown Menu languages*/}
             <div
               className={`absolute right-0 mt-2 w-40 origin-top-right transition-all z-50 ${
                 isLangOpen
@@ -124,7 +131,7 @@ export default function MarketingHeader({ translations, lang }: Props) {
           {!user ? (
             <Link
               href={logInRef}
-              className="text-md font-medium text-emerald-600"
+              className="hidden sm:block text-md font-medium text-emerald-600"
             >
               {t(translations, "marketing.nav.login", "Log in")}
             </Link>
@@ -151,7 +158,7 @@ export default function MarketingHeader({ translations, lang }: Props) {
         </div>
       </div>
 
-      {/* MOBILE OVERLAY MENU */}
+      {/* MOBILE OVERLAY BURGER MENU */}
       {isMenuOpen && (
         <div className="lg:hidden absolute top-20 left-0 w-full bg-white border-b border-gray-100 p-6 shadow-xl animate-in slide-in-from-top-2 z-40">
           <nav className="flex flex-col gap-6">

@@ -8,7 +8,6 @@ import HeroMarketing, {
   TestimonialsSection,
 } from "@/1-widgets/marketing/ui";
 import GlobalLegacyBridge from "@/1-widgets/marketing/ui/features/GlobalLegacyBridge";
-import { updateAccountInfo } from "@/3-entities/account/api/accountCrud";
 import { useSupabaseAuth } from "@/4-shared/hooks/useSupabaseAuth";
 import { JsonLd } from "@/4-shared/lib/seo/JsonLd";
 import { generateWebPageSchema } from "@/4-shared/lib/seo/generateGraphSchema";
@@ -54,14 +53,6 @@ export default function MarketingPageComponent({
   // HANDLER: Secondary CTA
   const handleSecondaryClick = () => {
     window.open(secondaryHref, "_blank");
-  };
-
-  // HANDLER: Language Selector
-  const handleLanguageChange = async (lang: string) => {
-    if (user?.id) {
-      updateAccountInfo(user.id, { preferred_language: lang });
-    }
-    router.push(`/${lang}`);
   };
 
   // VIEW MODEL: Generated directly from props for instant hydration
