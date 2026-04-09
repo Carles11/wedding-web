@@ -143,7 +143,7 @@ export default async function Page({
           translations={translations}
           showBrandBadge={showBrandBadge}
         />
-        {!showFooter && (
+        {showFooter && (
           <Footer
             lang={langInput}
             translations={marketingTranslationsForFooter}
