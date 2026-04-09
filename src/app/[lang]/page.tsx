@@ -132,6 +132,10 @@ export default async function Page({
       shouldShowBrandBadge({ planType: site.plan_type, routeKind: "tenant" }),
     ]);
 
+    const marketingTranslationsForFooter = await fetchMarketingTranslations(
+      langInput,
+      "en",
+    );
     return (
       <div className="tenant-theme">
         <TenantPageComponent
@@ -139,7 +143,12 @@ export default async function Page({
           translations={translations}
           showBrandBadge={showBrandBadge}
         />
-        {showFooter && <Footer lang={langInput} translations={translations} />}
+        {!showFooter && (
+          <Footer
+            lang={langInput}
+            translations={marketingTranslationsForFooter}
+          />
+        )}
       </div>
     );
   }

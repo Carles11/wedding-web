@@ -5,6 +5,7 @@ import {
 import { t } from "@/4-shared/helpers/t";
 import type { MarketingTranslations } from "@/4-shared/types";
 import Link from "next/link";
+import Heading from "../typography/Heading";
 
 type FooterProps = {
   author?: string;
@@ -71,7 +72,10 @@ export function Footer({
               href={`${langPrefix}/`}
               className="inline-flex items-center gap-2"
             >
-              <h3 className="font-serif text-2xl font-normal leading-none tracking-tight">
+              <Heading
+                as="h3"
+                className="font-serif text-2xl font-normal leading-none tracking-tight"
+              >
                 {siteName.replace(".com", "")}
                 <em
                   className="italic"
@@ -79,7 +83,7 @@ export function Footer({
                 >
                   .com
                 </em>
-              </h3>
+              </Heading>
             </Link>
             <p className="max-w-xs text-sm font-light leading-relaxed text-slate-500">
               {t(
