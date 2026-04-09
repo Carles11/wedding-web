@@ -13,6 +13,7 @@ type StepLayoutProps = {
   nextLabel?: string;
   backLabel?: string;
   translations?: Record<string, string>;
+  fullHeight?: boolean;
 };
 
 export function StepLayout({
@@ -26,6 +27,7 @@ export function StepLayout({
   nextLabel,
   backLabel,
   translations = {},
+  fullHeight = true,
 }: StepLayoutProps) {
   // Resolve labels using translations first, then prop, then fallback
 
@@ -41,46 +43,56 @@ export function StepLayout({
     "Back";
   const resolvedSave =
     translations["builder.actions.save"] || nextLabel || "Save";
+  const mobilePrimaryLabel = onNext ? resolvedSave : resolvedBack;
+  const mobilePrimaryAction = onNext || onBack;
+  const mobilePrimaryDisabled = onNext ? nextDisabled : backDisabled;
 
   return (
-    <div className="builder-theme flex min-h-screen flex-col">
+    <div
+      className={`builder-theme flex flex-col ${fullHeight ? "min-h-screen" : ""}`}
+    >
       {/* CONTENT */}
       <main className="flex-1 pb-28 md:pb-8">{children}</main>
 
       {/* DESKTOP ACTIONS */}
-      {showActions && (
-        <div
-          className={`hidden md:flex items-center justify-start gap-3 border-t builder-muted-surface px-6 py-4`}
-        >
-          <BuilderButton
-            variant="secondary"
-            onClick={onBack}
-            disabled={backDisabled}
-          >
-            {resolvedBack}
-          </BuilderButton>
+      {showActions && (onBack || onNext) && (
+        <div className="hidden items-center justify-start gap-3 border-t builder-muted-surface px-6 py-4 md:flex">
+          {onBack && (
+            <BuilderButton
+              variant="secondary"
+              onClick={onBack}
+              disabled={backDisabled}
+            >
+              {resolvedBack}
+            </BuilderButton>
+          )}
 
-          <BuilderButton
-            onClick={onNext}
-            disabled={nextDisabled}
-            loading={nextLoading}
-            loadingLabel={translations["builder.actions.saving"] || "Saving..."}
-          >
-            {resolvedNext}
-          </BuilderButton>
+          {onNext && (
+            <BuilderButton
+              onClick={onNext}
+              disabled={nextDisabled}
+              loading={nextLoading}
+              loadingLabel={
+                translations["builder.actions.saving"] || "Saving..."
+              }
+            >
+              {resolvedNext}
+            </BuilderButton>
+          )}
         </div>
       )}
 
       {/* MOBILE STICKY BAR */}
-      {showActions && (
+      {showActions && mobilePrimaryAction && (
         <div className="md:hidden">
           <StickyMobileBar
-            primaryLabel={resolvedSave}
-            onPrimary={onNext}
-            primaryDisabled={nextDisabled}
-            primaryLoading={nextLoading}
-            secondaryLabel={onBack ? resolvedBack : undefined}
-            onSecondary={onBack}
+            primaryLabel={mobilePrimaryLabel}
+            onPrimary={mobilePrimaryAction}
+            primaryDisabled={mobilePrimaryDisabled}
+            primaryLoading={onNext ? nextLoading : false}
+            secondaryLabel={onNext && onBack ? resolvedBack : undefined}
+            onSecondary={onNext ? onBack : undefined}
+            secondaryDisabled={backDisabled}
           />
         </div>
       )}

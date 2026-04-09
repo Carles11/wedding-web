@@ -5,18 +5,20 @@ import { notify } from "@/4-shared/lib/toast/toast";
 import { AccountInfo } from "@/4-shared/types/account";
 import LanguageSelector from "@/4-shared/ui/builder/LanguageSelector";
 import Heading from "@/4-shared/ui/commons/typography/Heading";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface PreferencesTabProps {
   account: AccountInfo;
   translations: Record<string, string>;
   cardClass: string;
+  onPreferredLanguageChange?: (lang: SupportedLanguage) => void;
 }
 
 export function PreferencesTab({
   account,
   translations,
   cardClass,
+  onPreferredLanguageChange,
 }: PreferencesTabProps) {
   const [currentLang, setCurrentLang] = useState<SupportedLanguage>(
     (account.preferred_language as SupportedLanguage) || "en",
@@ -24,11 +26,21 @@ export function PreferencesTab({
   const [loading, setLoading] = useState(false);
   const { user } = useSupabaseAuth();
 
+  useEffect(() => {
+    setCurrentLang((account.preferred_language as SupportedLanguage) || "en");
+  }, [account.preferred_language]);
+
   const handleLanguageChange = async (lang: string) => {
     if (lang === currentLang) return;
     if (!user) {
       return;
     }
+
+    const nextLang = lang as SupportedLanguage;
+    const previousLang = currentLang;
+
+    setCurrentLang(nextLang);
+    onPreferredLanguageChange?.(nextLang);
     setLoading(true);
 
     const result = await updateAccountInfo(user.id, {
@@ -36,13 +48,15 @@ export function PreferencesTab({
     });
     setLoading(false);
     if (result.success) {
-      setCurrentLang(lang as SupportedLanguage);
       notify.success(
         translations[
           "builder.account.tabs.preferences.language_changed_success"
         ] || "Preferred language updated!",
       );
     } else {
+      setCurrentLang(previousLang);
+      onPreferredLanguageChange?.(previousLang);
+
       const errorMsg =
         typeof result.error === "string"
           ? result.error

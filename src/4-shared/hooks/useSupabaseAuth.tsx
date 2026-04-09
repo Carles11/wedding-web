@@ -64,6 +64,7 @@ export function useSupabaseAuth() {
     currentEmail: string,
     newEmail: string,
     password: string,
+    lang: string, // 1. Add lang parameter to send the email in the correct language
   ) => {
     // Step 1: Re-authenticate
     const { error: signInError } = await supabase.auth.signInWithPassword({
@@ -73,10 +74,13 @@ export function useSupabaseAuth() {
     if (signInError) {
       return { success: false, error: signInError };
     }
-    // Step 2: Update email
+
+    // Step 2: Update email AND metadata
     const { error: updateError } = await supabase.auth.updateUser({
       email: newEmail,
+      data: { language: lang }, // 2. This is what the Edge Function reads!
     });
+
     if (updateError) {
       return { success: false, error: updateError };
     }

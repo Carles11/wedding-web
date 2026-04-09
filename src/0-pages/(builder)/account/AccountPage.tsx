@@ -2,7 +2,7 @@
 
 import { deleteAccountAction } from "@/3-entities/account/actions/deleteAccount";
 import { updateAccountInfo } from "@/3-entities/account/api/accountCrud";
-import { getAccountById } from "@/3-entities/account/api/getAccountById";
+import type { SupportedLanguage } from "@/4-shared/config/i18n";
 import { useSupabaseAuth } from "@/4-shared/hooks/useSupabaseAuth";
 import { notify } from "@/4-shared/lib/toast/toast";
 import UnderlinedLink from "@/4-shared/ui/commons/link/UnderlinedLink";
@@ -36,18 +36,17 @@ export default function AccountPage({ account, translations, site }: Props) {
   const { user, signOut } = useSupabaseAuth();
 
   useEffect(() => {
-    async function refetchAccount() {
-      if (user?.id && user?.email && user.email !== currentAccount.email) {
-        const result = await getAccountById(user.id);
-        if (result.success && result.data) {
-          setCurrentAccount(result.data);
-          setEditName(result.data.full_name || "");
-          setEditEmail(result.data.email);
-        }
-      }
+    if (!user?.email || user.email === currentAccount.email) {
+      return;
     }
-    refetchAccount();
-  }, [user?.email]);
+
+    setCurrentAccount((prev) => ({
+      ...prev,
+      email: user.email!,
+      updated_at: new Date().toISOString(),
+    }));
+    setEditEmail(user.email);
+  }, [user?.email, currentAccount.email]);
 
   if (!currentAccount) {
     return (
@@ -59,24 +58,36 @@ export default function AccountPage({ account, translations, site }: Props) {
   }
 
   const handleSave = async () => {
+    const normalizedName = editName.trim();
+    const updates: { full_name?: string } = {};
+
+    if (normalizedName !== (currentAccount.full_name || "")) {
+      updates.full_name = normalizedName;
+    }
+
+    if (Object.keys(updates).length === 0) {
+      notify.success(
+        translations["builder.general.form.save_success"] ||
+          "Changes saved successfully!",
+      );
+      return;
+    }
+
     setSaving(true);
     try {
-      const updates: any = {};
-      if (editName !== account.full_name) updates.full_name = editName;
-      if (Object.keys(updates).length === 0) {
-        notify.success(
-          translations["builder.general.form.save_success"] ||
-            "Changes saved successfully!",
-        );
-        return;
-      }
-      const result = await updateAccountInfo(account.id, updates);
+      const result = await updateAccountInfo(currentAccount.id, updates);
       if (result.success) {
+        setCurrentAccount((prev) => ({
+          ...prev,
+          ...updates,
+          updated_at: new Date().toISOString(),
+        }));
+        setEditName(updates.full_name ?? normalizedName);
+
         notify.success(
           translations["builder.general.form.save_success"] ||
             "Changes saved successfully!",
         );
-        setEditEmail(account.email);
       } else {
         notify.error("Update failed.");
       }
@@ -90,13 +101,13 @@ export default function AccountPage({ account, translations, site }: Props) {
   };
 
   const handleDelete = async () => {
-    if (!deleteAcknowledge || deleteConfirm !== account.email) {
+    if (!deleteAcknowledge || deleteConfirm !== currentAccount.email) {
       notify.error("Please verify deletion requirements.");
       return;
     }
     setSaving(true);
     try {
-      const result = await deleteAccountAction(account.id);
+      const result = await deleteAccountAction(currentAccount.id);
       if (result.success) {
         await signOut();
         router.push("/");
@@ -106,8 +117,18 @@ export default function AccountPage({ account, translations, site }: Props) {
     }
   };
 
-  const initials = currentAccount.full_name
-    ? currentAccount.full_name
+  const displayName = editName.trim() || currentAccount.full_name || "";
+
+  const handlePreferredLanguageChange = (lang: SupportedLanguage) => {
+    setCurrentAccount((prev) => ({
+      ...prev,
+      preferred_language: lang,
+      updated_at: new Date().toISOString(),
+    }));
+  };
+
+  const initials = displayName
+    ? displayName
         .split(" ")
         .map((n: string) => n[0])
         .join("")
@@ -140,9 +161,9 @@ export default function AccountPage({ account, translations, site }: Props) {
         <div className="relative flex flex-col sm:flex-row items-center sm:items-start gap-6">
           {/* Avatar */}
           <div className="shrink-0">
-            {account.avatar_url ? (
+            {currentAccount.avatar_url ? (
               <img
-                src={account.avatar_url}
+                src={currentAccount.avatar_url}
                 alt="avatar"
                 className="w-24 h-24 rounded-2xl object-cover ring-4 ring-(--builder-color-primary)/10"
               />
@@ -163,14 +184,14 @@ export default function AccountPage({ account, translations, site }: Props) {
             <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
               <Heading
                 as="h1"
-                className="text-2xl sm:text-3xl font-bold text-(--builder-color-text) truncate"
+                className="text-2xl sm:text-3xl font-bold text-(--builder-color-text) wrap-break-word "
               >
-                {account.full_name ||
+                {displayName ||
                   translations["builder.account.page.welcome_back"] ||
                   "Welcome!"}
               </Heading>
-              {account.onboarding_completed && (
-                <div className="flex justify-center">
+              {currentAccount.onboarding_completed && (
+                <div className="flex justify-center sm:justify-start">
                   <span className="px-2.5 py-0.5 text-[10px] uppercase tracking-wider font-bold rounded-full bg-green-100 text-green-700 border border-green-200">
                     {translations["builder.account.page.onboarded"] ||
                       "Onboarded"}
@@ -193,12 +214,12 @@ export default function AccountPage({ account, translations, site }: Props) {
                   d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
                 />
               </svg>
-              <span className="truncate">{account.email}</span>
+              <span className="truncate">{currentAccount.email}</span>
             </p>
 
             <div className="pt-2 border-t border-(--builder-color-border) inline-block">
               <UnderlinedLink
-                href={`/${account.preferred_language?.toLowerCase() || "en"}/builder`}
+                href={`/${currentAccount.preferred_language?.toLowerCase() || "en"}/builder`}
                 thicknessClass="h-0.5"
                 durationMs={350}
                 ariaLabel="Back to dashboard"
@@ -268,14 +289,15 @@ export default function AccountPage({ account, translations, site }: Props) {
             translations={translations}
             cardClass={cardClass}
             router={router}
-            lang={account.preferred_language?.toLowerCase() || "en"}
+            lang={currentAccount.preferred_language?.toLowerCase() || "en"}
           />
         )}
         {activeTab === "preferences" && (
           <PreferencesTab
-            account={account}
+            account={currentAccount}
             translations={translations}
             cardClass={cardClass}
+            onPreferredLanguageChange={handlePreferredLanguageChange}
           />
         )}
       </div>

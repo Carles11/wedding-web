@@ -51,7 +51,7 @@ export default function MembershipSection({
         <div
           className={`rounded-[22px] p-6 flex flex-col md:flex-row md:items-center gap-6 ${
             planType === "premium"
-              ? "bg-linear-to-br from-blue-50/50 to-white"
+              ? "bg-linear-to-br from-(blue-50/50) to-white"
               : "bg-white"
           }`}
         >
@@ -61,7 +61,7 @@ export default function MembershipSection({
               <div
                 className={`px-3 py-1 text-[10px] font-bold tracking-widest uppercase rounded-full border ${
                   planType === "premium"
-                    ? "bg-blue-600 text-white border-blue-600"
+                    ? "bg-(--builder-color-primary) text-white border-(--builder-color-primary-hover)"
                     : "bg-gray-100 text-gray-600 border-gray-200"
                 }`}
               >
@@ -78,7 +78,7 @@ export default function MembershipSection({
                   key={index}
                   className="flex items-center gap-2 text-sm text-gray-600"
                 >
-                  <Check className="w-4 h-4 text-blue-500 shrink-0" />
+                  <Check className="w-4 h-4 text-(--builder-color-primary) shrink-0" />
                   <span className="truncate">{feature}</span>
                 </li>
               ))}

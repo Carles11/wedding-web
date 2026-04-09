@@ -53,11 +53,18 @@ export default function AccountBillingDetails({
           >
             {translations["billing.current_plan"] ?? "Current Plan"}
           </Heading>
-          <span className="inline-flex items-center px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-blue-700 text-xs font-bold uppercase tracking-wide">
+          <div
+            className={`px-3 py-1 text-[10px] font-bold tracking-widest uppercase rounded-full border ${
+              planType === "premium"
+                ? "bg-(--builder-color-primary) text-white border-(--builder-color-primary-hover)"
+                : "bg-gray-100 text-gray-600 border-gray-200"
+            }`}
+          >
+            {" "}
             {translations[`billing.plan_tier_${planType}`] ??
               catalogItem?.name ??
               planType}
-          </span>
+          </div>
         </div>
         <div className="px-6 py-5">
           <p className="text-gray-600 text-sm max-w-md leading-relaxed">
