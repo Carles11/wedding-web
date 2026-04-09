@@ -19,6 +19,7 @@ export interface DomainAndBillingBuilderStepProps {
   lang: string;
   translations: TranslationDictionary;
   planType: PlanType;
+  allStepsComplete: boolean;
 }
 
 export type ShareTarget = {

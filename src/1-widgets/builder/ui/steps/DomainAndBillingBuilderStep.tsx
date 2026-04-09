@@ -22,6 +22,7 @@ export default function DomainAndBillingBuilderStep({
   lang,
   translations,
   planType,
+  allStepsComplete,
 }: DomainAndBillingBuilderStepProps) {
   const router = useRouter();
 
@@ -166,7 +167,7 @@ export default function DomainAndBillingBuilderStep({
           site={site}
           refresh={refresh}
           translations={translations}
-          planType={planType}
+          allStepsComplete={allStepsComplete}
         />
         <CustomDomainSection
           siteId={site.id}

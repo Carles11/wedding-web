@@ -3,28 +3,31 @@ import type { AccountInfo, PlanType, Site } from "@/4-shared/types";
 export interface BuilderClientProps {
   initialLang?: string;
   translations: Record<string, string>;
-  userId?: string | null;
-  userProfile?: {
-    cookie_consent?: boolean | null;
-    cookie_consent_at?: string | null;
-    cookie_consent_version?: string | null;
-    [key: string]: any;
-  } | null;
+  // userId?: string | null;
+  // userProfile?: {
+  //   cookie_consent?: boolean | null;
+  //   cookie_consent_at?: string | null;
+  //   cookie_consent_version?: string | null;
+  //   [key: string]: any;
+  // } | null;
   account: AccountInfo;
   isLegacyMode: boolean;
 }
+export type StepStatus = "done" | "pending" | "optional";
+
+export type StepStatuses = string[];
 
 export interface BuilderStepContentProps {
   active: number;
   account: AccountInfo;
   site: Site;
-  siteLoading: boolean;
-  siteError: string | null;
   refresh: () => void;
   currentLang: string;
   translations: Record<string, string>;
   langLimit: number;
   planType: PlanType;
+  stepStatuses: StepStatuses;
+
   // step completeness callbacks
   setHasHeroContent: (v: boolean) => void;
   setHeroImageExists: (v: boolean) => void;
@@ -34,8 +37,6 @@ export interface BuilderStepContentProps {
   setHasWeddingGiftData: (v: boolean) => void;
   setHasContact: (v: boolean) => void;
 }
-
-export type StepStatus = "done" | "pending" | "optional";
 
 export interface BuilderStepNavProps {
   stepKeys: string[];

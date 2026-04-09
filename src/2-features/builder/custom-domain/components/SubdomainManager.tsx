@@ -3,7 +3,7 @@
 import { getSiteUrl } from "@/4-shared/helpers/domains/getSiteUrl";
 import { getDomainSuffix } from "@/4-shared/helpers/domains/getSuffix";
 import { notify } from "@/4-shared/lib/toast/toast";
-import type { PlanType, Site } from "@/4-shared/types";
+import type { Site } from "@/4-shared/types";
 import Heading from "@/4-shared/ui/commons/typography/Heading";
 import { copyToClipboard } from "@/4-shared/utils/copyToClipboard";
 import { isValidSubdomain } from "@/4-shared/utils/validations";
@@ -15,16 +15,16 @@ interface Props {
   site: Site;
   refresh: () => void;
   translations: Record<string, string>;
-  planType: PlanType;
   canEdit?: boolean;
+  allStepsComplete?: boolean;
 }
 
 export default function SubdomainManager({
   site,
   refresh,
   translations,
-  planType,
   canEdit = true,
+  allStepsComplete,
 }: Props) {
   const [subdomain, setSubdomain] = useState<string>(site.subdomain ?? "");
   const [editing, setEditing] = useState(false);
@@ -117,6 +117,7 @@ export default function SubdomainManager({
             canEdit={canEdit}
             onCopy={handleCopy}
             onEdit={() => setEditing(true)}
+            allStepsComplete={allStepsComplete}
           />
         ) : (
           <SubdomainEditingForm

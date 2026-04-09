@@ -1,4 +1,5 @@
 import { getSiteUrl } from "@/4-shared/helpers/domains/getSiteUrl";
+import { notify } from "@/4-shared/lib/toast/toast";
 import type { Site } from "@/4-shared/types";
 import React from "react";
 
@@ -10,6 +11,7 @@ interface Props {
   canEdit: boolean;
   onCopy: () => void;
   onEdit: () => void;
+  allStepsComplete?: boolean;
 }
 
 export const SubdomainSection: React.FC<Props> = ({
@@ -20,14 +22,42 @@ export const SubdomainSection: React.FC<Props> = ({
   canEdit,
   onCopy,
   onEdit,
+  allStepsComplete = false,
 }) => {
-  const activeUrl = getSiteUrl(site.subdomain ?? "");
+  const getPreviewUrl = getSiteUrl(site.subdomain ?? "");
+
+  // --- Analytics Handler ---
+  const trackSitePreview = (subdomain: string) => {
+    if (typeof window !== "undefined" && (window as any).gtag) {
+      (window as any).gtag("event", "site_preview_opened", {
+        event_category: "engagement",
+        event_label: subdomain,
+        environment:
+          window.location.hostname === "localhost"
+            ? "development"
+            : "production",
+        language: site.default_lang || "en",
+      });
+    }
+  };
+
+  const handlePreviewClick = (e: React.MouseEvent) => {
+    if (!allStepsComplete) {
+      e.preventDefault();
+      notify.error(
+        translations["builder.header.error.incomplete"] ||
+          "Please complete all required steps before previewing your site.",
+      );
+      return;
+    }
+    if (site?.subdomain) trackSitePreview(site.subdomain);
+  };
 
   return (
     <div className="flex flex-col md:flex-row items-center justify-between">
       <div className="flex items-center gap-1   text-sm">
         <span className="text-gray-400 select-none">
-          {activeUrl.startsWith("https") ? "https://" : "http://"}
+          {getPreviewUrl.startsWith("https") ? "https://" : "http://"}
         </span>
         <span className="font-bold text-gray-800">{site.subdomain}</span>
         <span className="text-gray-400 select-none">.{domainSuffix}</span>
@@ -37,8 +67,8 @@ export const SubdomainSection: React.FC<Props> = ({
         <div className="flex items-center gap-3 md:gap-1">
           <button
             onClick={onCopy}
-            className="p-1.5 text-gray-400 hover:text-[#6ABDA6] transition-colors cursor-pointer"
             title={translations["builder.domain.copy_url"]}
+            className="text-sm font-medium px-3 py-1 text-gray-600 hover:bg-gray-100 rounded-md transition-colors cursor-pointer"
           >
             {copied ? (
               <svg
@@ -73,10 +103,19 @@ export const SubdomainSection: React.FC<Props> = ({
             )}
           </button>
           <a
-            href={activeUrl}
+            href={getPreviewUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs font-medium text-[#6ABDA6] hover:underline flex items-center gap-1 transition-all"
+            tabIndex={allStepsComplete ? 0 : -1}
+            aria-disabled={!allStepsComplete}
+            className={[
+              // Added 'inline-flex', 'items-center', and 'gap-1'
+              "inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 whitespace-nowrap shrink-0 transition-opacity",
+              allStepsComplete
+                ? "text-(--builder-color-primary) border-(--builder-color-primary-hover) hover:opacity-70"
+                : "text-gray-300 border-gray-200",
+            ].join(" ")}
+            onClick={handlePreviewClick}
           >
             {translations["builder.domain.visit_site"] || "Visit"}
             <svg
@@ -99,7 +138,7 @@ export const SubdomainSection: React.FC<Props> = ({
         {canEdit && (
           <button
             onClick={onEdit}
-            className="text-sm font-medium px-3 py-1 text-gray-600 hover:bg-gray-100 rounded-md transition-colors"
+            className="text-sm font-medium px-3 py-1 text-gray-600 hover:bg-gray-100 rounded-md transition-colors cursor-pointer"
           >
             {translations["builder.general.edit"] || "Change"}
           </button>

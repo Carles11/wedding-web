@@ -1,6 +1,7 @@
 "use client";
 
 import { BuilderStepContentProps } from "@/4-shared/types";
+import Heading from "@/4-shared/ui/commons/typography/Heading";
 import {
   AccommodationBuilderStep,
   ContactBuilderStep,
@@ -20,8 +21,6 @@ import {
 export default function BuilderStepContent({
   active,
   site,
-  siteLoading,
-  siteError,
   refresh,
   currentLang,
   translations,
@@ -35,10 +34,14 @@ export default function BuilderStepContent({
   setHasWeddingGiftData,
   setHasContact,
   account,
+  stepStatuses,
 }: BuilderStepContentProps) {
+  const requiredSteps = stepStatuses?.filter((s) => s !== "optional") ?? [];
+  const allRequiredDone = requiredSteps.every((s) => s === "done");
+
   return (
     <section className="flex-1 min-w-0 p-4 sm:p-6">
-      <h2 className="text-xl font-semibold">
+      <Heading as="h2" className="text-xl font-semibold">
         {
           translations[
             [
@@ -53,23 +56,8 @@ export default function BuilderStepContent({
             ][active]
           ]
         }
-      </h2>
+      </Heading>
       <div className="mt-4">
-        {/*   {siteLoading ? (
-          <CustomLoader
-            message={translations["builder.status.loading"] || "Loading..."}
-          />
-        ) : siteError ? (
-          <p className="text-(--builder-color-danger)">
-            {translations["builder.status.error"]} {siteError}
-          </p>
-        ) : (
-          <p className="text-sm text-gray-600">
-            {translations["builder.status.subdomain"]}{" "}
-            {site?.subdomain ?? translations["builder.status.subdomain_empty"]}
-          </p>
-        )} */}
-
         <div className="mt-8 p-0 md:p-4 bg-gray-50">
           {/* Steps always mounted — unmounting would cause stale-read after Supabase writes */}
           <div className={active !== 0 ? "hidden" : undefined}>
@@ -154,6 +142,7 @@ export default function BuilderStepContent({
               lang={currentLang}
               translations={translations}
               planType={planType}
+              allStepsComplete={allRequiredDone}
             />
           </div>
           {/* Account step removed: now only accessible as standalone dashboard page */}

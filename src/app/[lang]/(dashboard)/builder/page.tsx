@@ -53,8 +53,8 @@ export default async function BuilderPage({
       <BuilderClient
         initialLang={lang}
         translations={translations}
-        userId={userProfile?.id ?? null}
-        userProfile={userProfile}
+        // userId={userProfile?.id ?? null}
+        // userProfile={userProfile}
         account={userProfile}
         isLegacyMode={isLegacy}
       />

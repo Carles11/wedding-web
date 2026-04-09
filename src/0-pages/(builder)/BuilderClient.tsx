@@ -35,8 +35,6 @@ const STEP_KEYS = [
 export default function BuilderClient({
   initialLang = "en",
   translations: initialTranslations,
-  userId,
-  userProfile,
   account,
   isLegacyMode,
 }: BuilderClientProps) {
@@ -292,8 +290,6 @@ export default function BuilderClient({
             <BuilderStepContent
               active={active}
               site={site}
-              siteLoading={siteLoading}
-              siteError={siteError}
               refresh={refresh}
               currentLang={currentLang}
               translations={translations}
@@ -307,6 +303,7 @@ export default function BuilderClient({
               setHasWeddingGiftData={setHasWeddingGiftData}
               setHasContact={setHasContact}
               account={account}
+              stepStatuses={STEP_STATUS}
             />
           </div>
         </main>

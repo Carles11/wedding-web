@@ -1,4 +1,5 @@
 import { LogoutButton } from "@/2-features/auth/ui";
+import { getSiteUrl } from "@/4-shared/helpers/domains/getSiteUrl";
 import { notify } from "@/4-shared/lib/toast/toast";
 import type { Site } from "@/4-shared/types";
 import { useState } from "react";
@@ -37,18 +38,7 @@ export function BuilderHeader({
     }
   };
 
-  const getPreviewUrl = () => {
-    if (typeof window === "undefined" || !site?.subdomain) return "";
-    const { hostname } = window.location;
-    if (hostname === "localhost")
-      return `http://${site.subdomain}.localhost:3000`;
-    if (hostname.includes("vercel.app")) {
-      const parts = hostname.split(".");
-      parts[0] = site.subdomain;
-      return `${window.location.protocol}//${parts.join(".")}`;
-    }
-    return `https://${site.subdomain}.weddweb.com`;
-  };
+  const getPreviewUrl = getSiteUrl(site?.subdomain ?? "");
 
   const handlePreviewClick = (e: React.MouseEvent) => {
     if (!allRequiredDone) {
@@ -62,8 +52,6 @@ export function BuilderHeader({
     if (site?.subdomain) trackSitePreview(site.subdomain);
   };
 
-  const previewUrl = getPreviewUrl();
-
   return (
     <header className="border-b bg-white">
       {/* ── MOBILE HEADER (< sm) ────────────────────────────────────── */}
@@ -76,7 +64,7 @@ export function BuilderHeader({
         {/* Preview pill — only shown when subdomain exists */}
         {site?.subdomain && (
           <a
-            href={previewUrl}
+            href={getPreviewUrl}
             target="_blank"
             rel="noreferrer"
             onClick={handlePreviewClick}
@@ -86,7 +74,7 @@ export function BuilderHeader({
               "text-xs font-medium px-2.5 py-1 rounded-full border whitespace-nowrap shrink-0 transition-opacity",
               allRequiredDone
                 ? "text-(--builder-color-primary) border-(--builder-color-primary) hover:opacity-70"
-                : "text-gray-300 border-gray-200 pointer-events-none",
+                : "text-gray-300 border-gray-200",
             ].join(" ")}
           >
             {translations["builder.header.preview_short"] || "Preview ↗"}
@@ -143,7 +131,8 @@ export function BuilderHeader({
           {/* Branding/Title Section */}
           <div className="text-center sm:text-left">
             <h2 className="text-xl sm:text-2xl text-(--builder-color-primary) font-bold leading-tight">
-              {translations["builder.header.title"] || "Wedding-Web — Builder"}
+              {translations["builder.header.title"] ||
+                "Wedding website — Builder"}
             </h2>
             <p className="text-sm text-gray-500 mt-1">
               {translations["builder.header.subtitle"] ||
@@ -156,8 +145,13 @@ export function BuilderHeader({
             <div className="flex items-center justify-center sm:justify-end gap-4 w-full">
               {site?.subdomain ? (
                 <a
-                  className="text-sm font-medium text-(--builder-color-primary) hover:underline whitespace-nowrap"
-                  href={previewUrl}
+                  className={[
+                    "text-xs font-medium px-2.5 py-1 rounded-full border whitespace-nowrap shrink-0 transition-opacity",
+                    allRequiredDone
+                      ? "text-(--builder-color-primary) border-(--builder-color-primary) hover:opacity-70"
+                      : "text-gray-300 border-gray-200",
+                  ].join(" ")}
+                  href={getPreviewUrl}
                   target="_blank"
                   rel="noreferrer"
                   onClick={handlePreviewClick}

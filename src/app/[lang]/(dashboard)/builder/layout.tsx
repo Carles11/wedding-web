@@ -6,7 +6,6 @@ import { Footer } from "@/4-shared/ui/commons/footer/Footer";
 import { PlanProvider, ToastProvider } from "@/app/providers";
 import { redirect } from "next/navigation";
 import { ReactNode } from "react";
-// import "../../../globals.css";
 
 type DashboardLayoutProps = {
   children: ReactNode;
