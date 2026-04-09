@@ -70,7 +70,7 @@ export function BuilderHeader({
       <div className="flex sm:hidden items-center gap-2 px-4 py-2.5 min-w-0">
         {/* Title — pushes icons to the right, never wraps */}
         <h2 className="text-base font-semibold text-(--builder-color-primary) leading-none whitespace-nowrap flex-1 min-w-0 truncate">
-          {translations["builder.header.title.short"] || "Wedding-Web"}
+          {translations["builder.header.title.short"] || "WeddWeb"}
         </h2>
 
         {/* Preview pill — only shown when subdomain exists */}

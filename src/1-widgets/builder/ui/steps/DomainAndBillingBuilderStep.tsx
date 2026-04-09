@@ -12,6 +12,7 @@ import { BuilderButton } from "@/4-shared/ui/builder";
 import MainModal from "@/4-shared/ui/commons/modals/MainModal";
 import { ShareTargetCard } from "@/4-shared/ui/commons/share/shareTargetCard";
 import { copyToClipboard } from "@/4-shared/utils/copyToClipboard";
+import { ShareIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -24,22 +25,16 @@ export default function DomainAndBillingBuilderStep({
 }: DomainAndBillingBuilderStepProps) {
   const router = useRouter();
 
-  // Use language-prefixed routing, not query param
   const handleUpgradeClick = () => router.push(`/${lang || "en"}/pricing`);
 
-  // 1. All "real" custom domains (not platform test/production domains)
   const verifiedDomains =
     site.domains?.filter(
       (d) => !d.endsWith(".weddweb.com") && !d.endsWith(".localhost:3000"),
     ) || [];
 
-  // 2. Pending domains list
   const pendingDomains = site.pending_custom_domains || [];
-
-  // 3. Status map for all domains
   const domainStatuses = site.domain_statuses || {};
 
-  // 4. Loader refresh after add/remove
   const [domainLoading, setDomainLoading] = useState(false);
   const [shareModalOpen, setShareModalOpen] = useState(false);
 
@@ -57,8 +52,12 @@ export default function DomainAndBillingBuilderStep({
         "Use your public WeddWeb subdomain for guests.",
       url: site.subdomain ? `https://${site.subdomain}.weddweb.com` : null,
       shareText: site.title
-        ? `Take a look at our wedding site on WeddWeb: ${site.title}`
-        : "Take a look at our wedding site on WeddWeb.",
+        ? translations["builder.share.subdomain_text_title"]?.replace(
+            "{title}",
+            site.title,
+          ) || `Take a look at our wedding site on WeddWeb: ${site.title}`
+        : translations["builder.share.subdomain_text"] ||
+          "Take a look at our wedding site on WeddWeb.",
     },
     {
       id: "custom-domain",
@@ -70,8 +69,12 @@ export default function DomainAndBillingBuilderStep({
         "Use your connected personal domain if you have one.",
       url: primaryCustomDomain ? `https://${primaryCustomDomain}` : null,
       shareText: site.title
-        ? `Visit our wedding website: ${site.title}`
-        : "Visit our wedding website.",
+        ? translations["builder.share.custom_domain_text_title"]?.replace(
+            "{title}",
+            site.title,
+          ) || `Visit our wedding website: ${site.title}`
+        : translations["builder.share.custom_domain_text"] ||
+          "Visit our wedding website.",
     },
     {
       id: "weddweb",
@@ -119,9 +122,7 @@ export default function DomainAndBillingBuilderStep({
         });
         return;
       } catch (error) {
-        if (error instanceof Error && error.name === "AbortError") {
-          return;
-        }
+        if (error instanceof Error && error.name === "AbortError") return;
       }
     }
 
@@ -131,33 +132,36 @@ export default function DomainAndBillingBuilderStep({
   return (
     <>
       <div>
-        {/* Conditional Subtitle based on Plan */}
-        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-          <div className="text-md text-gray-600 sm:max-w-2xl">
-            {planType === "premium" ? (
-              // Premium Message: Focused on management and success
-              <span>
-                {translations["builder.step.domain_billing_subtitle_premium"] ||
-                  "Manage your professional web address and billing details below."}
-              </span>
-            ) : (
-              // Free Message: Focused on the upgrade path
-              <span>
-                {translations["builder.step.domain_billing_subtitle"] ||
-                  "Set up the web address of your event site. You can upgrade to unlock custom domains and access billing options."}
-              </span>
-            )}
-          </div>
+        {/* Subtitle + Share CTA */}
+        <div className="mb-6">
+          {/* Subtitle */}
+          <p className="text-md text-gray-600 sm:max-w-2xl">
+            {planType === "premium"
+              ? translations["builder.step.domain_billing_subtitle_premium"] ||
+                "Manage your professional web address and billing details below."
+              : translations["builder.step.domain_billing_subtitle"] ||
+                "Set up the web address of your event site. You can upgrade to unlock custom domains and access billing options."}
+          </p>
 
-          <BuilderButton
-            variant="secondary"
-            size="md"
-            className="self-start whitespace-nowrap"
-            onClick={() => setShareModalOpen(true)}
-          >
-            {translations["builder.share.cta"] || "Share with guests"}
-          </BuilderButton>
+          {/* Share button:
+              - Mobile: full-width primary button with share icon, sits below subtitle with clear top margin
+              - Desktop: inline secondary link-style, right-aligned next to subtitle
+          */}
+
+          {/* Desktop: right-aligned secondary button, same row as subtitle */}
+          <div className="sm:flex sm:justify-end sm:mt-0 mt-4">
+            <BuilderButton
+              variant="primary"
+              size="md"
+              className="whitespace-nowrap w-full md:w-fit flex items-center justify-center gap-2 rounded-xl py-3 px-4 text-sm font-medium text-white transition-opacity hover:opacity-90 active:opacity-80"
+              onClick={() => setShareModalOpen(true)}
+              icon={<ShareIcon size={16} />}
+            >
+              {translations["builder.share.cta"] || "Share with guests"}
+            </BuilderButton>
+          </div>
         </div>
+
         <SubdomainManager
           site={site}
           refresh={refresh}

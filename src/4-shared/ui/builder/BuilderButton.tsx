@@ -15,6 +15,7 @@ type BuilderButtonProps = Omit<
   fullWidth?: boolean;
   loading?: boolean;
   loadingLabel?: string;
+  icon?: ReactNode;
 };
 
 function joinClasses(...classes: Array<string | false | null | undefined>) {
@@ -32,6 +33,7 @@ export function BuilderButton({
   className,
   disabled,
   type = "button",
+  icon = "",
   ...rest
 }: BuilderButtonProps) {
   const variantClass =
@@ -56,6 +58,7 @@ export function BuilderButton({
       disabled={disabled || loading}
       {...rest}
     >
+      {icon && <span className="mr-2">{icon}</span>}
       {loading ? loadingLabel : children}
     </button>
   );
