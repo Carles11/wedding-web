@@ -24,7 +24,7 @@ export function BuilderLangTabs({
         {translations["builder.languages.tabs.label"] ??
           "These languages will be active on your wedding site:"}
       </p>
-      <div className="flex flex-col flex-wrap gap-1.5 mb-6 bg-gray-50 rounded-xl w-fit border border-gray-100">
+      <div className="flex flex-wrap gap-1.5 mb-6 bg-gray-50 rounded-xl w-fit border border-gray-100">
         {languages.map((lang) => {
           const isActive = activeLang === lang;
           const isDefault = defaultLang === lang;
