@@ -1,3 +1,4 @@
+import { t } from "@/4-shared/helpers/t";
 import { createSupabaseSSRClient } from "@/4-shared/lib/supabase/server";
 import { patchDomainToRedirect } from "@/4-shared/lib/vercel/patchDomainToRedirect";
 import {
@@ -11,12 +12,6 @@ type SiteDomainSnapshot = {
   domains: string[];
   pending_custom_domains: string[];
   domain_statuses: DomainStatuses;
-  domain_provider_api_url: string | null;
-};
-
-type DiscoverProviderUrlResponse = {
-  providerUrl: string | null;
-  domain: string;
 };
 
 const DOMAIN_RE = /^[a-z0-9.-]+\.[a-z]{2,}$/;
@@ -67,43 +62,16 @@ function uniqueStrings(values: string[]): string[] {
 export async function addCustomDomainWithRedirectVariants(
   siteId: string,
   domainInput: string,
+  translations: Record<string, string> = {},
 ) {
   const supabase = await createSupabaseSSRClient();
 
   const apexDomain = normalizeToApex(domainInput);
   const wwwDomain = `www.${apexDomain}`;
 
-  let providerUrl: string | null = null;
-
-  try {
-    const { data: discoveryData, error: discoveryError } =
-      await supabase.functions.invoke<DiscoverProviderUrlResponse>(
-        "discover-provider-url",
-        {
-          body: { domain: apexDomain },
-        },
-      );
-
-    if (discoveryError) {
-      console.warn(
-        "[domain] Domain Connect discovery failed:",
-        discoveryError.message,
-      );
-    } else if (
-      typeof discoveryData?.providerUrl === "string" &&
-      discoveryData.providerUrl.trim()
-    ) {
-      providerUrl = discoveryData.providerUrl.trim();
-    }
-  } catch (error) {
-    console.warn("[domain] Domain Connect discovery failed:", error);
-  }
-
   const { data: site, error: fetchError } = await supabase
     .from("sites")
-    .select(
-      "domains, pending_custom_domains, domain_statuses, domain_provider_api_url",
-    )
+    .select("domains, pending_custom_domains, domain_statuses")
     .eq("id", siteId)
     .maybeSingle();
 
@@ -120,10 +88,6 @@ export async function addCustomDomainWithRedirectVariants(
       site.domain_statuses && typeof site.domain_statuses === "object"
         ? ({ ...site.domain_statuses } as DomainStatuses)
         : {},
-    domain_provider_api_url:
-      typeof site.domain_provider_api_url === "string"
-        ? site.domain_provider_api_url
-        : null,
   };
 
   const existingCustomRoots = new Set<string>();
@@ -197,7 +161,6 @@ export async function addCustomDomainWithRedirectVariants(
     .update({
       pending_custom_domains: nextPending,
       domain_statuses: nextStatuses,
-      domain_provider_api_url: providerUrl,
     })
     .eq("id", siteId);
 
@@ -264,38 +227,59 @@ export async function addCustomDomainWithRedirectVariants(
         domains: snapshot.domains,
         pending_custom_domains: snapshot.pending_custom_domains,
         domain_statuses: snapshot.domain_statuses,
-        domain_provider_api_url: snapshot.domain_provider_api_url,
       })
       .eq("id", siteId);
 
     const originalMessage =
       error instanceof Error ? error.message : String(error);
-    const friendlyMessage = mapVercelErrorMessage(originalMessage);
+    const friendlyMessage = mapVercelErrorMessage(
+      translations,
+      originalMessage,
+    );
 
     throw new DomainFlowError(500, friendlyMessage);
   }
 }
 
-function mapVercelErrorMessage(rawError: string): string {
+function mapVercelErrorMessage(
+  translations: Record<string, string>,
+  rawError: string,
+): string {
   const normalizedError = rawError.toLowerCase();
 
   if (normalizedError.includes("conflicting_caa_record")) {
-    return "Your domain has a security lock (CAA). Please update your DNS to allow 'letsencrypt.org' so we can secure your site.";
+    return t(
+      translations,
+      "builder.domain.error.conflicting_caa",
+      "Your domain has a security lock (CAA). Please update your DNS to allow 'letsencrypt.org' so we can secure your site.",
+    );
   }
 
   if (
     normalizedError.includes("domain_taken") ||
     normalizedError.includes("forbidden")
   ) {
-    return "This domain is already linked to another project. Please verify you own it and that it isn't active elsewhere.";
+    return t(
+      translations,
+      "builder.domain.error.domain_taken",
+      "This domain is already linked to another project. Please verify you own it and that it isn't active elsewhere.",
+    );
   }
 
   if (normalizedError.includes("rate_limited")) {
-    return "Too many attempts. Please wait a few minutes before trying again.";
+    return t(
+      translations,
+      "builder.domain.error.rate_limited",
+      "Too many attempts. Please wait a few minutes before trying again.",
+    );
   }
 
   if (normalizedError.includes("invalid_domain")) {
-    return "That doesn't look like a valid domain format. Please check for typos.";
+    return t(
+      translations,
+      "builder.domain.error.invalid_domain",
+      "That doesn't look like a valid domain format. Please check for typos.",
+    );
   }
 
   return rawError;

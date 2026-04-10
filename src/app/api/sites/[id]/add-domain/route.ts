@@ -90,7 +90,11 @@ export async function POST(
     }
 
     // 1. Actually add the custom domain (your business logic)
-    const result = await addCustomDomainWithRedirectVariants(id, domain);
+    const result = await addCustomDomainWithRedirectVariants(
+      id,
+      domain,
+      translations,
+    );
 
     // 2. Log the action in your audit table
     try {

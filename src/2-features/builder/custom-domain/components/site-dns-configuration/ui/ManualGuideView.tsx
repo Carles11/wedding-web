@@ -1,4 +1,5 @@
 import { t } from "@/4-shared/helpers/t";
+import { ExternalLink } from "lucide-react";
 import { DnsRecord } from "./DnsRecord";
 
 export const ManualGuideView = ({
@@ -61,17 +62,7 @@ export const ManualGuideView = ({
           "builder.domain.dns_modal.link_vercel_guide",
           "View Vercel DNS setup guide",
         )}
-        <svg
-          width={10}
-          height={10}
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth={2.5}
-          strokeLinecap="round"
-        >
-          <path d="M7 17L17 7M7 7h10v10" />
-        </svg>
+        <ExternalLink size={10} />
       </a>
       <a
         href="https://pressific.com/articles/how-to-update-your-dns-records-on/#2-namecheap"
@@ -84,17 +75,7 @@ export const ManualGuideView = ({
           "builder.domain.dns_modal.link_registrars_guide",
           "Most common registrars: DNS instructions",
         )}
-        <svg
-          width={10}
-          height={10}
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth={2.5}
-          strokeLinecap="round"
-        >
-          <path d="M7 17L17 7M7 7h10v10" />
-        </svg>
+        <ExternalLink size={10} />
       </a>
     </div>
   </>

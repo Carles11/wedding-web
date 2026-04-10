@@ -176,7 +176,6 @@ export default function DomainAndBillingBuilderStep({
           verifiedDomains={verifiedDomains}
           pendingDomains={pendingDomains}
           domainStatuses={domainStatuses}
-          domainProviderApiUrl={site.domain_provider_api_url}
           onUpgradeClick={handleUpgradeClick}
           refetchDomains={refetchDomains}
           loading={domainLoading}

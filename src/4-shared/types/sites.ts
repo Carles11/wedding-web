@@ -12,10 +12,15 @@ export type Site = {
   domains?: string[] | null;
   created_at?: string | null;
   pending_custom_domains?: string[] | null;
-  domain_provider_api_url?: string | null;
   domain_statuses?: Record<
     string,
-    "idle" | "saving" | "success" | "error" | "pending" | "verified"
+    | "idle"
+    | "saving"
+    | "success"
+    | "error"
+    | "pending"
+    | "pending_certificate"
+    | "verified"
   > | null;
   seo_enabled?: boolean | null;
   title_font?: string | null;

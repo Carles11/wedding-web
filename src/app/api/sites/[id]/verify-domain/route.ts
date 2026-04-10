@@ -7,7 +7,7 @@ import { getVercelDomainStatus } from "@/4-shared/lib/vercel/vercel-domains";
 import { after, NextRequest, NextResponse } from "next/server";
 
 interface ParseVercelStatusResult {
-  status: "pending" | "verified" | "error";
+  status: "pending" | "pending_certificate" | "verified" | "error";
   dnsInstructions?: string;
   error?: string;
 }
@@ -22,6 +22,12 @@ function parseVercelStatus(
   // Map status as returned by getVercelDomainStatus
   if (vercel.status === "valid") {
     return { status: "verified" };
+  }
+  if (vercel.status === "pending_certificate") {
+    return {
+      status: "pending_certificate",
+      dnsInstructions: vercel.dnsInstructions,
+    };
   }
   if (vercel.status === "pending_validation") {
     return {

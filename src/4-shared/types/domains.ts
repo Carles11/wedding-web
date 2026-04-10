@@ -7,7 +7,6 @@ export interface CustomDomainSectionProps {
   verifiedDomains: string[];
   pendingDomains: string[];
   domainStatuses: Record<string, string>;
-  domainProviderApiUrl?: string | null;
   onUpgradeClick: () => void;
   refetchDomains: () => Promise<void>;
   loading?: boolean;

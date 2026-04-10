@@ -18,11 +18,18 @@ import {
 import { notify } from "@/4-shared/lib/toast/toast";
 import { GeneralContentState, GeneralSiteFormProps } from "@/4-shared/types";
 import { BuilderLangTabs, UpgradeCTAModal } from "@/4-shared/ui/builder";
+import { Toggle } from "@/4-shared/ui/commons/buttons/Toggle";
 import { SkeletonLoader } from "@/4-shared/ui/commons/loader/SkeletonLoader";
 import { ensureNotLegacy } from "@/4-shared/utils/billing/legacyLock";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 import { StepLayout } from "../../step-layout";
+import {
+  clearDefaultLanguageIfRemoved,
+  type DefaultLanguageValue,
+  getEffectiveBuilderLanguage,
+  isSelectedDefaultLanguage,
+} from "./general-site-form/defaultLanguage";
 
 export default function GeneralSiteForm({
   site,
@@ -38,7 +45,7 @@ export default function GeneralSiteForm({
   const fetchCounterRef = useRef(0);
   const lastFetchedRef = useRef<GeneralContentState | null>(null);
   const [languages, setLanguages] = useState<SupportedLanguage[]>([]);
-  const [defaultLang, setDefaultLang] = useState<SupportedLanguage>("en");
+  const [defaultLang, setDefaultLang] = useState<DefaultLanguageValue>("en");
   const [subdomain, setSubdomain] = useState("");
   const [heroId, setHeroId] = useState<string | null>(null);
   const [content, setContent] = useState<
@@ -67,10 +74,34 @@ export default function GeneralSiteForm({
     return a.every((v, i) => v === b[i]);
   }
 
+  function getDefaultLanguageRequiredMessage() {
+    return (
+      translations["builder.general.form.default_language_required"] ??
+      "Please choose a default language from the selected site languages before saving."
+    );
+  }
+
+  function getDefaultLanguageRemovedMessage() {
+    return (
+      translations["builder.general.form.default_language_removed"] ??
+      "You removed the current default language. Please choose a new default language before saving."
+    );
+  }
+
   function applyGeneralContent(res: GeneralContentState) {
+    const normalizedDefaultLang: DefaultLanguageValue = res.languages.includes(
+      res.default_lang,
+    )
+      ? res.default_lang
+      : "";
+    const effectiveLang = getEffectiveBuilderLanguage(
+      res.languages,
+      normalizedDefaultLang,
+    );
+
     lastFetchedRef.current = res;
     setLanguages(res.languages);
-    setDefaultLang(res.default_lang);
+    setDefaultLang(normalizedDefaultLang);
     setSubdomain(res.subdomain);
     setHeroId(res.heroId);
 
@@ -93,8 +124,11 @@ export default function GeneralSiteForm({
       setSelectedBodyFont(res.body_font ?? DEFAULT_TENANT.body);
     }
 
-    setActiveLang(res.default_lang);
-    setGeneralComplete?.(!!res.titles[res.default_lang]?.trim());
+    setActiveLang(effectiveLang);
+    setGeneralComplete?.(!!res.titles[effectiveLang]?.trim());
+    setLanguageError(
+      normalizedDefaultLang === "" ? getDefaultLanguageRequiredMessage() : null,
+    );
   }
 
   // Group font options by style for the dropdown
@@ -260,7 +294,9 @@ export default function GeneralSiteForm({
 
     if (languages.includes(lang)) {
       const updated = languages.filter((l) => l !== lang);
+      const nextDefaultLang = clearDefaultLanguageIfRemoved(lang, defaultLang);
       setLanguages(updated);
+      setDefaultLang(nextDefaultLang);
 
       setContent((curr) => {
         const copy = { ...curr };
@@ -270,6 +306,14 @@ export default function GeneralSiteForm({
 
       if (activeLang === lang && updated.length > 0) setActiveLang(updated[0]);
       else if (updated.length === 0) setActiveLang("en");
+
+      if (nextDefaultLang === "") {
+        const message = getDefaultLanguageRemovedMessage();
+        setLanguageError(message);
+        notify.error(message);
+      } else {
+        setLanguageError(null);
+      }
       return;
     }
 
@@ -284,6 +328,9 @@ export default function GeneralSiteForm({
       [lang]: { title: "", subtitle: "" },
     }));
     setActiveLang(lang);
+    if (defaultLang !== "") {
+      setLanguageError(null);
+    }
   };
 
   // 🔹 Save
@@ -367,6 +414,13 @@ export default function GeneralSiteForm({
       return;
     }
 
+    if (!isSelectedDefaultLanguage(defaultLang, languages)) {
+      const message = getDefaultLanguageRequiredMessage();
+      setLanguageError(message);
+      notify.error(message);
+      return;
+    }
+
     const existingLanguages = (site.languages ?? []) as SupportedLanguage[];
     const languagesChanged = !arraysEqual(existingLanguages, languages);
     const defaultLangChanged = (site.default_lang ?? "en") !== defaultLang;
@@ -396,16 +450,47 @@ export default function GeneralSiteForm({
     } catch (err: unknown) {
       // Check if it's our specific Legacy error
       const errorMessage =
-        err instanceof Error && err.message === "LEGACY_MODE_ACTIVE"
-          ? translations["builder.errors.legacy_mode_active"] ||
-            "Editing is disabled for legacy sites. Please upgrade to continue."
-          : err instanceof Error
-            ? err.message
-            : translations["error.something_went_wrong"];
+        err instanceof Error &&
+        (err.message === "DEFAULT_LANGUAGE_REQUIRED" ||
+          err.message === "DEFAULT_LANGUAGE_NOT_IN_LANGUAGES")
+          ? getDefaultLanguageRequiredMessage()
+          : err instanceof Error && err.message === "LEGACY_MODE_ACTIVE"
+            ? translations["builder.errors.legacy_mode_active"] ||
+              "Editing is disabled for legacy sites. Please upgrade to continue."
+            : err instanceof Error
+              ? err.message
+              : translations["error.something_went_wrong"];
 
       notify.error(errorMessage);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleSetDefault = async (lang: SupportedLanguage) => {
+    const prev = defaultLang;
+    setDefaultLang(lang as DefaultLanguageValue);
+    setActiveLang(lang);
+    setLanguageError(null);
+
+    if (!site) return;
+    try {
+      await saveSiteGeneralContent({
+        site_id: site.id,
+        heroId,
+        content: {}, // no content change
+        default_lang: lang,
+      });
+      notify.success(
+        translations["builder.general.form.save_success"] ??
+          "Saved successfully.",
+      );
+    } catch {
+      // revert on failure
+      setDefaultLang(prev);
+      notify.error(
+        translations["error.something_went_wrong"] ?? "Failed to save.",
+      );
     }
   };
 
@@ -490,6 +575,52 @@ export default function GeneralSiteForm({
                 );
               })}
             </div>
+
+            {languages.length > 0 && (
+              <div>
+                <label className="block text-sm font-medium text-(--builder-color-text)">
+                  {translations[
+                    "builder.general.form.label.default_language"
+                  ] ?? "Default site language"}
+                </label>
+                <p className="mt-0.5 mb-3 text-xs text-(--builder-color-text-muted)">
+                  {translations["builder.general.form.default_language_help"] ??
+                    "Main fallback language — required for builder content."}
+                </p>
+                <div className="rounded-lg border border-(--builder-color-border) overflow-hidden divide-y divide-(--builder-color-border)">
+                  {languages.map((langCode) => {
+                    const isSelected = defaultLang === langCode;
+                    return (
+                      <button
+                        key={langCode}
+                        type="button"
+                        onClick={() => {
+                          setDefaultLang(langCode as DefaultLanguageValue);
+                          setActiveLang(langCode);
+                          setLanguageError(null);
+                          setError(null);
+                        }}
+                        className="w-full flex items-center justify-between px-4 py-3 bg-(--builder-color-surface) hover:bg-(--builder-color-muted-surface)/40 transition-colors text-left"
+                      >
+                        <span className="text-sm text-(--builder-color-text)">
+                          {SUPPORTED_LANGUAGE_LABELS[langCode]}
+                        </span>
+                        <Toggle
+                          checked={isSelected}
+                          onChange={() => {
+                            setDefaultLang(langCode as DefaultLanguageValue);
+                            setActiveLang(langCode);
+                            setLanguageError(null);
+                            setError(null);
+                          }}
+                          aria-label={`Set ${SUPPORTED_LANGUAGE_LABELS[langCode]} as default`}
+                        />
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
 
           <UpgradeCTAModal
@@ -518,8 +649,10 @@ export default function GeneralSiteForm({
         <BuilderLangTabs
           languages={languages}
           activeLang={activeLang}
-          onChange={(l) => setActiveLang(l as SupportedLanguage)}
-          getLabel={(l) => SUPPORTED_LANGUAGE_LABELS[l as SupportedLanguage]}
+          defaultLang={defaultLang}
+          onChange={setActiveLang}
+          onSetDefault={handleSetDefault}
+          getLabel={(lang) => SUPPORTED_LANGUAGE_LABELS[lang]}
         />
 
         {/* Title */}

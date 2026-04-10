@@ -58,6 +58,7 @@ export default function BuilderClient({
 
   const [currentLang, setCurrentLang] = useState(initialLang);
   const [translations, setTranslations] = useState(initialTranslations);
+
   // Sync currentLang from the [lang] path segment in the URL
   useEffect(() => {
     if (typeof window === "undefined") return;

@@ -4,13 +4,16 @@ import { addCustomDomainClient } from "@/2-features/builder/custom-domain/api/ad
 import { removeCustomDomainClient } from "@/2-features/builder/custom-domain/api/removeCustomDomain.client";
 import { verifyCustomDomainClient } from "@/2-features/builder/custom-domain/api/verifyCustomDomain.client";
 import DnsModalContent from "@/2-features/builder/custom-domain/components/DnsModalContent";
+import RemoveDomainConfirmModal from "@/2-features/builder/custom-domain/components/RemoveDomainConfirmModal";
 import { getDomainVariants } from "@/4-shared/helpers/domains/getDomainVariants";
 import { toApexDomain } from "@/4-shared/helpers/domains/toApexDomain";
+import { t } from "@/4-shared/helpers/t";
 import { notify } from "@/4-shared/lib/toast/toast";
 import { CustomDomainSectionProps } from "@/4-shared/types";
 import { BuilderButton } from "@/4-shared/ui/builder";
 import MainModal from "@/4-shared/ui/commons/modals/MainModal";
 import { Heading } from "@/4-shared/ui/commons/typography/Heading";
+import { AlertCircle, CheckCircle2, RefreshCw, XCircle } from "lucide-react";
 import React, { useState } from "react";
 
 export const CustomDomainSection: React.FC<CustomDomainSectionProps> = ({
@@ -20,7 +23,6 @@ export const CustomDomainSection: React.FC<CustomDomainSectionProps> = ({
   verifiedDomains: verifiedDomainsProp,
   pendingDomains: pendingDomainsProp,
   domainStatuses: domainStatusesProp,
-  domainProviderApiUrl,
   onUpgradeClick,
   refetchDomains,
   loading = false,
@@ -38,6 +40,7 @@ export const CustomDomainSection: React.FC<CustomDomainSectionProps> = ({
     >
   >({});
   const [dnsModalDomain, setDnsModalDomain] = useState<string | null>(null);
+  const [domainToRemove, setDomainToRemove] = useState<string | null>(null);
 
   const [verifiedDomains, setVerifiedDomains] =
     useState<string[]>(verifiedDomainsProp);
@@ -68,6 +71,43 @@ export const CustomDomainSection: React.FC<CustomDomainSectionProps> = ({
     new Set([...verifiedDomains, ...pendingDomains].map(toApexDomain)),
   ).filter(Boolean);
 
+  // Silent background re-check for verified domains on mount.
+  // Catches DNS regressions (e.g. user removed records after going live).
+  const bgCheckRanRef = React.useRef(false);
+  React.useEffect(() => {
+    if (bgCheckRanRef.current) return;
+    const verifiedApex = allDomains.filter(
+      (d) => (domainStatuses[d] || domainStatuses[`www.${d}`]) === "verified",
+    );
+    if (verifiedApex.length === 0) return;
+    bgCheckRanRef.current = true;
+
+    (async () => {
+      for (const domain of verifiedApex) {
+        try {
+          const result = await verifyCustomDomainClient(siteId, domain);
+          if (result.status && result.status !== "verified") {
+            setDomainStatuses((prev) => ({
+              ...prev,
+              [domain]: result.status,
+            }));
+            setDomainInfo((old) => ({
+              ...old,
+              [domain]: {
+                status: result.status,
+                dnsInstructions: result.dnsInstructions || null,
+                error: result.error || null,
+              },
+            }));
+          }
+        } catch {
+          // Silent — don't disrupt UX on transient network errors
+        }
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleAddDomain = async (e: React.FormEvent) => {
     e.preventDefault();
     setLocalStatus("saving");
@@ -80,8 +120,11 @@ export const CustomDomainSection: React.FC<CustomDomainSectionProps> = ({
     if (!isValidDomain(inputDomain)) {
       setLocalStatus("error");
       setDomainError(
-        translations["builder.domain.invalid_domain"] ||
+        t(
+          translations,
+          "builder.domain.invalid_domain",
           "Invalid domain format. Please enter a valid domain.",
+        ),
       );
       return;
     }
@@ -105,7 +148,13 @@ export const CustomDomainSection: React.FC<CustomDomainSectionProps> = ({
       skipNextPropSyncRef.current = true;
       setLocalStatus("success");
       setInputDomain("");
-      notify.success(translations["builder.domain.custom_domain_success"]);
+      notify.success(
+        t(
+          translations,
+          "builder.domain.custom_domain_success",
+          "Domain added successfully!",
+        ),
+      );
     } catch (err: unknown) {
       setLocalStatus("error");
       let msg = "";
@@ -119,7 +168,7 @@ export const CustomDomainSection: React.FC<CustomDomainSectionProps> = ({
       } else if (typeof err === "string") {
         msg = err;
       } else {
-        msg = translations["builder.domain.error_generic"] || "Server error";
+        msg = t(translations, "builder.domain.error_generic", "Server error");
       }
       notify.error(msg);
     } finally {
@@ -132,6 +181,8 @@ export const CustomDomainSection: React.FC<CustomDomainSectionProps> = ({
 
   const handleRemove = async (domain: string) => {
     if (!domain || loading) return;
+
+    setDomainToRemove(null);
     setLocalStatus("saving");
     setLocalMsg(null);
     let removeSucceeded = false;
@@ -149,13 +200,19 @@ export const CustomDomainSection: React.FC<CustomDomainSectionProps> = ({
       removeSucceeded = true;
       skipNextPropSyncRef.current = true;
       setLocalStatus("success");
-      notify.success(translations["builder.domain.custom_domain_removed"]);
+      notify.success(
+        t(
+          translations,
+          "builder.domain.custom_domain_removed",
+          "Domain removed successfully.",
+        ),
+      );
     } catch (err) {
       setLocalStatus("error");
       notify.error(
         err instanceof Error
           ? err.message
-          : translations["builder.domain.error_generic"],
+          : t(translations, "builder.domain.error_generic", "Server error"),
       );
     } finally {
       await refetchDomains();
@@ -175,12 +232,21 @@ export const CustomDomainSection: React.FC<CustomDomainSectionProps> = ({
         [domain]: {
           status: result.status,
           dnsInstructions: result.dnsInstructions || null,
+          error: result.error || null,
         },
       }));
+
+      // Optimistically update local status to reflect the server response
+      if (result.status) {
+        setDomainStatuses((prev) => ({ ...prev, [domain]: result.status }));
+      }
+
       setLocalStatus("success");
-      const checkMsg =
-        translations["builder.domain.custom_domain_checked"] ||
-        "Status checked!";
+      const checkMsg = t(
+        translations,
+        "builder.domain.custom_domain_checked",
+        "Status checked!",
+      );
       setLocalMsg(checkMsg);
       notify.success(checkMsg);
       await refetchDomains();
@@ -189,24 +255,42 @@ export const CustomDomainSection: React.FC<CustomDomainSectionProps> = ({
       setLocalMsg(
         err instanceof Error
           ? err.message
-          : translations["builder.domain.error_generic"],
+          : t(translations, "builder.domain.error_generic", "Server error"),
       );
     }
+  };
+
+  /**
+   * Resolves the effective domain status from DB statuses or the latest
+   * server response stored in domainInfo.
+   */
+  const getEffectiveStatus = (domain: string) => {
+    const dbStatus =
+      domainStatuses[domain] || domainStatuses[`www.${domain}`] || "";
+    const infoStatus = domainInfo[domain]?.status || "";
+    // Prefer the freshest signal: domainInfo is set after a check-status call
+    return infoStatus || dbStatus;
   };
 
   return (
     <section className="mt-8">
       <Heading as="h3" className="font-semibold text-gray-900 pb-2">
-        {translations["builder.domain.custom_domain_title"] || "Custom Domain"}
+        {t(translations, "builder.domain.custom_domain_title", "Custom Domain")}
       </Heading>
 
       {/* Dynamic Subtitles applied here */}
       <p className="text-sm text-gray-500 mb-4 max-w-xl">
         {userIsPremium
-          ? translations["builder.domain.custom_subtitle_premium"] ||
-            "Connect your own personal domain (e.g., yourname.com) for a cleaner look and easier guest access."
-          : translations["builder.domain.custom_subtitle_free"] ||
-            "Upgrade to Premium to unlock a custom domain and remove 'weddweb' from your professional web address."}
+          ? t(
+              translations,
+              "builder.domain.custom_subtitle_premium",
+              "Connect your own personal domain (e.g., yourname.com) for a cleaner look and easier guest access.",
+            )
+          : t(
+              translations,
+              "builder.domain.custom_subtitle_free",
+              "Upgrade to Premium to unlock a custom domain and remove 'weddweb' from your professional web address.",
+            )}
       </p>
 
       {!userIsPremium ? (
@@ -216,8 +300,11 @@ export const CustomDomainSection: React.FC<CustomDomainSectionProps> = ({
               🔒
             </span>
             <span className="text-sm font-medium">
-              {translations["builder.domain.custom_domain_locked"] ||
-                "Custom domain feature is locked."}
+              {t(
+                translations,
+                "builder.domain.custom_domain_locked",
+                "Custom domain feature is locked.",
+              )}
             </span>
           </div>
           <BuilderButton
@@ -226,7 +313,7 @@ export const CustomDomainSection: React.FC<CustomDomainSectionProps> = ({
             type="button"
             className="w-full sm:w-auto"
           >
-            {translations["builder.domain.upgrade_btn"] ?? "Upgrade Now"}
+            {t(translations, "builder.domain.upgrade_btn", "Upgrade Now")}
           </BuilderButton>
         </div>
       ) : (
@@ -236,7 +323,11 @@ export const CustomDomainSection: React.FC<CustomDomainSectionProps> = ({
             onSubmit={handleAddDomain}
           >
             <label className="sr-only" htmlFor="custom-domain-input">
-              {translations["builder.domain.custom_domain_placeholder"]}
+              {t(
+                translations,
+                "builder.domain.custom_domain_placeholder",
+                "Enter your domain",
+              )}
             </label>
             <div className="flex flex-col sm:flex-row gap-2">
               <input
@@ -259,7 +350,7 @@ export const CustomDomainSection: React.FC<CustomDomainSectionProps> = ({
                 disabled={loading || !inputDomain || localStatus === "saving"}
                 className="whitespace-nowrap"
               >
-                {translations["builder.domain.save_btn"]}
+                {t(translations, "builder.domain.save_btn", "Save")}
               </BuilderButton>
             </div>
 
@@ -278,128 +369,304 @@ export const CustomDomainSection: React.FC<CustomDomainSectionProps> = ({
           {allDomains.length > 0 && (
             <div className="mt-8">
               <h5 className="font-semibold text-gray-900 mb-3">
-                {translations["builder.domain.custom_domain_list_title"] ||
-                  "Connected Domains"}
+                {t(
+                  translations,
+                  "builder.domain.custom_domain_list_title",
+                  "Connected Domains",
+                )}
               </h5>
               <ul className="divide-y border border-gray-200 rounded-xl bg-white overflow-hidden shadow-sm">
-                {allDomains.map((domain) => (
-                  <React.Fragment key={domain}>
-                    <li className="flex items-center px-4 py-3 justify-between hover:bg-gray-50 transition-colors">
-                      <div className="flex items-center gap-3">
-                        <span className="font-medium text-gray-700">
-                          {domain}
-                        </span>
-                        {(domainStatuses[domain] ||
-                          domainStatuses[`www.${domain}`]) && (
-                          <span
-                            className={`text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full ${
-                              (domainStatuses[domain] ||
-                                domainStatuses[`www.${domain}`]) === "verified"
-                                ? "bg-green-100 text-green-700"
-                                : (domainStatuses[domain] ||
-                                      domainStatuses[`www.${domain}`]) ===
-                                    "pending"
-                                  ? "bg-yellow-100 text-yellow-700"
-                                  : "bg-red-100 text-red-700"
-                            }`}
-                          >
-                            {translations[
-                              `builder.domain.status_${domainStatuses[domain] || domainStatuses[`www.${domain}`]}`
-                            ] ||
-                              domainStatuses[domain] ||
-                              domainStatuses[`www.${domain}`]}
-                          </span>
-                        )}
-                      </div>
+                {allDomains.map((domain) => {
+                  const status = getEffectiveStatus(domain);
+                  const info = domainInfo[domain];
 
-                      <div className="flex items-center gap-2">
-                        {(domainStatuses[domain] ||
-                          domainStatuses[`www.${domain}`]) !== "verified" && (
+                  // Badge configuration per state
+                  const badgeConfig: Record<
+                    string,
+                    {
+                      className: string;
+                      icon: React.ReactNode;
+                      label: string;
+                    }
+                  > = {
+                    verified: {
+                      className: "bg-green-100 text-green-700",
+                      icon: (
+                        <CheckCircle2
+                          size={12}
+                          className="inline mr-1 -mt-px"
+                        />
+                      ),
+                      label: t(
+                        translations,
+                        "builder.domain.status_live",
+                        "Live",
+                      ),
+                    },
+                    pending_certificate: {
+                      className: "bg-blue-100 text-blue-700",
+                      icon: (
+                        <RefreshCw
+                          size={12}
+                          className="inline mr-1 -mt-px animate-spin"
+                        />
+                      ),
+                      label: t(
+                        translations,
+                        "builder.domain.status_pending_ssl",
+                        "Almost Ready",
+                      ),
+                    },
+                    pending: {
+                      className: "bg-yellow-100 text-yellow-700",
+                      icon: (
+                        <AlertCircle size={12} className="inline mr-1 -mt-px" />
+                      ),
+                      label: t(
+                        translations,
+                        "builder.domain.status_pending_dns",
+                        "DNS Required",
+                      ),
+                    },
+                    error: {
+                      className: "bg-red-100 text-red-700",
+                      icon: (
+                        <XCircle size={12} className="inline mr-1 -mt-px" />
+                      ),
+                      label: t(
+                        translations,
+                        "builder.domain.status_error",
+                        "Error",
+                      ),
+                    },
+                  };
+
+                  const badge = badgeConfig[status] ?? badgeConfig["pending"];
+                  const showRefresh = status !== "verified";
+
+                  return (
+                    <React.Fragment key={domain}>
+                      {/* Domain row */}
+                      <li className="flex items-center px-4 py-3 justify-between hover:bg-gray-50 transition-colors">
+                        <div className="flex items-center gap-3">
+                          <span className="font-medium text-gray-700">
+                            {domain}
+                          </span>
+                          {status && (
+                            <span
+                              className={`text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full inline-flex items-center ${badge.className}`}
+                            >
+                              {badge.icon}
+                              {badge.label}
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          {showRefresh && (
+                            <BuilderButton
+                              type="button"
+                              disabled={loading || localStatus === "saving"}
+                              variant="secondary"
+                              size="sm"
+                              onClick={() => handleCheckStatus(domain)}
+                            >
+                              {t(
+                                translations,
+                                "builder.domain.check_status_btn",
+                                "Refresh",
+                              )}
+                            </BuilderButton>
+                          )}
                           <BuilderButton
                             type="button"
                             disabled={loading || localStatus === "saving"}
                             variant="secondary"
+                            tone="danger"
                             size="sm"
-                            onClick={() => handleCheckStatus(domain)}
+                            onClick={() => setDomainToRemove(domain)}
                           >
-                            {translations["builder.domain.check_status_btn"] ||
-                              "Refresh"}
+                            {t(
+                              translations,
+                              "builder.domain.remove_btn",
+                              "Remove",
+                            )}
                           </BuilderButton>
-                        )}
-                        <BuilderButton
-                          type="button"
-                          disabled={loading || localStatus === "saving"}
-                          variant="secondary"
-                          tone="danger"
-                          size="sm"
-                          onClick={() => handleRemove(domain)}
-                        >
-                          {translations["builder.domain.remove_btn"] ||
-                            "Remove"}
-                        </BuilderButton>
-                      </div>
-                    </li>
+                        </div>
+                      </li>
 
-                    {/* Verified UI */}
-                    {(domainStatuses[domain] ||
-                      domainStatuses[`www.${domain}`]) === "verified" && (
-                      <li className="bg-green-50/50 px-4 py-3 border-t border-green-100">
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                          <div className="text-xs text-green-800">
-                            <p className="font-semibold mb-0.5">
-                              {translations[
-                                "builder.domain.verified_message"
-                              ] || "Your domain is live!"}
-                            </p>
-                            <p>
-                              {translations["builder.domain.did_you_add_dns"] ||
-                                "Everything looks good."}
-                            </p>
+                      {/* State C: Verified / Live */}
+                      {status === "verified" && (
+                        <li className="bg-green-50/50 px-4 py-3 border-t border-green-100">
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div className="flex items-start gap-2 text-xs text-green-800">
+                              <CheckCircle2
+                                size={16}
+                                className="mt-0.5 shrink-0"
+                              />
+                              <div>
+                                <p className="font-semibold mb-0.5">
+                                  {t(
+                                    translations,
+                                    "builder.domain.verified_message",
+                                    "Your domain is live!",
+                                  )}
+                                </p>
+                                <p>
+                                  {t(
+                                    translations,
+                                    "builder.domain.verified_subtitle",
+                                    "Everything is configured correctly. Your guests can access your site at this address.",
+                                  )}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex gap-2">
+                              <BuilderButton
+                                size="sm"
+                                variant="primary"
+                                onClick={() =>
+                                  window.open(`https://${domain}`, "_blank")
+                                }
+                              >
+                                {t(
+                                  translations,
+                                  "builder.domain.visit_site",
+                                  "Visit Site",
+                                )}
+                              </BuilderButton>
+                              <BuilderButton
+                                size="sm"
+                                variant="secondary"
+                                onClick={() => setDnsModalDomain(domain)}
+                              >
+                                {t(
+                                  translations,
+                                  "builder.domain.dns_settings",
+                                  "DNS Settings",
+                                )}
+                              </BuilderButton>
+                            </div>
                           </div>
-                          <div className="flex gap-2">
-                            <BuilderButton
-                              size="sm"
-                              variant="primary"
-                              onClick={() =>
-                                window.open(`https://${domain}`, "_blank")
-                              }
-                            >
-                              {translations["builder.domain.go_to_domain"] ||
-                                "Visit Site"}
-                            </BuilderButton>
+                        </li>
+                      )}
+
+                      {/* State B: SSL Pending / Almost Ready */}
+                      {status === "pending_certificate" && (
+                        <li className="bg-blue-50/50 px-4 py-3 border-t border-blue-100">
+                          <div className="flex items-start gap-2 text-xs text-blue-800">
+                            <RefreshCw
+                              size={16}
+                              className="mt-0.5 shrink-0 animate-spin"
+                            />
+                            <div>
+                              <p className="font-semibold mb-0.5">
+                                {t(
+                                  translations,
+                                  "builder.domain.status_pending_ssl",
+                                  "Almost Ready",
+                                )}
+                              </p>
+                              <p>
+                                {t(
+                                  translations,
+                                  "builder.domain.message_pending_ssl",
+                                  "DNS is configured correctly. SSL certificate is being generated — this usually takes a minute.",
+                                )}
+                              </p>
+                            </div>
+                          </div>
+                        </li>
+                      )}
+
+                      {/* State A: DNS Required */}
+                      {status === "pending" && (
+                        <li className="bg-yellow-50/50 px-4 py-3 border-t border-yellow-100">
+                          <div className="flex flex-col gap-2">
+                            <div className="flex items-start gap-2 text-xs text-yellow-800">
+                              <AlertCircle
+                                size={16}
+                                className="mt-0.5 shrink-0"
+                              />
+                              <div>
+                                <p className="font-semibold mb-0.5">
+                                  {t(
+                                    translations,
+                                    "builder.domain.dns_instructions_label",
+                                    "DNS Instructions",
+                                  )}
+                                </p>
+                                <p>
+                                  {t(
+                                    translations,
+                                    "builder.domain.dns_modal.section_diy",
+                                    "Add these records at your registrar",
+                                  )}
+                                </p>
+                              </div>
+                            </div>
+                            {info?.dnsInstructions && (
+                              <div className="bg-white border border-yellow-100 rounded-md p-3 font-mono text-[11px] text-yellow-900 overflow-x-auto">
+                                {info.dnsInstructions
+                                  .split("\n")
+                                  .map((line, idx) => (
+                                    <div key={idx}>{line}</div>
+                                  ))}
+                              </div>
+                            )}
                             <BuilderButton
                               size="sm"
                               variant="secondary"
                               onClick={() => setDnsModalDomain(domain)}
+                              className="w-fit ml-4"
                             >
-                              {translations["builder.domain.no_show_how"] ||
-                                "Instructions"}
+                              {t(
+                                translations,
+                                "builder.domain.show_instructions",
+                                "Show me how",
+                              )}
                             </BuilderButton>
-                          </div>
-                        </div>
-                      </li>
-                    )}
-
-                    {/* Pending DNS View */}
-                    {domainStatuses[domain] !== "verified" &&
-                      domainInfo[domain]?.dnsInstructions && (
-                        <li className="bg-blue-50/30 px-4 py-3 border-t border-blue-100">
-                          <p className="text-[10px] font-bold text-blue-800 uppercase tracking-tight mb-2">
-                            {translations[
-                              "builder.domain.dns_instructions_label"
-                            ] || "DNS Records Required"}
-                          </p>
-                          <div className="bg-white border border-blue-100 rounded-md p-3 font-mono text-[11px] text-blue-900 overflow-x-auto">
-                            {domainInfo[domain].dnsInstructions
-                              .split("\n")
-                              .map((line, idx) => (
-                                <div key={idx}>{line}</div>
-                              ))}
                           </div>
                         </li>
                       )}
-                  </React.Fragment>
-                ))}
+
+                      {/* State D: Error */}
+                      {status === "error" && (
+                        <li className="bg-red-50/50 px-4 py-3 border-t border-red-100">
+                          <div className="flex items-start gap-2 text-xs text-red-800">
+                            <XCircle size={16} className="mt-0.5 shrink-0" />
+                            <div>
+                              <p className="font-semibold mb-0.5">
+                                {t(
+                                  translations,
+                                  "builder.domain.status_action_required",
+                                  "Action Required",
+                                )}
+                              </p>
+                              <p>
+                                {info?.error ||
+                                  t(
+                                    translations,
+                                    "builder.domain.error_generic",
+                                    "There was a problem verifying your domain. Please check your DNS configuration.",
+                                  )}
+                              </p>
+                              {info?.dnsInstructions && (
+                                <div className="mt-2 bg-white border border-red-100 rounded-md p-3 font-mono text-[11px] text-red-900 overflow-x-auto">
+                                  {info.dnsInstructions
+                                    .split("\n")
+                                    .map((line, idx) => (
+                                      <div key={idx}>{line}</div>
+                                    ))}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </li>
+                      )}
+                    </React.Fragment>
+                  );
+                })}
               </ul>
             </div>
           )}
@@ -409,18 +676,31 @@ export const CustomDomainSection: React.FC<CustomDomainSectionProps> = ({
       {/* DNS Modal */}
       <MainModal
         open={!!dnsModalDomain}
-        title={
-          translations["builder.domain.dns_modal_title"] ||
-          "Connect Your Domain"
-        }
+        title={t(
+          translations,
+          "builder.domain.dns_modal_title",
+          "Connect Your Domain",
+        )}
         onClose={() => setDnsModalDomain(null)}
       >
         <DnsModalContent
           translations={translations}
           domainName={dnsModalDomain ?? ""}
-          domainConnectId={domainProviderApiUrl ?? undefined}
         />
       </MainModal>
+
+      <RemoveDomainConfirmModal
+        open={!!domainToRemove}
+        domain={domainToRemove}
+        translations={translations}
+        loading={loading || localStatus === "saving"}
+        onClose={() => setDomainToRemove(null)}
+        onConfirm={() => {
+          if (domainToRemove) {
+            void handleRemove(domainToRemove);
+          }
+        }}
+      />
     </section>
   );
 };

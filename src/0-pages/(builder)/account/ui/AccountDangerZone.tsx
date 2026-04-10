@@ -1,5 +1,7 @@
+import DeleteAccountConfirmModal from "@/0-pages/(builder)/account/ui/DeleteAccountConfirmModal";
 import { AccountInfo } from "@/4-shared/types/account";
 import { BuilderButton } from "@/4-shared/ui/builder";
+import { useState } from "react";
 
 interface AccountDangerZoneProps {
   account: AccountInfo;
@@ -22,6 +24,8 @@ export default function AccountDangerZone({
   deleteAcknowledge,
   setDeleteAcknowledge,
 }: AccountDangerZoneProps) {
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+
   const isConfirmDisabled =
     saving || deleteConfirm !== account.email || !deleteAcknowledge;
 
@@ -98,7 +102,7 @@ export default function AccountDangerZone({
           <BuilderButton
             type="button"
             tone="danger"
-            onClick={handleDelete}
+            onClick={() => setDeleteModalOpen(true)}
             disabled={isConfirmDisabled}
             className={`px-8 py-3 rounded-lg font-medium transition-all duration-200 ${
               isConfirmDisabled
@@ -114,6 +118,17 @@ export default function AccountDangerZone({
           </BuilderButton>
         </div>
       </div>
+
+      <DeleteAccountConfirmModal
+        open={deleteModalOpen}
+        translations={translations}
+        loading={saving}
+        onClose={() => setDeleteModalOpen(false)}
+        onConfirm={() => {
+          setDeleteModalOpen(false);
+          handleDelete();
+        }}
+      />
     </div>
   );
 }

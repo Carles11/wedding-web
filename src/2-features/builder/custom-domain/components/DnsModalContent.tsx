@@ -1,122 +1,43 @@
-import { interpolate } from "@/4-shared/helpers/interpolateVars";
 import { t } from "@/4-shared/helpers/t";
-import { notify } from "@/4-shared/lib/toast/toast";
-import { useState } from "react";
+import { Mail } from "lucide-react";
 import { ManualGuideView } from "./site-dns-configuration/ui/ManualGuideView";
 import { handleDelegateEmail } from "./site-dns-configuration/ui/delegateEmailContent";
-import { buildMagicLink } from "./site-dns-configuration/ui/generateDnsProviderMagicLink";
 
 export default function DnsModalContent({
   translations,
-  domainConnectId, // From your new DB schema
   domainName,
 }: {
   translations: Record<string, string>;
-  domainConnectId?: string;
   domainName: string;
 }) {
-  const [view, setView] = useState<"selection" | "manual">("selection");
-  const domainProviderApiUrl = domainConnectId
-    ? domainConnectId
-        .replace(/^https?:\/\//i, "")
-        .replace(/\/+$/, "")
-        .replace(/\/v2$/i, "")
-    : undefined;
-
-  // Magic Pillar: Domain Connect Handshake
-  const handleMagicSetup = () => {
-    // If we haven't discovered the provider URL yet, we can't show the button
-    if (!domainProviderApiUrl) {
-      return notify.error(
-        t(
-          translations,
-          "builder.domain.dns_modal.magic_error",
-          "We couldn't detect your registrar's auto-setup API.",
-        ),
-      );
-    }
-
-    const magicUrl = buildMagicLink(domainProviderApiUrl, domainName);
-
-    if (magicUrl) {
-      window.open(magicUrl, "_blank");
-    }
-  };
-
-  if (view === "manual") {
-    return (
-      <div className="animate-in fade-in duration-300">
-        <button
-          onClick={() => setView("selection")}
-          className="text-[10px] text-slate-500 hover:text-slate-400 mb-4 flex items-center gap-1 cursor-pointer"
-        >
-          ← {t(translations, "common.back", "Back to options")}
-        </button>
+  return (
+    <div className="flex flex-col gap-0 animate-in fade-in duration-300">
+      {/* Section 1: Do it yourself */}
+      <div>
+        <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">
+          {t(
+            translations,
+            "builder.domain.dns_modal.section_diy",
+            "Add these records at your registrar",
+          )}
+        </h4>
         <ManualGuideView translations={translations} />
       </div>
-    );
-  }
 
-  return (
-    <div className="flex flex-col gap-3 animate-in fade-in zoom-in-95 duration-200">
-      {/* PILLAR 1: MAGIC (Only show if provider supports Domain Connect) */}
-      {domainProviderApiUrl && (
-        <button
-          onClick={handleMagicSetup}
-          className="flex items-center gap-4 p-4 rounded-xl bg-(--builder-color-primary) hover:bg-(--builder-color-primary-hover) border border-indigo-400/30 transition-all group"
-        >
-          <div className="bg-white/10 p-2 rounded-lg group-hover:scale-110 transition-transform">
-            ✨
-          </div>
-          <div className="text-left cursor-pointer">
-            <p className="text-sm font-bold text-white">
-              {t(
-                translations,
-                "builder.domain.dns_modal.magic_title",
-                "Automatic Setup",
-              )}
-            </p>
-            <p className="text-xs text-white">
-              {interpolate(
-                t(
-                  translations,
-                  "builder.domain.dns_modal.magic_desc",
-                  "We'll configure {dnsProvider} for you in 2 clicks.",
-                ),
-                { dnsProvider: domainProviderApiUrl },
-              )}
-            </p>
-          </div>
-        </button>
-      )}
-
-      {/* PILLAR 3: GUIDED MANUAL (Your existing code) */}
-      <button
-        onClick={() => setView("manual")}
-        className="flex items-center gap-4 p-4 rounded-xl bg-neutral-800 border border-neutral-700 hover:border-neutral-500 transition-all group"
-      >
-        <div className="bg-neutral-300 p-2 rounded-lg group-hover:bg-neutral-600 transition-colors">
-          🛠
+      {/* Divider */}
+      <div className="relative my-4">
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full border-t border-neutral-200" />
         </div>
-        <div className="text-left cursor-pointer">
-          <p className="text-sm font-bold text-slate-200">
-            {t(
-              translations,
-              "builder.domain.dns_modal.manual_title",
-              "Manual Configuration",
-            )}
-          </p>
-          <p className="text-xs text-slate-200">
-            {t(
-              translations,
-              "builder.domain.dns_modal.manual_desc",
-              "I'll copy and paste the records myself.",
-            )}
-          </p>
+        <div className="relative flex justify-center">
+          <span className="bg-white px-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+            {t(translations, "builder.domain.dns_modal.divider_or", "or")}
+          </span>
         </div>
-      </button>
+      </div>
 
-      <div className="mt-4 pt-4 border-t border-neutral-800">
+      {/* Section 2: Ask for help */}
+      <div>
         <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">
           {t(
             translations,
@@ -129,38 +50,40 @@ export default function DnsModalContent({
           onClick={() =>
             handleDelegateEmail({ translations, domainName: domainName })
           }
-          className="w-full flex items-center justify-between p-4 rounded-xl border border-dashed border-neutral-700 hover:bg-neutral-100 hover:border-neutral-500 transition-all cursor-pointer group"
+          className="w-full flex items-center justify-between p-4 rounded-xl border border-dashed border-neutral-300 hover:bg-neutral-50 hover:border-neutral-400 transition-all cursor-pointer group"
         >
-          <div className="text-left">
-            <span className="text-xs font-semibold text-slate-800 transition-colors">
-              📧{" "}
-              {t(
-                translations,
-                "builder.domain.social.button",
-                "Forward to a tech-savvy friend",
-              )}
-            </span>
-            <p className="text-xs text-slate-500 mt-1 max-w-fit px-4">
-              {t(
-                translations,
-                "builder.domain.social.email_closing",
-                "Drop me a message or call me once you see this—I can give you my registrar login if that's easier. Thanks a million!",
-              )}
-            </p>
+          <div className="flex items-center gap-3 text-left">
+            <div className="bg-indigo-50 p-2 rounded-lg group-hover:bg-indigo-100 transition-colors">
+              <Mail size={16} className="text-indigo-500" />
+            </div>
+            <div>
+              <span className="text-xs font-semibold text-slate-800">
+                {t(
+                  translations,
+                  "builder.domain.social.help_button",
+                  "Forward to a tech-savvy friend",
+                )}
+              </span>
+              <p className="text-[11px] text-slate-500 mt-0.5">
+                {t(
+                  translations,
+                  "builder.domain.social.email_hint",
+                  "We'll prepare an email with all the DNS details ready to send.",
+                )}
+              </p>
+            </div>
           </div>
-          <div className="bg-neutral-800 p-2 rounded-full group-hover:bg-indigo-500/20 transition-colors">
-            <svg
-              width={14}
-              height={14}
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={2.5}
-              className="text-slate-500 group-hover:text-indigo-400 transition-colors"
-            >
-              <path d="M5 12h14M12 5l7 7-7 7" />
-            </svg>
-          </div>
+          <svg
+            width={14}
+            height={14}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2.5}
+            className="text-slate-400 group-hover:text-indigo-500 transition-colors shrink-0"
+          >
+            <path d="M5 12h14M12 5l7 7-7 7" />
+          </svg>
         </button>
       </div>
     </div>

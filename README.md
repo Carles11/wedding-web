@@ -262,26 +262,44 @@ The architecture is clean, scalable, and fully compatible with Google’s expect
 
 **License:** MIT — Copyright (c) 2026 Carles
 
-#### DNS HANDLING - CUSTOM DOMAINS
+---
 
-### 🌐 Custom Domain Engine (4-Pillar UX) 🏛️ The 4-Pillar Architecture
+## 🌐 Custom Domain Engine
 
-WeddWeb features a "Gold Standard" domain onboarding flow, designed to make the most technical part of a wedding website completely friction-free for non-technical users.
+Premium users can connect their own domain (e.g. `ourwedding.com`) to their wedding site. The feature is built around a **4-state status matrix** with automatic health monitoring.
 
-## ✨ Magic Handshake (Pillar 1): Automatic DNS configuration via Domain Connect. Supports GoDaddy, IONOS, and more with one-click authorization.
+### Domain Status Lifecycle
 
-## 🤝 Social Resilience (Pillar 2): "Share with a Friend" feature. Generates pre-formatted technical requirements for users to delegate setup to tech-savvy peers.
+| State                 | Badge           | Meaning                                                                |
+| --------------------- | --------------- | ---------------------------------------------------------------------- |
+| `pending`             | 🟡 DNS Required | Domain added to Vercel but DNS records not yet configured at registrar |
+| `pending_certificate` | 🔵 Almost Ready | DNS is correct; SSL certificate is being provisioned (usually < 1 min) |
+| `verified`            | 🟢 Live         | Domain fully operational — DNS + SSL valid                             |
+| `error`               | 🔴 Error        | Verification failed (CAA conflict, domain taken, etc.)                 |
 
-## 📋 Manual Transparency (Pillar 3): Clean, copy-pasteable DNS records (A/CNAME) fetched in real-time from Vercel for power users.
+### How It Works
 
-## 🧠 Intelligence (Pillar 4): Human-friendly error mapping. Technical failures like CAA conflicts or domain_taken are translated into empathetic, actionable advice.
+1. **Add** — User enters a domain → API adds it to Vercel project (apex + `www` redirect variant) and persists status in Supabase.
+2. **Configure** — DNS modal shows copy-pasteable A/CNAME records, or user can email instructions to a tech-savvy friend for delegation.
+3. **Verify** — "Refresh" button calls Vercel's `/v10/projects/{id}/domains/{domain}` for ownership and `/v6/domains/{domain}/config` for DNS configuration check (`misconfigured` boolean).
+4. **Auto-recheck** — On component mount, all `verified` domains are silently re-verified in the background. If DNS regressed (e.g. records removed), the badge downgrades automatically — no manual refresh needed.
 
-## ⚙️ Technical Highlights
+### Key Technical Details
 
-Atomic Operations: Every domain add/remove is wrapped in a rollback logic that keeps Supabase and Vercel perfectly synced.
+- **Vercel dual-endpoint verification** — Ownership (`verified` flag) is checked via the project domain endpoint; actual DNS configuration is confirmed via the separate `/v6/domains/{domain}/config` endpoint which returns `{ misconfigured: boolean }`. This prevents false "Live" status when domain ownership is verified but DNS records aren't pointing to Vercel.
+- **Atomic operations** — Every domain add/remove keeps Supabase and Vercel in sync with rollback logic.
+- **Human-friendly error mapping** — Raw Vercel errors (CAA conflicts, `domain_taken`, rate limits, invalid format) are translated into actionable, localized messages via `mapVercelErrorMessage()` with the `t()` helper.
+- **Optimistic UI** — Status badges update immediately from server responses before the next DB refetch completes.
+- **Full i18n** — All strings use `t(translations, key, fallback)` with keys stored in `global_translations_builder` across 11 locales.
 
-Edge-Powered Discovery: Supabase Edge Functions handle high-speed DNS TXT/CNAME lookups to identify registrar capabilities.
+### File Map
 
-Automated Callback: A dedicated verification route with a high-end UI loader handles the return trip from registrars, providing instant status updates.
-
-Built for Vercel: Fully integrated with the Vercel Domain API and global DNS templates.
+| File                                                                      | Role                                                                                  |
+| ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `src/2-features/builder/custom-domain/components/CustomDomainSection.tsx` | Main UI — domain list, status badges, state panels (A/B/C/D), auto-recheck            |
+| `src/2-features/builder/custom-domain/components/DnsModalContent.tsx`     | DNS instructions modal — manual guide + email delegation                              |
+| `src/4-shared/lib/vercel/vercel-domains.ts`                               | Vercel API wrapper — `getVercelDomainStatus()`, `getVercelDomainConfig()`, add/remove |
+| `src/4-shared/lib/vercel/addCustomDomainWithRedirectVariants.ts`          | Domain add orchestrator + `mapVercelErrorMessage()`                                   |
+| `src/app/api/sites/[id]/add-domain/route.ts`                              | POST endpoint — add domain                                                            |
+| `src/app/api/sites/[id]/verify-domain/route.ts`                           | POST endpoint — check status, trigger SEO sync on verification                        |
+| `scripts/seed-builder-domain-i18n-cleanup.sql`                            | SQL migration — domain translation keys (11 locales)                                  |

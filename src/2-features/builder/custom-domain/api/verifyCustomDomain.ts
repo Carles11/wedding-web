@@ -39,6 +39,9 @@ export async function verifyCustomDomain(siteId: string, domain: string) {
       (d) => d !== cleanDomain,
     );
     domain_statuses[cleanDomain] = "verified";
+  } else if (status === "pending_certificate") {
+    // DNS is correct, SSL still generating
+    domain_statuses[cleanDomain] = "pending_certificate";
   } else if (status === "pending_validation") {
     // Mark as still pending
     domain_statuses[cleanDomain] = "pending";
@@ -47,7 +50,7 @@ export async function verifyCustomDomain(siteId: string, domain: string) {
     domain_statuses[cleanDomain] = "error";
     pending_custom_domains = pending_custom_domains.filter(
       (d) => d !== cleanDomain,
-    ); // Optionally remove from pending
+    );
   }
 
   // 4. Save back to Supabase

@@ -5,7 +5,11 @@ if (!VERCEL_TOKEN) throw new Error("Missing VERCEL_TOKEN in environment!");
 if (!VERCEL_PROJECT_ID)
   throw new Error("Missing VERCEL_PROJECT_ID in environment!");
 
-export type VercelDomainStatus = "valid" | "pending_validation" | "error";
+export type VercelDomainStatus =
+  | "valid"
+  | "pending_validation"
+  | "pending_certificate"
+  | "error";
 
 export interface VercelDomainStatusResult {
   status: VercelDomainStatus;
@@ -108,6 +112,35 @@ export async function getVercelProjectDomain(
   return data as VercelProjectDomainResult;
 }
 
+/**
+ * Checks the DNS configuration of a domain via Vercel's config endpoint.
+ * Returns whether DNS records are correctly pointing to Vercel.
+ * This is separate from domain *ownership* verification.
+ */
+async function getVercelDomainConfig(
+  domain: string,
+): Promise<{ misconfigured: boolean }> {
+  const normalizedDomain = normalizeDomain(domain);
+  const url = `https://api.vercel.com/v6/domains/${normalizedDomain}/config`;
+  try {
+    const res = await fetch(url, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${VERCEL_TOKEN}`,
+        "Content-Type": "application/json",
+      },
+      cache: "no-store",
+    });
+    if (!res.ok) {
+      return { misconfigured: true };
+    }
+    const data = (await res.json()) as { misconfigured?: boolean };
+    return { misconfigured: data.misconfigured !== false };
+  } catch {
+    return { misconfigured: true };
+  }
+}
+
 export async function getVercelDomainStatus(
   domain: string,
 ): Promise<VercelDomainStatusResult> {
@@ -150,12 +183,34 @@ export async function getVercelDomainStatus(
       };
     }
 
-    if (
-      data.verified === true &&
-      (!data.verification ||
-        data.verification.status === "verified" ||
-        data.verification.status === undefined)
-    ) {
+    if (data.verified === true) {
+      // Ownership is verified, but we must also check if DNS records
+      // are actually pointing to Vercel (A / CNAME configured).
+      const config = await getVercelDomainConfig(normalizedDomain);
+
+      if (config.misconfigured) {
+        // Ownership verified but DNS not yet pointing to Vercel
+        return {
+          status: "pending_validation",
+          dnsInstructions:
+            "Please configure your DNS according to Vercel's domain instructions.",
+        };
+      }
+
+      // DNS is pointing correctly — check if SSL certificate is ready.
+      const hasOutstandingVerification =
+        data.verification &&
+        data.verification.status !== "verified" &&
+        data.verification.status !== undefined;
+
+      if (hasOutstandingVerification) {
+        return {
+          status: "pending_certificate",
+          dnsInstructions:
+            "DNS is configured correctly. SSL certificate is being generated.",
+        };
+      }
+
       return { status: "valid" };
     }
 

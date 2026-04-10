@@ -79,6 +79,35 @@ export async function saveSiteGeneralContent({
 
   // 2. If site language metadata needs updating:
   if (languages || default_lang) {
+    let languagesForValidation = languages;
+
+    if (default_lang) {
+      if (!languagesForValidation) {
+        const { data: currentSite, error: currentSiteError } = await supabase
+          .from("sites")
+          .select("languages, default_lang")
+          .eq("id", site_id)
+          .maybeSingle();
+
+        if (currentSiteError) throw currentSiteError;
+        if (!currentSite) throw new Error("Site not found");
+
+        languagesForValidation = Array.isArray(currentSite.languages)
+          ? (currentSite.languages as SupportedLanguage[])
+          : currentSite.default_lang
+            ? [currentSite.default_lang as SupportedLanguage]
+            : [];
+      }
+
+      if (!languagesForValidation.length) {
+        throw new Error("DEFAULT_LANGUAGE_REQUIRED");
+      }
+
+      if (!languagesForValidation.includes(default_lang)) {
+        throw new Error("DEFAULT_LANGUAGE_NOT_IN_LANGUAGES");
+      }
+    }
+
     const payload: Record<string, unknown> = {};
     if (languages) payload.languages = languages;
     if (default_lang) payload.default_lang = default_lang;
