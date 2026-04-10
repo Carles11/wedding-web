@@ -18,6 +18,7 @@ import {
 import { notify } from "@/4-shared/lib/toast/toast";
 import { GeneralContentState, GeneralSiteFormProps } from "@/4-shared/types";
 import { BuilderLangTabs, UpgradeCTAModal } from "@/4-shared/ui/builder";
+import { BuilderLangPills } from "@/4-shared/ui/builder/BuilderLangPills";
 import { SkeletonLoader } from "@/4-shared/ui/commons/loader/SkeletonLoader";
 import { ensureNotLegacy } from "@/4-shared/utils/billing/legacyLock";
 import { useRouter } from "next/navigation";
@@ -513,291 +514,220 @@ export default function GeneralSiteForm({
       translations={translations}
       onBack={handleDiscard}
     >
-      {" "}
-      <form onSubmit={handleSubmit} className="space-y-4 min-w-0 pb-24 md:pb-0">
-        {/* Languages */}
-        <div>
-          {/* Languages Selection Block */}
-          <div className="space-y-3">
-            <div className="flex flex-col gap-1.5 border-l-4 border-emerald-500/20 pl-4 py-1">
-              <label className="block text-md font-semibold text-gray-900">
-                {translations["builder.general.form.label.languages"] ??
-                  "In which languages will your guests view the site?"}
-              </label>
-              <p
-                className={`text-xs leading-relaxed ${planType === "free" ? "text-amber-700 bg-amber-50 px-2 py-1 rounded" : "text-gray-500"}`}
-              >
-                {planType === "free"
-                  ? translations["builder.general.form.language_limit"] ||
-                    "Your current plan includes 1 language. Upgrade to Premium to welcome guests in all 11 scripts."
-                  : translations["builder.general.form.language_limit_pro"] ||
-                    "Premium Plan: All 11 languages are enabled for your guests."}
-              </p>
-            </div>
+      {/* Languages */}
+      <BuilderLangPills
+        languages={languages}
+        planType={planType}
+        onToggle={handleLangCheckbox}
+        onLockedClick={() => setShowUpgradeCTA(true)}
+      />
 
-            <div className="flex flex-wrap gap-2 py-1">
-              {SUPPORTED_LANGUAGES.map((langCode) => {
-                const isSelected = languages.includes(langCode);
-                const isLocked =
-                  planType === "free" && !isSelected && languages.length >= 1;
+      {/* Language tabs */}
+      <BuilderLangTabs
+        languages={languages}
+        activeLang={activeLang}
+        defaultLang={defaultLang}
+        onChange={(langCode) => setActiveLang(langCode as SupportedLanguage)}
+        onSetDefault={(langCode) => {
+          void handleSetDefault(langCode as SupportedLanguage);
+        }}
+        getLabel={(langCode) =>
+          SUPPORTED_LANGUAGE_LABELS[langCode as SupportedLanguage]
+        }
+      />
 
-                return (
-                  <label
-                    key={langCode}
-                    className={`
-            builder-chip 
-            ${isSelected ? "builder-chip-active" : "builder-chip-idle"}
-            ${isLocked ? "builder-chip-locked" : ""}
-          `}
-                    onClick={(e) => {
-                      if (isLocked) {
-                        e.preventDefault();
-                        setShowUpgradeCTA(true);
-                      }
-                    }}
-                  >
-                    <input
-                      type="checkbox"
-                      className="hidden"
-                      checked={isSelected}
-                      onChange={() => !isLocked && handleLangCheckbox(langCode)}
-                      disabled={isLocked}
-                    />
+      {/* Title */}
+      <div>
+        <label className="block text-md font-normal text-gray-700">
+          {translations["builder.general.form.label.main_title"] ??
+            "Main title"}
+        </label>
+        <input
+          className="mt-1 block w-full rounded border px-3 py-2"
+          value={content[activeLang]?.title ?? ""}
+          onChange={(e) =>
+            setContent((c) => ({
+              ...c,
+              [activeLang]: {
+                ...c[activeLang],
+                title: e.target.value,
+              },
+            }))
+          }
+          required
+        />
+      </div>
 
-                    {/* Status Dot */}
-                    <span
-                      className={`h-1.5 w-1.5 rounded-full ${isSelected ? "bg-white" : "bg-gray-300"}`}
-                    />
-
-                    {SUPPORTED_LANGUAGE_LABELS[langCode]}
-
-                    {isLocked && (
-                      <svg
-                        className="h-3 w-3 ml-1"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" />
-                      </svg>
-                    )}
-                  </label>
-                );
-              })}
-            </div>
-          </div>
-
-          <UpgradeCTAModal
-            open={showUpgradeCTA && planType === "free"}
-            title={
-              translations["builder.general.form.need_more_langs"] ||
-              "Need more languages?"
-            }
-            description={
-              translations["builder.general.form.upgrade_description"] ||
-              "Your current plan only allows one language. Upgrade to Premium to unlock all languages for your wedding site."
-            }
-            cancelLabel={
-              translations["builder.general.form.cancel"] || "Cancel"
-            }
-            upgradeLabel={
-              translations["builder.general.form.upgrade"] ||
-              "Upgrade to Premium"
-            }
-            onClose={() => setShowUpgradeCTA(false)}
-            onUpgrade={() => router.push(`/${lang}/pricing`)}
-          />
-        </div>
-
-        {/* Language tabs */}
-        <BuilderLangTabs
-          languages={languages}
-          activeLang={activeLang}
-          defaultLang={defaultLang}
-          onChange={(langCode) => setActiveLang(langCode as SupportedLanguage)}
-          onSetDefault={(langCode) => {
-            void handleSetDefault(langCode as SupportedLanguage);
-          }}
-          getLabel={(langCode) =>
-            SUPPORTED_LANGUAGE_LABELS[langCode as SupportedLanguage]
+      {/* Subtitle */}
+      <div>
+        <label className="block text-md font-normal text-gray-700">
+          {translations["builder.general.form.label.subtitle"] ?? "Subtitle"}
+        </label>
+        <textarea
+          rows={3}
+          className="mt-1 block w-full rounded border px-3 py-2"
+          value={content[activeLang]?.subtitle ?? ""}
+          onChange={(e) =>
+            setContent((c) => ({
+              ...c,
+              [activeLang]: {
+                ...c[activeLang],
+                subtitle: e.target.value,
+              },
+            }))
           }
         />
+      </div>
 
-        {/* Title */}
+      {/* ── Font Selectors ─────────────────────────────────── */}
+      <fieldset className="space-y-4 rounded-lg border border-gray-200 p-4">
+        <legend className="px-2 text-md font-medium text-gray-700">
+          {translations["builder.fonts.section.title"] ?? "Typography"}
+        </legend>
+
+        {/* Title Font */}
         <div>
-          <label className="block text-md font-normal text-gray-700">
-            {translations["builder.general.form.label.main_title"] ??
-              "Main title"}
+          <label
+            htmlFor="title-font-select"
+            className="block text-sm font-normal text-gray-600"
+          >
+            {translations["builder.fonts.label.title_font"] ?? "Title Font"}
           </label>
-          <input
-            className="mt-1 block w-full rounded border px-3 py-2"
-            value={content[activeLang]?.title ?? ""}
-            onChange={(e) =>
-              setContent((c) => ({
-                ...c,
-                [activeLang]: {
-                  ...c[activeLang],
-                  title: e.target.value,
-                },
-              }))
-            }
-            required
-          />
+          <select
+            id="title-font-select"
+            value={selectedTitleFont}
+            onChange={(e) => handleFontChange("title", e.target.value)}
+            disabled={savingFonts}
+            className="mt-1 block w-full rounded border border-gray-300 bg-white px-3 py-2 text-sm focus:border-indigo-500 focus:ring-indigo-500"
+          >
+            {Object.entries(groupByStyle(AVAILABLE_TITLE_FONTS)).map(
+              ([style, fonts]) => (
+                <optgroup key={style} label={style}>
+                  {fonts!.map((f) => (
+                    <option key={f.id} value={f.id}>
+                      {f.name}
+                    </option>
+                  ))}
+                </optgroup>
+              ),
+            )}
+          </select>
         </div>
 
-        {/* Subtitle */}
+        {/* Body Font */}
         <div>
-          <label className="block text-md font-normal text-gray-700">
-            {translations["builder.general.form.label.subtitle"] ?? "Subtitle"}
+          <label
+            htmlFor="body-font-select"
+            className="block text-sm font-normal text-gray-600"
+          >
+            {translations["builder.fonts.label.body_font"] ?? "Body Font"}
           </label>
-          <textarea
-            rows={3}
-            className="mt-1 block w-full rounded border px-3 py-2"
-            value={content[activeLang]?.subtitle ?? ""}
-            onChange={(e) =>
-              setContent((c) => ({
-                ...c,
-                [activeLang]: {
-                  ...c[activeLang],
-                  subtitle: e.target.value,
-                },
-              }))
-            }
-          />
+          <select
+            id="body-font-select"
+            value={selectedBodyFont}
+            onChange={(e) => handleFontChange("body", e.target.value)}
+            disabled={savingFonts}
+            className="mt-1 block w-full rounded border border-gray-300 bg-white px-3 py-2 text-sm focus:border-indigo-500 focus:ring-indigo-500"
+          >
+            {Object.entries(groupByStyle(AVAILABLE_BODY_FONTS)).map(
+              ([style, fonts]) => (
+                <optgroup key={style} label={style}>
+                  {fonts!.map((f) => (
+                    <option key={f.id} value={f.id}>
+                      {f.name}
+                    </option>
+                  ))}
+                </optgroup>
+              ),
+            )}
+          </select>
         </div>
 
-        {/* ── Font Selectors ─────────────────────────────────── */}
-        <fieldset className="space-y-4 rounded-lg border border-gray-200 p-4">
-          <legend className="px-2 text-md font-medium text-gray-700">
-            {translations["builder.fonts.section.title"] ?? "Typography"}
-          </legend>
+        {/* Font Preview */}
+        <div className="rounded-md border border-dashed border-gray-300 bg-gray-50 p-4 text-center">
+          <p className="mb-1 text-xs uppercase tracking-wide text-gray-400">
+            {translations["builder.fonts.preview.label"] ?? "Preview"}
+          </p>
+          <p
+            className="text-5xl md:text-6xl leading-snug"
+            style={{
+              fontFamily: `var(${AVAILABLE_TITLE_FONTS.find((f) => f.id === selectedTitleFont)?.variable ?? "--font-playfair-display"})`,
+            }}
+          >
+            {content[activeLang]?.title || "We are getting married!"}
+          </p>
+          <p
+            className="mt-2 text-lg text-gray-600"
+            style={{
+              fontFamily: `var(${AVAILABLE_BODY_FONTS.find((f) => f.id === selectedBodyFont)?.variable ?? "--font-roboto"})`,
+            }}
+          >
+            {(content[activeLang]?.subtitle ||
+              translations["builder.fonts.preview.body"]) ??
+              "Join us for our special day and celebrate love."}
+          </p>
+        </div>
 
-          {/* Title Font */}
-          <div>
-            <label
-              htmlFor="title-font-select"
-              className="block text-sm font-normal text-gray-600"
-            >
-              {translations["builder.fonts.label.title_font"] ?? "Title Font"}
-            </label>
-            <select
-              id="title-font-select"
-              value={selectedTitleFont}
-              onChange={(e) => handleFontChange("title", e.target.value)}
-              disabled={savingFonts}
-              className="mt-1 block w-full rounded border border-gray-300 bg-white px-3 py-2 text-sm focus:border-indigo-500 focus:ring-indigo-500"
-            >
-              {Object.entries(groupByStyle(AVAILABLE_TITLE_FONTS)).map(
-                ([style, fonts]) => (
-                  <optgroup key={style} label={style}>
-                    {fonts!.map((f) => (
-                      <option key={f.id} value={f.id}>
-                        {f.name}
-                      </option>
-                    ))}
-                  </optgroup>
-                ),
-              )}
-            </select>
-          </div>
+        {/* Font Upgrade CTA */}
+        <UpgradeCTAModal
+          open={showFontUpgradeCTA && planType === "free"}
+          title={
+            translations["builder.fonts.upgrade.title"] ??
+            "Custom fonts are a Premium feature"
+          }
+          description={
+            translations["builder.fonts.upgrade.description"] ??
+            "Upgrade to Premium to personalise your wedding site with beautiful custom fonts."
+          }
+          cancelLabel={translations["builder.general.form.cancel"] ?? "Cancel"}
+          upgradeLabel={
+            translations["builder.general.form.upgrade"] ?? "Upgrade to Premium"
+          }
+          onClose={() => setShowFontUpgradeCTA(false)}
+          onUpgrade={() => router.push(`/${lang}/pricing`)}
+        />
+      </fieldset>
 
-          {/* Body Font */}
-          <div>
-            <label
-              htmlFor="body-font-select"
-              className="block text-sm font-normal text-gray-600"
-            >
-              {translations["builder.fonts.label.body_font"] ?? "Body Font"}
-            </label>
-            <select
-              id="body-font-select"
-              value={selectedBodyFont}
-              onChange={(e) => handleFontChange("body", e.target.value)}
-              disabled={savingFonts}
-              className="mt-1 block w-full rounded border border-gray-300 bg-white px-3 py-2 text-sm focus:border-indigo-500 focus:ring-indigo-500"
-            >
-              {Object.entries(groupByStyle(AVAILABLE_BODY_FONTS)).map(
-                ([style, fonts]) => (
-                  <optgroup key={style} label={style}>
-                    {fonts!.map((f) => (
-                      <option key={f.id} value={f.id}>
-                        {f.name}
-                      </option>
-                    ))}
-                  </optgroup>
-                ),
-              )}
-            </select>
-          </div>
+      {/* Status */}
+      {titleError && (
+        <div className="text-sm text-(--builder-color-danger)">
+          {titleError}
+        </div>
+      )}
+      {subtitleError && (
+        <div className="text-sm text-(--builder-color-danger)">
+          {subtitleError}
+        </div>
+      )}
 
-          {/* Font Preview */}
-          <div className="rounded-md border border-dashed border-gray-300 bg-gray-50 p-4 text-center">
-            <p className="mb-1 text-xs uppercase tracking-wide text-gray-400">
-              {translations["builder.fonts.preview.label"] ?? "Preview"}
-            </p>
-            <p
-              className="text-5xl md:text-6xl leading-snug"
-              style={{
-                fontFamily: `var(${AVAILABLE_TITLE_FONTS.find((f) => f.id === selectedTitleFont)?.variable ?? "--font-playfair-display"})`,
-              }}
-            >
-              {translations["builder.fonts.select.placeholder"] ??
-                "We are getting married!"}
-            </p>
-            <p
-              className="mt-2 text-lg text-gray-600"
-              style={{
-                fontFamily: `var(${AVAILABLE_BODY_FONTS.find((f) => f.id === selectedBodyFont)?.variable ?? "--font-roboto"})`,
-              }}
-            >
-              {translations["builder.fonts.preview.body"] ??
-                "Join us for our special day and celebrate love."}
-            </p>
-          </div>
+      {languageError && (
+        <div className="text-sm text-(--builder-color-danger)">
+          {languageError}
+        </div>
+      )}
+      {error && (
+        <div className="text-sm text-(--builder-color-danger)">{error}</div>
+      )}
 
-          {/* Font Upgrade CTA */}
-          <UpgradeCTAModal
-            open={showFontUpgradeCTA && planType === "free"}
-            title={
-              translations["builder.fonts.upgrade.title"] ??
-              "Custom fonts are a Premium feature"
-            }
-            description={
-              translations["builder.fonts.upgrade.description"] ??
-              "Upgrade to Premium to personalise your wedding site with beautiful custom fonts."
-            }
-            cancelLabel={
-              translations["builder.general.form.cancel"] ?? "Cancel"
-            }
-            upgradeLabel={
-              translations["builder.general.form.upgrade"] ??
-              "Upgrade to Premium"
-            }
-            onClose={() => setShowFontUpgradeCTA(false)}
-            onUpgrade={() => router.push(`/${lang}/pricing`)}
-          />
-        </fieldset>
+      {/* UPGRADE CTA MODAL */}
 
-        {/* Status */}
-        {titleError && (
-          <div className="text-sm text-(--builder-color-danger)">
-            {titleError}
-          </div>
-        )}
-        {subtitleError && (
-          <div className="text-sm text-(--builder-color-danger)">
-            {subtitleError}
-          </div>
-        )}
-
-        {languageError && (
-          <div className="text-sm text-(--builder-color-danger)">
-            {languageError}
-          </div>
-        )}
-        {error && (
-          <div className="text-sm text-(--builder-color-danger)">{error}</div>
-        )}
-      </form>
+      <UpgradeCTAModal
+        open={showUpgradeCTA && planType === "free"}
+        title={
+          translations["builder.general.form.need_more_langs"] ||
+          "Need more languages?"
+        }
+        description={
+          translations["builder.general.form.upgrade_description"] ||
+          "Your current plan only allows one language. Upgrade to Premium to unlock all languages for your wedding site."
+        }
+        cancelLabel={translations["builder.general.form.cancel"] || "Cancel"}
+        upgradeLabel={
+          translations["builder.general.form.upgrade"] || "Upgrade to Premium"
+        }
+        onClose={() => setShowUpgradeCTA(false)}
+        onUpgrade={() => router.push(`/${lang}/pricing`)}
+      />
     </StepLayout>
   );
 }
