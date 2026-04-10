@@ -1,5 +1,6 @@
 "use client";
 
+import type { SupportedLanguage } from "@/4-shared/config/i18n";
 import { interpolate } from "@/4-shared/helpers/interpolateVars";
 import type {
   CreateWhatToSeePayload,
@@ -32,6 +33,7 @@ import {
 import { CustomLoader } from "@/4-shared/ui/commons/loader/CustomLoader";
 import { useRouter } from "next/navigation";
 import { StepLayout } from "../../step-layout";
+import { getEffectiveBuilderLanguage } from "./general-site-form/defaultLanguage";
 import { WhatToSeeForm } from "./what-to-see/WhatToSeeForm";
 
 type Props = {
@@ -98,14 +100,22 @@ export default function WhatToSeeBuilderStep({
     }
   }
 
-  const languages = useMemo(() => {
+  const languages = useMemo<SupportedLanguage[]>(() => {
     if (!site) return ["en"];
     return site.languages && site.languages.length > 0
-      ? site.languages
-      : [site.default_lang ?? "en"];
-  }, [site]);
+      ? (site.languages as SupportedLanguage[])
+      : [(site.default_lang as SupportedLanguage | null) ?? "en"];
+  }, [site?.default_lang, site?.languages]);
 
-  const defaultLang = site?.default_lang ?? languages[0] ?? "en";
+  const defaultLang = useMemo(() => {
+    const candidate =
+      site?.default_lang &&
+      languages.includes(site.default_lang as SupportedLanguage)
+        ? (site.default_lang as SupportedLanguage)
+        : "";
+
+    return getEffectiveBuilderLanguage(languages, candidate);
+  }, [languages, site?.default_lang]);
 
   useEffect(() => {
     if (!site?.id) return;
@@ -139,7 +149,7 @@ export default function WhatToSeeBuilderStep({
     return () => {
       mounted = false;
     };
-  }, [site?.id]);
+  }, [site?.id, defaultLang, languages.join("|")]);
 
   // Notify parent whenever item count changes
   useEffect(() => {
@@ -172,6 +182,17 @@ export default function WhatToSeeBuilderStep({
   // Form state for the currently editing/creating item
   const [form, setForm] = useState<Partial<WhatToSeeEntryFull>>({});
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    if (!error && !formErrors.name) return;
+
+    setError(null);
+    setFormErrors((prev) => {
+      if (!prev.name) return prev;
+      const { name: _removed, ...rest } = prev;
+      return rest;
+    });
+  }, [defaultLang, error, formErrors.name, languages]);
 
   function scrollToForm() {
     setTimeout(() => {

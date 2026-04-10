@@ -18,7 +18,6 @@ import {
 import { notify } from "@/4-shared/lib/toast/toast";
 import { GeneralContentState, GeneralSiteFormProps } from "@/4-shared/types";
 import { BuilderLangTabs, UpgradeCTAModal } from "@/4-shared/ui/builder";
-import { Toggle } from "@/4-shared/ui/commons/buttons/Toggle";
 import { SkeletonLoader } from "@/4-shared/ui/commons/loader/SkeletonLoader";
 import { ensureNotLegacy } from "@/4-shared/utils/billing/legacyLock";
 import { useRouter } from "next/navigation";
@@ -272,7 +271,7 @@ export default function GeneralSiteForm({
       mounted = false;
     };
     // eslint-disable-next-line
-  }, [site?.id]);
+  }, [site?.id, site?.default_lang, site?.languages]);
 
   if (loading) {
     return <SkeletonLoader />;
@@ -468,10 +467,16 @@ export default function GeneralSiteForm({
   };
 
   const handleSetDefault = async (lang: SupportedLanguage) => {
-    const prev = defaultLang;
+    if (defaultLang === lang) return;
+
+    const prevDefault = defaultLang;
+    const prevActive = activeLang;
+
     setDefaultLang(lang as DefaultLanguageValue);
     setActiveLang(lang);
     setLanguageError(null);
+    setError(null);
+    setGeneralComplete?.(!!content[lang]?.title?.trim());
 
     if (!site) return;
     try {
@@ -481,13 +486,17 @@ export default function GeneralSiteForm({
         content: {}, // no content change
         default_lang: lang,
       });
+
+      await refresh();
+
       notify.success(
         translations["builder.general.form.save_success"] ??
           "Saved successfully.",
       );
     } catch {
       // revert on failure
-      setDefaultLang(prev);
+      setDefaultLang(prevDefault);
+      setActiveLang(prevActive);
       notify.error(
         translations["error.something_went_wrong"] ?? "Failed to save.",
       );
@@ -575,52 +584,6 @@ export default function GeneralSiteForm({
                 );
               })}
             </div>
-
-            {languages.length > 0 && (
-              <div>
-                <label className="block text-sm font-medium text-(--builder-color-text)">
-                  {translations[
-                    "builder.general.form.label.default_language"
-                  ] ?? "Default site language"}
-                </label>
-                <p className="mt-0.5 mb-3 text-xs text-(--builder-color-text-muted)">
-                  {translations["builder.general.form.default_language_help"] ??
-                    "Main fallback language — required for builder content."}
-                </p>
-                <div className="rounded-lg border border-(--builder-color-border) overflow-hidden divide-y divide-(--builder-color-border)">
-                  {languages.map((langCode) => {
-                    const isSelected = defaultLang === langCode;
-                    return (
-                      <button
-                        key={langCode}
-                        type="button"
-                        onClick={() => {
-                          setDefaultLang(langCode as DefaultLanguageValue);
-                          setActiveLang(langCode);
-                          setLanguageError(null);
-                          setError(null);
-                        }}
-                        className="w-full flex items-center justify-between px-4 py-3 bg-(--builder-color-surface) hover:bg-(--builder-color-muted-surface)/40 transition-colors text-left"
-                      >
-                        <span className="text-sm text-(--builder-color-text)">
-                          {SUPPORTED_LANGUAGE_LABELS[langCode]}
-                        </span>
-                        <Toggle
-                          checked={isSelected}
-                          onChange={() => {
-                            setDefaultLang(langCode as DefaultLanguageValue);
-                            setActiveLang(langCode);
-                            setLanguageError(null);
-                            setError(null);
-                          }}
-                          aria-label={`Set ${SUPPORTED_LANGUAGE_LABELS[langCode]} as default`}
-                        />
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
           </div>
 
           <UpgradeCTAModal
@@ -650,9 +613,13 @@ export default function GeneralSiteForm({
           languages={languages}
           activeLang={activeLang}
           defaultLang={defaultLang}
-          onChange={setActiveLang}
-          onSetDefault={handleSetDefault}
-          getLabel={(lang) => SUPPORTED_LANGUAGE_LABELS[lang]}
+          onChange={(langCode) => setActiveLang(langCode as SupportedLanguage)}
+          onSetDefault={(langCode) => {
+            void handleSetDefault(langCode as SupportedLanguage);
+          }}
+          getLabel={(langCode) =>
+            SUPPORTED_LANGUAGE_LABELS[langCode as SupportedLanguage]
+          }
         />
 
         {/* Title */}

@@ -28,6 +28,7 @@ import { ensureNotLegacy } from "@/4-shared/utils/billing/legacyLock";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { StepLayout } from "../../step-layout";
+import { getEffectiveBuilderLanguage } from "./general-site-form/defaultLanguage";
 import { getDayTags } from "./program-events/dayTags";
 import { ProgramEventForm } from "./program-events/ProgramEventForm";
 import { ProgramEventsList } from "./program-events/ProgramEventsList";
@@ -82,14 +83,22 @@ export default function ProgramEventsBuilderStep({
         )
       : String(eventsLimit);
 
-  const languages = useMemo(() => {
+  const languages = useMemo<SupportedLanguage[]>(() => {
     if (!site) return ["en"];
     return site.languages && site.languages.length > 0
-      ? site.languages
-      : [site.default_lang ?? "en"];
-  }, [site]);
+      ? (site.languages as SupportedLanguage[])
+      : [(site.default_lang as SupportedLanguage | null) ?? "en"];
+  }, [site?.default_lang, site?.languages]);
 
-  const defaultLang = site?.default_lang ?? languages[0] ?? "en";
+  const defaultLang = useMemo(() => {
+    const candidate =
+      site?.default_lang &&
+      languages.includes(site.default_lang as SupportedLanguage)
+        ? (site.default_lang as SupportedLanguage)
+        : "";
+
+    return getEffectiveBuilderLanguage(languages, candidate);
+  }, [languages, site?.default_lang]);
   const dayTags = getDayTags(translations);
   const { confirm: confirmDelete, confirmDialog } = useAlertConfirm();
 
@@ -148,7 +157,14 @@ export default function ProgramEventsBuilderStep({
     const requestId = ++fetchCounterRef.current;
     load(requestId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [site?.id]);
+  }, [site?.id, defaultLang, languages.join("|")]);
+
+  useEffect(() => {
+    if (error) {
+      setError(null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [defaultLang, languages.join("|")]);
 
   useEffect(() => {
     setHasMainProgramEvent?.(events.some((event) => !!event.is_main_event));

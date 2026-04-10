@@ -4,10 +4,17 @@ import {
   deleteImage,
   fetchImagesBySite,
   fetchSectionId,
-  getPublicUrlForImage,
   uploadImageForSite,
 } from "@/3-entities/images/api";
 import { getPlanLimit } from "@/4-shared/helpers/billing/entitlements";
+import {
+  classifyImage,
+  imagesSignature,
+  normalizeImages,
+  publicUrlForImageRow,
+  type ImageSectionIds,
+  type ImageSlot,
+} from "@/4-shared/helpers/images";
 import { notify } from "@/4-shared/lib/toast/toast";
 import type { AccountInfo, ImageRow, PlanType, Site } from "@/4-shared/types";
 import FileUploader from "@/4-shared/ui/builder/FileUploader";
@@ -17,70 +24,6 @@ import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Accept } from "react-dropzone";
 import { StepLayout } from "../../step-layout";
-
-type ImageSlot = "hero" | "contact";
-
-// ─── Module-level helpers (no component state deps) ───────────────────────────
-
-function imageSection(img: ImageRow): string | null {
-  return typeof img.section === "string"
-    ? img.section
-    : ((img.section as { type?: string } | null)?.type ?? null);
-}
-
-function imageCreatedAtValue(img: ImageRow): number {
-  if (!img.created_at) return 0;
-  const ts = Date.parse(img.created_at);
-  return Number.isNaN(ts) ? 0 : ts;
-}
-
-function sortImagesNewestFirst(rows: ImageRow[]): ImageRow[] {
-  return [...rows].sort((a, b) => {
-    const byCreatedAt = imageCreatedAtValue(b) - imageCreatedAtValue(a);
-    if (byCreatedAt !== 0) return byCreatedAt;
-    return String(b.id).localeCompare(String(a.id));
-  });
-}
-
-function imagesSignature(rows: ImageRow[]): string {
-  return sortImagesNewestFirst(rows)
-    .map((row) => `${row.id}:${row.section_id}:${imageSection(row) ?? "none"}`)
-    .join("|");
-}
-
-/** Keep only newest hero/contact image in front to avoid stale slot rendering. */
-function normalizeImages(rows: ImageRow[]): ImageRow[] {
-  const sorted = sortImagesNewestFirst(rows);
-  const hero = sorted.find((img) => imageSection(img) === "hero") ?? null;
-  const contact = sorted.find((img) => imageSection(img) === "contact") ?? null;
-
-  const visibleIds = new Set<string>();
-  if (hero?.id) visibleIds.add(hero.id);
-  if (contact?.id) visibleIds.add(contact.id);
-
-  const remainder = sorted.filter((img) => !visibleIds.has(img.id));
-  return [...(hero ? [hero] : []), ...(contact ? [contact] : []), ...remainder];
-}
-
-function publicUrlFor(image: ImageRow): string | null {
-  if (!image?.url) return null;
-  const base = getPublicUrlForImage({ url: image.url });
-  if (!base) return null;
-  // Stable cache-buster — never use Date.now() here
-  const cacheBuster =
-    typeof image.created_at === "string"
-      ? image.created_at
-      : image.id || "missing";
-  return `${base}?t=${cacheBuster}`;
-}
-
-// function EmptySlot({ label }: { label: string }) {
-//   return (
-//     <div className="h-40 rounded-xl border border-dashed flex items-center justify-center text-sm text-gray-500 bg-gray-50">
-//       {label}
-//     </div>
-//   );
-// }
 
 function ImageCard({
   img,
@@ -99,7 +42,7 @@ function ImageCard({
   onDelete?: () => void;
   vertical?: boolean;
 }) {
-  const url = publicUrlFor(img);
+  const url = publicUrlForImageRow(img);
   const imgClass = vertical
     ? "w-full aspect-[3/4] object-cover rounded-lg"
     : "w-full h-48 md:h-56 object-cover rounded-lg";
@@ -139,7 +82,7 @@ function ImageCard({
           type="button"
           onClick={onDelete}
           disabled={assigning || uploading}
-          className="absolute top-0 right-2 cursor-pointer mt-2 p-2 h-6 w-6 bg-white rounded-md border shadow-sm flex items-center justify-center text-[var(--builder-color-danger)] text-sm font-bold hover:bg-white md:opacity-0 md:group-hover:opacity-100 transition"
+          className="absolute top-0 right-2 cursor-pointer mt-2 p-2 h-6 w-6 bg-white rounded-md border shadow-sm flex items-center justify-center text-(--builder-color-danger) text-sm font-bold hover:bg-white md:opacity-0 md:group-hover:opacity-100 transition"
           aria-label="Delete image"
         >
           ×
@@ -181,16 +124,28 @@ export default function ImagesBuilderStep({
     hero: 0,
     contact: 0,
   });
+  const [sectionIds, setSectionIds] = useState<ImageSectionIds>({
+    hero: null,
+    contact: null,
+  });
 
   // assignments
   const assignedHero = useMemo(
-    () => images.find((img) => imageSection(img) === "hero") || null,
-    [images],
+    () =>
+      images.find(
+        (img) =>
+          classifyImage(img, sectionIds.hero, sectionIds.contact) === "hero",
+      ) || null,
+    [images, sectionIds.contact, sectionIds.hero],
   );
 
   const assignedContact = useMemo(
-    () => images.find((img) => imageSection(img) === "contact") || null,
-    [images],
+    () =>
+      images.find(
+        (img) =>
+          classifyImage(img, sectionIds.hero, sectionIds.contact) === "contact",
+      ) || null,
+    [images, sectionIds.contact, sectionIds.hero],
   );
 
   const isBusy = assigning || uploadingSlot !== null;
@@ -208,14 +163,41 @@ export default function ImagesBuilderStep({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [site?.id]);
 
+  async function resolveSectionIds(siteId: string): Promise<ImageSectionIds> {
+    const [hero, contact] = await Promise.all([
+      fetchSectionId(siteId, "hero"),
+      fetchSectionId(siteId, "contact"),
+    ]);
+
+    const nextSectionIds: ImageSectionIds = { hero, contact };
+
+    setSectionIds((prev) =>
+      prev.hero === nextSectionIds.hero &&
+      prev.contact === nextSectionIds.contact
+        ? prev
+        : nextSectionIds,
+    );
+
+    return nextSectionIds;
+  }
+
   async function reconcileImages(
     requestId: number,
     baselineRows: ImageRow[],
+    resolvedSectionIds: ImageSectionIds,
     maxAttempts = 3,
   ) {
     if (!site?.id) return;
 
-    let baselineSignature = imagesSignature(normalizeImages(baselineRows));
+    let baselineSignature = imagesSignature(
+      normalizeImages(
+        baselineRows,
+        resolvedSectionIds.hero,
+        resolvedSectionIds.contact,
+      ),
+      resolvedSectionIds.hero,
+      resolvedSectionIds.contact,
+    );
 
     for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
       await new Promise((resolve) => setTimeout(resolve, 700));
@@ -224,8 +206,16 @@ export default function ImagesBuilderStep({
       }
 
       const nextRows = await fetchImagesBySite(site.id);
-      const nextNormalized = normalizeImages(nextRows);
-      const nextSignature = imagesSignature(nextNormalized);
+      const nextNormalized = normalizeImages(
+        nextRows,
+        resolvedSectionIds.hero,
+        resolvedSectionIds.contact,
+      );
+      const nextSignature = imagesSignature(
+        nextNormalized,
+        resolvedSectionIds.hero,
+        resolvedSectionIds.contact,
+      );
 
       if (nextSignature !== baselineSignature) {
         setImages(nextNormalized);
@@ -241,10 +231,15 @@ export default function ImagesBuilderStep({
     setError(null);
 
     try {
+      const resolvedSectionIds = await resolveSectionIds(site.id);
       const rows = await fetchImagesBySite(site.id);
-      const normalized = normalizeImages(rows);
+      const normalized = normalizeImages(
+        rows,
+        resolvedSectionIds.hero,
+        resolvedSectionIds.contact,
+      );
       setImages(normalized);
-      await reconcileImages(requestId, rows);
+      await reconcileImages(requestId, rows, resolvedSectionIds);
     } catch (err) {
       const message =
         err instanceof Error
@@ -326,6 +321,14 @@ export default function ImagesBuilderStep({
         );
       }
 
+      const nextSectionIds: ImageSectionIds = {
+        ...sectionIds,
+        [slot]: sectionId,
+      };
+      setSectionIds((prev) =>
+        prev[slot] === sectionId ? prev : { ...prev, [slot]: sectionId },
+      );
+
       const inserted = await uploadImageForSite(
         site.id,
         file,
@@ -341,19 +344,12 @@ export default function ImagesBuilderStep({
             "Upload failed.",
         );
 
-      // uploadImageForSite returns a plain DB row without a section join.
-      // Attach section.type so normalizeImages can immediately classify this
-      // image as hero/contact without needing a round-trip re-fetch.
-      const insertedWithSection: ImageRow = {
-        ...inserted,
-        section: { type: slot },
-      };
-
       setImages((prev) =>
-        normalizeImages([
-          ...prev.filter((img) => img.id !== existingInSlot?.id),
-          insertedWithSection,
-        ]),
+        normalizeImages(
+          [...prev.filter((img) => img.id !== existingInSlot?.id), inserted],
+          nextSectionIds.hero,
+          nextSectionIds.contact,
+        ),
       );
 
       // Keep DB clean: remove the replaced image row after successful upload.
