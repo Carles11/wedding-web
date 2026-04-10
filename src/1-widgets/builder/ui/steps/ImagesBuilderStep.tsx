@@ -10,6 +10,7 @@ import { getPlanLimit } from "@/4-shared/helpers/billing/entitlements";
 import {
   classifyImage,
   imagesSignature,
+  inferSectionIdsFromRows,
   normalizeImages,
   publicUrlForImageRow,
   type ImageSectionIds,
@@ -163,13 +164,12 @@ export default function ImagesBuilderStep({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [site?.id]);
 
-  async function resolveSectionIds(siteId: string): Promise<ImageSectionIds> {
-    const [hero, contact] = await Promise.all([
-      fetchSectionId(siteId, "hero"),
-      fetchSectionId(siteId, "contact"),
-    ]);
-
-    const nextSectionIds: ImageSectionIds = { hero, contact };
+  function resolveSectionIds(rows: ImageRow[]): ImageSectionIds {
+    const inferredSectionIds = inferSectionIdsFromRows(rows);
+    const nextSectionIds: ImageSectionIds = {
+      hero: inferredSectionIds.hero ?? sectionIds.hero,
+      contact: inferredSectionIds.contact ?? sectionIds.contact,
+    };
 
     setSectionIds((prev) =>
       prev.hero === nextSectionIds.hero &&
@@ -189,14 +189,18 @@ export default function ImagesBuilderStep({
   ) {
     if (!site?.id) return;
 
+    let activeSectionIds = {
+      ...resolvedSectionIds,
+    };
+
     let baselineSignature = imagesSignature(
       normalizeImages(
         baselineRows,
-        resolvedSectionIds.hero,
-        resolvedSectionIds.contact,
+        activeSectionIds.hero,
+        activeSectionIds.contact,
       ),
-      resolvedSectionIds.hero,
-      resolvedSectionIds.contact,
+      activeSectionIds.hero,
+      activeSectionIds.contact,
     );
 
     for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
@@ -206,15 +210,17 @@ export default function ImagesBuilderStep({
       }
 
       const nextRows = await fetchImagesBySite(site.id);
+      activeSectionIds = resolveSectionIds(nextRows);
+
       const nextNormalized = normalizeImages(
         nextRows,
-        resolvedSectionIds.hero,
-        resolvedSectionIds.contact,
+        activeSectionIds.hero,
+        activeSectionIds.contact,
       );
       const nextSignature = imagesSignature(
         nextNormalized,
-        resolvedSectionIds.hero,
-        resolvedSectionIds.contact,
+        activeSectionIds.hero,
+        activeSectionIds.contact,
       );
 
       if (nextSignature !== baselineSignature) {
@@ -231,8 +237,8 @@ export default function ImagesBuilderStep({
     setError(null);
 
     try {
-      const resolvedSectionIds = await resolveSectionIds(site.id);
       const rows = await fetchImagesBySite(site.id);
+      const resolvedSectionIds = resolveSectionIds(rows);
       const normalized = normalizeImages(
         rows,
         resolvedSectionIds.hero,

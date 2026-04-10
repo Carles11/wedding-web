@@ -11,10 +11,11 @@ import { fetchContactSection } from "@/3-entities/sections/api/fetchContactSecti
 import { fetchWeddingGiftBySite } from "@/3-entities/wedding_gifts/api";
 import { fetchWhatToSeeEntries } from "@/3-entities/what_to_see/api";
 import { getPlanLimit } from "@/4-shared/helpers/billing/entitlements";
+import { inferSectionIdsFromRows } from "@/4-shared/helpers/images";
 import { useSite } from "@/4-shared/hooks/useSite";
 import { useSupabaseAuth } from "@/4-shared/hooks/useSupabaseAuth";
 import { createClient } from "@/4-shared/lib/supabase/client";
-import { BuilderClientProps, ImageSection, StepStatus } from "@/4-shared/types";
+import { BuilderClientProps, StepStatus } from "@/4-shared/types";
 import { BuilderHeader } from "@/4-shared/ui/builder";
 import { CustomLoader } from "@/4-shared/ui/commons/loader/CustomLoader";
 import { isValidEmail } from "@/4-shared/utils/validations";
@@ -124,14 +125,8 @@ export default function BuilderClient({
     const id = site.id;
 
     fetchImagesBySite(id).then((images) => {
-      setHeroImageExists(
-        images.some(
-          (img) =>
-            img.section &&
-            typeof img.section === "object" &&
-            (img.section as ImageSection).type === "hero",
-        ),
-      );
+      const sectionIds = inferSectionIdsFromRows(images);
+      setHeroImageExists(Boolean(sectionIds.hero));
     });
 
     fetchContactSection(id).then((section) => {

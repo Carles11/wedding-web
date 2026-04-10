@@ -24,9 +24,7 @@ export function BuilderFormCard({
       {description && (
         <p className="mt-1 text-sm text-slate-600">{description}</p>
       )}
-
       <div className="mt-4 space-y-4">{children}</div>
-
       {error && (
         <div className="mt-3 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
           {error}

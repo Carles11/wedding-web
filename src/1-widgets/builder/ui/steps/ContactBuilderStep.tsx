@@ -297,7 +297,7 @@ export default function ContactBuilderStep({
       <div className="space-y-4">
         <div className="mb-4 text-md text-gray-600">
           {translations["builder.contact.description"] ||
-            "Provide the main contact details used for RSVP and site contact."}
+            "Add your contact details so your guests can easily reach out with any questions for your special day."}
         </div>
 
         {loading ? (

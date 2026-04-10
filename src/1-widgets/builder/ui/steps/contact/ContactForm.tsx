@@ -27,7 +27,7 @@ export function ContactForm({
       {/* Bride */}
       <div className="p-3 border rounded-xl bg-white">
         <div className="font-medium">
-          {translations["builder.contact.bride"] || "Bride"}
+          {translations["builder.contact.bride"] || "Side A"}
         </div>
         <div className="mt-3 space-y-3">
           <BuilderTextInput
@@ -65,7 +65,7 @@ export function ContactForm({
       {/* Groom */}
       <div className="p-3 border rounded-xl bg-white">
         <div className="font-medium">
-          {translations["builder.contact.groom"] || "Groom"}
+          {translations["builder.contact.groom"] || "Side B"}
         </div>
         <div className="mt-3 space-y-3">
           <BuilderTextInput

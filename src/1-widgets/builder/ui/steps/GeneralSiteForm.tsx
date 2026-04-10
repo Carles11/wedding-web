@@ -514,14 +514,15 @@ export default function GeneralSiteForm({
       translations={translations}
       onBack={handleDiscard}
     >
-      {/* Languages */}
+      {" "}
+      {/* Languages pills */}
       <BuilderLangPills
         languages={languages}
         planType={planType}
         onToggle={handleLangCheckbox}
         onLockedClick={() => setShowUpgradeCTA(true)}
+        translations={translations}
       />
-
       {/* Language tabs */}
       <BuilderLangTabs
         languages={languages}
@@ -534,10 +535,10 @@ export default function GeneralSiteForm({
         getLabel={(langCode) =>
           SUPPORTED_LANGUAGE_LABELS[langCode as SupportedLanguage]
         }
+        translations={translations}
       />
-
       {/* Title */}
-      <div>
+      <div className="mt-8">
         <label className="block text-md font-normal text-gray-700">
           {translations["builder.general.form.label.main_title"] ??
             "Main title"}
@@ -557,7 +558,6 @@ export default function GeneralSiteForm({
           required
         />
       </div>
-
       {/* Subtitle */}
       <div>
         <label className="block text-md font-normal text-gray-700">
@@ -578,9 +578,8 @@ export default function GeneralSiteForm({
           }
         />
       </div>
-
       {/* ── Font Selectors ─────────────────────────────────── */}
-      <fieldset className="space-y-4 rounded-lg border border-gray-200 p-4">
+      <fieldset className="space-y-4 rounded-lg border border-gray-200 p-4 mt-6">
         <legend className="px-2 text-md font-medium text-gray-700">
           {translations["builder.fonts.section.title"] ?? "Typography"}
         </legend>
@@ -687,7 +686,6 @@ export default function GeneralSiteForm({
           onUpgrade={() => router.push(`/${lang}/pricing`)}
         />
       </fieldset>
-
       {/* Status */}
       {titleError && (
         <div className="text-sm text-(--builder-color-danger)">
@@ -699,7 +697,6 @@ export default function GeneralSiteForm({
           {subtitleError}
         </div>
       )}
-
       {languageError && (
         <div className="text-sm text-(--builder-color-danger)">
           {languageError}
@@ -708,9 +705,7 @@ export default function GeneralSiteForm({
       {error && (
         <div className="text-sm text-(--builder-color-danger)">{error}</div>
       )}
-
       {/* UPGRADE CTA MODAL */}
-
       <UpgradeCTAModal
         open={showUpgradeCTA && planType === "free"}
         title={

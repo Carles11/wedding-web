@@ -8,6 +8,38 @@ export type ImageSectionIds = {
   contact: string | null;
 };
 
+function joinedSectionType(img: ImageRow): string | null {
+  return typeof img.section === "string"
+    ? img.section
+    : ((img.section as { type?: string } | null)?.type ?? null);
+}
+
+/**
+ * Bootstrap known hero/contact section IDs from rows already returned by the
+ * backend join. Actual slot classification still uses only `section_id`.
+ */
+export function inferSectionIdsFromRows(rows: ImageRow[]): ImageSectionIds {
+  const next: ImageSectionIds = { hero: null, contact: null };
+
+  for (const row of sortImagesNewestFirst(rows)) {
+    const type = joinedSectionType(row);
+
+    if (type === "hero" && !next.hero) {
+      next.hero = row.section_id;
+    }
+
+    if (type === "contact" && !next.contact) {
+      next.contact = row.section_id;
+    }
+
+    if (next.hero && next.contact) {
+      break;
+    }
+  }
+
+  return next;
+}
+
 /**
  * Slot classification must rely on the persisted section_id, not on an optional
  * joined `section.type` relation that may be absent on freshly inserted rows.

@@ -11,14 +11,15 @@ export async function fetchSectionId(
     .select("id")
     .eq("site_id", siteId)
     .eq("type", type)
-    .maybeSingle();
+    .limit(1)
+    .maybeSingle<{ id: string }>();
 
   if (data?.id) {
     return data.id;
   }
 
   if (error) {
-    console.error("Failed to fetch section UUID", error);
+    console.warn("Failed to fetch section UUID", { siteId, type, error });
     return null;
   }
 
@@ -34,10 +35,31 @@ export async function fetchSectionId(
     .select("id")
     .maybeSingle<{ id: string }>();
 
+  if (inserted?.id) {
+    return inserted.id;
+  }
+
   if (insertError) {
-    console.error("Failed to create section UUID", insertError);
+    const { data: retryData, error: retryError } = await supabase
+      .from("sections")
+      .select("id")
+      .eq("site_id", siteId)
+      .eq("type", type)
+      .limit(1)
+      .maybeSingle<{ id: string }>();
+
+    if (retryData?.id) {
+      return retryData.id;
+    }
+
+    console.warn("Failed to create section UUID", {
+      siteId,
+      type,
+      insertError,
+      retryError,
+    });
     return null;
   }
 
-  return inserted?.id ?? null;
+  return null;
 }

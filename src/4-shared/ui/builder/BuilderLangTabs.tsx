@@ -5,6 +5,7 @@ type BuilderLangTabsProps = {
   onChange: (lang: string) => void;
   onSetDefault: (lang: string) => void;
   getLabel?: (lang: string) => string;
+  translations: Record<string, string>;
 };
 
 export function BuilderLangTabs({
@@ -14,28 +15,33 @@ export function BuilderLangTabs({
   onChange,
   onSetDefault,
   getLabel,
+  translations,
 }: BuilderLangTabsProps) {
-  if (languages.length <= 1) return null;
-
+  // if (languages.length <= 1) return null;
   return (
-    <div className="flex flex-wrap gap-1.5 mb-6 p-1 bg-gray-50 rounded-xl w-fit border border-gray-100">
-      {languages.map((lang) => {
-        const isActive = activeLang === lang;
-        const isDefault = defaultLang === lang;
-        const label = getLabel ? getLabel(lang) : lang;
+    <>
+      <p className=" pt-6 pb-3 text-gray-500">
+        {translations["builder.languages.tabs.label"] ??
+          "These languages will be active on your wedding site:"}
+      </p>
+      <div className="flex flex-col flex-wrap gap-1.5 mb-6 bg-gray-50 rounded-xl w-fit border border-gray-100">
+        {languages.map((lang) => {
+          const isActive = activeLang === lang;
+          const isDefault = defaultLang === lang;
+          const label = getLabel ? getLabel(lang) : lang;
 
-        return (
-          <button
-            type="button"
-            key={lang}
-            onClick={() => {
-              if (isActive && !isDefault) {
-                onSetDefault(lang);
-              } else if (!isActive) {
-                onChange(lang);
-              }
-            }}
-            className={`
+          return (
+            <button
+              type="button"
+              key={lang}
+              onClick={() => {
+                if (isActive && !isDefault) {
+                  onSetDefault(lang);
+                } else if (!isActive) {
+                  onChange(lang);
+                }
+              }}
+              className={`
     group relative flex flex-col items-center gap-0.5 cursor-pointer
     transition-all duration-200 px-4 py-1.5 rounded-lg
     text-[11px] font-semibold uppercase tracking-wider min-w-[72px]
@@ -45,17 +51,17 @@ export function BuilderLangTabs({
         : "bg-transparent text-gray-400 hover:bg-white hover:text-gray-700"
     }
   `}
-          >
-            <span className="flex items-center gap-1">
-              {isActive && (
-                <span className="w-1.5 h-1.5 rounded-full bg-teal-500 inline-block" />
-              )}
-              {label}
-            </span>
+            >
+              <span className="flex items-center gap-1">
+                {isActive && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-teal-500 inline-block" />
+                )}
+                {label}
+              </span>
 
-            {/* Always reserve the same space to avoid layout shift */}
-            <span
-              className={`
+              {/* Always reserve the same space to avoid layout shift */}
+              <span
+                className={`
   text-[9px] font-medium normal-case tracking-normal leading-none
   transition-opacity duration-150
   ${
@@ -66,12 +72,13 @@ export function BuilderLangTabs({
         : "opacity-0"
   }
 `}
-            >
-              {isDefault ? "Default" : "Set as default"}
-            </span>
-          </button>
-        );
-      })}
-    </div>
+              >
+                {isDefault ? "Default" : "Set as default"}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </>
   );
 }

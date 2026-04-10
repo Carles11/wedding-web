@@ -2,10 +2,12 @@ import { interpolate } from "@/4-shared/helpers/interpolateVars";
 import { t } from "@/4-shared/helpers/t";
 import type { ProgramEvent } from "@/4-shared/types";
 import { BuilderFormCard, BuilderLanguageCard } from "@/4-shared/ui/builder";
+import { MultiLangInputsBanner } from "@/4-shared/ui/builder/BuilderLangMultilangInputsBanner";
 import {
   BuilderTextInput,
   BuilderTextarea,
 } from "@/4-shared/ui/builder/inputs";
+import { BuilderDropdownInput } from "@/4-shared/ui/builder/inputs/BuilderDropdownInput";
 import { DateInput } from "@/4-shared/ui/builder/inputs/DateInput";
 import { TimeInput } from "@/4-shared/ui/builder/inputs/TimeInput";
 import { Toggle } from "@/4-shared/ui/commons/buttons/Toggle";
@@ -75,41 +77,18 @@ export function ProgramEventForm({
         <div className="flex flex-col gap-3 md:flex-row md:items-start">
           {/* Day select */}
           <div className="flex-1 min-w-0 flex flex-col">
-            <label className="block text-xs text-gray-600 mb-1">
-              {dayLabel}
-            </label>
-            <div className="relative">
-              <select
-                value={form.day_tag ?? "wedding_day"}
-                onChange={(e) =>
-                  onUpdateFormField(
-                    "day_tag",
-                    e.target.value as ProgramEvent["day_tag"],
-                  )
-                }
-                className="
-    w-full cursor-pointer appearance-none
-    rounded-(--builder-radius)
-    border border-(--builder-color-border)
-    bg-(--builder-color-surface)
-    px-3 py-2 pr-9
-    shadow-(--builder-shadow)
-    text-(--builder-color-text)
-    focus:border-(--builder-color-primary)
-    focus:outline-none
-    focus:ring-2 focus:ring-(--builder-color-primary)
-  "
-              >
-                {dayTags.map((d) => (
-                  <option key={d.key ?? "wedding_day"} value={d.key ?? ""}>
-                    {d.label}
-                  </option>
-                ))}
-              </select>
-              <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-500">
-                ▾
-              </span>
-            </div>
+            <BuilderDropdownInput
+              label={dayLabel}
+              value={form.day_tag ?? "wedding_day"}
+              options={dayTags.map((d) => ({
+                key: d.key ?? "wedding_day",
+                label: d.label,
+              }))}
+              onChange={(v) =>
+                onUpdateFormField("day_tag", v as ProgramEvent["day_tag"])
+              }
+              prominent
+            />
           </div>
           {/* Date input */}
           <div className="flex-1 min-w-0 flex flex-col">
@@ -192,23 +171,12 @@ export function ProgramEventForm({
         )}
 
         <div>
-          <div className="font-medium text-slate-800">
-            {t(
-              translations,
-              "builder.program_events.form.multi_language",
-              "Multi-language fields",
-            )}
-          </div>
-          <div className="mb-2 text-sm text-gray-600">
-            {interpolate(
-              t(
-                translations,
-                "builder.program_events.form.languages.info",
-                "Fill fields for each site language. Default language ({defaultLang}) is required for Title and Location.",
-              ),
-              { defaultLang },
-            )}
-          </div>
+          {/* Multi-language section header */}
+          <MultiLangInputsBanner
+            translations={translations}
+            languages={languages}
+            defaultLang={defaultLang}
+          />
 
           <div className="space-y-3">
             {languages.map((locale) => (
