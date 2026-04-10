@@ -40,7 +40,7 @@ export default function BuilderStepContent({
   const allRequiredDone = requiredSteps.every((s) => s === "done");
 
   return (
-    <section className="flex-1 min-w-0 p-4 sm:p-6">
+    <section className=" flex-1 min-w-0 p-4 sm:p-6">
       <Heading as="h2" className="text-xl font-semibold">
         {
           translations[
