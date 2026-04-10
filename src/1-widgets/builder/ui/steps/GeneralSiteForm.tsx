@@ -88,6 +88,13 @@ export default function GeneralSiteForm({
     );
   }
 
+  useEffect(() => {
+    const message = titleError ?? subtitleError ?? languageError ?? error;
+    if (message) {
+      notify.error(message);
+    }
+  }, [titleError, subtitleError, languageError, error]);
+
   function applyGeneralContent(res: GeneralContentState) {
     const normalizedDefaultLang: DefaultLanguageValue = res.languages.includes(
       res.default_lang,
@@ -310,7 +317,6 @@ export default function GeneralSiteForm({
       if (nextDefaultLang === "") {
         const message = getDefaultLanguageRemovedMessage();
         setLanguageError(message);
-        notify.error(message);
       } else {
         setLanguageError(null);
       }
@@ -417,7 +423,6 @@ export default function GeneralSiteForm({
     if (!isSelectedDefaultLanguage(defaultLang, languages)) {
       const message = getDefaultLanguageRequiredMessage();
       setLanguageError(message);
-      notify.error(message);
       return;
     }
 
@@ -686,25 +691,7 @@ export default function GeneralSiteForm({
           onUpgrade={() => router.push(`/${lang}/pricing`)}
         />
       </fieldset>
-      {/* Status */}
-      {titleError && (
-        <div className="text-sm text-(--builder-color-danger)">
-          {titleError}
-        </div>
-      )}
-      {subtitleError && (
-        <div className="text-sm text-(--builder-color-danger)">
-          {subtitleError}
-        </div>
-      )}
-      {languageError && (
-        <div className="text-sm text-(--builder-color-danger)">
-          {languageError}
-        </div>
-      )}
-      {error && (
-        <div className="text-sm text-(--builder-color-danger)">{error}</div>
-      )}
+      {/* Status handled via toast notifications */}
       {/* UPGRADE CTA MODAL */}
       <UpgradeCTAModal
         open={showUpgradeCTA && planType === "free"}
