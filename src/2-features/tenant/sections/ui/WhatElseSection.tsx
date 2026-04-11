@@ -3,6 +3,7 @@ import type {
   WhatToSeeEntryFull,
 } from "@/4-shared/types";
 import UnderlinedLink from "@/4-shared/ui/commons/link/UnderlinedLink";
+import { Heading } from "@/4-shared/ui/commons/typography/Heading";
 import SectionContainer from "@/4-shared/ui/tenant/section/SectionContainer";
 
 type WhatElseSectionProps = {
@@ -98,9 +99,12 @@ export default function WhatElseSection({
               key={it.id}
               className="p-4 border rounded-lg bg-neutral-50"
             >
-              <h3 className="font-semibold text-2xl text-neutral-800">
+              <Heading
+                as="h3"
+                className="font-semibold text-2xl text-neutral-800"
+              >
                 {titleText}
-              </h3>
+              </Heading>
               {descText && (
                 <p className="text-sm text-neutral-600 mt-2">{descText}</p>
               )}
