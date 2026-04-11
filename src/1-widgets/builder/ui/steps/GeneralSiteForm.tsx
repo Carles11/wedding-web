@@ -504,7 +504,7 @@ export default function GeneralSiteForm({
       setDefaultLang(prevDefault);
       setActiveLang(prevActive);
       notify.error(
-        translations["error.something_went_wrong"] ?? "Failed to save.",
+        translations["error.something_went_wrong"] ?? "Something went wrong.",
       );
     }
   };
@@ -544,10 +544,10 @@ export default function GeneralSiteForm({
       />
       {/* Title */}
       <div className="mt-8">
-        <label className="block text-md font-normal text-gray-700">
+        <p className=" pt-6 pb-3 text-gray-500">
           {translations["builder.general.form.label.main_title"] ??
             "Main title"}
-        </label>
+        </p>
         <input
           className="mt-1 block w-full rounded border px-3 py-2"
           value={content[activeLang]?.title ?? ""}
@@ -565,9 +565,9 @@ export default function GeneralSiteForm({
       </div>
       {/* Subtitle */}
       <div>
-        <label className="block text-md font-normal text-gray-700">
+        <p className=" pt-6 pb-3 text-gray-500">
           {translations["builder.general.form.label.subtitle"] ?? "Subtitle"}
-        </label>
+        </p>
         <textarea
           rows={3}
           className="mt-1 block w-full rounded border px-3 py-2"
@@ -585,7 +585,7 @@ export default function GeneralSiteForm({
       </div>
       {/* ── Font Selectors ─────────────────────────────────── */}
       <fieldset className="space-y-4 rounded-lg border border-gray-200 p-4 mt-6">
-        <legend className="px-2 text-md font-medium text-gray-700">
+        <legend className="pt-3 pb-3 text-gray-500">
           {translations["builder.fonts.section.title"] ?? "Typography"}
         </legend>
 

@@ -3,6 +3,7 @@ import { getTextForLang } from "@/4-shared/lib/getTextForLang";
 import type { TranslationDictionary } from "@/4-shared/types";
 
 import UnderlinedLink from "@/4-shared/ui/commons/link/UnderlinedLink";
+import { Heading } from "@/4-shared/ui/commons/typography/Heading";
 import SectionContainer from "@/4-shared/ui/tenant/section/SectionContainer";
 import Image from "next/image";
 
@@ -159,16 +160,19 @@ export default function ContactSection({
         dividerSize={120}
         dividerOpacity={0.055}
       >
-        <div className="relative z-10">
-          <div className="grid gap-6 md:grid-cols-2">
+        <div className="relative z-10 ">
+          <div className="grid gap-6 md:grid-cols-2 ">
             {people.map((p: ContactPerson, i: number) => (
               <div
                 key={i}
                 className="p-4 bg-white/80 dark:bg-neutral-900/70 rounded-lg shadow-sm border"
               >
-                <div className="text-lg font-semibold text-neutral-800 dark:text-neutral-100">
+                <Heading
+                  as="h3"
+                  className="font-semibold text-2xl text-neutral-800"
+                >
                   {p.name}
-                </div>
+                </Heading>
                 <div className="text-sm text-neutral-600 mt-2 space-y-1">
                   {p.email && (
                     <div>

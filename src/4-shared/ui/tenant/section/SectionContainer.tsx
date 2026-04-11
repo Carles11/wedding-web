@@ -39,7 +39,8 @@ export default function SectionContainer({
   children,
 }: SectionContainerProps) {
   const bgClass = variant === "muted" ? "bg-transparent" : "bg-white";
-  const innerBg = variant === "muted" ? "bg-white" : "bg-white";
+  const innerBg =
+    variant === "white" ? "bg-white" : "bg-white/60 backdrop-blur-sm";
   const motive = dividerMotive ?? "flower1";
   const motifClass = dividerClassName ?? "w-36 h-auto";
   const size = dividerSize ?? 120;
@@ -49,7 +50,7 @@ export default function SectionContainer({
     <section
       id={id}
       aria-labelledby={headingId}
-      className={`${bgClass} relative py-16 md:py-24`}
+      className={`${bgClass} relative py-16 md:py-24 `}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {withDivider && (
@@ -63,7 +64,7 @@ export default function SectionContainer({
           </div>
         )}
 
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-4xl mx-auto ">
           {(heading || subtitle) && (
             <header className="mb-6">
               {heading && (

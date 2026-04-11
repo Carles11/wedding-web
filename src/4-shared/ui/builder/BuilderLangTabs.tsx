@@ -21,8 +21,8 @@ export function BuilderLangTabs({
   return (
     <>
       <p className=" pt-6 pb-3 text-gray-500">
-        {translations["builder.languages.tabs.label"] ??
-          "These languages will be active on your wedding site:"}
+        {translations["builder.languages.tabs.edit_selection"] ??
+          "Select to edit the fields for each language:"}
       </p>
       <div className="flex flex-wrap gap-1.5 mb-6 bg-gray-50 rounded-xl w-fit border border-gray-100">
         {languages.map((lang) => {
