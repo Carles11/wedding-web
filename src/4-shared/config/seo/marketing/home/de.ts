@@ -4,7 +4,7 @@ export const seoMetadata: SitewideSEO = {
   marketing: {
     title: "WeddWeb - Erstelle in Minuten schöne Hochzeitswebsites",
     description:
-      "Erstelle mehrsprachige Hochzeitswebsites mit RSVP, Fotogalerien, eigener Domain und mehr. Mobilfreundlich, privat und einfach zu bedienen. Kostenloser Forever-Plan verfügbar. Kein Programmieraufwand nötig. Vertraut von Paaren weltweit.",
+      "Erstelle deine mehrsprachige Hochzeitswebsite fur immer mit nativem RTL, eigener Domain und starkem Datenschutz. Starte gratis in 11 Sprachen mit WeddWeb.",
     ogTitle: "WeddWeb - Schöne Hochzeitswebsites leicht gemacht",
     ogDescription:
       "Der einfachste Weg, deine perfekte Hochzeitswebsite zu erstellen",

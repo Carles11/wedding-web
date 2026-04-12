@@ -4,7 +4,7 @@ export const seoMetadata: SitewideSEO = {
   marketing: {
     title: "WeddWeb - Crea Pàgines Web de Casament Precioses en Minuts",
     description:
-      "Construeix llocs web de casament impressionants i multilingües amb RSVP, galeries de fotos, dominis personalitzats i més. Mòbil, privat i fàcil d'utilitzar. Pla gratuït per sempre. Sense necessitat de programar. Confiat per parelles d'arreu del món.",
+      "Crea el teu web de casament multilingue per sempre amb RTL natiu, domini propi i privacitat real. Llanca en 11 idiomes gratis amb WeddWeb, avui mateix.",
     ogTitle: "WeddWeb - Pàgines Web de Casament Precioses Fetes Fàcil",
     ogDescription:
       "La manera més fàcil de crear la pàgina web perfecta per al teu casament",
