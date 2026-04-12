@@ -1,16 +1,27 @@
 import {
   GOOGLE_SITE_VERIFICATION,
-  ICONS,
   THEME_COLOR,
 } from "@/4-shared/config/seo/meta";
 import { isValidLanguage } from "@/4-shared/helpers/isValidLanguage";
 import { allFontInstances } from "@/4-shared/lib/fonts/fontRegistry";
 import { generateGraphSchema } from "@/4-shared/lib/seo/generateGraphSchema";
 import { JsonLd } from "@/4-shared/lib/seo/JsonLd";
+import type { Metadata } from "next";
 // import { GoogleAnalytics } from "@next/third-parties/google";
 import { AnalyticsWithConsent } from "@/4-shared/ui/AnalyticsWithConsent";
 import { ReactNode } from "react";
 import "../globals.css";
+
+export const metadata: Metadata = {
+  icons: {
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
+  },
+};
 
 export default async function LangLayout({
   children,
@@ -33,9 +44,6 @@ export default async function LangLayout({
     >
       <head>
         <link rel="alternate" type="text/plain" href="/llms.txt" />
-        {ICONS.filter((icon) => icon.rel !== "manifest").map((icon, i) => (
-          <link key={i} {...icon} />
-        ))}
 
         <link
           rel="manifest"

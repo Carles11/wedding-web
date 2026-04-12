@@ -13,18 +13,10 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
       // ── Standard Search Engines (Google, Bing, Yandex) ──────────────────────
       {
         userAgent: "*",
-        allow: [
-          "/",
-          "/_next/static/", // ALLOW Google to see your CSS and JS for rendering
-          "/_next/image/", // ALLOW Google to see optimized Next.js images
-        ],
+        allow: "/",
         disallow: [
-          "/_next/", // Block the rest (JSON data, build manifests, etc.)
-          "/*/auth/",
-          "/*/builder/",
-          "/api/",
-          "/auth/",
-          "/builder/",
+          "/_next/data/", // Block ISR/SSR JSON payloads (duplicate content)
+          "/api/", // API routes — no HTML, must stay blocked
         ],
       },
 
@@ -60,7 +52,7 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
                 "/zh/",
                 "/ru/",
               ],
-              disallow: ["/*/auth/", "/*/builder/", "/api/"],
+              disallow: ["/api/"],
             }
           : {
               // Absolute block — protect tenant wedding data from AI training

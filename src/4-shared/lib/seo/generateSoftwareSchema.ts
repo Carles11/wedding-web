@@ -43,6 +43,7 @@ export function generateSoftwareSchema(
     name: "WeddWeb",
     operatingSystem: "All",
     applicationCategory: "BusinessApplication",
+    applicationSubCategory: "WeddingApplication",
     description:
       translations["marketing.hero.subheadline"] ||
       "WeddWeb is a multilingual wedding website platform. Build a beautiful, AI-ready site in 11 languages with sub-second performance, custom domains, and global accessibility.",
@@ -50,6 +51,14 @@ export function generateSoftwareSchema(
     datePublished: SITE_LAUNCH_DATE,
     dateModified: today,
     inLanguage: lang,
+    image: "https://weddweb.com/assets/og/weddweb-OG.png",
+    screenshot: [
+      {
+        "@type": "ImageObject",
+        url: "https://weddweb.com/assets/og/weddweb-OG.png",
+        caption: "WeddWeb — Multilingual Wedding Website Platform",
+      },
+    ],
     // Relationship: this software is provided by the Organization
     provider: { "@id": "https://weddweb.com/#organization" },
     featureList: uniqueFeatures,

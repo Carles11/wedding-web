@@ -642,6 +642,11 @@ export default function ProgramEventsBuilderStep({
         });
       }
 
+      notify.success(
+        translations["builder.general.form.save_success"] ||
+          "Saved successfully.",
+      );
+
       clearForm();
       refresh();
     } catch (err: unknown) {

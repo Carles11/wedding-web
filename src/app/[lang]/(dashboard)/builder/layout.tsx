@@ -4,8 +4,29 @@ import { fetchMarketingTranslations } from "@/4-shared/api/marketing";
 import { isValidLanguage } from "@/4-shared/helpers/isValidLanguage";
 import { Footer } from "@/4-shared/ui/commons/footer/Footer";
 import { PlanProvider, ToastProvider } from "@/app/providers";
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { ReactNode } from "react";
+
+/**
+ * Builder Layout — NoIndex Layer
+ *
+ * Replaces the former robots.txt hard-block for /builder/ routes.
+ * Crawlers can now reach these pages (clearing Bing "blocked by robots.txt"
+ * warnings), but are instructed not to index or follow any links.
+ */
+export const metadata: Metadata = {
+  robots: {
+    index: false,
+    follow: false,
+    nocache: true,
+    googleBot: {
+      index: false,
+      follow: false,
+      noimageindex: true,
+    },
+  },
+};
 
 type DashboardLayoutProps = {
   children: ReactNode;
