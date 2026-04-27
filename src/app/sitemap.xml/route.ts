@@ -1,6 +1,7 @@
+// Ensure Vercel/Next.js does not cache this route and respects custom headers
+export const dynamic = "force-dynamic";
+import { sitemapResponse } from "@/4-shared/lib/seo/sitemapResponse";
 import { headers } from "next/headers";
-import { NextResponse } from "next/server";
-// We import the GET logic from the tenant file to reuse it here
 import { GET as getTenantSitemap } from "../sitemap-tenant.xml/route";
 
 const baseUrl = "https://weddweb.com";
@@ -23,9 +24,7 @@ export async function GET(request: Request) {
         </sitemap>
       </sitemapindex>`;
 
-    return new NextResponse(xml, {
-      headers: { "Content-Type": "application/xml" },
-    });
+    return sitemapResponse(xml);
   }
 
   // If it's a custom domain (maria-and-pablo.com),

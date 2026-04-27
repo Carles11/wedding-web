@@ -1,5 +1,7 @@
+// Ensure Vercel/Next.js does not cache this route and respects custom headers
+export const dynamic = "force-dynamic";
 import { SUPPORTED_LANGUAGES } from "@/4-shared/config/i18n";
-import { NextResponse } from "next/server";
+import { sitemapResponse } from "@/4-shared/lib/seo/sitemapResponse";
 
 const baseUrl = "https://weddweb.com";
 function getW3CDate() {
@@ -67,7 +69,5 @@ export async function GET() {
 
   const xml = `<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\" xmlns:xhtml=\"http://www.w3.org/1999/xhtml\">\n${urls.join("\n")}\n</urlset>`;
 
-  return new NextResponse(xml, {
-    headers: { "Content-Type": "application/xml" },
-  });
+  return sitemapResponse(xml);
 }

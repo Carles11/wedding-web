@@ -1,5 +1,7 @@
+// Ensure Vercel/Next.js does not cache this route and respects custom headers
+export const dynamic = "force-dynamic";
+import { sitemapResponse } from "@/4-shared/lib/seo/sitemapResponse";
 import { createSupabaseSSRClient } from "@/4-shared/lib/supabase/server";
-import { NextResponse } from "next/server";
 
 function escapeXml(unsafe: string) {
   return unsafe.replace(/[<>&'\"]/g, function (c) {
@@ -31,10 +33,7 @@ export async function GET(request: Request) {
     .single();
 
   if (error || !site) {
-    return new NextResponse("<error>Tenant not found</error>", {
-      status: 404,
-      headers: { "Content-Type": "application/xml" },
-    });
+    return sitemapResponse("<error>Tenant not found</error>", 404);
   }
 
   const siteLangs =
@@ -63,7 +62,5 @@ export async function GET(request: Request) {
 
   const xml = `<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\" xmlns:xhtml=\"http://www.w3.org/1999/xhtml\">\n${urls.join("\n")}\n</urlset>`;
 
-  return new NextResponse(xml, {
-    headers: { "Content-Type": "application/xml" },
-  });
+  return sitemapResponse(xml);
 }
