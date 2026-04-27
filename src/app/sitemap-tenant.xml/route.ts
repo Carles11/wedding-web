@@ -61,6 +61,7 @@ export async function GET(request: Request) {
     )
     .eq("seo_enabled", true);
 
+  console.log("[SITEMAP] Supabase error:", sitesError);
   console.log("raw host:", host);
   console.log("normalized host:", normalizedHost);
   console.log(
