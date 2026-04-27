@@ -22,11 +22,19 @@ function escapeXml(unsafe: string) {
   });
 }
 
+function normalizeHost(host: string): string {
+  let h = host.trim().toLowerCase();
+  // Remove www. if present
+  if (h.startsWith("www.")) h = h.slice(4);
+  return h;
+}
+
 function getSubdomainFromHost(host: string): string | null {
   // e.g., inesundcarles.weddweb.com -> inesundcarles
   const mainDomain = "weddweb.com";
   if (host.endsWith(mainDomain)) {
     const parts = host.split(".");
+    // classic "foo.weddweb.com"
     if (parts.length === 3 && parts[1] === "weddweb" && parts[2] === "com") {
       return parts[0];
     }
@@ -36,28 +44,37 @@ function getSubdomainFromHost(host: string): string | null {
 
 export async function GET(request: Request) {
   const host = request.headers.get("host")?.toLowerCase() || "";
+  const normalizedHost = normalizeHost(host);
   const supabase = await createSupabaseSSRClient();
 
-  // Try custom domain match first
-  let { data: site, error } = await supabase
+  // Fetch all SEO tenants up front
+  const { data: sites, error: sitesError } = await supabase
     .from("sites")
-    .select("languages, default_lang, updated_at, seo_enabled")
-    .contains("domains", [host])
-    .eq("seo_enabled", true)
-    .single();
+    .select(
+      "domains, subdomain, languages, default_lang, updated_at, seo_enabled",
+    )
+    .eq("seo_enabled", true);
 
-  // If not found, try subdomain match
+  if (!sites || sites.length === 0) {
+    return sitemapResponse("<error>No tenants found</error>", 404);
+  }
+
+  // Try exact custom domain match (normalized)
+  let site = sites.find(
+    (s) =>
+      Array.isArray(s.domains) &&
+      s.domains.map((d: string) => normalizeHost(d)).includes(normalizedHost),
+  );
+
+  // Fallback: try subdomain match
   if (!site) {
-    const subdomain = getSubdomainFromHost(host);
+    const subdomain = getSubdomainFromHost(normalizedHost);
     if (subdomain) {
-      const { data, error: subErr } = await supabase
-        .from("sites")
-        .select("languages, default_lang, updated_at, seo_enabled")
-        .eq("subdomain", subdomain)
-        .eq("seo_enabled", true)
-        .single();
-      site = data;
-      error = subErr;
+      site = sites.find(
+        (s) =>
+          typeof s.subdomain === "string" &&
+          s.subdomain.toLowerCase() === subdomain,
+      );
     }
   }
 
@@ -80,16 +97,25 @@ export async function GET(request: Request) {
   const urls = siteLangs.map((lang) => {
     const loc = `https://${escapeXml(host)}/${lang}`;
     const alternates = [
-      `<xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://${escapeXml(host)}/${defaultLang}\" />`,
+      `<xhtml:link rel="alternate" hreflang="x-default" href="https://${escapeXml(host)}/${defaultLang}" />`,
       ...siteLangs.map(
         (l) =>
-          `<xhtml:link rel=\"alternate\" hreflang=\"${l}\" href=\"https://${escapeXml(host)}/${l}\" />`,
+          `<xhtml:link rel="alternate" hreflang="${l}" href="https://${escapeXml(host)}/${l}" />`,
       ),
     ].join("");
-    return `<url>\n<loc>${loc}</loc>\n<lastmod>${lastMod}</lastmod>\n<changefreq>weekly</changefreq>\n<priority>1.0</priority>\n${alternates}\n</url>`;
+    return `<url>
+<loc>${loc}</loc>
+<lastmod>${lastMod}</lastmod>
+<changefreq>weekly</changefreq>
+<priority>1.0</priority>
+${alternates}
+</url>`;
   });
 
-  const xml = `<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\" xmlns:xhtml=\"http://www.w3.org/1999/xhtml\">\n${urls.join("\n")}\n</urlset>`;
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+${urls.join("\n")}
+</urlset>`;
 
   return sitemapResponse(xml);
 }
