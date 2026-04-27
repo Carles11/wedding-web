@@ -9,7 +9,7 @@ import { createClient, SupabaseClient } from "@supabase/supabase-js";
  *
  * DO NOT use for: Client-side code, tenant-specific queries
  */
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 // console.log("all variables", {
 //   SUPABASE_URL,

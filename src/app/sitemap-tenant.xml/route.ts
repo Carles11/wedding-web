@@ -42,6 +42,12 @@ function getSubdomainFromHost(host: string): string | null {
   return null;
 }
 
+console.log("[SITEMAP] SUPABASE_URL", process.env.SUPABASE_URL);
+console.log(
+  "[SITEMAP] SUPABASE_SERVICE_ROLE_KEY",
+  Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY),
+);
+
 export async function GET(request: Request) {
   const host = request.headers.get("host")?.toLowerCase() || "";
   const normalizedHost = normalizeHost(host);
