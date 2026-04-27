@@ -59,6 +59,9 @@ export async function GET(request: Request) {
     return sitemapResponse("<error>No tenants found</error>", 404);
   }
 
+  console.log("Sitemap host:", host, "normalized:", normalizedHost);
+  console.log("Supabase sites:", sites, "error:", sitesError);
+
   // Try exact custom domain match (normalized)
   let site = sites.find(
     (s) =>
