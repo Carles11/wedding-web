@@ -57,7 +57,7 @@ export async function GET(request: Request) {
   const { data: sites, error: sitesError } = await supabase
     .from("sites")
     .select(
-      "domains, subdomain, languages, default_lang, updated_at, seo_enabled",
+      "domains, subdomain, languages, default_lang, last_activity_at, seo_enabled",
     )
     .eq("seo_enabled", true);
 
@@ -114,8 +114,8 @@ export async function GET(request: Request) {
     Array.isArray(site.languages) && site.languages.length > 0
       ? site.languages
       : ["en"];
-  const lastMod = site.updated_at
-    ? new Date(site.updated_at).toISOString().split("T")[0]
+  const lastMod = site.last_activity_at
+    ? new Date(site.last_activity_at).toISOString().split("T")[0]
     : new Date().toISOString().split("T")[0];
 
   // x-default uses the site's actual default language (matches <head> hreflang)

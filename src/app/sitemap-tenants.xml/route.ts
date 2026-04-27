@@ -26,7 +26,7 @@ export async function GET() {
   const supabase = await createSupabaseSSRClient();
   const { data: sites, error } = await supabase
     .from("sites")
-    .select("domains, languages, default_lang, updated_at, seo_enabled")
+    .select("domains, languages, default_lang, last_activity_at , seo_enabled")
     .eq("seo_enabled", true);
 
   if (error) {
@@ -40,8 +40,8 @@ export async function GET() {
         ? site.languages
         : ["en"];
     const defaultLang = site.default_lang || "en";
-    const lastMod = site.updated_at
-      ? new Date(site.updated_at).toISOString().split("T")[0]
+    const lastMod = site.last_activity_at
+      ? new Date(site.last_activity_at).toISOString().split("T")[0]
       : new Date().toISOString().split("T")[0];
 
     return site.domains.flatMap((domain: string) =>
