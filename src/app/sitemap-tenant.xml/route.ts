@@ -55,12 +55,30 @@ export async function GET(request: Request) {
     )
     .eq("seo_enabled", true);
 
+  console.log("raw host:", host);
+  console.log("normalized host:", normalizedHost);
+  console.log(
+    "Supabase sites:",
+    sites &&
+      sites.map((s) => ({
+        domains: s.domains,
+        subdomain: s.subdomain,
+      })),
+  );
+
+  if (sites) {
+    for (const s of sites) {
+      console.log(
+        "Checking tenant:",
+        s.subdomain,
+        s.domains.map((d: string) => normalizeHost(d)),
+      );
+    }
+  }
+
   if (!sites || sites.length === 0) {
     return sitemapResponse("<error>No tenants found</error>", 404);
   }
-
-  console.log("Sitemap host:", host, "normalized:", normalizedHost);
-  console.log("Supabase sites:", sites, "error:", sitesError);
 
   // Try exact custom domain match (normalized)
   let site = sites.find(
