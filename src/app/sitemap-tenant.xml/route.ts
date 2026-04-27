@@ -22,17 +22,46 @@ function escapeXml(unsafe: string) {
   });
 }
 
+function getSubdomainFromHost(host: string): string | null {
+  // e.g., inesundcarles.weddweb.com -> inesundcarles
+  const mainDomain = "weddweb.com";
+  if (host.endsWith(mainDomain)) {
+    const parts = host.split(".");
+    if (parts.length === 3 && parts[1] === "weddweb" && parts[2] === "com") {
+      return parts[0];
+    }
+  }
+  return null;
+}
+
 export async function GET(request: Request) {
-  const host = request.headers.get("host") || "";
+  const host = request.headers.get("host")?.toLowerCase() || "";
   const supabase = await createSupabaseSSRClient();
-  const { data: site, error } = await supabase
+
+  // Try custom domain match first
+  let { data: site, error } = await supabase
     .from("sites")
     .select("languages, default_lang, updated_at, seo_enabled")
     .contains("domains", [host])
     .eq("seo_enabled", true)
     .single();
 
-  if (error || !site) {
+  // If not found, try subdomain match
+  if (!site) {
+    const subdomain = getSubdomainFromHost(host);
+    if (subdomain) {
+      const { data, error: subErr } = await supabase
+        .from("sites")
+        .select("languages, default_lang, updated_at, seo_enabled")
+        .eq("subdomain", subdomain)
+        .eq("seo_enabled", true)
+        .single();
+      site = data;
+      error = subErr;
+    }
+  }
+
+  if (!site) {
     return sitemapResponse("<error>Tenant not found</error>", 404);
   }
 
