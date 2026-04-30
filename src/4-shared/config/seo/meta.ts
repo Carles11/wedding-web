@@ -32,7 +32,7 @@ export const ORGANIZATION_JSONLD = {
   contactPoint: {
     "@type": "ContactPoint",
     contactType: "customer support",
-    email: "support@weddweb.com",
+    email: "carles@rio-frances.com",
   },
 
   // --- Social footprint ---
