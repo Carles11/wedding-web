@@ -38,9 +38,9 @@ export const ORGANIZATION_JSONLD = {
   // --- Social footprint ---
   sameAs: [
     "https://www.facebook.com/weddweb",
-    "https://www.instagram.com/weddweb",
-    "https://twitter.com/weddweb",
-    "https://www.linkedin.com/company/weddweb",
+    "https://x.com/weddweb_com",
+    "https://www.linkedin.com/company/weddweb/",
+    "https://www.tiktok.com/@weddweb_com",
   ],
 
   // Relationship: closes the triangle — Org → Software → Org, WebSite → Org

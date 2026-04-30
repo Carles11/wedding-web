@@ -34,6 +34,95 @@ export function Footer({
         color: "var(--foreground)",
       }}
     >
+      {/* Social Profile Links */}
+      <nav
+        aria-label="Social profiles"
+        className="mb-8 flex flex-wrap gap-4 items-center justify-center"
+      >
+        <a
+          href="https://www.facebook.com/weddweb"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Facebook"
+          title="Facebook"
+          className="hover:opacity-80 focus-visible:ring-2 rounded-full p-2"
+        >
+          <svg
+            width="24"
+            height="24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path d="M17 2.5h-2.5A4.5 4.5 0 0 0 10 7v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1H17V2.5Z" />
+          </svg>
+        </a>
+        <a
+          href="https://x.com/weddweb_com"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="X / Twitter"
+          title="X / Twitter"
+          className="hover:opacity-80 focus-visible:ring-2 rounded-full p-2"
+        >
+          <svg
+            width="24"
+            height="24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path d="M3 3l18 18M21 3L3 21" />
+          </svg>
+        </a>
+
+        <a
+          href="https://www.linkedin.com/company/weddweb/"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="LinkedIn"
+          title="LinkedIn"
+          className="hover:opacity-80 focus-visible:ring-2 rounded-full p-2"
+        >
+          <svg
+            width="24"
+            height="24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <rect x="2" y="2" width="20" height="20" rx="2" />
+            <path d="M7 10v7M7 7v.01M12 17v-4a2 2 0 0 1 4 0v4" />
+          </svg>
+        </a>
+
+        <a
+          href="https://www.tiktok.com/@weddweb_com"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="TikTok"
+          title="TikTok"
+          className="hover:opacity-80 focus-visible:ring-2 rounded-full p-2"
+        >
+          <svg
+            width="24"
+            height="24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path d="M9 17a4 4 0 1 1 0-8v8Zm0 0V7m6 0v10a4 4 0 1 0 4-4" />
+          </svg>
+        </a>
+      </nav>
       <style>{`
         .footer-nav-link { color: var(--builder-color-text-muted); text-decoration: none; transition: color 0.2s; }
         .footer-nav-link:hover { color: var(--marketing-color-primary); }

@@ -9,6 +9,11 @@ import type {
   ShareTarget,
 } from "@/4-shared/types";
 import { BuilderButton } from "@/4-shared/ui/builder";
+import {
+  FacebookIcon,
+  WhatsappIcon,
+  Xtwitter,
+} from "@/4-shared/ui/commons/icons/social";
 import MainModal from "@/4-shared/ui/commons/modals/MainModal";
 import { ShareTargetCard } from "@/4-shared/ui/commons/share/shareTargetCard";
 import { copyToClipboard } from "@/4-shared/utils/copyToClipboard";
@@ -113,7 +118,6 @@ export default function DomainAndBillingBuilderStep({
 
   const handleNativeShare = async (target: ShareTarget) => {
     if (!target.url) return;
-
     if (typeof navigator !== "undefined" && navigator.share) {
       try {
         await navigator.share({
@@ -126,8 +130,51 @@ export default function DomainAndBillingBuilderStep({
         if (error instanceof Error && error.name === "AbortError") return;
       }
     }
-
     await handleCopyLink(target.url);
+  };
+
+  // Social share URLs
+  const getSocialShareLinks = (target: ShareTarget) => {
+    const url = encodeURIComponent(target.url || "");
+    const text = encodeURIComponent(target.shareText || "");
+    return [
+      {
+        id: "facebook",
+        label: "Facebook",
+        icon: <FacebookIcon className="w-4.5 h-4.5" />,
+        url: `https://www.facebook.com/sharer/sharer.php?u=${url}`,
+      },
+      {
+        id: "twitter",
+        label: "X / Twitter",
+        icon: <Xtwitter className="w-4.5 h-4.5" />,
+        url: `https://x.com/intent/tweet?url=${url}&text=${text}`,
+      },
+      {
+        id: "whatsapp",
+        label: "WhatsApp",
+        icon: <WhatsappIcon className="w-4.5 h-4.5" />,
+        url: `https://wa.me/?text=${text}%20${url}`,
+      },
+      // LinkedIn icon not present in shared library; fallback to text only
+      {
+        id: "linkedin",
+        label: "LinkedIn",
+        icon: <span className="inline-block w-4.5 h-4.5 align-middle">in</span>,
+        url: `https://www.linkedin.com/shareArticle?url=${url}&title=${text}`,
+      },
+      // {
+      //   id: "email",
+      //   label: "Email",
+      //   icon: (
+      //     <MailIcon
+      //       className="w-4.5 h-4.5"
+      //       href={`mailto:?subject=${text}&body=${url}`}
+      //     />
+      //   ),
+      //   url: `mailto:?subject=${text}&body=${url}`,
+      // },
+    ];
   };
 
   return (
@@ -200,13 +247,35 @@ export default function DomainAndBillingBuilderStep({
           </p>
 
           {shareTargets.map((target) => (
-            <ShareTargetCard
-              key={target.id}
-              target={target}
-              translations={translations}
-              onShare={handleNativeShare}
-              onCopy={handleCopyLink}
-            />
+            <div key={target.id} className="mb-6">
+              <ShareTargetCard
+                target={target}
+                translations={translations}
+                onShare={handleNativeShare}
+                onCopy={handleCopyLink}
+              />
+              {/* Social share buttons */}
+              {target.url && (
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {getSocialShareLinks(target).map((share) => (
+                    <a
+                      key={share.id}
+                      href={share.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={share.label}
+                      title={share.label}
+                      className="inline-flex items-center gap-1 px-3 py-1 rounded-lg border border-gray-200 bg-white text-xs font-medium text-gray-700 hover:bg-gray-50 focus-visible:ring-2"
+                    >
+                      {share.icon}
+                      <span className="sr-only md:not-sr-only">
+                        {share.label}
+                      </span>
+                    </a>
+                  ))}
+                </div>
+              )}
+            </div>
           ))}
         </div>
       </MainModal>
