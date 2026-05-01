@@ -4,7 +4,7 @@ export const seoMetadata: SitewideSEO = {
   marketing: {
     title: "WeddWeb - 常见问题 | 婚礼网站帮助",
     description:
-      "查找关于 WeddWeb 婚礼网站、RSVP、隐私、个性化等常见问题的答案。支持多语言。",
+      "查看 WeddWeb 婚礼网站常见问题，了解价格、语言支持、隐私保护、自定义域名、搜索可见性、站点设置、发布流程与宾客访问体验，帮助你在上线前比较方案、确认功能范围，同时提前理解多语言展示、页面管理、礼物信息、住宿建议、搜索设置与常见使用限制，适合准备邀请页、故事介绍和出行说明的新人参考，更稳妥些。",
     ogTitle: "WeddWeb FAQ - 所有婚礼网站问题解答",
     ogDescription: "获取使用 WeddWeb 构建完美婚礼网站的帮助和技巧。",
     ogImage: "/assets/og/weddweb-OG.png",

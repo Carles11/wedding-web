@@ -4,7 +4,7 @@ export const seoMetadata: SitewideSEO = {
   marketing: {
     title: "Mehrsprachige Hochzeitswebsite Erstellen | 11 Sprachen & RTL",
     description:
-      "Erstellen Sie eine professionelle Hochzeitswebsite in 11 Sprachen mit nativem RTL-Support. Automatische Spracherkennung und absolute Privatsphäre.",
+      "Erstellen Sie eine WeddWeb-Hochzeitswebsite in 11 Sprachen mit nativer Skriptunterstützung, RTL, Auto-Spracherkennung und datenschutzorientiertem Hosting.",
     ogTitle: "Native mehrsprachige Hochzeitswebsite-Plattform | WeddWeb",
     ogDescription:
       "Von Arabisch bis Chinesisch: Bieten Sie Ihren Gästen eine Hochzeitswebsite mit nativer Skript-Unterstützung. Hochleistung, werbefrei.",

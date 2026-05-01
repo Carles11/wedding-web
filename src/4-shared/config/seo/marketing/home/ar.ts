@@ -4,7 +4,7 @@ export const seoMetadata: SitewideSEO = {
   marketing: {
     title: "WeddWeb - أنشئ مواقع زفاف جميلة في دقائق",
     description:
-      "أنشئ موقع زفافك مع WeddWeb: 11 لغة، دعم RTL، نطاق مخصص وخصوصية أولاً. ابدأ مجاناً اليوم.",
+      "أنشئ موقع زفاف جميل مع WeddWeb خلال دقائق، مع 11 لغة ودعم RTL ونطاق مخصص وتفاصيل يومك واستضافة تضع الخصوصية أولاً، ليصل كل ضيف إلى المعلومات بوضوح تام.",
     ogTitle: "WeddWeb - مواقع زفاف جميلة بسهولة",
     ogDescription: "أسهل طريقة لإنشاء موقع زفاف مثالي لك",
     ogImage: "/assets/og/weddweb-OG.png",

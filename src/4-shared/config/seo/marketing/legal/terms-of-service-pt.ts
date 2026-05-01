@@ -4,7 +4,7 @@ export const seoMetadata: SitewideSEO = {
   marketing: {
     title: "Termos de Serviço | WeddWeb",
     description:
-      "Consulte os Termos de Serviço da WeddWeb para conhecer seus direitos e responsabilidades ao usar nossa plataforma de casamentos. Clareza, transparência e proteção legal para todos os usuários.",
+      "Consulte os Termos de Serviço da WeddWeb para compreender regras de uso, direitos, responsabilidades e como tratamos acesso, conteúdo, pagamentos e obrigações legais.",
     ogTitle: "Termos de Serviço WeddWeb",
     ogDescription:
       "Seus direitos e obrigações ao usar a WeddWeb. Plataforma de casamentos segura e transparente.",

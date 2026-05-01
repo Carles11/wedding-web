@@ -4,7 +4,7 @@ export const seoMetadata: SitewideSEO = {
   marketing: {
     title: "WeddWeb - मिनटों में खूबसूरत वेडिंग वेबसाइट बनाएं",
     description:
-      "WeddWeb पर wedding site बनाएं: 11 languages, native RTL, custom domain और privacy-first hosting. आज free launch करें।",
+      "WeddWeb के साथ मिनटों में खूबसूरत वेडिंग वेबसाइट बनाएं, 11 भाषाएं, native RTL, custom domain, आयोजन विवरण और private hosting ताकि मेहमान जानकारी आसानी से पढ़ें।",
     ogTitle: "WeddWeb - खूबसूरत वेडिंग वेबसाइट्स को आसान बनाएं",
     ogDescription: "अपनी परफेक्ट वेडिंग वेबसाइट बनाने का सबसे आसान तरीका",
     ogImage: "/assets/og/weddweb-OG.png",

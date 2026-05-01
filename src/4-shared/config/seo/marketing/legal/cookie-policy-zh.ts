@@ -4,7 +4,7 @@ export const seoMetadata: SitewideSEO = {
   marketing: {
     title: "Cookie 政策 | WeddWeb",
     description:
-      "了解 WeddWeb 如何使用 Cookie 来提升您的体验并保护您的隐私。关于 Cookie 及类似技术的完全透明说明。",
+      "阅读 WeddWeb 的 Cookie 政策，了解我们使用哪些 Cookie 与类似技术、各自用途、保存时间，以及您如何管理同意、偏好设置、分析选项与浏览器控制。页面也会说明必要 Cookie 与可选 Cookie 的区别，以及如何更新授权与站点设置，帮助您更清楚地管理隐私选择与站点体验，更安心些。",
     ogTitle: "WeddWeb Cookie 政策",
     ogDescription:
       "WeddWeb 如何使用 Cookie 并保护您的隐私。GDPR 合规与透明度。",

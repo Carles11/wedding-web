@@ -4,7 +4,7 @@ export const seoMetadata: SitewideSEO = {
   marketing: {
     title: "WeddWeb Pricing - How Much Does a Wedding Website Cost?",
     description:
-      "See WeddWeb's transparent pricing for wedding websites. Compare free and premium plans, features, and value. No hidden fees. Start your wedding website for free!",
+      "Compare WeddWeb pricing for free and premium wedding websites, multilingual publishing, custom domains, and long-term value with limits and no surprise fees.",
     ogTitle: "WeddWeb Pricing - Affordable Wedding Websites for Every Couple",
     ogDescription:
       "Discover the cost of building your wedding website with WeddWeb. Flexible plans for every need.",

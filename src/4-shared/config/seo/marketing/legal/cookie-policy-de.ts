@@ -4,7 +4,7 @@ export const seoMetadata: SitewideSEO = {
   marketing: {
     title: "Cookie-Richtlinie | WeddWeb",
     description:
-      "Erfahren Sie, wie WeddWeb Cookies verwendet, um Ihr Erlebnis zu verbessern und Ihre Privatsphäre zu schützen. Volle Transparenz über die Verwendung von Cookies und ähnlichen Technologien.",
+      "Lesen Sie die Cookie-Richtlinie von WeddWeb, um zu erfahren, welche Cookies und ähnlichen Technologien wir nutzen, warum und wie Sie Einwilligungen verwalten.",
     ogTitle: "WeddWeb Cookie-Richtlinie",
     ogDescription:
       "Wie WeddWeb Cookies verwendet und Ihre Privatsphäre schützt. DSGVO-Konformität und Transparenz.",

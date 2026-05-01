@@ -4,7 +4,7 @@ export const seoMetadata: SitewideSEO = {
   marketing: {
     title: "Cookie Policy | WeddWeb",
     description:
-      "Learn how WeddWeb uses cookies to enhance your experience and protect your privacy. Full transparency on the use of cookies and similar technologies.",
+      "Read WeddWeb's Cookie Policy to learn which cookies and similar technologies we use, why we use them, and how you can manage consent settings and preferences.",
     ogTitle: "WeddWeb Cookie Policy",
     ogDescription:
       "How WeddWeb uses cookies and protects your privacy. GDPR compliance and transparency.",

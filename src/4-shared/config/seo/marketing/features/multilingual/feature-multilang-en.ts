@@ -4,7 +4,7 @@ export const seoMetadata: SitewideSEO = {
   marketing: {
     title: "Multilingual Wedding Website Builder | Native RTL & 11 Languages",
     description:
-      "Create a professional wedding website in 11 languages with native RTL support. Edge-computed locale detection and absolute privacy for your international guests.",
+      "Build a WeddWeb wedding website in 11 languages with native script support, RTL handling, automatic locale detection, and privacy-first hosting for guests.",
     ogTitle: "Native Multilingual Wedding Website Platform | WeddWeb",
     ogDescription:
       "From Arabic (RTL) to Hindi and Chinese: serve your global guests with a script-aware wedding website. High performance, zero ads, 100% privacy.",

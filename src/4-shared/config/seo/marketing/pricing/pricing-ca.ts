@@ -4,7 +4,7 @@ export const seoMetadata: SitewideSEO = {
   marketing: {
     title: "Preus WeddWeb - Quant costa una web de casament?",
     description:
-      "Consulta els preus transparents de WeddWeb per a webs de casament. Compara plans gratuïts i premium, característiques i valor. Comença gratis la teva web de casament!",
+      "Compara els preus de WeddWeb per a webs de casament gratuïtes i premium, dominis propis, publicació multilingüe i valor a llarg termini amb límits clars.",
     ogTitle: "Preus WeddWeb - Webs de casament assequibles per a tothom",
     ogDescription:
       "Descobreix el cost de crear la teva web de casament amb WeddWeb. Plans flexibles per a cada parella.",

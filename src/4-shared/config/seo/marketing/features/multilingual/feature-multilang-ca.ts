@@ -4,7 +4,7 @@ export const seoMetadata: SitewideSEO = {
   marketing: {
     title: "Creador de Webs de Boda Multilingües | 11 Idiomes i RTL Natiu",
     description:
-      "Crea una web de boda professional en 11 idiomes amb suport RTL natiu. Detecció d'idioma automàtica i privadesa absoluta per als teus convidats.",
+      "Crea una web de casament WeddWeb en 11 idiomes amb suport natiu d'escriptures, RTL, detecció automàtica d'idioma i allotjament centrat en la privacitat.",
     ogTitle: "Plataforma de Webs de Boda Multilingües Nativa | WeddWeb",
     ogDescription:
       "Des d'àrab (RTL) fins a hindi i xinès: ofereix als teus convidats una web de boda amb suport natiu d'alfabets. Alt rendiment, sense anuncis.",

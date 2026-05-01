@@ -3,6 +3,19 @@ const nextConfig = {
   // 1. Move reactCompiler to the top level as requested by the warning
   reactCompiler: true,
 
+  async headers() {
+    return [
+      {
+        source: "/llms.txt",
+        headers: [{ key: "X-Robots-Tag", value: "noindex, noarchive" }],
+      },
+      {
+        source: "/llms-full.txt",
+        headers: [{ key: "X-Robots-Tag", value: "noindex, noarchive" }],
+      },
+    ];
+  },
+
   // 2. Remove 'productionBrowserSourceMaps' if it's still causing issues,
   // or just omit it (it defaults to false).
 

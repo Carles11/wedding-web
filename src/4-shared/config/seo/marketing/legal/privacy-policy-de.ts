@@ -4,7 +4,7 @@ export const seoMetadata: SitewideSEO = {
   marketing: {
     title: "Datenschutzerklärung | WeddWeb",
     description:
-      "Lesen Sie die Datenschutzerklärung von WeddWeb, um zu erfahren, wie wir Ihre Daten schützen und globale Vorschriften einhalten. Transparent, DSGVO-konform und datenschutzorientiert.",
+      "Lesen Sie die Datenschutzrichtlinie von WeddWeb, um zu erfahren, wie wir Daten erfassen, nutzen und schützen, welche Rechte Sie haben und wie wir Vorschriften einhalten.",
     ogTitle: "WeddWeb Datenschutzerklärung",
     ogDescription:
       "Wie WeddWeb Ihre Privatsphäre und Daten schützt. DSGVO, CCPA und globale Compliance.",

@@ -4,7 +4,7 @@ export const seoMetadata: SitewideSEO = {
   marketing: {
     title: "Política de galetes | WeddWeb",
     description:
-      "Descobreix com WeddWeb utilitza galetes per millorar la teva experiència i protegir la teva privadesa. Transparència total sobre l'ús de galetes i tecnologies similars.",
+      "Llegeix la Política de Cookies de WeddWeb per saber quines galetes i tecnologies similars fem servir, per què, i com pots gestionar consentiment i preferències.",
     ogTitle: "Política de galetes WeddWeb",
     ogDescription:
       "Com WeddWeb utilitza galetes i protegeix la teva privadesa. Compliment del RGPD i transparència.",

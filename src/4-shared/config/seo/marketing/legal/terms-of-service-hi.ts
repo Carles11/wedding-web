@@ -4,7 +4,7 @@ export const seoMetadata: SitewideSEO = {
   marketing: {
     title: "सेवा की शर्तें | WeddWeb",
     description:
-      "WeddWeb की सेवा की शर्तें पढ़ें और जानें कि हमारी शादी प्लेटफ़ॉर्म का उपयोग करते समय आपके अधिकार और जिम्मेदारियाँ क्या हैं। स्पष्टता, पारदर्शिता और सभी उपयोगकर्ताओं के लिए कानूनी सुरक्षा।",
+      "WeddWeb की सेवा शर्तें पढ़ें और समझें कि platform use के नियम, आपके अधिकार, जिम्मेदारियां, access, content, payment और legal obligations कैसे तय किए जाते हैं।",
     ogTitle: "WeddWeb सेवा की शर्तें",
     ogDescription:
       "WeddWeb का उपयोग करते समय आपके अधिकार और दायित्व। सुरक्षित और पारदर्शी शादी प्लेटफ़ॉर्म।",

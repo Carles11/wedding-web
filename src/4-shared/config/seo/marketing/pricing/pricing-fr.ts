@@ -4,7 +4,7 @@ export const seoMetadata: SitewideSEO = {
   marketing: {
     title: "Tarifs WeddWeb - Combien coûte un site de mariage ?",
     description:
-      "Découvrez les tarifs transparents de WeddWeb pour les sites de mariage. Comparez les plans gratuits et premium, les fonctionnalités et la valeur. Commencez gratuitement votre site de mariage !",
+      "Comparez les tarifs WeddWeb pour les sites de mariage gratuits et premium, la publication multilingue, les domaines personnalisés et la valeur à long terme.",
     ogTitle: "Tarifs WeddWeb - Sites de mariage abordables pour tous",
     ogDescription:
       "Découvrez le coût de création de votre site de mariage avec WeddWeb. Des plans flexibles pour chaque couple.",

@@ -4,7 +4,7 @@ export const seoMetadata: SitewideSEO = {
   marketing: {
     title: "Privacy Policy | WeddWeb",
     description:
-      "Read WeddWeb's Privacy Policy to learn how we protect your data, respect your privacy, and comply with global regulations. Transparent, GDPR-ready, and privacy-first.",
+      "Read WeddWeb's Privacy Policy to learn how we collect, use, and protect your data, what choices and rights you have, and how we meet global privacy requirements.",
     ogTitle: "WeddWeb Privacy Policy",
     ogDescription:
       "How WeddWeb protects your privacy and data. GDPR, CCPA, and global compliance.",

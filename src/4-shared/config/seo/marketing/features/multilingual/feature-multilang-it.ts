@@ -4,7 +4,7 @@ export const seoMetadata: SitewideSEO = {
   marketing: {
     title: "Creatore di Siti Matrimonio Multilingua | 11 Lingue e RTL Nativo",
     description:
-      "Crea un sito di matrimonio professionale in 11 lingue con supporto RTL nativo. Rilevamento automatico della lingua e privacy assoluta.",
+      "Crea un sito matrimonio WeddWeb in 11 lingue con supporto nativo delle scritture, RTL, rilevamento automatico della lingua e hosting orientato alla privacy.",
     ogTitle: "Piattaforma di Siti Matrimonio Multilingua Nativa | WeddWeb",
     ogDescription:
       "Dall'arabo al cinese e all'hindi: offri ai tuoi ospiti un sito di matrimonio con supporto nativo degli alfabeti. Alte prestazioni, senza pubblicità.",

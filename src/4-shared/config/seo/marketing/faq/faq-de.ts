@@ -4,7 +4,7 @@ export const seoMetadata: SitewideSEO = {
   marketing: {
     title: "WeddWeb - Häufige Fragen | Hilfe zur Hochzeitswebsite",
     description:
-      "Finden Sie Antworten auf häufige Fragen zu WeddWeb: Hochzeitswebsites, RSVP, Datenschutz, Anpassung und mehr. Mehrsprachiger Support inklusive.",
+      "Finden Sie klare Antworten zu WeddWeb-Hochzeitswebsites, Preisen, Sprachen, Datenschutz, Domains, SEO-Sichtbarkeit und Einrichtung vor der Veröffentlichung.",
     ogTitle: "WeddWeb FAQ - Alle Fragen zur Hochzeitswebsite beantwortet",
     ogDescription:
       "Holen Sie sich Hilfe und Tipps für Ihre perfekte Hochzeitswebsite mit WeddWeb.",

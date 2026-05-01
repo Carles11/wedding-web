@@ -4,7 +4,7 @@ export const seoMetadata: SitewideSEO = {
   marketing: {
     title: "WeddWeb - 在几分钟内创建漂亮的婚礼网站",
     description:
-      "用 WeddWeb 打造永久多语言婚礼网站：支持 11 种语言与原生 RTL，提供自定义域名和隐私优先托管，现在即可免费上线。",
+      "用 WeddWeb 在几分钟内创建精美婚礼网站，支持 11 种语言、原生 RTL、自定义域名、婚礼日程、住宿建议、礼物信息与隐私优先托管，让不同地区的宾客都能轻松查看重要安排，也让你更安心地发布、分享爱情故事、发送出行提醒、管理多语言页面，并长期保留婚礼内容与回忆，也适合婚后长期留存回顾与继续分享。",
     ogTitle: "WeddWeb - 轻松创建漂亮的婚礼网站",
     ogDescription: "创建完美婚礼网站的最简单方式",
     ogImage: "/assets/og/weddweb-OG.png",

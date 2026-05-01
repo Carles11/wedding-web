@@ -4,7 +4,7 @@ export const seoMetadata: SitewideSEO = {
   marketing: {
     title: "Conditions d'utilisation | WeddWeb",
     description:
-      "Consultez les Conditions d'utilisation de WeddWeb pour connaître vos droits et responsabilités lors de l'utilisation de notre plateforme de mariage. Clarté, transparence et protection juridique pour tous les utilisateurs.",
+      "Consultez les Conditions d'utilisation de WeddWeb pour comprendre les règles d'usage, vos droits et responsabilités, ainsi que l'accès, le contenu, le paiement et nos obligations.",
     ogTitle: "Conditions d'utilisation WeddWeb",
     ogDescription:
       "Vos droits et obligations lors de l'utilisation de WeddWeb. Plateforme de mariage sécurisée et transparente.",

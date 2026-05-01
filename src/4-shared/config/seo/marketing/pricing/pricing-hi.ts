@@ -4,7 +4,7 @@ export const seoMetadata: SitewideSEO = {
   marketing: {
     title: "WeddWeb प्राइसिंग - वेडिंग वेबसाइट की कीमत कितनी है?",
     description:
-      "WeddWeb वेडिंग वेबसाइट के लिए पारदर्शी मूल्य देखें। मुफ्त और प्रीमियम प्लान, फीचर्स और वैल्यू की तुलना करें। कोई छुपे शुल्क नहीं। अपनी वेडिंग वेबसाइट मुफ्त में शुरू करें!",
+      "WeddWeb की pricing में free और premium वेडिंग वेबसाइट, multilingual publishing, custom domain और value की तुलना करें, limits स्पष्ट हैं और surprise fees नहीं।",
     ogTitle: "WeddWeb प्राइसिंग - हर जोड़े के लिए किफायती वेडिंग वेबसाइट",
     ogDescription:
       "WeddWeb के साथ अपनी वेडिंग वेबसाइट बनाने की लागत जानें। हर जरूरत के लिए लचीले प्लान।",

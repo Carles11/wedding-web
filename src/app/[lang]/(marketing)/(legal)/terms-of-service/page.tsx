@@ -10,6 +10,7 @@ import {
 import { getMetadataBase } from "@/4-shared/lib/seo/getMetadataBase";
 import { JsonLd } from "@/4-shared/lib/seo/JsonLd";
 import { legalTranslations } from "@/4-shared/lib/seo/legalMetadata";
+import { normalizeMetaDescription } from "@/4-shared/lib/seo/normalizeMetaDescription";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 
@@ -31,6 +32,7 @@ export async function generateMetadata({
   const t =
     legalTranslations[lang as SupportedLanguage] ?? legalTranslations.en;
   const path = "terms-of-service";
+  const description = normalizeMetaDescription(t.termsDesc);
 
   // Build Hreflang Alternates for all 11 languages
   const languages: Record<string, string> = {};
@@ -43,7 +45,7 @@ export async function generateMetadata({
   return {
     metadataBase,
     title: t.termsTitle,
-    description: t.termsDesc,
+    description,
     alternates: {
       canonical: `/${lang}/${path}`,
       languages: {
@@ -53,7 +55,7 @@ export async function generateMetadata({
     },
     openGraph: {
       title: t.termsTitle,
-      description: t.termsDesc,
+      description,
       url: `/${lang}/${path}`,
       siteName: "WeddWeb",
       locale: `${lang}_${lang.toUpperCase()}`,
@@ -63,7 +65,7 @@ export async function generateMetadata({
     twitter: {
       card: "summary_large_image",
       title: t.termsTitle,
-      description: t.termsDesc,
+      description,
       images: [ogImage],
     },
     // We allow indexing for Authority (E-E-A-T)

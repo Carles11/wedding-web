@@ -4,7 +4,7 @@ export const seoMetadata: SitewideSEO = {
   marketing: {
     title: "WeddWeb Preise - Was kostet eine Hochzeitswebsite?",
     description:
-      "Sehen Sie die transparenten Preise von WeddWeb für Hochzeitswebsites. Vergleichen Sie kostenlose und Premium-Pläne, Funktionen und Mehrwert. Starten Sie Ihre Hochzeitswebsite kostenlos!",
+      "Vergleichen Sie WeddWeb-Preise für kostenlose und Premium-Hochzeitswebsites, eigene Domains, mehrsprachige Veröffentlichung und Mehrwert ohne Überraschungen.",
     ogTitle: "WeddWeb Preise - Günstige Hochzeitswebsites für jedes Paar",
     ogDescription:
       "Erfahren Sie, was es kostet, Ihre Hochzeitswebsite mit WeddWeb zu erstellen. Flexible Pläne für jeden Bedarf.",

@@ -66,6 +66,7 @@ import { seoMetadata as multilingualPt } from "./marketing/features/multilingual
 import { seoMetadata as multilingualRu } from "./marketing/features/multilingual/feature-multilang-ru";
 import { seoMetadata as multilingualZh } from "./marketing/features/multilingual/feature-multilang-zh";
 
+import { normalizePageSEO } from "@/4-shared/lib/seo/normalizeMetaDescription";
 import type { PageSEO, SitewideSEO } from "./types";
 
 const homeSeoByLocale: Record<string, SitewideSEO> = {
@@ -162,7 +163,7 @@ export function getSEOMetadata(
   // Get the locale data, fallback to English
   const sitewide = seoBySection[locale] ?? seoBySection["en"];
 
-  return sitewide[page];
+  return normalizePageSEO(sitewide[page]);
 }
 
 export * from "./types";

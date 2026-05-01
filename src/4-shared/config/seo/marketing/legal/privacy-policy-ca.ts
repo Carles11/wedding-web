@@ -4,7 +4,7 @@ export const seoMetadata: SitewideSEO = {
   marketing: {
     title: "Política de Privacitat | WeddWeb",
     description:
-      "Consulta la Política de Privacitat de WeddWeb per saber com protegim les teves dades i complim amb la normativa global. Transparència, GDPR i privacitat per davant de tot.",
+      "Llegeix la Política de Privacitat de WeddWeb per saber com recopilem, utilitzem i protegim les teves dades, quins drets tens i com complim els requisits globals.",
     ogTitle: "Política de Privacitat de WeddWeb",
     ogDescription:
       "Com WeddWeb protegeix la teva privacitat i dades. Compliment GDPR, CCPA i més.",

@@ -43,8 +43,6 @@ export default async function LangLayout({
       suppressHydrationWarning
     >
       <head>
-        <link rel="alternate" type="text/plain" href="/llms.txt" />
-
         <link
           rel="manifest"
           href={`/manifests/${lang}/site.webmanifest`}

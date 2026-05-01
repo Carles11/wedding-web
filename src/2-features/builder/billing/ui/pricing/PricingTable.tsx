@@ -73,7 +73,7 @@ export default function PricingTable({
             relative flex flex-col rounded-2xl border bg-white
             p-8 shadow-sm transition
             ${isLoading ? "opacity-80 pointer-events-none" : "hover:shadow-xl hover:-translate-y-1"}
-            ${highlight ? "shadow-lg ring-1 ring-[var(--marketing-color-primary)]" : "border-gray-200"}
+            ${highlight ? "shadow-lg ring-1 ring-[--marketing-color-primary]" : "border-gray-200"}
             `}
           >
             {highlight && (
