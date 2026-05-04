@@ -35,11 +35,18 @@ export default async function RsvpErrorPage({
 
   if (!resolved) {
     return (
-      <main>
-        <p>
-          Something went wrong. Please use the link from your email again or try
-          later.
-        </p>
+      <main className="min-h-screen bg-(--color-background) py-10 sm:py-14">
+        <div className="mx-auto w-full max-w-xl px-4 sm:px-6">
+          <section className="rounded-xl border border-(--builder-color-border) bg-(--builder-color-surface) p-6 text-center shadow-(--builder-shadow) sm:p-8">
+            <h1 className="text-3xl text-(--builder-color-text) sm:text-4xl">
+              RSVP
+            </h1>
+            <p className="mt-3 text-sm leading-6 text-(--builder-color-text-muted)">
+              Something went wrong. Please use the link from your email again or
+              try later.
+            </p>
+          </section>
+        </div>
       </main>
     );
   }
@@ -47,14 +54,21 @@ export default async function RsvpErrorPage({
   const t = await getMergedTranslations(resolved.siteId, lang, "en");
 
   return (
-    <main>
-      <p>
-        {tr(
-          t,
-          "rsvp.error.message",
-          "Something went wrong. Please use the link from your email again or try later.",
-        )}
-      </p>
+    <main className="min-h-screen bg-(--color-background) py-10 sm:py-14">
+      <div className="mx-auto w-full max-w-xl px-4 sm:px-6">
+        <section className="rounded-xl border border-(--builder-color-border) bg-(--builder-color-surface) p-6 text-center shadow-(--builder-shadow) sm:p-8">
+          <h1 className="text-3xl text-(--builder-color-text) sm:text-4xl">
+            RSVP
+          </h1>
+          <p className="mt-3 text-sm leading-6 text-(--builder-color-text-muted)">
+            {tr(
+              t,
+              "rsvp.error.message",
+              "Something went wrong. Please use the link from your email again or try later.",
+            )}
+          </p>
+        </section>
+      </div>
     </main>
   );
 }

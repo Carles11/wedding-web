@@ -53,8 +53,17 @@ export default async function RsvpPage({
   // --- State A: site not found ---
   if (!resolved) {
     return (
-      <main>
-        <p>Site not found.</p>
+      <main className="min-h-screen bg-(--color-background) py-10 sm:py-14">
+        <div className="mx-auto w-full max-w-2xl px-4 sm:px-6">
+          <section className="rounded-xl border border-(--builder-color-border) bg-(--builder-color-surface) p-5 shadow-(--builder-shadow) sm:p-7">
+            <h1 className="text-3xl text-(--builder-color-text) sm:text-4xl">
+              RSVP
+            </h1>
+            <p className="mt-3 text-sm leading-6 text-(--builder-color-text-muted)">
+              Site not found.
+            </p>
+          </section>
+        </div>
       </main>
     );
   }
@@ -66,14 +75,21 @@ export default async function RsvpPage({
   if (!rawCode) {
     const t = await getMergedTranslations(siteId, lang, "en");
     return (
-      <main>
-        <p>
-          {tr(
-            t,
-            "rsvp.page.invalid_link",
-            "This link is invalid or has expired.",
-          )}
-        </p>
+      <main className="min-h-screen bg-(--color-background) py-10 sm:py-14">
+        <div className="mx-auto w-full max-w-2xl px-4 sm:px-6">
+          <section className="rounded-xl border border-(--builder-color-border) bg-(--builder-color-surface) p-5 shadow-(--builder-shadow) sm:p-7">
+            <h1 className="text-3xl text-(--builder-color-text) sm:text-4xl">
+              {tr(t, "rsvp.page.title", "RSVP")}
+            </h1>
+            <p className="mt-3 text-sm leading-6 text-(--builder-color-text-muted)">
+              {tr(
+                t,
+                "rsvp.page.invalid_link",
+                "This link is invalid or has expired.",
+              )}
+            </p>
+          </section>
+        </div>
       </main>
     );
   }
@@ -84,14 +100,21 @@ export default async function RsvpPage({
   if (!result.ok) {
     const t = await getMergedTranslations(siteId, lang, "en");
     return (
-      <main>
-        <p>
-          {tr(
-            t,
-            "rsvp.page.invalid_link",
-            "This link is invalid or has expired.",
-          )}
-        </p>
+      <main className="min-h-screen bg-(--color-background) py-10 sm:py-14">
+        <div className="mx-auto w-full max-w-2xl px-4 sm:px-6">
+          <section className="rounded-xl border border-(--builder-color-border) bg-(--builder-color-surface) p-5 shadow-(--builder-shadow) sm:p-7">
+            <h1 className="text-3xl text-(--builder-color-text) sm:text-4xl">
+              {tr(t, "rsvp.page.title", "RSVP")}
+            </h1>
+            <p className="mt-3 text-sm leading-6 text-(--builder-color-text-muted)">
+              {tr(
+                t,
+                "rsvp.page.invalid_link",
+                "This link is invalid or has expired.",
+              )}
+            </p>
+          </section>
+        </div>
       </main>
     );
   }
@@ -110,55 +133,105 @@ export default async function RsvpPage({
   );
 
   return (
-    <main>
-      <h1>{tr(t, "rsvp.page.title", "RSVP")}</h1>
+    <main className="min-h-screen bg-(--color-background) py-10 sm:py-14">
+      <div className="mx-auto w-full max-w-2xl px-4 sm:px-6">
+        <section className="rounded-xl border border-(--builder-color-border) bg-(--builder-color-surface) p-5 shadow-(--builder-shadow) sm:p-7">
+          <h1 className="text-3xl text-(--builder-color-text) sm:text-4xl">
+            {tr(t, "rsvp.page.title", "RSVP")}
+          </h1>
 
-      <form method="POST" action="/api/rsvp/submit">
-        <input type="hidden" name="code" value={rawCode} />
-        <input type="hidden" name="lang" value={lang} />
+          <form
+            method="POST"
+            action="/api/rsvp/submit"
+            className="mt-6 space-y-6"
+          >
+            <input type="hidden" name="code" value={rawCode} />
+            <input type="hidden" name="lang" value={lang} />
 
-        <fieldset>
-          <legend>{tr(t, "rsvp.form.status.label", "Will you attend?")}</legend>
+            <fieldset className="space-y-3 rounded-lg border border-(--builder-color-border) bg-(--builder-color-muted-surface) p-4">
+              <legend className="px-1 text-sm font-semibold text-(--builder-color-text)">
+                {tr(t, "rsvp.form.status.label", "Will you attend?")}
+              </legend>
 
-          <label>
-            <input
-              type="radio"
-              name="status"
-              value="attending"
-              defaultChecked={defaultStatus === "attending"}
-            />
-            {tr(t, "rsvp.form.status.attending", "Yes, I'll be there")}
-          </label>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <label className="flex items-start gap-3 rounded-lg border border-(--builder-color-border) bg-white px-3 py-3 text-sm text-(--builder-color-text)">
+                  <input
+                    type="radio"
+                    name="status"
+                    value="attending"
+                    defaultChecked={defaultStatus === "attending"}
+                    className="mt-0.5 h-4 w-4 shrink-0"
+                  />
+                  <span>
+                    {tr(t, "rsvp.form.status.attending", "Yes, I'll be there")}
+                  </span>
+                </label>
 
-          <label>
-            <input
-              type="radio"
-              name="status"
-              value="not_attending"
-              defaultChecked={defaultStatus === "not_attending"}
-            />
-            {tr(t, "rsvp.form.status.not_attending", "Sorry, I can't make it")}
-          </label>
-        </fieldset>
+                <label className="flex items-start gap-3 rounded-lg border border-(--builder-color-border) bg-white px-3 py-3 text-sm text-(--builder-color-text)">
+                  <input
+                    type="radio"
+                    name="status"
+                    value="not_attending"
+                    defaultChecked={defaultStatus === "not_attending"}
+                    className="mt-0.5 h-4 w-4 shrink-0"
+                  />
+                  <span>
+                    {tr(
+                      t,
+                      "rsvp.form.status.not_attending",
+                      "Sorry, I can't make it",
+                    )}
+                  </span>
+                </label>
+              </div>
+            </fieldset>
 
-        <label>
-          {tr(t, "rsvp.form.headcount.label", "Number of guests")}
-          <select name="headcount" defaultValue={defaultHeadcount}>
-            {headcountOptions.map((n) => (
-              <option key={n} value={String(n)}>
-                {n}
-              </option>
-            ))}
-          </select>
-        </label>
+            <div className="space-y-1.5 rounded-lg border border-(--builder-color-border) bg-(--builder-color-muted-surface) p-4">
+              <label
+                htmlFor="rsvp-headcount"
+                className="block text-sm font-medium text-(--builder-color-text)"
+              >
+                {tr(t, "rsvp.form.headcount.label", "Number of guests")}
+              </label>
+              <select
+                id="rsvp-headcount"
+                name="headcount"
+                defaultValue={defaultHeadcount}
+                className="w-full rounded-md border border-(--builder-color-border) bg-white px-3 py-2 text-sm text-(--builder-color-text) focus:border-(--builder-color-primary) focus:outline-none focus:ring-2 focus:ring-(--builder-color-primary)/20"
+              >
+                {headcountOptions.map((n) => (
+                  <option key={n} value={String(n)}>
+                    {n}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-        <label>
-          {tr(t, "rsvp.form.comment.label", "Message (optional)")}
-          <textarea name="comment" defaultValue={defaultComment} />
-        </label>
+            <div className="space-y-1.5 rounded-lg border border-(--builder-color-border) bg-(--builder-color-muted-surface) p-4">
+              <label
+                htmlFor="rsvp-comment"
+                className="block text-sm font-medium text-(--builder-color-text)"
+              >
+                {tr(t, "rsvp.form.comment.label", "Message (optional)")}
+              </label>
+              <textarea
+                id="rsvp-comment"
+                name="comment"
+                rows={4}
+                defaultValue={defaultComment}
+                className="w-full rounded-md border border-(--builder-color-border) bg-white px-3 py-2 text-sm text-(--builder-color-text) focus:border-(--builder-color-primary) focus:outline-none focus:ring-2 focus:ring-(--builder-color-primary)/20"
+              />
+            </div>
 
-        <button type="submit">{tr(t, "rsvp.form.submit", "Send RSVP")}</button>
-      </form>
+            <button
+              type="submit"
+              className="w-full rounded-md bg-(--builder-color-primary) px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-(--builder-color-primary-hover) focus:outline-none focus:ring-2 focus:ring-(--builder-color-primary-focus) focus:ring-offset-2"
+            >
+              {tr(t, "rsvp.form.submit", "Send RSVP")}
+            </button>
+          </form>
+        </section>
+      </div>
     </main>
   );
 }
