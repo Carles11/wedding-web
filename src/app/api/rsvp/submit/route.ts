@@ -69,8 +69,11 @@ export async function POST(req: Request) {
   const { party } = result;
 
   // --- Normalize headcount ---
-  let headcountNorm: number | null = null;
-  if (status === "attending") {
+  let headcountNorm: number;
+
+  if (status === "not_attending") {
+    headcountNorm = 0;
+  } else {
     const parsed = parseInt(
       typeof headcountRaw === "string" ? headcountRaw : "",
       10,

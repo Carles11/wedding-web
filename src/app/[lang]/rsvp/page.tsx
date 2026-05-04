@@ -1,3 +1,4 @@
+import { RSVPFormComponent } from "@/0-pages/(tenant)/RSVPFormComponent";
 import { validateRsvpAccessCode } from "@/3-entities/rsvp/lib/validateRsvpAccessCode";
 import { getMergedTranslations } from "@/4-shared/lib/i18n";
 import { resolveSiteIdFromHost } from "@/4-shared/lib/site/resolveSiteIdFromHost";
@@ -9,7 +10,6 @@ export const dynamic = "force-dynamic";
 // ---------------------------------------------------------------------------
 // Metadata — static, always NOINDEX (private invite-only page)
 // ---------------------------------------------------------------------------
-
 export async function generateMetadata(): Promise<Metadata> {
   return {
     title: "RSVP",
@@ -21,10 +21,6 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-// ---------------------------------------------------------------------------
-// Translation helper — resolves a key from the pre-fetched flat dict
-// ---------------------------------------------------------------------------
-
 function tr(
   dict: Record<string, string>,
   key: string,
@@ -33,9 +29,11 @@ function tr(
   return dict[key] ?? fallback;
 }
 
-// ---------------------------------------------------------------------------
-// Page
-// ---------------------------------------------------------------------------
+type RsvpStatus = "attending" | "not_attending";
+
+function isRsvpStatus(value: unknown): value is RsvpStatus {
+  return value === "attending" || value === "not_attending";
+}
 
 export default async function RsvpPage({
   params,
@@ -96,7 +94,7 @@ export default async function RsvpPage({
 
   const result = await validateRsvpAccessCode({ siteId, rawCode });
 
-  // --- State B: invalid/expired code ---
+  // --- State C: invalid/expired code ---
   if (!result.ok) {
     const t = await getMergedTranslations(siteId, lang, "en");
     return (
@@ -119,18 +117,9 @@ export default async function RsvpPage({
     );
   }
 
-  // --- State C: valid code — render form ---
+  // --- State D: valid code — render form ---
   const { party, partyState } = result;
   const t = await getMergedTranslations(siteId, lang, "en");
-
-  const defaultStatus = partyState?.status ?? "attending";
-  const defaultHeadcount = String(partyState?.headcount ?? 1);
-  const defaultComment = partyState?.comment ?? "";
-
-  const headcountOptions = Array.from(
-    { length: party.max_guests },
-    (_, i) => i + 1,
-  );
 
   return (
     <main className="min-h-screen bg-(--color-background) py-10 sm:py-14">
@@ -140,96 +129,21 @@ export default async function RsvpPage({
             {tr(t, "rsvp.page.title", "RSVP")}
           </h1>
 
-          <form
-            method="POST"
-            action="/api/rsvp/submit"
-            className="mt-6 space-y-6"
-          >
-            <input type="hidden" name="code" value={rawCode} />
-            <input type="hidden" name="lang" value={lang} />
-
-            <fieldset className="space-y-3 rounded-lg border border-gray-200 bg-gray-50 p-4">
-              <legend className="px-1 text-sm font-semibold text-(--color-foreground)">
-                {tr(t, "rsvp.form.status.label", "Will you attend?")}
-              </legend>
-
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <label className="flex items-start gap-3 rounded-lg border border-gray-200 bg-white px-3 py-3 text-sm text-(--color-foreground)">
-                  <input
-                    type="radio"
-                    name="status"
-                    value="attending"
-                    defaultChecked={defaultStatus === "attending"}
-                    className="mt-0.5 h-4 w-4 shrink-0"
-                  />
-                  <span>
-                    {tr(t, "rsvp.form.status.attending", "Yes, I'll be there")}
-                  </span>
-                </label>
-
-                <label className="flex items-start gap-3 rounded-lg border border-gray-200 bg-white px-3 py-3 text-sm text-(--color-foreground)">
-                  <input
-                    type="radio"
-                    name="status"
-                    value="not_attending"
-                    defaultChecked={defaultStatus === "not_attending"}
-                    className="mt-0.5 h-4 w-4 shrink-0"
-                  />
-                  <span>
-                    {tr(
-                      t,
-                      "rsvp.form.status.not_attending",
-                      "Sorry, I can't make it",
-                    )}
-                  </span>
-                </label>
-              </div>
-            </fieldset>
-
-            <div className="space-y-1.5 rounded-lg border border-gray-200 bg-gray-50 p-4">
-              <label
-                htmlFor="rsvp-headcount"
-                className="block text-sm font-medium text-(--color-foreground)"
-              >
-                {tr(t, "rsvp.form.headcount.label", "Number of guests")}
-              </label>
-              <select
-                id="rsvp-headcount"
-                name="headcount"
-                defaultValue={defaultHeadcount}
-                className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-(--color-foreground) focus:border-(--marketing-color-primary) focus:outline-none focus:ring-2 focus:ring-(--marketing-color-primary)/20"
-              >
-                {headcountOptions.map((n) => (
-                  <option key={n} value={String(n)}>
-                    {n}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="space-y-1.5 rounded-lg border border-gray-200 bg-gray-50 p-4">
-              <label
-                htmlFor="rsvp-comment"
-                className="block text-sm font-medium text-(--color-foreground)"
-              >
-                {tr(t, "rsvp.form.comment.label", "Message (optional)")}
-              </label>
-              <textarea
-                id="rsvp-comment"
-                name="comment"
-                rows={4}
-                defaultValue={defaultComment}
-                className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-(--color-foreground) focus:border-(--marketing-color-primary) focus:outline-none focus:ring-2 focus:ring-(--marketing-color-primary)/20"
-              />
-            </div>
-
-            <button
-              type="submit"
-              className="w-full rounded-md bg-(--marketing-color-primary) px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-(--marketing-color-primary-hover) focus:outline-none focus:ring-2 focus:ring-(--marketing-color-primary-focus) focus:ring-offset-2"
-            >
-              {tr(t, "rsvp.form.submit", "Send RSVP")}
-            </button>
-          </form>
+          <RSVPFormComponent
+            lang={lang}
+            rawCode={rawCode}
+            t={t}
+            party={{ max_guests: party.max_guests }}
+            partyState={
+              partyState && isRsvpStatus(partyState.status)
+                ? {
+                    status: partyState.status,
+                    headcount: partyState.headcount,
+                    comment: partyState.comment,
+                  }
+                : null
+            }
+          />
         </section>
       </div>
     </main>
