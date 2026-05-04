@@ -37,11 +37,11 @@ export default async function RsvpSuccessPage({
     return (
       <main className="min-h-screen bg-(--color-background) py-10 sm:py-14">
         <div className="mx-auto w-full max-w-xl px-4 sm:px-6">
-          <section className="rounded-xl border border-(--builder-color-border) bg-(--builder-color-surface) p-6 text-center shadow-(--builder-shadow) sm:p-8">
-            <h1 className="text-3xl text-(--builder-color-text) sm:text-4xl">
+          <section className="rounded-xl border border-(--marketing-color-border) bg-(--marketing-color-surface) p-6 text-center shadow-(--marketing-shadow) sm:p-8">
+            <h1 className="text-3xl text-(--marketing-color-text) sm:text-4xl">
               RSVP
             </h1>
-            <p className="mt-3 text-sm leading-6 text-(--builder-color-text-muted)">
+            <p className="mt-3 text-sm leading-6 text-(--marketing-color-text-muted)">
               Your RSVP has been submitted. Thank you!
             </p>
           </section>
@@ -55,11 +55,11 @@ export default async function RsvpSuccessPage({
   return (
     <main className="min-h-screen bg-(--color-background) py-10 sm:py-14">
       <div className="mx-auto w-full max-w-xl px-4 sm:px-6">
-        <section className="rounded-xl border border-(--builder-color-border) bg-(--builder-color-surface) p-6 text-center shadow-(--builder-shadow) sm:p-8">
-          <h1 className="text-3xl text-(--builder-color-text) sm:text-4xl">
+        <section className="rounded-xl border border-(--marketing-color-border) bg-(--marketing-color-surface) p-6 text-center shadow-(--marketing-shadow) sm:p-8">
+          <h1 className="text-3xl text-(--marketing-color-text) sm:text-4xl">
             RSVP
           </h1>
-          <p className="mt-3 text-sm leading-6 text-(--builder-color-text-muted)">
+          <p className="mt-3 text-sm leading-6 text-(--marketing-color-text-muted)">
             {tr(
               t,
               "rsvp.success.message",

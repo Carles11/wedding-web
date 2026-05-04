@@ -55,11 +55,11 @@ export default async function RsvpPage({
     return (
       <main className="min-h-screen bg-(--color-background) py-10 sm:py-14">
         <div className="mx-auto w-full max-w-2xl px-4 sm:px-6">
-          <section className="rounded-xl border border-(--builder-color-border) bg-(--builder-color-surface) p-5 shadow-(--builder-shadow) sm:p-7">
-            <h1 className="text-3xl text-(--builder-color-text) sm:text-4xl">
+          <section className="rounded-xl border border-(--marketing-color-border) bg-(--marketing-color-surface) p-5 shadow-(--marketing-shadow) sm:p-7">
+            <h1 className="text-3xl text-(--marketing-color-text) sm:text-4xl">
               RSVP
             </h1>
-            <p className="mt-3 text-sm leading-6 text-(--builder-color-text-muted)">
+            <p className="mt-3 text-sm leading-6 text-(--marketing-color-text-muted)">
               Site not found.
             </p>
           </section>
@@ -77,11 +77,11 @@ export default async function RsvpPage({
     return (
       <main className="min-h-screen bg-(--color-background) py-10 sm:py-14">
         <div className="mx-auto w-full max-w-2xl px-4 sm:px-6">
-          <section className="rounded-xl border border-(--builder-color-border) bg-(--builder-color-surface) p-5 shadow-(--builder-shadow) sm:p-7">
-            <h1 className="text-3xl text-(--builder-color-text) sm:text-4xl">
+          <section className="rounded-xl border border-(--marketing-color-border) bg-(--marketing-color-surface) p-5 shadow-(--marketing-shadow) sm:p-7">
+            <h1 className="text-3xl text-(--marketing-color-text) sm:text-4xl">
               {tr(t, "rsvp.page.title", "RSVP")}
             </h1>
-            <p className="mt-3 text-sm leading-6 text-(--builder-color-text-muted)">
+            <p className="mt-3 text-sm leading-6 text-(--marketing-color-text-muted)">
               {tr(
                 t,
                 "rsvp.page.invalid_link",
@@ -102,11 +102,11 @@ export default async function RsvpPage({
     return (
       <main className="min-h-screen bg-(--color-background) py-10 sm:py-14">
         <div className="mx-auto w-full max-w-2xl px-4 sm:px-6">
-          <section className="rounded-xl border border-(--builder-color-border) bg-(--builder-color-surface) p-5 shadow-(--builder-shadow) sm:p-7">
-            <h1 className="text-3xl text-(--builder-color-text) sm:text-4xl">
+          <section className="rounded-xl border border-(--marketing-color-border) bg-(--marketing-color-surface) p-5 shadow-(--marketing-shadow) sm:p-7">
+            <h1 className="text-3xl text-(--marketing-color-text) sm:text-4xl">
               {tr(t, "rsvp.page.title", "RSVP")}
             </h1>
-            <p className="mt-3 text-sm leading-6 text-(--builder-color-text-muted)">
+            <p className="mt-3 text-sm leading-6 text-(--marketing-color-text-muted)">
               {tr(
                 t,
                 "rsvp.page.invalid_link",
@@ -135,8 +135,8 @@ export default async function RsvpPage({
   return (
     <main className="min-h-screen bg-(--color-background) py-10 sm:py-14">
       <div className="mx-auto w-full max-w-2xl px-4 sm:px-6">
-        <section className="rounded-xl border border-(--builder-color-border) bg-(--builder-color-surface) p-5 shadow-(--builder-shadow) sm:p-7">
-          <h1 className="text-3xl text-(--builder-color-text) sm:text-4xl">
+        <section className="rounded-xl border border-(--marketing-color-border) bg-(--marketing-color-surface) p-5 shadow-(--marketing-shadow) sm:p-7">
+          <h1 className="text-3xl text-(--marketing-color-text) sm:text-4xl">
             {tr(t, "rsvp.page.title", "RSVP")}
           </h1>
 
@@ -148,13 +148,13 @@ export default async function RsvpPage({
             <input type="hidden" name="code" value={rawCode} />
             <input type="hidden" name="lang" value={lang} />
 
-            <fieldset className="space-y-3 rounded-lg border border-(--builder-color-border) bg-(--builder-color-muted-surface) p-4">
-              <legend className="px-1 text-sm font-semibold text-(--builder-color-text)">
+            <fieldset className="space-y-3 rounded-lg border border-(--marketing-color-border) bg-(--marketing-color-muted-surface) p-4">
+              <legend className="px-1 text-sm font-semibold text-(--marketing-color-text)">
                 {tr(t, "rsvp.form.status.label", "Will you attend?")}
               </legend>
 
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <label className="flex items-start gap-3 rounded-lg border border-(--builder-color-border) bg-white px-3 py-3 text-sm text-(--builder-color-text)">
+                <label className="flex items-start gap-3 rounded-lg border border-(--marketing-color-border) bg-white px-3 py-3 text-sm text-(--marketing-color-text)">
                   <input
                     type="radio"
                     name="status"
@@ -167,7 +167,7 @@ export default async function RsvpPage({
                   </span>
                 </label>
 
-                <label className="flex items-start gap-3 rounded-lg border border-(--builder-color-border) bg-white px-3 py-3 text-sm text-(--builder-color-text)">
+                <label className="flex items-start gap-3 rounded-lg border border-(--marketing-color-border) bg-white px-3 py-3 text-sm text-(--marketing-color-text)">
                   <input
                     type="radio"
                     name="status"
@@ -186,10 +186,10 @@ export default async function RsvpPage({
               </div>
             </fieldset>
 
-            <div className="space-y-1.5 rounded-lg border border-(--builder-color-border) bg-(--builder-color-muted-surface) p-4">
+            <div className="space-y-1.5 rounded-lg border border-(--marketing-color-border) bg-(--marketing-color-muted-surface) p-4">
               <label
                 htmlFor="rsvp-headcount"
-                className="block text-sm font-medium text-(--builder-color-text)"
+                className="block text-sm font-medium text-(--marketing-color-text)"
               >
                 {tr(t, "rsvp.form.headcount.label", "Number of guests")}
               </label>
@@ -197,7 +197,7 @@ export default async function RsvpPage({
                 id="rsvp-headcount"
                 name="headcount"
                 defaultValue={defaultHeadcount}
-                className="w-full rounded-md border border-(--builder-color-border) bg-white px-3 py-2 text-sm text-(--builder-color-text) focus:border-(--builder-color-primary) focus:outline-none focus:ring-2 focus:ring-(--builder-color-primary)/20"
+                className="w-full rounded-md border border-(--marketing-color-border) bg-white px-3 py-2 text-sm text-(--marketing-color-text) focus:border-(--marketing-color-primary) focus:outline-none focus:ring-2 focus:ring-(--marketing-color-primary)/20"
               >
                 {headcountOptions.map((n) => (
                   <option key={n} value={String(n)}>
@@ -207,10 +207,10 @@ export default async function RsvpPage({
               </select>
             </div>
 
-            <div className="space-y-1.5 rounded-lg border border-(--builder-color-border) bg-(--builder-color-muted-surface) p-4">
+            <div className="space-y-1.5 rounded-lg border border-(--marketing-color-border) bg-(--marketing-color-muted-surface) p-4">
               <label
                 htmlFor="rsvp-comment"
-                className="block text-sm font-medium text-(--builder-color-text)"
+                className="block text-sm font-medium text-(--marketing-color-text)"
               >
                 {tr(t, "rsvp.form.comment.label", "Message (optional)")}
               </label>
@@ -219,13 +219,13 @@ export default async function RsvpPage({
                 name="comment"
                 rows={4}
                 defaultValue={defaultComment}
-                className="w-full rounded-md border border-(--builder-color-border) bg-white px-3 py-2 text-sm text-(--builder-color-text) focus:border-(--builder-color-primary) focus:outline-none focus:ring-2 focus:ring-(--builder-color-primary)/20"
+                className="w-full rounded-md border border-(--marketing-color-border) bg-white px-3 py-2 text-sm text-(--marketing-color-text) focus:border-(--marketing-color-primary) focus:outline-none focus:ring-2 focus:ring-(--marketing-color-primary)/20"
               />
             </div>
 
             <button
               type="submit"
-              className="w-full rounded-md bg-(--builder-color-primary) px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-(--builder-color-primary-hover) focus:outline-none focus:ring-2 focus:ring-(--builder-color-primary-focus) focus:ring-offset-2"
+              className="w-full rounded-md bg-(#6abda6) px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-(#4aa693) focus:outline-none focus:ring-2 focus:ring-(#4a8a7a) focus:ring-offset-2"
             >
               {tr(t, "rsvp.form.submit", "Send RSVP")}
             </button>
