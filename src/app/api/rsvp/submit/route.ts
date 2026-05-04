@@ -68,6 +68,8 @@ export async function POST(req: Request) {
 
   const { party } = result;
 
+  if (party.max_guests < 1) return errorRedirect();
+
   // --- Normalize headcount ---
   let headcountNorm: number;
 

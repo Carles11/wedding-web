@@ -121,6 +121,27 @@ export default async function RsvpPage({
   const { party, partyState } = result;
   const t = await getMergedTranslations(siteId, lang, "en");
 
+  if (party.max_guests < 1) {
+    return (
+      <main className="min-h-screen bg-(--color-background) py-10 sm:py-14">
+        <div className="mx-auto w-full max-w-2xl px-4 sm:px-6">
+          <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm sm:p-7">
+            <h1 className="text-3xl text-(--color-foreground) sm:text-4xl">
+              {tr(t, "rsvp.page.title", "RSVP")}
+            </h1>
+            <p className="mt-3 text-sm leading-6 text-gray-500">
+              {tr(
+                t,
+                "rsvp.page.invalid_link",
+                "This link is invalid or has expired.",
+              )}
+            </p>
+          </section>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="min-h-screen bg-(--color-background) py-10 sm:py-14">
       <div className="mx-auto w-full max-w-2xl px-4 sm:px-6">
