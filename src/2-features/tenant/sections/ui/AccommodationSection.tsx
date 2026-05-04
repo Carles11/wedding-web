@@ -1,5 +1,6 @@
 import { AccommodationSectionProps } from "@/4-shared/types";
 import UnderlinedLink from "@/4-shared/ui/commons/link/UnderlinedLink";
+import { Heading } from "@/4-shared/ui/commons/typography/Heading";
 import SectionContainer from "@/4-shared/ui/tenant/section/SectionContainer";
 
 function IconPhone() {
@@ -110,13 +111,13 @@ export default function AccommodationSection({
             className="relative p-4 bg-white rounded-lg shadow-sm border border-neutral-100 overflow-hidden"
           >
             <div
-              className="absolute left-0 top-0 h-full w-1 bg-gradient-to-b from-indigo-200 to-indigo-100 opacity-60"
+              className="absolute left-0 top-0 h-full w-1 bg-linear-to-b from-indigo-200 to-indigo-100 opacity-60"
               aria-hidden
             />
             <div className="pl-3">
-              <h3 className="font-semibold text-2xl text-neutral-800">
+              <Heading as="h3" className="font-semibold text-neutral-800">
                 {h.name}
-              </h3>
+              </Heading>
               <address className="not-italic text-sm text-neutral-600 mt-1">
                 {h.address}
               </address>

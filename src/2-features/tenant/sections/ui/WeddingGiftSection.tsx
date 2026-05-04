@@ -53,13 +53,13 @@ export default function WeddingGiftSection({ data, translations }: Props) {
       dividerClassName="w-36 h-auto opacity-10"
       dividerSize={120}
     >
-      <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 text-center md:text-left">
+      <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 text-center md:text-left items-start">
         {/* BANK TRANSFER */}
         {hasBank && (
           <div className="flex flex-col space-y-3 p-6 bg-white/40 rounded-2xl border border-white/60 backdrop-blur-sm shadow-sm transition-all hover:shadow-md">
             <Heading
               as="h3"
-              className="text-xs font-bold uppercase tracking-widest text-neutral-400"
+              className="font-semibold text-2xl text-neutral-800"
             >
               {t(translations, "wedding_gift.bank", "Bank Transfer")}
             </Heading>
@@ -99,7 +99,7 @@ export default function WeddingGiftSection({ data, translations }: Props) {
           <div className="flex flex-col justify-center p-6 bg-white/40 rounded-2xl border border-white/60 backdrop-blur-sm shadow-sm transition-all hover:shadow-md">
             <Heading
               as="h3"
-              className="font-semibold text-2xl text-neutral-800"
+              className="font-semibold text-2xl text-neutral-800 pb-4"
             >
               {t(translations, "wedding_gift.paypal", "PayPal")}
             </Heading>
@@ -148,7 +148,7 @@ export default function WeddingGiftSection({ data, translations }: Props) {
           <div className="flex flex-col justify-center p-6 bg-white/40 rounded-2xl border border-white/60 backdrop-blur-sm shadow-sm transition-all hover:shadow-md">
             <Heading
               as="h3"
-              className="font-semibold text-2xl text-neutral-800 mb-4"
+              className="font-semibold text-2xl text-neutral-800 pb-4"
             >
               {t(translations, "wedding_gift.mobile", "Mobile Transfer")}
             </Heading>
@@ -188,7 +188,7 @@ export default function WeddingGiftSection({ data, translations }: Props) {
           <div className="flex flex-col justify-center p-6 bg-white/40 rounded-2xl border border-white/60 backdrop-blur-sm shadow-sm transition-all hover:shadow-md">
             <Heading
               as="h3"
-              className="font-semibold text-2xl text-neutral-800"
+              className="font-semibold text-2xl text-neutral-800 pb-4"
             >
               {t(translations, "wedding_gift.giftlist", "Registry")}
             </Heading>

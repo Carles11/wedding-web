@@ -168,7 +168,7 @@ export default function ContactSection({
                 className="p-4 bg-white/80 dark:bg-neutral-900/70 rounded-lg shadow-sm border"
               >
                 <Heading
-                  as="h3"
+                  as="h4"
                   className="font-semibold text-2xl text-neutral-800"
                 >
                   {p.name}
