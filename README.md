@@ -138,6 +138,84 @@ The i18n system is directly tied to platform SEO health:
 
 ---
 
+## RSVP (Public) — Regression Checklist
+
+Use this checklist after RSVP-related changes. Expected results are included so this can be copied into QA runs.
+
+1. SSR rendering states
+
+- Site not found:
+  - Open `/{lang}/rsvp?code=<any>` on a host that does not resolve to a site.
+  - Expected: page renders the site-not-found state and does not render RSVP form fields.
+- Missing code:
+  - Open `/{lang}/rsvp` without `code`.
+  - Expected: page renders invalid/expired-link message (`rsvp.page.invalid_link`).
+- Invalid/expired code:
+  - Open `/{lang}/rsvp?code=<invalid_or_expired_code>`.
+  - Expected: page renders invalid/expired-link message (`rsvp.page.invalid_link`).
+- Valid code:
+  - Open `/{lang}/rsvp?code=<valid_code>`.
+  - Expected: RSVP form is rendered with status radios, headcount select, optional comment, and submit button.
+
+2. SEO/robots
+
+- Check page source for RSVP pages (`/[lang]/rsvp`, `/[lang]/rsvp/success`, `/[lang]/rsvp/error`).
+- Expected: robots directives are `noindex,nofollow` (including Googlebot noindex/nofollow).
+
+3. Submit rules (server truth)
+
+- Attending rules:
+  - Submit with `status=attending` and `headcount` outside `1..max_guests`.
+  - Expected: request is rejected (error flow/redirect), no invalid state persisted.
+- Not attending rules:
+  - Submit with `status=not_attending` and any client-provided `headcount`.
+  - Expected: server persists `headcount=0`.
+- Comment rules:
+  - Submit without comment.
+  - Expected: accepted (comment optional).
+  - Submit comment length `>1000`.
+  - Expected: rejected (error flow/redirect).
+
+4. Progressive enhancement
+
+- JS enabled:
+  - On RSVP form, select `not_attending`.
+  - Expected: headcount select becomes disabled and value is set to `0`.
+- JS disabled:
+  - In Chrome/Edge DevTools, open Command Menu (`Ctrl+Shift+P`) and run `Disable JavaScript`.
+  - Reload the RSVP page and submit with `status=not_attending`.
+  - Expected: form still submits, and server still persists `headcount=0`.
+
+5. Multi-tenant checks
+
+- Site resolution is based on request Host header.
+- Validate the tested preview/custom domain exists in `sites.domains[]` for the target site.
+- Expected: RSVP route resolves to the correct tenant data for that host.
+
+6. DB verification (Supabase SQL)
+
+- Query latest party state:
+
+```sql
+select *
+from public.rsvp_party_state
+where party_id = '<party_id>'
+order by updated_at desc
+limit 1;
+```
+
+- Query recent submissions:
+
+```sql
+select *
+from public.rsvp_submissions
+where party_id = '<party_id>'
+order by created_at desc
+limit 5;
+```
+
+---
+
 ## 📜 Full Documentation
 
 For complete technical specs, deployment guides, and feature roadmaps, visit the:
@@ -303,3 +381,5 @@ Premium users can connect their own domain (e.g. `ourwedding.com`) to their wedd
 | `src/app/api/sites/[id]/add-domain/route.ts`                              | POST endpoint — add domain                                                            |
 | `src/app/api/sites/[id]/verify-domain/route.ts`                           | POST endpoint — check status, trigger SEO sync on verification                        |
 | `scripts/seed-builder-domain-i18n-cleanup.sql`                            | SQL migration — domain translation keys (11 locales)                                  |
+
+### RSVP
