@@ -100,6 +100,18 @@ export function ProgramEventForm({
               onChange={(newDate: string) => onUpdateFormField("date", newDate)}
               required
             />
+            {form.day_tag === "wedding_day" &&
+              weddingDayReferenceDate &&
+              form.date &&
+              form.date !== weddingDayReferenceDate && (
+                <p className="mt-1 text-xs text-amber-600">
+                  {t(
+                    translations,
+                    "builder.program_events.hint.date_will_update_all",
+                    "Saving will update all Wedding Day events to this date.",
+                  )}
+                </p>
+              )}
           </div>
           {/* Time input */}
           <div className="flex-1 min-w-0 flex flex-col">

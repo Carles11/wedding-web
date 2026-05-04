@@ -101,6 +101,8 @@ export default function ProgramEventsBuilderStep({
   }, [languages, site?.default_lang]);
   const dayTags = getDayTags(translations);
   const { confirm: confirmDelete, confirmDialog } = useAlertConfirm();
+  const { confirm: confirmDateChange, confirmDialog: dateChangeDialog } =
+    useAlertConfirm();
 
   const weddingDayReferenceDate = useMemo(() => {
     const ref = events.find(
@@ -497,17 +499,50 @@ export default function ProgramEventsBuilderStep({
       weddingDayReferenceDate &&
       form.date !== weddingDayReferenceDate
     ) {
-      const message = interpolate(
-        t(
-          translations,
-          "builder.program_events.error.wedding_day_same_date",
-          "All Wedding Day events must use the same date ({date}).",
-        ),
-        { date: weddingDayReferenceDate },
+      const otherWeddingDayEvents = events.filter(
+        (e) => e.day_tag === "wedding_day" && e.id !== editingId,
       );
-      setError(message);
-      notify.error(message);
-      return;
+
+      const confirmed = await confirmDateChange({
+        title: t(
+          translations,
+          "builder.program_events.confirm.change_date_title",
+          "Change Wedding Day date?",
+        ),
+        message: interpolate(
+          t(
+            translations,
+            "builder.program_events.confirm.change_date_message",
+            "This will update the date to {date} for all {count} Wedding Day event(s). Continue?",
+          ),
+          {
+            date: form.date,
+            count: String(otherWeddingDayEvents.length + 1),
+          },
+        ),
+        confirmLabel: t(
+          translations,
+          "builder.program_events.confirm.change_date_confirm",
+          "Update all",
+        ),
+        cancelLabel: t(translations, "builder.actions.cancel", "Cancel"),
+      });
+
+      if (!confirmed) return;
+
+      // Bulk-update all other wedding_day events to the new date
+      await Promise.all(
+        otherWeddingDayEvents.map((e) =>
+          updateProgramEvent(e.id, { date: form.date ?? undefined }),
+        ),
+      );
+      setEvents((prev) =>
+        prev.map((e) =>
+          e.day_tag === "wedding_day" && e.id !== editingId
+            ? { ...e, date: form.date ?? e.date }
+            : e,
+        ),
+      );
     }
 
     if (!canAddMore() && !editingId) {
@@ -820,6 +855,7 @@ export default function ProgramEventsBuilderStep({
       )}
 
       {confirmDialog}
+      {dateChangeDialog}
     </StepLayout>
   );
 }
