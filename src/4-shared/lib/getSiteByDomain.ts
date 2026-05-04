@@ -5,6 +5,18 @@ import { cache } from "react";
  * Get site row by host (domain or subdomain).
  * Wrapped in React cache() to deduplicate requests between metadata and page.
  */
+const PLATFORM_SUFFIXES = [".weddweb.com", ".localhost:3000"];
+
+function extractSubdomain(host: string): string | null {
+  for (const suffix of PLATFORM_SUFFIXES) {
+    if (host.endsWith(suffix)) {
+      const sub = host.slice(0, host.length - suffix.length);
+      if (sub && !sub.includes(".")) return sub;
+    }
+  }
+  return null;
+}
+
 export const getSiteByDomain = cache(async (host: string | null) => {
   if (!host) return null;
 
@@ -13,8 +25,17 @@ export const getSiteByDomain = cache(async (host: string | null) => {
     ? normalized.slice(4)
     : normalized;
 
+  // Extract just the subdomain for platform hosts (e.g. "foo.localhost:3000" → "foo")
+  const subdomain = extractSubdomain(stripped);
+
   try {
     const supabase = await createSupabaseSSRClient();
+
+    const orParts = [
+      `domains.cs.{${normalized}}`,
+      `domains.cs.{${stripped}}`,
+      subdomain ? `subdomain.eq.${subdomain}` : `subdomain.eq.${stripped}`,
+    ];
 
     const { data, error } = await supabase
       .from("sites")
@@ -39,9 +60,7 @@ export const getSiteByDomain = cache(async (host: string | null) => {
         )
       `,
       )
-      .or(
-        `domains.cs.{${normalized}},domains.cs.{${stripped}},subdomain.eq.${stripped}`,
-      )
+      .or(orParts.join(","))
       .maybeSingle();
 
     if (error) {
