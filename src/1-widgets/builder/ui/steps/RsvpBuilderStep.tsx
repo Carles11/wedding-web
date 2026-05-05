@@ -1,8 +1,8 @@
 "use client";
 
+import { RsvpAnalyticsTab } from "@/1-widgets/builder/ui/steps/rsvp/RsvpAnalyticsTab";
 import type { PlanType, Site } from "@/4-shared/types";
 import { useEffect, useState } from "react";
-import { RsvpAnalyticsTab } from "@/1-widgets/builder/ui/steps/rsvp/RsvpAnalyticsTab";
 import { RsvpPartiesTab } from "./rsvp/RsvpPartiesTab";
 import { RsvpResponsesTab } from "./rsvp/RsvpResponsesTab";
 

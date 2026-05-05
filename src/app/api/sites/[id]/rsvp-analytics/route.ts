@@ -29,8 +29,13 @@ function normalizeLabel(label: string): string {
     .replace(/^./, (char) => char.toUpperCase());
 }
 
-function buildBreakdown(counts: Map<string, number>): RsvpAnalyticsBreakdownItem[] {
-  const total = Array.from(counts.values()).reduce((sum, count) => sum + count, 0);
+function buildBreakdown(
+  counts: Map<string, number>,
+): RsvpAnalyticsBreakdownItem[] {
+  const total = Array.from(counts.values()).reduce(
+    (sum, count) => sum + count,
+    0,
+  );
   if (total === 0) return [];
 
   return Array.from(counts.entries())
@@ -146,7 +151,8 @@ export async function GET(
 
     const languageCounts = new Map<string, number>();
     for (const party of safeParties) {
-      const key = (party.preferred_lang || "unknown").trim().toLowerCase() || "unknown";
+      const key =
+        (party.preferred_lang || "unknown").trim().toLowerCase() || "unknown";
       languageCounts.set(key, (languageCounts.get(key) ?? 0) + 1);
     }
 

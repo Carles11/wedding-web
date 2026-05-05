@@ -1,4 +1,7 @@
-import type { RsvpAnalyticsData, RsvpAnalyticsJson } from "@/3-entities/rsvp/model/types";
+import type {
+  RsvpAnalyticsData,
+  RsvpAnalyticsJson,
+} from "@/3-entities/rsvp/model/types";
 import { useCallback, useEffect, useState } from "react";
 
 type UseRsvpAnalyticsOptions = {
@@ -40,9 +43,7 @@ export function useRsvpAnalytics(
       const json = (await res.json()) as RsvpAnalyticsJson;
 
       if (!res.ok || !json.success) {
-        setError(
-          json.success ? "Failed to load RSVP analytics." : json.error,
-        );
+        setError(json.success ? "Failed to load RSVP analytics." : json.error);
         setData(null);
         return;
       }

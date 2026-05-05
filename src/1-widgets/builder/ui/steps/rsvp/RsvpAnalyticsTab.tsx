@@ -35,15 +35,21 @@ function BreakdownChart({
   if (items.length === 0) {
     return (
       <div className="space-y-3 rounded-lg border border-(--builder-color-border) bg-white p-4">
-        <h3 className="text-base font-semibold text-(--builder-color-text)">{title}</h3>
-        <p className="text-sm text-(--builder-color-text-muted)">{emptyLabel}</p>
+        <h3 className="text-base font-semibold text-(--builder-color-text)">
+          {title}
+        </h3>
+        <p className="text-sm text-(--builder-color-text-muted)">
+          {emptyLabel}
+        </p>
       </div>
     );
   }
-
+  console.log("analytics items", { items });
   return (
     <div className="space-y-4 rounded-lg border border-(--builder-color-border) bg-white p-4">
-      <h3 className="text-base font-semibold text-(--builder-color-text)">{title}</h3>
+      <h3 className="text-base font-semibold text-(--builder-color-text)">
+        {title}
+      </h3>
 
       <div className="space-y-2" role="img" aria-label={tableLabel}>
         {items.map((item) => (
@@ -55,7 +61,9 @@ function BreakdownChart({
             <div className="h-2 w-full overflow-hidden rounded-full bg-(--builder-color-muted-surface)">
               <div
                 className="h-full rounded-full bg-(--builder-color-primary)"
-                style={{ width: `${Math.max(0, Math.min(100, item.percentage))}%` }}
+                style={{
+                  width: `${Math.max(0, Math.min(100, item.percentage))}%`,
+                }}
               />
             </div>
           </div>
@@ -75,8 +83,12 @@ function BreakdownChart({
           <tbody className="divide-y divide-(--builder-color-border)">
             {items.map((item) => (
               <tr key={`${item.key}-row`}>
-                <td className="px-3 py-2 text-(--builder-color-text)">{item.label}</td>
-                <td className="px-3 py-2 text-center text-(--builder-color-text)">{item.count}</td>
+                <td className="px-3 py-2 text-(--builder-color-text)">
+                  {item.label}
+                </td>
+                <td className="px-3 py-2 text-center text-(--builder-color-text)">
+                  {item.count}
+                </td>
                 <td className="px-3 py-2 text-right text-(--builder-color-text-muted)">
                   {item.percentage.toFixed(1)}%
                 </td>
@@ -89,16 +101,31 @@ function BreakdownChart({
   );
 }
 
-function SummaryCard({ label, value }: { label: string; value: string | number }) {
+function SummaryCard({
+  label,
+  value,
+}: {
+  label: string;
+  value: string | number;
+}) {
   return (
     <div className="rounded-lg border border-(--builder-color-border) bg-white p-4">
-      <p className="text-xs uppercase tracking-wide text-(--builder-color-text-muted)">{label}</p>
-      <p className="mt-1 text-2xl font-semibold text-(--builder-color-text)">{value}</p>
+      <p className="text-xs uppercase tracking-wide text-(--builder-color-text-muted)">
+        {label}
+      </p>
+      <p className="mt-1 text-2xl font-semibold text-(--builder-color-text)">
+        {value}
+      </p>
     </div>
   );
 }
 
-export function RsvpAnalyticsTab({ siteId, lang, planType, translations }: Props) {
+export function RsvpAnalyticsTab({
+  siteId,
+  lang,
+  planType,
+  translations,
+}: Props) {
   const router = useRouter();
   const isPremium = planType === "premium";
   const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
@@ -137,7 +164,11 @@ export function RsvpAnalyticsTab({ siteId, lang, planType, translations }: Props
             )}
           </p>
           <div>
-            <BuilderButton variant="primary" size="sm" onClick={() => setUpgradeModalOpen(true)}>
+            <BuilderButton
+              variant="primary"
+              size="sm"
+              onClick={() => setUpgradeModalOpen(true)}
+            >
               {t(
                 translations,
                 "builder.rsvp.analytics.locked.cta",
@@ -162,7 +193,11 @@ export function RsvpAnalyticsTab({ siteId, lang, planType, translations }: Props
             "Upgrade to Premium to view RSVP analytics and guest insights.",
           )}
           cancelLabel={t(translations, "common.cancel", "Cancel")}
-          upgradeLabel={t(translations, "builder.upgrade.cta", "Upgrade to Premium")}
+          upgradeLabel={t(
+            translations,
+            "builder.upgrade.cta",
+            "Upgrade to Premium",
+          )}
         />
       </>
     );
@@ -183,7 +218,9 @@ export function RsvpAnalyticsTab({ siteId, lang, planType, translations }: Props
         </p>
       </header>
 
-      {loading && <div className="grid gap-3 sm:grid-cols-3">{loadingCards}</div>}
+      {loading && (
+        <div className="grid gap-3 sm:grid-cols-3">{loadingCards}</div>
+      )}
 
       {!loading && error && (
         <div className="rounded border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -248,7 +285,11 @@ export function RsvpAnalyticsTab({ siteId, lang, planType, translations }: Props
                 "builder.rsvp.analytics.table.language",
                 "Language",
               )}
-              tableCountLabel={t(translations, "builder.rsvp.analytics.table.count", "Count")}
+              tableCountLabel={t(
+                translations,
+                "builder.rsvp.analytics.table.count",
+                "Count",
+              )}
               tablePercentageLabel={t(
                 translations,
                 "builder.rsvp.analytics.table.percentage",
@@ -278,7 +319,11 @@ export function RsvpAnalyticsTab({ siteId, lang, planType, translations }: Props
                 "builder.rsvp.analytics.table.restriction",
                 "Restriction",
               )}
-              tableCountLabel={t(translations, "builder.rsvp.analytics.table.count", "Count")}
+              tableCountLabel={t(
+                translations,
+                "builder.rsvp.analytics.table.count",
+                "Count",
+              )}
               tablePercentageLabel={t(
                 translations,
                 "builder.rsvp.analytics.table.percentage",
@@ -291,7 +336,11 @@ export function RsvpAnalyticsTab({ siteId, lang, planType, translations }: Props
 
       {!loading && !error && !data && (
         <div className="rounded-lg border border-(--builder-color-border) bg-white p-4 text-sm text-(--builder-color-text-muted)">
-          {t(translations, "builder.rsvp.analytics.empty", "No analytics data yet.")}
+          {t(
+            translations,
+            "builder.rsvp.analytics.empty",
+            "No analytics data yet.",
+          )}
         </div>
       )}
     </section>

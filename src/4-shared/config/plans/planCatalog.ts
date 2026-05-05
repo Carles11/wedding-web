@@ -1,13 +1,14 @@
 import { PlanFeatureCatalogItem } from "@/4-shared/types";
-
 const FREE_PLAN_FEATURES: readonly PlanFeatureCatalogItem[] = [
+  // Domain
   {
-    title: "Your own wedding website",
-    titleTranslationKeys: ["pricing.plan.free.feature_1"],
-    marketingDescription: "Your site lives at yourname.weddweb.com",
+    title: "Custom subdomain (your-names.weddweb.com)",
+    titleTranslationKeys: ["pricing.plan.free.feature_8"],
+    marketingDescription: "Choose a personalized subdomain for your site",
     marketingDescriptionTranslationKey:
-      "marketing.features.free_plan_feature_1_description",
+      "marketing.features.free_plan_feature_4_description",
   },
+  // Languages
   {
     title: "1 language of your choice",
     titleTranslationKeys: ["pricing.plan.free.feature_5"],
@@ -15,6 +16,16 @@ const FREE_PLAN_FEATURES: readonly PlanFeatureCatalogItem[] = [
     marketingDescriptionTranslationKey:
       "marketing.features.free_plan_feature_2_description",
   },
+  // RSVP
+  {
+    title: "Basic RSVP – online attendance tracking",
+    titleTranslationKeys: ["pricing.plan.free.rsvp"],
+    marketingDescription:
+      "Collect simple attendance from guests online (yes/no RSVP)",
+    marketingDescriptionTranslationKey:
+      "marketing.features.free_plan_feature_rsvp_desc",
+  },
+  // Content
   {
     title: "Essential content (2 accommodations, 2 tips)",
     titleTranslationKeys: ["pricing.plan.free.feature_2"],
@@ -23,20 +34,7 @@ const FREE_PLAN_FEATURES: readonly PlanFeatureCatalogItem[] = [
     marketingDescriptionTranslationKey:
       "marketing.features.free_plan_feature_3_description",
   },
-  {
-    title: "RSVP (Guests can respond online)",
-    titleTranslationKeys: ["pricing.plan.free.rsvp"],
-    marketingDescription: "Collect all RSVPs online with ease",
-    marketingDescriptionTranslationKey:
-      "marketing.features.free_plan_feature_rsvp_desc",
-  },
-  {
-    title: "Custom subdomain (your-names.weddweb.com)",
-    titleTranslationKeys: ["pricing.plan.free.feature_8"],
-    marketingDescription: "Choose a personalized subdomain for your site",
-    marketingDescriptionTranslationKey:
-      "marketing.features.free_plan_feature_4_description",
-  },
+  // Email support
   {
     title: "Email support",
     titleTranslationKeys: ["pricing.plan.free.feature_7"],
@@ -44,6 +42,7 @@ const FREE_PLAN_FEATURES: readonly PlanFeatureCatalogItem[] = [
     marketingDescriptionTranslationKey:
       "marketing.features.free_plan_feature_5_description",
   },
+  // Online forever
   {
     title: "Online forever (view-only after 6 months)",
     titleTranslationKeys: ["pricing.plan.free.feature_9"],
@@ -52,6 +51,7 @@ const FREE_PLAN_FEATURES: readonly PlanFeatureCatalogItem[] = [
     marketingDescriptionTranslationKey:
       "marketing.features.free_plan_feature_6_description",
   },
+  // No credit card needed
   {
     title: "No credit card needed",
     titleTranslationKeys: ["pricing.plan.free.feature_10"],
@@ -63,6 +63,7 @@ const FREE_PLAN_FEATURES: readonly PlanFeatureCatalogItem[] = [
 ];
 
 const PREMIUM_PLAN_FEATURES: readonly PlanFeatureCatalogItem[] = [
+  // Domain
   {
     title: "Your own domain (yournames.com)",
     titleTranslationKeys: ["pricing.plan.premium.feature_1"],
@@ -70,6 +71,7 @@ const PREMIUM_PLAN_FEATURES: readonly PlanFeatureCatalogItem[] = [
     marketingDescriptionTranslationKey:
       "marketing.features.premium_plan_feature_1_description",
   },
+  // Languages
   {
     title: "All 11 languages, every native script",
     titleTranslationKeys: ["pricing.plan.premium.feature_2"],
@@ -77,6 +79,17 @@ const PREMIUM_PLAN_FEATURES: readonly PlanFeatureCatalogItem[] = [
     marketingDescriptionTranslationKey:
       "marketing.features.premium_plan_feature_2_description",
   },
+  // RSVP (all advanced features)
+  {
+    title:
+      "Advanced RSVP: guests, headcount, dietary, comments, bulk, analytics",
+    titleTranslationKeys: ["pricing.plan.premium.rsvp"],
+    marketingDescription:
+      "Advanced RSVP and full guest list management: add unlimited guests, get headcount for each party, dietary and allergy info, guest comments, send bulk invitations, import guest lists in bulk, and analyze attendance in detail with built-in analytics.",
+    marketingDescriptionTranslationKey:
+      "marketing.features.premium_plan_feature_rsvp_desc",
+  },
+  // Content
   {
     title: "Unlimited content—photos, events & tips",
     titleTranslationKeys: ["pricing.plan.premium.feature_4"],
@@ -85,15 +98,7 @@ const PREMIUM_PLAN_FEATURES: readonly PlanFeatureCatalogItem[] = [
     marketingDescriptionTranslationKey:
       "marketing.features.premium_plan_feature_3_description",
   },
-  {
-    title:
-      "Advanced RSVP (full headcount, dietary, comments, plus bulk invitations)",
-    titleTranslationKeys: ["pricing.plan.premium.rsvp"],
-    marketingDescription:
-      "Advanced RSVP and guest list management—export, message, track, analyze responses",
-    marketingDescriptionTranslationKey:
-      "marketing.features.premium_plan_feature_rsvp_desc",
-  },
+  // Email support (priority)
   {
     title: "Priority email support (reply in 48h)",
     titleTranslationKeys: ["pricing.plan.premium.feature_3"],
@@ -101,13 +106,7 @@ const PREMIUM_PLAN_FEATURES: readonly PlanFeatureCatalogItem[] = [
     marketingDescriptionTranslationKey:
       "marketing.features.premium_plan_feature_4_description",
   },
-  {
-    title: "Full gift registry & management",
-    titleTranslationKeys: ["pricing.plan.premium.feature_5"],
-    marketingDescription: "Create and manage multiple gift registries",
-    marketingDescriptionTranslationKey:
-      "marketing.features.premium_plan_feature_5_description",
-  },
+  // Online forever
   {
     title: "Your site, permanently online forever",
     titleTranslationKeys: ["pricing.plan.premium.feature_6"],
@@ -115,6 +114,14 @@ const PREMIUM_PLAN_FEATURES: readonly PlanFeatureCatalogItem[] = [
       "Your site remains online indefinitely and stays fully editable forever.",
     marketingDescriptionTranslationKey:
       "marketing.features.premium_plan_feature_6_description",
+  },
+  // Gift registry
+  {
+    title: "Full gift registry & management",
+    titleTranslationKeys: ["pricing.plan.premium.feature_5"],
+    marketingDescription: "Create and manage multiple gift registries",
+    marketingDescriptionTranslationKey:
+      "marketing.features.premium_plan_feature_5_description",
   },
 ];
 
@@ -133,6 +140,7 @@ export const PLAN_CATALOG = {
       weddingGiftMethods: 1,
       languages: 1,
       customDomains: 0,
+      guests: -1, // UNLIMITED RSVP guests (made explicit!)
     },
     price: -1,
     currency: "EUR",
@@ -152,6 +160,7 @@ export const PLAN_CATALOG = {
       weddingGiftMethods: -1,
       languages: -1,
       customDomains: 1,
+      guests: -1, // UNLIMITED RSVP guests (highlighted!)
     },
     price: 39.0,
     currency: "EUR",

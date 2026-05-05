@@ -72,7 +72,10 @@ describe("GET /api/sites/[id]/rsvp-analytics", () => {
 
   function createSupabaseMock(options: {
     site: { id: string; plan_type: string } | null;
-    parties?: Array<{ preferred_lang: string | null; access_code_hash: string | null }>;
+    parties?: Array<{
+      preferred_lang: string | null;
+      access_code_hash: string | null;
+    }>;
     states?: Array<{ status: string | null; meal_intolerances: string | null }>;
   }) {
     const siteQuery = createSiteQuery(options.site);
@@ -155,7 +158,9 @@ describe("GET /api/sites/[id]/rsvp-analytics", () => {
       ]),
     );
     expect(json.analytics?.dietary).toEqual(
-      expect.arrayContaining([expect.objectContaining({ key: "vegan", count: 1 })]),
+      expect.arrayContaining([
+        expect.objectContaining({ key: "vegan", count: 1 }),
+      ]),
     );
   });
 
