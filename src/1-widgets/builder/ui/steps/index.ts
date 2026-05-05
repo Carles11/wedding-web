@@ -5,5 +5,6 @@ export { default as DomainAndBillingBuilderStep } from "./DomainAndBillingBuilde
 export { default as GeneralSiteForm } from "./GeneralSiteForm";
 export { default as ImagesBuilderStep } from "./ImagesBuilderStep";
 export { default as ProgramEventsBuilderStep } from "./ProgramEventsBuilderStep";
+export { default as RsvpBuilderStep } from "./RsvpBuilderStep";
 export { default as WeddingGiftBuilderStep } from "./WeddingGiftBuilderStep";
 export { default as WhatToSeeBuilderStep } from "./WhatToSeeBuilderStep";

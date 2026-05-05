@@ -7,6 +7,7 @@ import { fetchAccommodationEntries } from "@/3-entities/accommodation/api";
 import { updateAccountInfo } from "@/3-entities/account/api/accountCrud";
 import { fetchImagesBySite } from "@/3-entities/images/api";
 import { fetchHasMainProgramEvent } from "@/3-entities/program_events/api";
+import { fetchRsvpSettings } from "@/3-entities/rsvp/api";
 import { fetchContactSection } from "@/3-entities/sections/api/fetchContactSection";
 import { fetchWeddingGiftBySite } from "@/3-entities/wedding_gifts/api";
 import { fetchWhatToSeeEntries } from "@/3-entities/what_to_see/api";
@@ -30,6 +31,7 @@ const STEP_KEYS = [
   "builder.nav.step.what_to_see",
   "builder.nav.step.wedding_gift",
   "builder.nav.step.contact",
+  "builder.nav.step.rsvp",
   "builder.nav.step.domain_billing",
 ];
 
@@ -55,7 +57,13 @@ export default function BuilderClient({
   // Initialize active step from URL query param
   const searchParams = useSearchParams();
   const initialStep = parseInt(searchParams.get("step") ?? "0", 10);
-  const [active, setActive] = useState(isNaN(initialStep) ? 0 : initialStep);
+  const safeInitialStep =
+    Number.isNaN(initialStep) ||
+    initialStep < 0 ||
+    initialStep >= STEP_KEYS.length
+      ? 0
+      : initialStep;
+  const [active, setActive] = useState(safeInitialStep);
 
   const [currentLang, setCurrentLang] = useState(initialLang);
   const [translations, setTranslations] = useState(initialTranslations);
@@ -78,6 +86,7 @@ export default function BuilderClient({
   const [whatToSeeCount, setWhatToSeeCount] = useState(0);
   const [hasWeddingGiftData, setHasWeddingGiftData] = useState(false);
   const [hasContact, setHasContact] = useState(false);
+  const [hasRsvpEnabled, setHasRsvpEnabled] = useState(false);
 
   const handleUpgrade = () => {
     router.push(`/${initialLang}/builder/checkout?plan=premium`);
@@ -155,6 +164,9 @@ export default function BuilderClient({
         hasAnyGiftPaymentMethod(gift as Record<string, unknown> | null),
       ),
     );
+    fetchRsvpSettings(id).then((s) =>
+      setHasRsvpEnabled(s?.is_enabled ?? false),
+    );
   }, [site?.id]);
 
   const handleLanguageChange = async (lang: string) => {
@@ -204,6 +216,7 @@ export default function BuilderClient({
     whatToSeeCount > 0 ? "done" : "optional",
     hasWeddingGiftData ? "done" : "optional",
     hasContact ? "done" : "pending",
+    hasRsvpEnabled ? "done" : "optional",
     "done",
   ];
 
@@ -298,6 +311,7 @@ export default function BuilderClient({
               setWhatToSeeCount={setWhatToSeeCount}
               setHasWeddingGiftData={setHasWeddingGiftData}
               setHasContact={setHasContact}
+              setHasRsvpEnabled={setHasRsvpEnabled}
               account={account}
               stepStatuses={STEP_STATUS}
             />

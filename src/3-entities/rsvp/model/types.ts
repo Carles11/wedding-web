@@ -9,10 +9,15 @@ export type RsvpSettings = {
 export type RsvpParty = {
   id: string;
   site_id: string;
-  access_code_hash: string;
-  is_active: boolean;
+  name: string;
+  email: string;
+  preferred_lang: string;
   max_guests: number;
-  preferred_lang: string | null;
+  access_code_hash: string | null;
+  passcode_hash: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
 };
 
 /** Subset of the rsvp_party_state row returned by Supabase. */
@@ -23,6 +28,38 @@ export type RsvpPartyState = {
   headcount: number | null;
   comment: string | null;
   updated_at: string;
+};
+
+/** Subset of the rsvp_submissions row returned by Supabase. */
+export type RsvpSubmission = {
+  id: string;
+  site_id: string;
+  party_id: string;
+  lang: string;
+  payload: Record<string, unknown>;
+  submitted_at: string;
+};
+
+export type RsvpResponseStatus = "unknown" | "attending" | "not_attending";
+
+export type RsvpResponseRow = {
+  party: Pick<
+    RsvpParty,
+    | "id"
+    | "site_id"
+    | "name"
+    | "email"
+    | "preferred_lang"
+    | "max_guests"
+    | "is_active"
+    | "updated_at"
+  >;
+  state: {
+    status: RsvpResponseStatus;
+    headcount: number | null;
+    comment: string | null;
+    updated_at: string | null;
+  };
 };
 
 /** Discriminated union returned by validateRsvpAccessCode. */

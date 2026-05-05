@@ -9,13 +9,14 @@ import {
   GeneralSiteForm,
   ImagesBuilderStep,
   ProgramEventsBuilderStep,
+  RsvpBuilderStep,
   WeddingGiftBuilderStep,
   WhatToSeeBuilderStep,
 } from "./steps";
 
 /**
  * Renders the right-hand content pane of the builder.
- * All 8 steps are always mounted (hidden via CSS) to preserve local state
+ * All steps are always mounted (hidden via CSS) to preserve local state
  * across tab switches and avoid stale-read issues after Supabase writes.
  */
 export default function BuilderStepContent({
@@ -33,6 +34,7 @@ export default function BuilderStepContent({
   setWhatToSeeCount,
   setHasWeddingGiftData,
   setHasContact,
+  setHasRsvpEnabled,
   account,
   stepStatuses,
 }: BuilderStepContentProps) {
@@ -52,6 +54,7 @@ export default function BuilderStepContent({
               "builder.nav.step.what_to_see",
               "builder.nav.step.wedding_gift",
               "builder.nav.step.contact",
+              "builder.nav.step.rsvp",
               "builder.nav.step.domain_billing",
             ][active]
           ]
@@ -136,6 +139,15 @@ export default function BuilderStepContent({
             />
           </div>
           <div className={active !== 7 ? "hidden" : undefined}>
+            <RsvpBuilderStep
+              site={site}
+              refresh={refresh}
+              lang={currentLang}
+              translations={translations}
+              setHasRsvpEnabled={setHasRsvpEnabled}
+            />
+          </div>
+          <div className={active !== 8 ? "hidden" : undefined}>
             <DomainAndBillingBuilderStep
               site={site}
               refresh={refresh}

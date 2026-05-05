@@ -8,6 +8,8 @@ import {
 } from "@/4-shared/ui/commons/icons/completenessIcons";
 import { Fragment } from "react";
 
+const DOMAIN_BILLING_STEP_KEY = "builder.nav.step.domain_billing";
+
 function StatusIcon({ status }: { status: StepStatus }) {
   if (status === "done") return <GreenCheckIcon />;
   if (status === "optional") return <GrayCircleIcon />;
@@ -33,26 +35,41 @@ export default function BuilderStepNav({
         <div className="flex overflow-x-auto gap-2 p-3">
           {stepKeys.map((k, i) => (
             <Fragment key={k}>
-              <div className="flex items-center">
-                <button
-                  onClick={() => onSelect(i)}
-                  className={`shrink-0 flex items-center gap-2 px-3 py-2 rounded whitespace-nowrap border ${
-                    i === active
-                      ? "builder-step-nav-mobile-active"
-                      : "builder-step-nav-mobile-idle"
-                  }`}
-                >
-                  {i !== 7 && <StatusIcon status={stepStatuses[i]} />}{" "}
-                  <span className="text-sm">{translations[k]}</span>
-                </button>
-              </div>
-              {i === 6 && ( // separator after the 7th (index 6), before the 8th (index 7)
-                <span
-                  aria-hidden="true"
-                  className="mx-2 h-9 border-l border-gray-300 opacity-60"
-                  style={{ display: "inline-block", verticalAlign: "middle" }}
-                />
-              )}
+              {(() => {
+                const isDomainBillingStep = k === DOMAIN_BILLING_STEP_KEY;
+                const shouldRenderMobileDivider =
+                  stepKeys[i + 1] === DOMAIN_BILLING_STEP_KEY;
+
+                return (
+                  <>
+                    <div className="flex items-center">
+                      <button
+                        onClick={() => onSelect(i)}
+                        className={`shrink-0 flex items-center gap-2 px-3 py-2 rounded whitespace-nowrap border ${
+                          i === active
+                            ? "builder-step-nav-mobile-active"
+                            : "builder-step-nav-mobile-idle"
+                        }`}
+                      >
+                        {!isDomainBillingStep && (
+                          <StatusIcon status={stepStatuses[i]} />
+                        )}{" "}
+                        <span className="text-sm">{translations[k]}</span>
+                      </button>
+                    </div>
+                    {shouldRenderMobileDivider && (
+                      <span
+                        aria-hidden="true"
+                        className="mx-2 h-9 border-l border-gray-300 opacity-60"
+                        style={{
+                          display: "inline-block",
+                          verticalAlign: "middle",
+                        }}
+                      />
+                    )}
+                  </>
+                );
+              })()}
             </Fragment>
           ))}
 
@@ -78,7 +95,7 @@ export default function BuilderStepNav({
         <ul className="mt-4 flex md:block gap-2 md:gap-0 space-y-0 md:space-y-2 min-w-max md:min-w-0">
           {stepKeys.map((k, i) => (
             <Fragment key={k}>
-              {i === 7 && (
+              {k === DOMAIN_BILLING_STEP_KEY && (
                 <li className="my-3 px-3" aria-hidden="true">
                   <div className="builder-step-divider h-px" />
                 </li>
@@ -92,12 +109,12 @@ export default function BuilderStepNav({
                   } cursor-pointer`}
                   onClick={() => onSelect(i)}
                 >
-                  {i !== 7 && (
+                  {k !== DOMAIN_BILLING_STEP_KEY && (
                     <span className="w-6 flex justify-center items-center">
                       <StatusIcon status={stepStatuses[i]} />
                     </span>
                   )}
-                  {translations[k]}
+                  {translations[k] || "RSVP"}
                 </button>
               </li>
             </Fragment>

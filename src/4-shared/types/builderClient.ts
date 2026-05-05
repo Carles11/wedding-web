@@ -36,6 +36,7 @@ export interface BuilderStepContentProps {
   setWhatToSeeCount: (v: number) => void;
   setHasWeddingGiftData: (v: boolean) => void;
   setHasContact: (v: boolean) => void;
+  setHasRsvpEnabled: (v: boolean) => void;
 }
 
 export interface BuilderStepNavProps {
