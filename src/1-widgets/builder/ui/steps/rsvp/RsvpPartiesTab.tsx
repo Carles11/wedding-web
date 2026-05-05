@@ -407,7 +407,7 @@ export function RsvpPartiesTab({
         </div>
         <div className="flex flex-wrap items-center gap-2 justify-end">
           <BuilderButton
-            variant="secondary"
+            variant="primary"
             size="sm"
             onClick={handleBulkAddClick}
             disabled={loading}
@@ -425,24 +425,26 @@ export function RsvpPartiesTab({
         </div>
       </div>
       {/* TODO: Add guest segments or list targeting when bulk actions expand beyond site-wide operations. */}
-      <BuilderButton
-        variant="secondary"
-        size="sm"
-        onClick={handleBulkInviteClick}
-        disabled={loading || bulkSending}
-      >
-        {bulkSending
-          ? t(
-              translations,
-              "builder.rsvp.guests.bulk_invite.sending",
-              "Sending bulk invites...",
-            )
-          : t(
-              translations,
-              "builder.rsvp.guests.bulk_invite.button",
-              "Send bulk invites",
-            )}
-      </BuilderButton>
+      <div className="flex flex-col gap-3 md:flex-row items-center justify-end">
+        <BuilderButton
+          variant="secondary"
+          size="sm"
+          onClick={handleBulkInviteClick}
+          disabled={loading || bulkSending}
+        >
+          {bulkSending
+            ? t(
+                translations,
+                "builder.rsvp.guests.bulk_invite.sending",
+                "Sending bulk invites...",
+              )
+            : t(
+                translations,
+                "builder.rsvp.guests.bulk_invite.button",
+                "Send bulk invites",
+              )}
+        </BuilderButton>
+      </div>
 
       {loadError && (
         <div className="rounded border border-red-300 bg-red-50 px-4 py-3">

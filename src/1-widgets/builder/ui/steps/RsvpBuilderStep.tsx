@@ -2,6 +2,7 @@
 
 import type { PlanType, Site } from "@/4-shared/types";
 import { useEffect, useState } from "react";
+import { RsvpAnalyticsTab } from "@/1-widgets/builder/ui/steps/rsvp/RsvpAnalyticsTab";
 import { RsvpPartiesTab } from "./rsvp/RsvpPartiesTab";
 import { RsvpResponsesTab } from "./rsvp/RsvpResponsesTab";
 
@@ -44,7 +45,7 @@ export default function RsvpBuilderStep({
   setHasRsvpEnabled,
 }: Props) {
   const [activeTab, setActiveTab] = useState<
-    "settings" | "parties" | "responses"
+    "settings" | "parties" | "responses" | "analytics"
   >("settings");
   const [isEnabled, setIsEnabled] = useState(false);
   const [deadlineLocal, setDeadlineLocal] = useState(""); // datetime-local string
@@ -176,6 +177,17 @@ export default function RsvpBuilderStep({
         >
           {translations["builder.rsvp.tab.responses"] || "Responses"}
         </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab("analytics")}
+          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+            activeTab === "analytics"
+              ? "border-(--builder-color-primary) text-(--builder-color-primary)"
+              : "border-transparent text-(--builder-color-text-muted) hover:text-(--builder-color-text)"
+          }`}
+        >
+          {translations["builder.rsvp.tab.analytics"] || "Analytics"}
+        </button>
       </div>
 
       {activeTab === "parties" && site?.id ? (
@@ -187,6 +199,13 @@ export default function RsvpBuilderStep({
         />
       ) : activeTab === "responses" && site?.id ? (
         <RsvpResponsesTab siteId={site.id} translations={translations} />
+      ) : activeTab === "analytics" && site?.id ? (
+        <RsvpAnalyticsTab
+          siteId={site.id}
+          lang={lang}
+          planType={planType}
+          translations={translations}
+        />
       ) : activeTab === "parties" ? null : (
         <>
           <p className="mt-1 text-sm text-(--builder-color-text-muted)">

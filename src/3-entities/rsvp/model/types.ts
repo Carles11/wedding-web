@@ -66,6 +66,37 @@ export type RsvpResponseRow = {
   };
 };
 
+export type RsvpAnalyticsBreakdownItem = {
+  key: string;
+  label: string;
+  count: number;
+  percentage: number;
+};
+
+export type RsvpAnalyticsSummary = {
+  invitations_sent: number;
+  rsvps_received: number;
+  attending_count: number;
+  attendance_rate: number;
+};
+
+export type RsvpAnalyticsData = {
+  summary: RsvpAnalyticsSummary;
+  languages: RsvpAnalyticsBreakdownItem[];
+  dietary: RsvpAnalyticsBreakdownItem[];
+  generated_at: string;
+};
+
+export type RsvpAnalyticsJson =
+  | {
+      success: true;
+      analytics: RsvpAnalyticsData;
+    }
+  | {
+      success: false;
+      error: string;
+    };
+
 /** Discriminated union returned by validateRsvpAccessCode. */
 export type ValidateRsvpAccessCodeResult =
   | {
