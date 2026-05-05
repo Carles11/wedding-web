@@ -1,6 +1,7 @@
 import { RSVPFormComponent } from "@/0-pages/(tenant)/RSVPFormComponent";
 import { validateRsvpAccessCode } from "@/3-entities/rsvp/lib/validateRsvpAccessCode";
-import { getMergedTranslations } from "@/4-shared/lib/i18n";
+import { t } from "@/4-shared/helpers/t";
+import { fetchGlobalTranslations } from "@/4-shared/lib/i18n";
 import { resolveSiteIdFromHost } from "@/4-shared/lib/site/resolveSiteIdFromHost";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
@@ -19,14 +20,6 @@ export async function generateMetadata(): Promise<Metadata> {
       googleBot: { index: false, follow: false },
     },
   };
-}
-
-function tr(
-  dict: Record<string, string>,
-  key: string,
-  fallback: string,
-): string {
-  return dict[key] ?? fallback;
 }
 
 type RsvpStatus = "attending" | "not_attending";
@@ -48,6 +41,8 @@ export default async function RsvpPage({
   const host = (await headers()).get("host") ?? "";
   const resolved = await resolveSiteIdFromHost(host);
 
+  const globalTranslations = await fetchGlobalTranslations(lang, "en");
+  console.log({ globalTranslations });
   // --- State A: site not found ---
   if (!resolved) {
     return (
@@ -55,7 +50,7 @@ export default async function RsvpPage({
         <div className="mx-auto w-full max-w-2xl px-4 sm:px-6">
           <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm sm:p-7">
             <h1 className="text-3xl text-(--color-foreground) sm:text-4xl">
-              RSVP
+              {t(globalTranslations, "rsvp.page.title", "RSVP")}
             </h1>
             <p className="mt-3 text-sm leading-6 text-gray-500">
               Site not found.
@@ -71,17 +66,16 @@ export default async function RsvpPage({
 
   // --- State B: missing code (before DB call) ---
   if (!rawCode) {
-    const t = await getMergedTranslations(siteId, lang, "en");
     return (
       <main className="min-h-screen bg-(--color-background) py-10 sm:py-14">
         <div className="mx-auto w-full max-w-2xl px-4 sm:px-6">
           <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm sm:p-7">
             <h1 className="text-3xl text-(--color-foreground) sm:text-4xl">
-              {tr(t, "rsvp.page.title", "RSVP")}
+              {t(globalTranslations, "rsvp.page.title", "RSVP")}
             </h1>
             <p className="mt-3 text-sm leading-6 text-gray-500">
-              {tr(
-                t,
+              {t(
+                globalTranslations,
                 "rsvp.page.invalid_link",
                 "This link is invalid or has expired.",
               )}
@@ -96,17 +90,16 @@ export default async function RsvpPage({
 
   // --- State C: invalid/expired code ---
   if (!result.ok) {
-    const t = await getMergedTranslations(siteId, lang, "en");
     return (
       <main className="min-h-screen bg-(--color-background) py-10 sm:py-14">
         <div className="mx-auto w-full max-w-2xl px-4 sm:px-6">
           <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm sm:p-7">
             <h1 className="text-3xl text-(--color-foreground) sm:text-4xl">
-              {tr(t, "rsvp.page.title", "RSVP")}
+              {t(globalTranslations, "rsvp.page.title", "Guests & RSVP")}
             </h1>
             <p className="mt-3 text-sm leading-6 text-gray-500">
-              {tr(
-                t,
+              {t(
+                globalTranslations,
                 "rsvp.page.invalid_link",
                 "This link is invalid or has expired.",
               )}
@@ -119,7 +112,6 @@ export default async function RsvpPage({
 
   // --- State D: valid code — render form ---
   const { party, partyState } = result;
-  const t = await getMergedTranslations(siteId, lang, "en");
 
   if (party.max_guests < 1) {
     return (
@@ -127,11 +119,11 @@ export default async function RsvpPage({
         <div className="mx-auto w-full max-w-2xl px-4 sm:px-6">
           <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm sm:p-7">
             <h1 className="text-3xl text-(--color-foreground) sm:text-4xl">
-              {tr(t, "rsvp.page.title", "RSVP")}
+              {t(globalTranslations, "rsvp.page.title", "RSVP")}
             </h1>
             <p className="mt-3 text-sm leading-6 text-gray-500">
-              {tr(
-                t,
+              {t(
+                globalTranslations,
                 "rsvp.page.invalid_link",
                 "This link is invalid or has expired.",
               )}
@@ -147,13 +139,13 @@ export default async function RsvpPage({
       <div className="mx-auto w-full max-w-2xl px-4 sm:px-6">
         <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm sm:p-7">
           <h1 className="text-3xl text-(--color-foreground) sm:text-4xl">
-            {tr(t, "rsvp.page.title", "RSVP")}
+            {t(globalTranslations, "rsvp.page.title", "RSVP")}
           </h1>
 
           <RSVPFormComponent
             lang={lang}
             rawCode={rawCode}
-            t={t}
+            t={globalTranslations}
             party={{ max_guests: party.max_guests }}
             partyState={
               partyState && isRsvpStatus(partyState.status)

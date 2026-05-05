@@ -47,7 +47,6 @@ export default async function BuilderPage({
   cutoff.setMonth(cutoff.getMonth() - 6);
 
   const isLegacy = userProfile?.plan_type === "free" && lastActivity < cutoff;
-
   return (
     <div className="min-h-screen bg-gray-50">
       <BuilderClient

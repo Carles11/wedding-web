@@ -135,6 +135,7 @@ export default function RsvpBuilderStep({
       </div>
     );
   }
+
   return (
     <div className="rounded border border-(--builder-color-border) bg-white p-6">
       {/* Tab switcher */}
@@ -197,9 +198,7 @@ export default function RsvpBuilderStep({
                 aria-checked={isEnabled}
                 onClick={() => setIsEnabled((v) => !v)}
                 className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${
-                  isEnabled
-                    ? "bg-(--builder-color-primary, #4f46e5)"
-                    : "bg-gray-200"
+                  isEnabled ? "bg-(--builder-color-primary)" : "bg-gray-200"
                 }`}
               >
                 <span
