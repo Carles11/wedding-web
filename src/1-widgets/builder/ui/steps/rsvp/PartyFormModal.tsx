@@ -75,7 +75,7 @@ export function PartyFormModal({
       setNameError(
         t(
           translations,
-          "builder.rsvp.party.name.required",
+          "builder.rsvp.guest.name.required",
           "Name is required.",
         ),
       );
@@ -88,7 +88,7 @@ export function PartyFormModal({
       setEmailError(
         t(
           translations,
-          "builder.rsvp.party.email.required",
+          "builder.rsvp.guest.email.required",
           "Email is required.",
         ),
       );
@@ -97,7 +97,7 @@ export function PartyFormModal({
       setEmailError(
         t(
           translations,
-          "builder.rsvp.party.email.invalid",
+          "builder.rsvp.guest.email.invalid",
           "Enter a valid email address.",
         ),
       );
@@ -111,7 +111,7 @@ export function PartyFormModal({
       setMaxGuestsError(
         t(
           translations,
-          "builder.rsvp.party.max_guests.invalid",
+          "builder.rsvp.guest.max_guests.invalid",
           "Max guests must be at least 1.",
         ),
       );
@@ -162,14 +162,14 @@ export function PartyFormModal({
           setEmailError(
             t(
               translations,
-              "builder.rsvp.party.email.duplicate",
+              "builder.rsvp.guest.email.duplicate",
               "This email is already registered for this site.",
             ),
           );
         } else {
           setSubmitError(
             json.error ??
-              t(translations, "builder.rsvp.party.save.error", "Save failed."),
+              t(translations, "builder.rsvp.guest.save.error", "Save failed."),
           );
         }
         return;
@@ -181,7 +181,7 @@ export function PartyFormModal({
       setSubmitError(
         t(
           translations,
-          "builder.rsvp.party.network.error",
+          "builder.rsvp.guest.network.error",
           "Network error — please try again.",
         ),
       );
@@ -195,14 +195,14 @@ export function PartyFormModal({
       open={open}
       title={
         isEdit
-          ? t(translations, "builder.rsvp.party.modal.edit", "Edit party")
-          : t(translations, "builder.rsvp.party.modal.add", "Add party")
+          ? t(translations, "builder.rsvp.guest.modal.edit", "Edit guest")
+          : t(translations, "builder.rsvp.guest.modal.add", "Add guest")
       }
       onClose={onClose}
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         <BuilderTextInput
-          label={t(translations, "builder.rsvp.party.name.label", "Name")}
+          label={t(translations, "builder.rsvp.guest.name.label", "Name")}
           value={name}
           onChange={setName}
           required
@@ -211,7 +211,7 @@ export function PartyFormModal({
         />
 
         <BuilderTextInput
-          label={t(translations, "builder.rsvp.party.email.label", "Email")}
+          label={t(translations, "builder.rsvp.guest.email.label", "Email")}
           value={email}
           onChange={setEmail}
           type="email"
@@ -223,7 +223,7 @@ export function PartyFormModal({
         <BuilderDropdownInput
           label={t(
             translations,
-            "builder.rsvp.party.lang.label",
+            "builder.rsvp.guest.lang.label",
             "Preferred language",
           )}
           value={preferredLang}
@@ -235,7 +235,7 @@ export function PartyFormModal({
           <label className="block text-xs text-gray-600">
             {t(
               translations,
-              "builder.rsvp.party.max_guests.label",
+              "builder.rsvp.guest.max_guests.label",
               "Max guests",
             )}
             <span className="ml-0.5 text-red-500"> *</span>
@@ -264,12 +264,12 @@ export function PartyFormModal({
             onClick={onClose}
             disabled={saving}
           >
-            {t(translations, "builder.rsvp.party.modal.cancel", "Cancel")}
+            {t(translations, "builder.rsvp.guest.modal.cancel", "Cancel")}
           </BuilderButton>
           <BuilderButton type="submit" variant="primary" disabled={saving}>
             {saving
-              ? t(translations, "builder.rsvp.party.modal.saving", "Saving…")
-              : t(translations, "builder.rsvp.party.modal.save", "Save")}
+              ? t(translations, "builder.rsvp.guest.modal.saving", "Saving…")
+              : t(translations, "builder.rsvp.guest.modal.save", "Save")}
           </BuilderButton>
         </div>
       </form>

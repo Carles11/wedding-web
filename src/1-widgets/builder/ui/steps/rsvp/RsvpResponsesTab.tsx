@@ -77,6 +77,8 @@ function toCsv(rows: RsvpResponseRow[]): string {
     "status",
     "headcount",
     "comment",
+    "meal_intolerances",
+    "song_request",
     "updated_at",
   ];
 
@@ -90,6 +92,8 @@ function toCsv(rows: RsvpResponseRow[]): string {
       row.state.status,
       row.state.headcount,
       row.state.comment,
+      row.state.meal_intolerances,
+      row.state.song_request,
       row.state.updated_at,
     ];
     return values.map(escapeCsvValue).join(",");
@@ -522,6 +526,20 @@ export function RsvpResponsesTab({ siteId, translations }: Props) {
                 <th className="px-4 py-2 text-left">
                   {t(
                     translations,
+                    "builder.rsvp.responses.col.meal_intolerances",
+                    "Dietary",
+                  )}
+                </th>
+                <th className="px-4 py-2 text-left">
+                  {t(
+                    translations,
+                    "builder.rsvp.responses.col.song_request",
+                    "Song request",
+                  )}
+                </th>
+                <th className="px-4 py-2 text-left">
+                  {t(
+                    translations,
                     "builder.rsvp.responses.col.updated",
                     "Updated",
                   )}
@@ -534,7 +552,7 @@ export function RsvpResponsesTab({ siteId, translations }: Props) {
               {loading && rows.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={10}
+                    colSpan={12}
                     className="px-4 py-6 text-center text-(--builder-color-text-muted)"
                   >
                     {t(
@@ -547,7 +565,7 @@ export function RsvpResponsesTab({ siteId, translations }: Props) {
               ) : rows.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={10}
+                    colSpan={12}
                     className="px-4 py-6 text-center text-(--builder-color-text-muted)"
                   >
                     {t(
@@ -583,12 +601,12 @@ export function RsvpResponsesTab({ siteId, translations }: Props) {
                         {row.party.is_active
                           ? t(
                               translations,
-                              "builder.rsvp.responses.party.active",
+                              "builder.rsvp.responses.guest.active",
                               "Active",
                             )
                           : t(
                               translations,
-                              "builder.rsvp.responses.party.inactive",
+                              "builder.rsvp.responses.guest.inactive",
                               "Inactive",
                             )}
                       </span>
@@ -608,6 +626,12 @@ export function RsvpResponsesTab({ siteId, translations }: Props) {
                     </td>
                     <td className="px-4 py-2 text-(--builder-color-text-muted) max-w-[220px] truncate">
                       {row.state.comment || "-"}
+                    </td>
+                    <td className="px-4 py-2 text-(--builder-color-text-muted) max-w-45 truncate">
+                      {row.state.meal_intolerances || "-"}
+                    </td>
+                    <td className="px-4 py-2 text-(--builder-color-text-muted) max-w-45 truncate">
+                      {row.state.song_request || "-"}
                     </td>
                     <td className="px-4 py-2 text-(--builder-color-text-muted) text-xs">
                       {formatDateTime(row.state.updated_at)}
@@ -672,7 +696,7 @@ export function RsvpResponsesTab({ siteId, translations }: Props) {
           <div className="space-y-5">
             <section className="rounded border border-(--builder-color-border) bg-(--builder-color-surface) p-4 space-y-2">
               <h4 className="text-sm font-semibold text-(--builder-color-text)">
-                {t(translations, "builder.rsvp.responses.modal.party", "Party")}
+                {t(translations, "builder.rsvp.responses.modal.guest", "Guest")}
               </h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
                 <p className="text-(--builder-color-text)">
@@ -727,6 +751,28 @@ export function RsvpResponsesTab({ siteId, translations }: Props) {
                   :{" "}
                 </span>
                 {selectedRow.state.comment || "-"}
+              </p>
+              <p className="text-sm text-(--builder-color-text)">
+                <span className="font-medium">
+                  {t(
+                    translations,
+                    "builder.rsvp.responses.col.meal_intolerances",
+                    "Dietary",
+                  )}
+                  :{" "}
+                </span>
+                {selectedRow.state.meal_intolerances || "-"}
+              </p>
+              <p className="text-sm text-(--builder-color-text)">
+                <span className="font-medium">
+                  {t(
+                    translations,
+                    "builder.rsvp.responses.col.song_request",
+                    "Song request",
+                  )}
+                  :{" "}
+                </span>
+                {selectedRow.state.song_request || "-"}
               </p>
               <p className="text-xs text-(--builder-color-text-muted)">
                 {t(

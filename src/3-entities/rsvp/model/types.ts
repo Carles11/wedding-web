@@ -27,6 +27,8 @@ export type RsvpPartyState = {
   status: string;
   headcount: number | null;
   comment: string | null;
+  meal_intolerances: string | null;
+  song_request: string | null;
   updated_at: string;
 };
 
@@ -58,6 +60,8 @@ export type RsvpResponseRow = {
     status: RsvpResponseStatus;
     headcount: number | null;
     comment: string | null;
+    meal_intolerances: string | null;
+    song_request: string | null;
     updated_at: string | null;
   };
 };

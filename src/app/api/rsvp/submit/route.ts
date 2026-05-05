@@ -34,6 +34,8 @@ export async function POST(req: Request) {
   const statusRaw = formData.get("status");
   const headcountRaw = formData.get("headcount");
   const commentRaw = formData.get("comment");
+  const mealIntolerancesRaw = formData.get("meal_intolerances");
+  const songRequestRaw = formData.get("song_request");
 
   const langCandidate = typeof lang === "string" ? lang.trim() : "";
   const langStr = (SUPPORTED_LANGUAGES as readonly string[]).includes(
@@ -62,6 +64,14 @@ export async function POST(req: Request) {
   if (commentStr.length > 1000) return errorRedirect();
   const commentNorm = commentStr.length > 0 ? commentStr : null;
 
+  // --- Premium-only field validation (values discarded if Free) ---
+  const mealIntolerancesStr =
+    typeof mealIntolerancesRaw === "string" ? mealIntolerancesRaw.trim() : "";
+  const songRequestStr =
+    typeof songRequestRaw === "string" ? songRequestRaw.trim() : "";
+  if (mealIntolerancesStr.length > 500) return errorRedirect();
+  if (songRequestStr.length > 500) return errorRedirect();
+
   // --- Validate access code ---
   const result = await validateRsvpAccessCode({ siteId, rawCode });
   if (!result.ok) return errorRedirect();
@@ -69,6 +79,19 @@ export async function POST(req: Request) {
   const { party } = result;
 
   if (party.max_guests < 1) return errorRedirect();
+
+  // --- Fetch site plan (determines whether premium fields are saved) ---
+  const { data: siteRow } = await supabaseAdmin
+    .from("sites")
+    .select("plan_type")
+    .eq("id", siteId)
+    .maybeSingle();
+  const isPremium = siteRow?.plan_type === "premium";
+
+  const mealIntolerancesNorm =
+    isPremium && mealIntolerancesStr.length > 0 ? mealIntolerancesStr : null;
+  const songRequestNorm =
+    isPremium && songRequestStr.length > 0 ? songRequestStr : null;
 
   // --- Normalize headcount ---
   let headcountNorm: number;
@@ -99,6 +122,8 @@ export async function POST(req: Request) {
         status,
         headcount: headcountNorm,
         comment: commentNorm,
+        ...(isPremium && { meal_intolerances: mealIntolerancesNorm }),
+        ...(isPremium && { song_request: songRequestNorm }),
         userAgent: req.headers.get("user-agent") ?? null,
         submittedAt: now,
       },
@@ -119,6 +144,8 @@ export async function POST(req: Request) {
         status,
         headcount: headcountNorm,
         comment: commentNorm,
+        ...(isPremium && { meal_intolerances: mealIntolerancesNorm }),
+        ...(isPremium && { song_request: songRequestNorm }),
         updated_at: now,
       },
       { onConflict: "party_id" },

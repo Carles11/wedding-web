@@ -24,6 +24,13 @@ const FREE_PLAN_FEATURES: readonly PlanFeatureCatalogItem[] = [
       "marketing.features.free_plan_feature_3_description",
   },
   {
+    title: "RSVP (Guests can respond online)",
+    titleTranslationKeys: ["pricing.plan.free.rsvp"],
+    marketingDescription: "Collect all RSVPs online with ease",
+    marketingDescriptionTranslationKey:
+      "marketing.features.free_plan_feature_rsvp_desc",
+  },
+  {
     title: "Custom subdomain (your-names.weddweb.com)",
     titleTranslationKeys: ["pricing.plan.free.feature_8"],
     marketingDescription: "Choose a personalized subdomain for your site",
@@ -77,6 +84,15 @@ const PREMIUM_PLAN_FEATURES: readonly PlanFeatureCatalogItem[] = [
       "Add as many events, accommodation tips, and activities as you need",
     marketingDescriptionTranslationKey:
       "marketing.features.premium_plan_feature_3_description",
+  },
+  {
+    title:
+      "Advanced RSVP (full headcount, dietary, comments, plus bulk invitations)",
+    titleTranslationKeys: ["pricing.plan.premium.rsvp"],
+    marketingDescription:
+      "Advanced RSVP and guest list management—export, message, track, analyze responses",
+    marketingDescriptionTranslationKey:
+      "marketing.features.premium_plan_feature_rsvp_desc",
   },
   {
     title: "Priority email support (reply in 48h)",

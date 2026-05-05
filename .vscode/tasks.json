@@ -1,0 +1,52 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Run bulk-invite route test",
+			"type": "shell",
+			"command": "npm",
+			"args": [
+				"test",
+				"--",
+				"src/app/api/sites/[id]/bulk-invite/route.test.ts"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "Run bulk-invite route test by path",
+			"type": "shell",
+			"command": "npm",
+			"args": [
+				"test",
+				"--",
+				"--runTestsByPath",
+				"src/app/api/sites/[id]/bulk-invite/route.test.ts"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "Re-run bulk-invite route test",
+			"type": "shell",
+			"command": "npm",
+			"args": [
+				"test",
+				"--",
+				"--runTestsByPath",
+				"src/app/api/sites/[id]/bulk-invite/route.test.ts"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "Run bulk-invite route test after Response mock",
+			"type": "shell",
+			"command": "npm",
+			"args": [
+				"test",
+				"--",
+				"--runTestsByPath",
+				"src/app/api/sites/[id]/bulk-invite/route.test.ts"
+			],
+			"isBackground": false
+		}
+	]
+}

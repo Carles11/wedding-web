@@ -82,7 +82,9 @@ export async function validateRsvpAccessCode(
   // --- Lookup 3: rsvp_party_state (nullable — first-time visitor has no state) ---
   const { data: stateRow, error: stateError } = await supabaseAdmin
     .from("rsvp_party_state")
-    .select("party_id, site_id, status, headcount, comment, updated_at")
+    .select(
+      "party_id, site_id, status, headcount, comment, meal_intolerances, song_request, updated_at",
+    )
     .eq("party_id", party.id)
     .eq("site_id", siteId)
     .maybeSingle();

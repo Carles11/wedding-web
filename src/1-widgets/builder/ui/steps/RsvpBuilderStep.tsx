@@ -1,6 +1,6 @@
 "use client";
 
-import { Site } from "@/4-shared/types";
+import type { PlanType, Site } from "@/4-shared/types";
 import { useEffect, useState } from "react";
 import { RsvpPartiesTab } from "./rsvp/RsvpPartiesTab";
 import { RsvpResponsesTab } from "./rsvp/RsvpResponsesTab";
@@ -10,6 +10,7 @@ type Props = {
   refresh: () => void;
   lang: string;
   translations: Record<string, string>;
+  planType: PlanType;
   setHasRsvpEnabled: (v: boolean) => void;
 };
 
@@ -37,7 +38,9 @@ function datetimeLocalToIso(local: string): string | null {
 
 export default function RsvpBuilderStep({
   site,
+  lang,
   translations,
+  planType,
   setHasRsvpEnabled,
 }: Props) {
   const [activeTab, setActiveTab] = useState<
@@ -160,7 +163,7 @@ export default function RsvpBuilderStep({
               : "border-transparent text-(--builder-color-text-muted) hover:text-(--builder-color-text)"
           }`}
         >
-          {translations["builder.rsvp.tab.parties"] || "Parties"}
+          {translations["builder.rsvp.tab.guests"] || "Guests"}
         </button>
         <button
           type="button"
@@ -176,14 +179,16 @@ export default function RsvpBuilderStep({
       </div>
 
       {activeTab === "parties" && site?.id ? (
-        <RsvpPartiesTab siteId={site.id} translations={translations} />
+        <RsvpPartiesTab
+          siteId={site.id}
+          lang={lang}
+          translations={translations}
+          planType={planType}
+        />
       ) : activeTab === "responses" && site?.id ? (
         <RsvpResponsesTab siteId={site.id} translations={translations} />
       ) : activeTab === "parties" ? null : (
         <>
-          <h3 className="text-xl text-(--builder-color-text)">
-            {translations["builder.nav.step.rsvp"] || "RSVP"}
-          </h3>
           <p className="mt-1 text-sm text-(--builder-color-text-muted)">
             {translations["builder.rsvp.description"] ||
               "Let guests RSVP online. Enable this step to activate the RSVP flow on your site."}

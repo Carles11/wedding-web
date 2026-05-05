@@ -12,7 +12,7 @@ export const seoMetadata: SitewideSEO = {
     twitterCard: "summary_large_image",
     keywords: [
       "mehrsprachige hochzeitswebsite",
-      "zweisprachige rsvp",
+      "mehrsprachige rsvp",
       "hochzeitswebsite auf arabisch",
       "internationale hochzeit",
       "beste hochzeitswebsite 2026",

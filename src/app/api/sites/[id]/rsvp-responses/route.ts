@@ -44,6 +44,8 @@ type RsvpResponsesViewRow = {
   status: string;
   headcount: number | null;
   comment: string | null;
+  meal_intolerances: string | null;
+  song_request: string | null;
   state_updated_at: string | null;
 };
 
@@ -75,7 +77,8 @@ export async function GET(req: Request, context: RouteContext<{ id: string }>) {
     let query = supabase
       .from("rsvp_responses_view")
       .select(
-        "site_id, party_id, name, email, preferred_lang, max_guests, is_active, party_updated_at, status, headcount, comment, state_updated_at",
+        // ADD THE TWO NEW FIELDS:
+        "site_id, party_id, name, email, preferred_lang, max_guests, is_active, party_updated_at, status, headcount, comment, meal_intolerances, song_request, state_updated_at",
         { count: "exact" },
       )
       .eq("site_id", id)
@@ -130,6 +133,8 @@ export async function GET(req: Request, context: RouteContext<{ id: string }>) {
           : "unknown",
         headcount: r.headcount,
         comment: r.comment,
+        meal_intolerances: r.meal_intolerances,
+        song_request: r.song_request,
         updated_at: r.state_updated_at,
       },
     }));

@@ -12,7 +12,7 @@ export const seoMetadata: SitewideSEO = {
     twitterCard: "summary_large_image",
     keywords: [
       "web de boda multilingüe",
-      "rsvp bilingüe boda",
+      "rsvp multilingüe boda",
       "web de boda en àrab",
       "suport rtl boda",
       "boda internacional",

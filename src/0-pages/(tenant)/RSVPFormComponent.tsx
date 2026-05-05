@@ -22,13 +22,16 @@ export type RSVPFormComponentProps = {
     status: RsvpStatus;
     headcount: number | null;
     comment: string | null;
+    meal_intolerances: string | null;
+    song_request: string | null;
   };
+  isPremium: boolean;
   /** Optional: allow page to inject extra content (e.g. alerts) without changing form. */
   headerSlot?: ReactNode;
 };
 
 export function RSVPFormComponent(props: RSVPFormComponentProps) {
-  const { lang, rawCode, t, party, partyState, headerSlot } = props;
+  const { lang, rawCode, t, party, partyState, isPremium, headerSlot } = props;
 
   const defaultStatus: RsvpStatus = partyState?.status ?? "attending";
 
@@ -37,6 +40,8 @@ export function RSVPFormComponent(props: RSVPFormComponentProps) {
   );
 
   const defaultComment = partyState?.comment ?? "";
+  const defaultMealIntolerances = partyState?.meal_intolerances ?? "";
+  const defaultSongRequest = partyState?.song_request ?? "";
 
   const headcountOptions = [
     0,
@@ -138,6 +143,62 @@ export function RSVPFormComponent(props: RSVPFormComponentProps) {
             className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-(--color-foreground) outline-none focus:border-(--marketing-color-primary) focus:ring-2 focus:ring-(--marketing-color-primary-focus)"
           />
         </div>
+
+        {isPremium && (
+          <>
+            <div className="space-y-1.5 rounded-lg border border-gray-200 bg-gray-50 p-4">
+              <label
+                htmlFor="rsvp-meal-intolerances"
+                className="block text-sm font-medium text-(--color-foreground)"
+              >
+                {tr(
+                  t,
+                  "rsvp.form.meal_intolerances.label",
+                  "Meal intolerances or dietary restrictions (optional)",
+                )}
+              </label>
+
+              <textarea
+                id="rsvp-meal-intolerances"
+                name="meal_intolerances"
+                rows={3}
+                defaultValue={defaultMealIntolerances}
+                placeholder={tr(
+                  t,
+                  "rsvp.form.meal_intolerances.placeholder",
+                  "E.g.: nuts, gluten, dairy, vegetarian, vegan, etc.",
+                )}
+                className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-(--color-foreground) outline-none focus:border-(--marketing-color-primary) focus:ring-2 focus:ring-(--marketing-color-primary-focus)"
+              />
+            </div>
+
+            <div className="space-y-1.5 rounded-lg border border-gray-200 bg-gray-50 p-4">
+              <label
+                htmlFor="rsvp-song-request"
+                className="block text-sm font-medium text-(--color-foreground)"
+              >
+                {tr(
+                  t,
+                  "rsvp.form.song_request.label",
+                  "Song request (optional)",
+                )}
+              </label>
+
+              <input
+                id="rsvp-song-request"
+                type="text"
+                name="song_request"
+                defaultValue={defaultSongRequest}
+                placeholder={tr(
+                  t,
+                  "rsvp.form.song_request.placeholder",
+                  "Let us know a song you want to hear on the dance floor!",
+                )}
+                className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-(--color-foreground) outline-none focus:border-(--marketing-color-primary) focus:ring-2 focus:ring-(--marketing-color-primary-focus)"
+              />
+            </div>
+          </>
+        )}
 
         <button
           type="submit"

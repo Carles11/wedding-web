@@ -144,6 +144,7 @@ export default function BuilderStepContent({
               refresh={refresh}
               lang={currentLang}
               translations={translations}
+              planType={planType}
               setHasRsvpEnabled={setHasRsvpEnabled}
             />
           </div>

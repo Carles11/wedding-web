@@ -3,6 +3,7 @@ import { validateRsvpAccessCode } from "@/3-entities/rsvp/lib/validateRsvpAccess
 import { t } from "@/4-shared/helpers/t";
 import { fetchGlobalTranslations } from "@/4-shared/lib/i18n";
 import { resolveSiteIdFromHost } from "@/4-shared/lib/site/resolveSiteIdFromHost";
+import { supabaseAdmin } from "@/4-shared/lib/supabase/supabaseServer";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 
@@ -63,6 +64,14 @@ export default async function RsvpPage({
 
   const { siteId } = resolved;
   const rawCode = code?.trim() ?? "";
+
+  // --- Fetch site plan ---
+  const { data: siteRow } = await supabaseAdmin
+    .from("sites")
+    .select("plan_type")
+    .eq("id", siteId)
+    .maybeSingle();
+  const isPremium = siteRow?.plan_type === "premium";
 
   // --- State B: missing code (before DB call) ---
   if (!rawCode) {
@@ -147,12 +156,15 @@ export default async function RsvpPage({
             rawCode={rawCode}
             t={globalTranslations}
             party={{ max_guests: party.max_guests }}
+            isPremium={isPremium}
             partyState={
               partyState && isRsvpStatus(partyState.status)
                 ? {
                     status: partyState.status,
                     headcount: partyState.headcount,
                     comment: partyState.comment,
+                    meal_intolerances: partyState.meal_intolerances,
+                    song_request: partyState.song_request,
                   }
                 : null
             }

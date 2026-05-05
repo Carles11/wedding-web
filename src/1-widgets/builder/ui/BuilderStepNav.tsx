@@ -114,7 +114,7 @@ export default function BuilderStepNav({
                       <StatusIcon status={stepStatuses[i]} />
                     </span>
                   )}
-                  {translations[k] || "RSVP"}
+                  {translations[k] || "Guests & RSVP"}
                 </button>
               </li>
             </Fragment>
