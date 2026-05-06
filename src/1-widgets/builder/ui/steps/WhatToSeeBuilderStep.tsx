@@ -117,6 +117,14 @@ export default function WhatToSeeBuilderStep({
     return getEffectiveBuilderLanguage(languages, candidate);
   }, [languages, site?.default_lang]);
 
+  const [activeLang, setActiveLang] = useState<SupportedLanguage>(defaultLang);
+
+  useEffect(() => {
+    if (!languages.includes(activeLang)) {
+      setActiveLang(getEffectiveBuilderLanguage(languages, defaultLang));
+    }
+  }, [activeLang, defaultLang, languages.join("|")]) // eslint-disable-line react-hooks/exhaustive-deps
+
   useEffect(() => {
     if (!site?.id) return;
     let mounted = true;
@@ -192,7 +200,7 @@ export default function WhatToSeeBuilderStep({
       const { name: _removed, ...rest } = prev;
       return rest;
     });
-  }, [defaultLang, error, formErrors.name, languages]);
+  }, [activeLang, defaultLang, error, formErrors.name, languages]);
 
   function scrollToForm() {
     setTimeout(() => {
@@ -206,6 +214,7 @@ export default function WhatToSeeBuilderStep({
   function startCreate() {
     setEditingId(null);
     setForm({ name: {}, description: {}, notes: {}, location_url: "" });
+    setActiveLang(getEffectiveBuilderLanguage(languages, defaultLang));
     setCollapsed(true);
     scrollToForm();
   }
@@ -213,6 +222,7 @@ export default function WhatToSeeBuilderStep({
   function startEdit(it: WhatToSeeEntryFull) {
     setEditingId(it.id);
     setForm({ ...it });
+    setActiveLang(getEffectiveBuilderLanguage(languages, defaultLang));
     setCollapsed(true);
     scrollToForm();
   }
@@ -251,14 +261,14 @@ export default function WhatToSeeBuilderStep({
 
     const name = (form.name as Record<string, string> | undefined) ?? {};
     const errors: Record<string, string> = {};
-    if (!name[defaultLang]) {
+    if (!name[activeLang]) {
       errors.name = interpolate(
         t(
           translations,
           "builder.what_to_see.error.required_name",
-          `Name is required in ${defaultLang}`,
+          `Name is required in ${activeLang}`,
         ),
-        { defaultLang },
+        { defaultLang: activeLang },
       );
     }
     // Validate location_url if present
@@ -593,6 +603,8 @@ export default function WhatToSeeBuilderStep({
               errors={formErrors}
               languages={languages}
               defaultLang={defaultLang}
+              activeLang={activeLang}
+              onChangeActiveLang={setActiveLang}
               translations={translations}
               onChange={updateField}
               onChangeI18n={updateI18n}

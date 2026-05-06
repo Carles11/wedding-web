@@ -1,9 +1,9 @@
 import type { SupportedLanguage } from "@/4-shared/config/i18n";
 import { SUPPORTED_LANGUAGE_LABELS } from "@/4-shared/config/i18n";
-import { interpolate } from "@/4-shared/helpers/interpolateVars";
 import { t } from "@/4-shared/helpers/t";
 import type { WhatToSeeEntryFull } from "@/4-shared/types";
-import { BuilderLanguageCard } from "@/4-shared/ui/builder";
+import { BuilderLangTabs } from "@/4-shared/ui/builder";
+import { MultiLangInputsBanner } from "@/4-shared/ui/builder/BuilderLangMultilangInputsBanner";
 import {
   BuilderTextInput,
   BuilderTextarea,
@@ -17,6 +17,8 @@ export type WhatToSeeFormProps = {
   errors: WhatToSeeFormErrors;
   languages: string[];
   defaultLang: string;
+  activeLang: SupportedLanguage;
+  onChangeActiveLang: (lang: SupportedLanguage) => void;
   translations: Record<string, string>;
   onChange: (field: keyof WhatToSeeEntryFull, value: any) => void;
   onChangeI18n: (
@@ -32,6 +34,8 @@ export function WhatToSeeForm({
   errors,
   languages,
   defaultLang,
+  activeLang,
+  onChangeActiveLang,
   translations,
   onChange,
   onChangeI18n,
@@ -44,76 +48,79 @@ export function WhatToSeeForm({
 
   return (
     <>
-      {languages.map((locale) => (
-        <BuilderLanguageCard
-          key={locale}
-          languageCode={
-            SUPPORTED_LANGUAGE_LABELS[locale as SupportedLanguage] ?? locale
-          }
-          title={interpolate(
-            t(
-              translations,
-              "builder.general.form.language_fields_for",
-              "Fields for {language}",
-            ),
-            {
-              language:
-                SUPPORTED_LANGUAGE_LABELS[locale as SupportedLanguage] ??
-                locale,
-            },
-          )}
-          isDefault={locale === defaultLang}
-          defaultBadgeLabel={t(
-            translations,
-            "builder.what_to_see.badge.default",
-            "Default",
-          )}
-        >
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <BuilderTextInput
-              label={`${t(translations, "builder.what_to_see.field.name", "Name")}${locale === defaultLang ? " *" : ""}`}
-              value={
-                (form.name as Record<string, string> | undefined)?.[locale] ??
-                ""
-              }
-              onChange={(v) => onChangeI18n("name", locale, v)}
-              autoComplete="off"
-            />
+      <BuilderLangTabs
+        languages={languages}
+        activeLang={activeLang}
+        defaultLang={defaultLang}
+        onChange={(langCode) => onChangeActiveLang(langCode as SupportedLanguage)}
+        onSetDefault={() => undefined}
+        getLabel={(langCode) =>
+          SUPPORTED_LANGUAGE_LABELS[langCode as SupportedLanguage] ?? langCode
+        }
+        translations={translations}
+        programStep={true}
+      />
 
+      <MultiLangInputsBanner
+        translations={translations}
+        languages={languages}
+        defaultLang={defaultLang}
+      />
+
+      <section
+        role="tabpanel"
+        id={`whattosee-lang-panel-${activeLang}`}
+        aria-label={SUPPORTED_LANGUAGE_LABELS[activeLang] ?? activeLang}
+        className="space-y-3"
+      >
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <BuilderTextInput
+            label={`${t(translations, "builder.what_to_see.field.name", "Name")}${activeLang === defaultLang ? " *" : ""}`}
+            value={
+              (form.name as Record<string, string> | undefined)?.[activeLang] ??
+              ""
+            }
+            onChange={(v) => onChangeI18n("name", activeLang, v)}
+            error={errors.name}
+            autoComplete="off"
+            disabled={disabled}
+          />
+
+          <BuilderTextarea
+            label={t(
+              translations,
+              "builder.what_to_see.field.description",
+              "Description",
+            )}
+            value={
+              (form.description as Record<string, string> | undefined)?.[
+                activeLang
+              ] ?? ""
+            }
+            onChange={(v) => onChangeI18n("description", activeLang, v)}
+            rows={2}
+            disabled={disabled}
+          />
+
+          <div className="sm:col-span-2">
             <BuilderTextarea
               label={t(
                 translations,
-                "builder.what_to_see.field.description",
-                "Description",
+                "builder.what_to_see.field.notes",
+                "Notes",
               )}
               value={
-                (form.description as Record<string, string> | undefined)?.[
-                  locale
+                (form.notes as Record<string, string> | undefined)?.[
+                  activeLang
                 ] ?? ""
               }
-              onChange={(v) => onChangeI18n("description", locale, v)}
+              onChange={(v) => onChangeI18n("notes", activeLang, v)}
               rows={2}
+              disabled={disabled}
             />
-
-            <div className="sm:col-span-2">
-              <BuilderTextarea
-                label={t(
-                  translations,
-                  "builder.what_to_see.field.notes",
-                  "Notes",
-                )}
-                value={
-                  (form.notes as Record<string, string> | undefined)?.[
-                    locale
-                  ] ?? ""
-                }
-                onChange={(v) => onChangeI18n("notes", locale, v)}
-                rows={2}
-              />
-            </div>
           </div>
-        </BuilderLanguageCard>
-      ))}
+        </div>
+      </section>
 
       <BuilderTextInput
         label={t(
