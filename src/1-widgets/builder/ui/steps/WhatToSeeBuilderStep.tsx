@@ -23,6 +23,7 @@ import {
 } from "@/4-shared/helpers/billing/entitlements";
 import { t } from "@/4-shared/helpers/t";
 import { useAlertConfirm } from "@/4-shared/hooks/useAlertConfirm";
+import { getEffectiveBuilderLanguage } from "@/4-shared/lib/builder-language/defaultLanguage";
 import { notify } from "@/4-shared/lib/toast/toast";
 import {
   BuilderButton,
@@ -33,7 +34,6 @@ import {
 import { CustomLoader } from "@/4-shared/ui/commons/loader/CustomLoader";
 import { useRouter } from "next/navigation";
 import { StepLayout } from "../../step-layout";
-import { getEffectiveBuilderLanguage } from "./general-site-form/defaultLanguage";
 import { WhatToSeeForm } from "./what-to-see/WhatToSeeForm";
 
 type Props = {

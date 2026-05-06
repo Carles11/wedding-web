@@ -15,6 +15,7 @@ import { timeToMinutes } from "@/4-shared/helpers/formatTime";
 import { interpolate } from "@/4-shared/helpers/interpolateVars";
 import { t } from "@/4-shared/helpers/t";
 import { useAlertConfirm } from "@/4-shared/hooks/useAlertConfirm";
+import { getEffectiveBuilderLanguage } from "@/4-shared/lib/builder-language/defaultLanguage";
 import { notify } from "@/4-shared/lib/toast/toast";
 import type {
   AccountInfo,
@@ -28,7 +29,6 @@ import { ensureNotLegacy } from "@/4-shared/utils/billing/legacyLock";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { StepLayout } from "../../step-layout";
-import { getEffectiveBuilderLanguage } from "./general-site-form/defaultLanguage";
 import { getDayTags } from "./program-events/dayTags";
 import { ProgramEventForm } from "./program-events/ProgramEventForm";
 import { ProgramEventsList } from "./program-events/ProgramEventsList";
@@ -99,6 +99,7 @@ export default function ProgramEventsBuilderStep({
 
     return getEffectiveBuilderLanguage(languages, candidate);
   }, [languages, site?.default_lang]);
+  const [activeLang, setActiveLang] = useState<SupportedLanguage>(defaultLang);
   const dayTags = getDayTags(translations);
   const { confirm: confirmDelete, confirmDialog } = useAlertConfirm();
   const { confirm: confirmDateChange, confirmDialog: dateChangeDialog } =
@@ -162,11 +163,16 @@ export default function ProgramEventsBuilderStep({
   }, [site?.id, defaultLang, languages.join("|")]);
 
   useEffect(() => {
+    const nextActive = getEffectiveBuilderLanguage(languages, defaultLang);
+    if (!languages.includes(activeLang)) {
+      setActiveLang(nextActive);
+    }
+
     if (error) {
       setError(null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [defaultLang, languages.join("|")]);
+  }, [activeLang, defaultLang, languages.join("|")]);
 
   useEffect(() => {
     setHasMainProgramEvent?.(events.some((event) => !!event.is_main_event));
@@ -264,6 +270,7 @@ export default function ProgramEventsBuilderStep({
 
   function startCreate() {
     setIsFormOpen(true);
+    setActiveLang(getEffectiveBuilderLanguage(languages, defaultLang));
     setForm({
       day_tag: "wedding_day",
       date: undefined,
@@ -292,6 +299,7 @@ export default function ProgramEventsBuilderStep({
 
   function startEdit(event: ProgramEvent) {
     setIsFormOpen(true);
+    setActiveLang(getEffectiveBuilderLanguage(languages, defaultLang));
     setEditingId(event.id);
     setForm({ ...event });
     setError(null);
@@ -458,15 +466,18 @@ export default function ProgramEventsBuilderStep({
     const location =
       (form.location as Record<string, string> | undefined) ?? {};
 
-    if (!title[defaultLang] || !location[defaultLang]) {
+    if (!title[activeLang] || !location[activeLang]) {
       setError(
         interpolate(
           t(
             translations,
             "builder.program_events.error.missing_fields",
-            "Title and location are required in {defaultLang}",
+            "Title and location are required in {activeLang}",
           ),
-          { defaultLang },
+          {
+            activeLang,
+            defaultLang: activeLang,
+          },
         ),
       );
       return;
@@ -772,11 +783,12 @@ export default function ProgramEventsBuilderStep({
             t(
               translations,
               "builder.program_events.info",
-              "Events are grouped into Before Wedding Day, Wedding Day, and After Wedding Day. Title and location are required in the site default language ({defaultLang}).",
+              "Events are grouped into Before Wedding Day, Wedding Day, and After Wedding Day. Title and location are required in the active editing language ({activeLang}).",
             ),
             {
               FREE_EVENT_LIMIT: eventsLimitLabel,
-              defaultLang,
+              activeLang,
+              defaultLang: activeLang,
             },
           )}
         </div>
@@ -823,9 +835,12 @@ export default function ProgramEventsBuilderStep({
           dayTags={dayTags}
           defaultLang={defaultLang}
           languages={languages}
+          activeLang={activeLang}
+          planType={planType}
           weddingDayReferenceDate={weddingDayReferenceDate}
           saving={saving}
           error={error}
+          onChangeActiveLang={setActiveLang}
           onUpdateFormField={updateFormField}
           onUpdateI18nField={updateI18nField}
           onToggleFormMain={handleFormMainToggle}

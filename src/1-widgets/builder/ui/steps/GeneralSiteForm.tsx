@@ -9,6 +9,12 @@ import {
   SUPPORTED_LANGUAGES,
 } from "@/4-shared/config/i18n";
 import {
+  clearDefaultLanguageIfRemoved,
+  type DefaultLanguageValue,
+  getEffectiveBuilderLanguage,
+  isSelectedDefaultLanguage,
+} from "@/4-shared/lib/builder-language/defaultLanguage";
+import {
   AVAILABLE_BODY_FONTS,
   AVAILABLE_TITLE_FONTS,
   DEFAULT_TENANT,
@@ -17,19 +23,16 @@ import {
 } from "@/4-shared/lib/fonts/fontRegistry";
 import { notify } from "@/4-shared/lib/toast/toast";
 import { GeneralContentState, GeneralSiteFormProps } from "@/4-shared/types";
-import { BuilderLangTabs, UpgradeCTAModal } from "@/4-shared/ui/builder";
-import { BuilderLangPills } from "@/4-shared/ui/builder/BuilderLangPills";
+import {
+  BuilderLangPills,
+  BuilderLangTabs,
+  UpgradeCTAModal,
+} from "@/4-shared/ui/builder";
 import { SkeletonLoader } from "@/4-shared/ui/commons/loader/SkeletonLoader";
 import { ensureNotLegacy } from "@/4-shared/utils/billing/legacyLock";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 import { StepLayout } from "../../step-layout";
-import {
-  clearDefaultLanguageIfRemoved,
-  type DefaultLanguageValue,
-  getEffectiveBuilderLanguage,
-  isSelectedDefaultLanguage,
-} from "./general-site-form/defaultLanguage";
 
 export default function GeneralSiteForm({
   site,

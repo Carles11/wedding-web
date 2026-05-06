@@ -1,5 +1,6 @@
 export { BuilderButton } from "./BuilderButton";
 export { BuilderFormCard } from "./BuilderFormCard";
+export { BuilderLangPills } from "./BuilderLangPills";
 export { BuilderLangTabs } from "./BuilderLangTabs";
 export { BuilderLanguageCard } from "./BuilderLanguageCard";
 export { default as FileUploader } from "./FileUploader";

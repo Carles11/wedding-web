@@ -1,7 +1,11 @@
+import {
+  SUPPORTED_LANGUAGE_LABELS,
+  type SupportedLanguage,
+} from "@/4-shared/config/i18n";
 import { interpolate } from "@/4-shared/helpers/interpolateVars";
 import { t } from "@/4-shared/helpers/t";
-import type { ProgramEvent } from "@/4-shared/types";
-import { BuilderFormCard, BuilderLanguageCard } from "@/4-shared/ui/builder";
+import type { PlanType, ProgramEvent } from "@/4-shared/types";
+import { BuilderFormCard, BuilderLangTabs } from "@/4-shared/ui/builder";
 import { MultiLangInputsBanner } from "@/4-shared/ui/builder/BuilderLangMultilangInputsBanner";
 import {
   BuilderTextInput,
@@ -21,11 +25,14 @@ type ProgramEventFormProps = {
   formRef: RefObject<HTMLDivElement | null>;
   translations: Record<string, string>;
   dayTags: DayTagOption[];
-  defaultLang: string;
-  languages: string[];
+  defaultLang: SupportedLanguage;
+  activeLang: SupportedLanguage;
+  languages: SupportedLanguage[];
+  planType: PlanType;
   weddingDayReferenceDate: string;
   saving: boolean;
   error: string | null;
+  onChangeActiveLang: (lang: SupportedLanguage) => void;
   onUpdateFormField: <K extends keyof ProgramEvent>(
     key: K,
     value: ProgramEvent[K],
@@ -45,10 +52,13 @@ export function ProgramEventForm({
   translations,
   dayTags,
   defaultLang,
+  activeLang,
   languages,
+  planType,
   weddingDayReferenceDate,
   saving,
   error,
+  onChangeActiveLang,
   onUpdateFormField,
   onUpdateI18nField,
   onToggleFormMain,
@@ -183,66 +193,80 @@ export function ProgramEventForm({
         )}
 
         <div>
-          {/* Multi-language section header */}
+          {/* <BuilderLangPills
+            languages={languages}
+            planType={planType}
+            onToggle={() => undefined}
+            onLockedClick={() => undefined}
+            readOnly
+            translations={translations}
+          /> */}
+
+          <BuilderLangTabs
+            languages={languages}
+            activeLang={activeLang}
+            defaultLang={defaultLang}
+            onChange={(langCode) =>
+              onChangeActiveLang(langCode as SupportedLanguage)
+            }
+            onSetDefault={() => undefined}
+            getLabel={(langCode) =>
+              SUPPORTED_LANGUAGE_LABELS[langCode as SupportedLanguage]
+            }
+            translations={translations}
+            programStep={true}
+          />
+
           <MultiLangInputsBanner
             translations={translations}
             languages={languages}
             defaultLang={defaultLang}
           />
 
-          <div className="space-y-3">
-            {languages.map((locale) => (
-              <BuilderLanguageCard
-                key={locale}
-                languageCode={locale.toUpperCase()}
-                title={getLanguageDisplay(locale)}
-                isDefault={locale === defaultLang}
-                defaultBadgeLabel={t(
+          <section
+            role="tabpanel"
+            id={`program-lang-panel-${activeLang}`}
+            aria-label={getLanguageDisplay(activeLang)}
+            className="space-y-3"
+          >
+            <div className="grid grid-cols-1 gap-2">
+              <BuilderTextInput
+                label={`${t(translations, "builder.program_events.field.title", "Title")}${activeLang === defaultLang ? ` ${t(translations, "builder.form.required", "(required)")}` : ""}`}
+                value={
+                  (form.title as Record<string, string> | undefined)?.[
+                    activeLang
+                  ] ?? ""
+                }
+                onChange={(v) => onUpdateI18nField("title", activeLang, v)}
+              />
+
+              <BuilderTextInput
+                label={`${t(translations, "builder.program_events.field.location", "Location")}${activeLang === defaultLang ? ` ${t(translations, "builder.form.required", "(required)")}` : ""}`}
+                value={
+                  (form.location as Record<string, string> | undefined)?.[
+                    activeLang
+                  ] ?? ""
+                }
+                onChange={(v) => onUpdateI18nField("location", activeLang, v)}
+              />
+
+              <BuilderTextarea
+                label={t(
                   translations,
-                  "builder.program_events.form.default_language_badge",
-                  "Default language",
+                  "builder.program_events.field.description",
+                  "Description (optional)",
                 )}
-              >
-                <div className="grid grid-cols-1 gap-2">
-                  <BuilderTextInput
-                    label={`${t(translations, "builder.program_events.field.title", "Title")}${locale === defaultLang ? ` ${t(translations, "builder.form.required", "(required)")}` : ""}`}
-                    value={
-                      (form.title as Record<string, string> | undefined)?.[
-                        locale
-                      ] ?? ""
-                    }
-                    onChange={(v) => onUpdateI18nField("title", locale, v)}
-                  />
-
-                  <BuilderTextInput
-                    label={`${t(translations, "builder.program_events.field.location", "Location")}${locale === defaultLang ? ` ${t(translations, "builder.form.required", "(required)")}` : ""}`}
-                    value={
-                      (form.location as Record<string, string> | undefined)?.[
-                        locale
-                      ] ?? ""
-                    }
-                    onChange={(v) => onUpdateI18nField("location", locale, v)}
-                  />
-
-                  <BuilderTextarea
-                    label={t(
-                      translations,
-                      "builder.program_events.field.description",
-                      "Description (optional)",
-                    )}
-                    value={
-                      (
-                        form.description as Record<string, string> | undefined
-                      )?.[locale] ?? ""
-                    }
-                    onChange={(v) =>
-                      onUpdateI18nField("description", locale, v)
-                    }
-                  />
-                </div>
-              </BuilderLanguageCard>
-            ))}
-          </div>
+                value={
+                  (form.description as Record<string, string> | undefined)?.[
+                    activeLang
+                  ] ?? ""
+                }
+                onChange={(v) =>
+                  onUpdateI18nField("description", activeLang, v)
+                }
+              />
+            </div>
+          </section>
         </div>
       </BuilderFormCard>
     </div>
