@@ -3,7 +3,7 @@ import { updateSession } from "@/4-shared/lib/supabase/middleware";
 import { createSupabaseSSRClient } from "@/4-shared/lib/supabase/server";
 import { NextResponse, type NextRequest } from "next/server";
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname, hostname } = request.nextUrl;
 
   // 1. PHASE ONE: Handle the Root Redirect (/)
