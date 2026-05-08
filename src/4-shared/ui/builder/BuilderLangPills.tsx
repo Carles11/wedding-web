@@ -10,6 +10,8 @@ type BuilderLangPillsProps = {
   planType: PlanType;
   onToggle: (lang: SupportedLanguage) => void;
   onLockedClick: () => void;
+  readOnly?: boolean;
+  onReadOnlyClick?: () => void;
   translations: Record<string, string>;
 };
 
@@ -18,6 +20,8 @@ export const BuilderLangPills = ({
   planType,
   onToggle,
   onLockedClick,
+  readOnly = false,
+  onReadOnlyClick,
   translations,
 }: BuilderLangPillsProps) => {
   return (
@@ -30,7 +34,10 @@ export const BuilderLangPills = ({
         {SUPPORTED_LANGUAGES.map((langCode) => {
           const isSelected = languages.includes(langCode);
           const isLocked =
-            planType === "free" && !isSelected && languages.length >= 1;
+            !readOnly &&
+            planType === "free" &&
+            !isSelected &&
+            languages.length >= 1;
 
           return (
             <label
@@ -39,11 +46,18 @@ export const BuilderLangPills = ({
               builder-chip
               ${isSelected ? "builder-chip-active" : "builder-chip-idle"}
               ${isLocked ? "builder-chip-locked" : ""}
+              ${readOnly ? "opacity-90" : ""}
             `}
               onClick={(e) => {
                 if (isLocked) {
                   e.preventDefault();
                   onLockedClick();
+                  return;
+                }
+
+                if (readOnly) {
+                  e.preventDefault();
+                  onReadOnlyClick?.();
                 }
               }}
             >
@@ -52,7 +66,7 @@ export const BuilderLangPills = ({
                 className="hidden"
                 checked={isSelected}
                 onChange={() => !isLocked && onToggle(langCode)}
-                disabled={isLocked}
+                disabled={isLocked || readOnly}
               />
 
               <span

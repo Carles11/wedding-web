@@ -9,8 +9,9 @@ import HeroMarketing, {
 } from "@/1-widgets/marketing/ui";
 import GlobalLegacyBridge from "@/1-widgets/marketing/ui/features/GlobalLegacyBridge";
 import { useSupabaseAuth } from "@/4-shared/hooks/useSupabaseAuth";
-import { JsonLd } from "@/4-shared/lib/seo/JsonLd";
 import { generateWebPageSchema } from "@/4-shared/lib/seo/generateGraphSchema";
+import { JsonLd } from "@/4-shared/lib/seo/JsonLd";
+import { WEDDWEB_SOCIAL_PROFILES } from "@/4-shared/lib/seo/socialProfiles";
 import type { MarketingPageProps } from "@/4-shared/types";
 import { useRouter } from "next/navigation";
 
@@ -81,12 +82,7 @@ export default function MarketingPageComponent({
   };
 
   // Social profile URLs (update with real ones when live)
-  const socialProfiles = [
-    "https://www.facebook.com/weddweb",
-    "https://x.com/weddweb_com",
-    "https://www.linkedin.com/company/weddweb/",
-    "https://www.tiktok.com/@weddweb_com",
-  ];
+  const socialProfiles = WEDDWEB_SOCIAL_PROFILES;
 
   // SocialProfile structured data
   const socialProfileSchema = {
@@ -97,20 +93,8 @@ export default function MarketingPageComponent({
     sameAs: socialProfiles,
   };
 
-  // Robust OG/Twitter meta tags for social presence
-  const ogSeeAlso = socialProfiles.map((url) => (
-    <meta key={url} property="og:see_also" content={url} />
-  ));
-  const twitterSeeAlso = socialProfiles.map((url) => (
-    <meta key={url} name="twitter:see_also" content={url} />
-  ));
-
   return (
     <>
-      <head>
-        {ogSeeAlso}
-        {twitterSeeAlso}
-      </head>
       <JsonLd
         data={generateWebPageSchema(
           translations["marketing.hero.subheadline"] ||

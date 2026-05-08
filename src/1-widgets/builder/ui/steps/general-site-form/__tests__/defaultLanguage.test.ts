@@ -2,7 +2,7 @@ import {
   clearDefaultLanguageIfRemoved,
   getEffectiveBuilderLanguage,
   isSelectedDefaultLanguage,
-} from "../defaultLanguage";
+} from "@/4-shared/lib/builder-language/defaultLanguage";
 
 describe("general-site-form default language helpers", () => {
   it("recognizes a valid selected default language", () => {

@@ -18,6 +18,7 @@ import { fetchWhatToSeeDataForTenant } from "@/3-entities/what_to_see/api/fetchW
 import TenantHeroShell from "@/1-widgets/tenant/page/ui/TenantHeroShell";
 import TenantNotFoundState from "@/1-widgets/tenant/page/ui/TenantNotFoundState";
 import TenantSectionsContent from "@/1-widgets/tenant/page/ui/TenantSectionsContent";
+import { WEDDWEB_SOCIAL_PROFILES } from "@/4-shared/lib/seo/socialProfiles";
 import { ProgramSection } from "@/4-shared/types";
 import { TenantAnalyticsTracker } from "@/4-shared/ui/TenantAnalyticsTracker";
 import { headers } from "next/headers";
@@ -151,12 +152,7 @@ export default async function TenantPageComponent({
     )?.variable ?? "--font-roboto";
 
   // Social profile URLs (update with real ones when live)
-  const socialProfiles = [
-    "https://www.facebook.com/weddweb",
-    "https://x.com/weddweb_com",
-    "https://www.linkedin.com/company/weddweb/",
-    "https://www.tiktok.com/@weddweb_com",
-  ];
+  const socialProfiles = WEDDWEB_SOCIAL_PROFILES;
 
   // SocialProfile structured data
   const socialProfileSchema = {
@@ -167,63 +163,46 @@ export default async function TenantPageComponent({
     sameAs: socialProfiles,
   };
 
-  // Robust OG/Twitter meta tags for social presence
-  const ogSeeAlso = socialProfiles.map((url) => (
-    <meta key={url} property="og:see_also" content={url} />
-  ));
-  const twitterSeeAlso = socialProfiles.map((url) => (
-    <meta key={url} name="twitter:see_also" content={url} />
-  ));
-
   return (
-    <>
-      <head>
-        {ogSeeAlso}
-        {twitterSeeAlso}
-      </head>
-      <div
-        className="tenant-theme"
-        style={
-          {
-            ["--title-font" as any]: `var(${titleFontVar})`,
-            ["--body-font" as any]: `var(${bodyFontVar})`,
-          } as React.CSSProperties
-        }
-      >
-        {/* Analytics Trigger */}
-        <TenantAnalyticsTracker
-          siteId={siteId}
-          isCustomDomain={isCustomDomain}
-        />
-        {/* JSON-LD SEO */}
-        <JsonLd data={eventSchema} />
-        <JsonLd data={socialProfileSchema} />
-        <TenantHeroShell
-          lang={lang}
-          translations={translations}
-          visibleSectionIds={visibleSectionIds}
-          availableLangs={availableLangs}
-          hero={heroFromi18n}
-          heroImage={heroImage}
-          showBrandBadge={showBrandBadge}
-        />
-        <TenantSectionsContent
-          mainEvent={mainEvent}
-          lang={lang}
-          translations={translations}
-          normalizedEvents={normalizedEvents}
-          accommodations={accommodations}
-          whatelse={whatelse}
-          weddingGift={weddingGift}
-          contact={contact}
-          contactImage={contactImage}
-          shouldRenderDetails={shouldRenderDetails}
-          shouldRenderAccommodation={shouldRenderAccommodation}
-          shouldRenderWhatElse={shouldRenderWhatElse}
-          shouldRenderWeddingGift={shouldRenderWeddingGift}
-          shouldRenderContact={shouldRenderContact}
-        />
-      </div>
-    </>
+    <div
+      className="tenant-theme"
+      style={
+        {
+          ["--title-font" as any]: `var(${titleFontVar})`,
+          ["--body-font" as any]: `var(${bodyFontVar})`,
+        } as React.CSSProperties
+      }
+    >
+      {/* Analytics Trigger */}
+      <TenantAnalyticsTracker siteId={siteId} isCustomDomain={isCustomDomain} />
+      {/* JSON-LD SEO */}
+      <JsonLd data={eventSchema} />
+      <JsonLd data={socialProfileSchema} />
+      <TenantHeroShell
+        lang={lang}
+        translations={translations}
+        visibleSectionIds={visibleSectionIds}
+        availableLangs={availableLangs}
+        hero={heroFromi18n}
+        heroImage={heroImage}
+        showBrandBadge={showBrandBadge}
+      />
+      <TenantSectionsContent
+        mainEvent={mainEvent}
+        lang={lang}
+        translations={translations}
+        normalizedEvents={normalizedEvents}
+        accommodations={accommodations}
+        whatelse={whatelse}
+        weddingGift={weddingGift}
+        contact={contact}
+        contactImage={contactImage}
+        shouldRenderDetails={shouldRenderDetails}
+        shouldRenderAccommodation={shouldRenderAccommodation}
+        shouldRenderWhatElse={shouldRenderWhatElse}
+        shouldRenderWeddingGift={shouldRenderWeddingGift}
+        shouldRenderContact={shouldRenderContact}
+      />
+    </div>
   );
 }

@@ -9,13 +9,14 @@ import {
   GeneralSiteForm,
   ImagesBuilderStep,
   ProgramEventsBuilderStep,
+  RsvpBuilderStep,
   WeddingGiftBuilderStep,
   WhatToSeeBuilderStep,
 } from "./steps";
 
 /**
  * Renders the right-hand content pane of the builder.
- * All 8 steps are always mounted (hidden via CSS) to preserve local state
+ * All steps are always mounted (hidden via CSS) to preserve local state
  * across tab switches and avoid stale-read issues after Supabase writes.
  */
 export default function BuilderStepContent({
@@ -33,12 +34,15 @@ export default function BuilderStepContent({
   setWhatToSeeCount,
   setHasWeddingGiftData,
   setHasContact,
+  setHasRsvpEnabled,
   account,
   stepStatuses,
+  TEST_ENABLED_SITE_IDS,
 }: BuilderStepContentProps) {
   const requiredSteps = stepStatuses?.filter((s) => s !== "optional") ?? [];
   const allRequiredDone = requiredSteps.every((s) => s === "done");
 
+  const siteId = site?.id;
   return (
     <section className=" flex-1 min-w-0 p-4 sm:p-6">
       <Heading as="h2" className="text-xl font-semibold">
@@ -52,6 +56,7 @@ export default function BuilderStepContent({
               "builder.nav.step.what_to_see",
               "builder.nav.step.wedding_gift",
               "builder.nav.step.contact",
+              "builder.nav.step.rsvp",
               "builder.nav.step.domain_billing",
             ][active]
           ]
@@ -136,6 +141,20 @@ export default function BuilderStepContent({
             />
           </div>
           <div className={active !== 7 ? "hidden" : undefined}>
+            {TEST_ENABLED_SITE_IDS.includes(siteId) ? (
+              <RsvpBuilderStep
+                site={site}
+                refresh={refresh}
+                lang={currentLang}
+                translations={translations}
+                planType={planType}
+                setHasRsvpEnabled={setHasRsvpEnabled}
+              />
+            ) : (
+              <p>We are working on this one. Coming Soon!</p>
+            )}
+          </div>
+          <div className={active !== 8 ? "hidden" : undefined}>
             <DomainAndBillingBuilderStep
               site={site}
               refresh={refresh}

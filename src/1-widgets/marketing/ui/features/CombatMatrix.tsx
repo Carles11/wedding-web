@@ -1,7 +1,7 @@
 import { t } from "@/4-shared/helpers/t";
 import type { MarketingTranslations } from "@/4-shared/types/marketingPage";
 import Heading from "@/4-shared/ui/commons/typography/Heading";
-import { Check, Globe, History, Shield, X, Zap } from "lucide-react";
+import { Check, Globe, History, Shield, Sparkles, X, Zap } from "lucide-react";
 
 type Props = {
   translations: MarketingTranslations;
@@ -9,6 +9,33 @@ type Props = {
 
 export default function CombatMatrix({ translations }: Props) {
   const comparisons = [
+    {
+      feature: t(
+        translations,
+        "marketing.combat.ai.title",
+        "Content Assistance",
+      ),
+      desc: t(
+        translations,
+        "marketing.combat.ai.desc",
+        "Do you have to write every word yourself?",
+      ),
+      weddweb: {
+        label: t(
+          translations,
+          "marketing.combat.ai.weddweb",
+          "Magic AI Writer",
+        ),
+      },
+      giants: {
+        label: t(
+          translations,
+          "marketing.combat.ai.giants",
+          "100% Manual Work",
+        ),
+      },
+      icon: <Sparkles className="w-5 h-5 text-pink-500" />,
+    },
     {
       feature: t(
         translations,

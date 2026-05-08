@@ -4,10 +4,19 @@ import { updateSiteFonts } from "@/3-entities/sites/api/updateSiteFonts";
 import { getSiteGeneralContent } from "@/4-shared/api/builder/getSiteGeneralContent";
 import { saveSiteGeneralContent } from "@/4-shared/api/builder/saveSiteGeneralContent";
 import type { SupportedLanguage } from "@/4-shared/config/i18n";
+
+import { MagicAIButton } from "@/4-shared/ui/builder/buttons/MagicAIButton";
+
 import {
   SUPPORTED_LANGUAGE_LABELS,
   SUPPORTED_LANGUAGES,
 } from "@/4-shared/config/i18n";
+import {
+  clearDefaultLanguageIfRemoved,
+  type DefaultLanguageValue,
+  getEffectiveBuilderLanguage,
+  isSelectedDefaultLanguage,
+} from "@/4-shared/lib/builder-language/defaultLanguage";
 import {
   AVAILABLE_BODY_FONTS,
   AVAILABLE_TITLE_FONTS,
@@ -17,19 +26,16 @@ import {
 } from "@/4-shared/lib/fonts/fontRegistry";
 import { notify } from "@/4-shared/lib/toast/toast";
 import { GeneralContentState, GeneralSiteFormProps } from "@/4-shared/types";
-import { BuilderLangTabs, UpgradeCTAModal } from "@/4-shared/ui/builder";
-import { BuilderLangPills } from "@/4-shared/ui/builder/BuilderLangPills";
+import {
+  BuilderLangPills,
+  BuilderLangTabs,
+  UpgradeCTAModal,
+} from "@/4-shared/ui/builder";
 import { SkeletonLoader } from "@/4-shared/ui/commons/loader/SkeletonLoader";
 import { ensureNotLegacy } from "@/4-shared/utils/billing/legacyLock";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 import { StepLayout } from "../../step-layout";
-import {
-  clearDefaultLanguageIfRemoved,
-  type DefaultLanguageValue,
-  getEffectiveBuilderLanguage,
-  isSelectedDefaultLanguage,
-} from "./general-site-form/defaultLanguage";
 
 export default function GeneralSiteForm({
   site,
@@ -68,6 +74,7 @@ export default function GeneralSiteForm({
     site?.body_font ?? DEFAULT_TENANT.body,
   );
   const [savingFonts, setSavingFonts] = useState(false);
+  // Removed local showAIModal state
 
   function arraysEqual<T>(a: T[], b: T[]) {
     if (a.length !== b.length) return false;
@@ -94,6 +101,32 @@ export default function GeneralSiteForm({
       notify.error(message);
     }
   }, [titleError, subtitleError, languageError, error]);
+
+  const handleAIApply = (newContent: any) => {
+    setContent((prev) => {
+      // 1. Create a shallow copy of the previous state
+      const updated = { ...prev };
+
+      // 2. Iterate through the keys (languages) sent by the AI
+      Object.keys(newContent).forEach((lang) => {
+        // FIX: Cast 'lang' as SupportedLanguage so TypeScript allows indexing
+        const typedLang = lang as SupportedLanguage;
+
+        updated[typedLang] = {
+          // Accessing prev[typedLang] now works because of the cast
+          ...(prev[typedLang] || { title: "", subtitle: "" }),
+          ...newContent[typedLang],
+        };
+      });
+
+      return updated;
+    });
+
+    notify.success(
+      translations["ai.content_applied"] ??
+        "AI Content applied! You can still edit the fields manually.",
+    );
+  };
 
   function applyGeneralContent(res: GeneralContentState) {
     const normalizedDefaultLang: DefaultLanguageValue = res.languages.includes(
@@ -529,25 +562,42 @@ export default function GeneralSiteForm({
         translations={translations}
       />
       {/* Language tabs */}
-      <BuilderLangTabs
-        languages={languages}
-        activeLang={activeLang}
-        defaultLang={defaultLang}
-        onChange={(langCode) => setActiveLang(langCode as SupportedLanguage)}
-        onSetDefault={(langCode) => {
-          void handleSetDefault(langCode as SupportedLanguage);
-        }}
-        getLabel={(langCode) =>
-          SUPPORTED_LANGUAGE_LABELS[langCode as SupportedLanguage]
-        }
-        translations={translations}
-      />
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <BuilderLangTabs
+            languages={languages}
+            activeLang={activeLang}
+            defaultLang={defaultLang}
+            onChange={(langCode) =>
+              setActiveLang(langCode as SupportedLanguage)
+            }
+            onSetDefault={(langCode) => {
+              void handleSetDefault(langCode as SupportedLanguage);
+            }}
+            getLabel={(langCode) =>
+              SUPPORTED_LANGUAGE_LABELS[langCode as SupportedLanguage]
+            }
+            translations={translations}
+          />
+        </div>
+        <MagicAIButton
+          siteId={site?.id || ""}
+          planType={planType}
+          languages={languages}
+          currentValues={content}
+          context="General Wedding Info"
+          onApply={handleAIApply}
+          translations={translations}
+          lang={lang}
+        />
+      </div>
       {/* Title */}
       <div className="mt-8">
-        <p className=" pt-6 pb-3 text-gray-500">
+        <p className="text-gray-500">
           {translations["builder.general.form.label.main_title"] ??
             "Main title"}
         </p>
+
         <input
           className="mt-1 block w-full rounded border px-3 py-2"
           value={content[activeLang]?.title ?? ""}
@@ -710,6 +760,8 @@ export default function GeneralSiteForm({
         onClose={() => setShowUpgradeCTA(false)}
         onUpgrade={() => router.push(`/${lang}/pricing`)}
       />
+      {/* Render Modal at the end of the return */}
+      {/* MagicAIButton handles modal logic */}
     </StepLayout>
   );
 }

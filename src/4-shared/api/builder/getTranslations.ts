@@ -12,6 +12,14 @@ type BuilderCacheEntry = {
   expiresAt: number;
 };
 
+type TranslationRow = {
+  key: string;
+  locale: string;
+  value: string;
+};
+
+const TRANSLATIONS_PAGE_SIZE = 1000;
+
 declare global {
   // eslint-disable-next-line no-var
   var __BUILDER_TRANSLATIONS_CACHE: Map<string, BuilderCacheEntry> | undefined;
@@ -28,14 +36,73 @@ function getBuilderCache(): Map<string, BuilderCacheEntry> {
   return globalThis.__BUILDER_TRANSLATIONS_CACHE;
 }
 
+function localeRank(
+  rowLocale: string,
+  preferredLocale: string,
+  fallbackLocale: string,
+): number {
+  // We rank locale matches so translation selection is deterministic even if
+  // Supabase returns rows in arbitrary order.
+  // Priority:
+  // 0) exact requested locale (e.g. "es-MX")
+  // 1) base requested locale (e.g. "es")
+  // 2) exact fallback locale (e.g. "en-GB")
+  // 3) base fallback locale (e.g. "en")
+  // 4) anything else (should not happen with current query input)
+  const preferredBase = preferredLocale.split("-")[0];
+  const fallbackBase = fallbackLocale.split("-")[0];
+
+  if (rowLocale === preferredLocale) return 0;
+  if (preferredBase && rowLocale === preferredBase) return 1;
+  if (rowLocale === fallbackLocale) return 2;
+  if (fallbackBase && rowLocale === fallbackBase) return 3;
+  return 4;
+}
+
+async function fetchAllBuilderRows(
+  supabase: SupabaseClient,
+  localesToQuery: string[],
+): Promise<TranslationRow[]> {
+  // PostgREST/Supabase can apply row limits per request. We fetch in pages so
+  // large translation tables do not silently drop keys.
+  const rows: TranslationRow[] = [];
+  let from = 0;
+
+  while (true) {
+    const { data, error } = await supabase
+      .from("global_translations_builder")
+      .select("key, locale, value")
+      .in("locale", localesToQuery)
+      .range(from, from + TRANSLATIONS_PAGE_SIZE - 1);
+
+    if (error) {
+      throw error;
+    }
+
+    const batch = (data ?? []) as TranslationRow[];
+    rows.push(...batch);
+
+    if (batch.length < TRANSLATIONS_PAGE_SIZE) {
+      break;
+    }
+
+    from += TRANSLATIONS_PAGE_SIZE;
+  }
+
+  return rows;
+}
+
 export async function fetchBuilderTranslations(
   supabase: SupabaseClient,
   locale: string,
   fallbackLocale?: string,
 ): Promise<TranslationDictionary> {
+  // "en" is the product-wide fallback when no explicit fallback is provided.
   const fallback = fallbackLocale ?? "en";
   if (!locale && !fallback) return {};
 
+  // Cache by locale+fallback pair because each combination yields a different
+  // resolved dictionary.
   const cacheKey = `builder:${locale}:${fallbackLocale ?? ""}`;
   const cache = getBuilderCache();
   const now = Date.now();
@@ -43,7 +110,8 @@ export async function fetchBuilderTranslations(
   const existing = cache.get(cacheKey);
   if (existing && existing.expiresAt > now) return existing.value;
 
-  // Prepare locale variants (full + base) for both main and fallback
+  // Query both full locale and base locale to support cases like:
+  // request "es-MX" with fallback "en-GB" while DB stores "es" / "en".
   const candidates = new Set<string>();
   const addLocale = (l?: string) => {
     if (!l) return;
@@ -56,39 +124,21 @@ export async function fetchBuilderTranslations(
   const localesToQuery = Array.from(candidates);
 
   try {
-    const { data, error } = await supabase
-      .from("global_translations_builder")
-      .select("key, locale, value")
-      .in("locale", localesToQuery);
+    const rows = await fetchAllBuilderRows(supabase, localesToQuery);
 
-    if (error) {
-      console.error(
-        "[builderTranslations] fetchBuilderTranslations error",
-        error,
-      );
-      return {};
-    }
+    // Select one winning value per key using the rank above.
+    const selectedByKey: Record<string, { value: string; rank: number }> = {};
 
-    // Build translation map: primary locale preferred, else fallback
-    const map: Record<string, { preferred?: string; fallback?: string }> = {};
+    rows.forEach((row) => {
+      if (!row?.key) return;
 
-    (data ?? []).forEach((row: unknown) => {
-      const r = row as { key?: string; locale?: string; value?: string };
-      if (!r || !r.key) return;
-      const {
-        key,
-        locale: rowLocale,
-        value,
-      } = r as {
-        key: string;
-        locale: string;
-        value: string;
-      };
-      if (!map[key]) map[key] = {};
-      if (rowLocale === locale) map[key].preferred = value;
-      else map[key].fallback = value;
+      const rank = localeRank(row.locale, locale, fallback);
+      const existing = selectedByKey[row.key];
+
+      if (!existing || rank < existing.rank) {
+        selectedByKey[row.key] = { value: row.value, rank };
+      }
     });
-
     // Plan feature title keys may be defined in marketing namespace as
     // fallback options in the central plan catalog. Merge them here so
     // builder pages can localize those titles too.
@@ -114,11 +164,12 @@ export async function fetchBuilderTranslations(
             value: string;
           };
 
-          if (!map[key]) map[key] = {};
-          if (rowLocale === locale) {
-            if (!map[key].preferred) map[key].preferred = value;
-          } else {
-            if (!map[key].fallback) map[key].fallback = value;
+          const rank = localeRank(rowLocale, locale, fallback);
+          const existing = selectedByKey[key];
+
+          // Keep builder table values as source of truth for overlapping keys.
+          if (!existing) {
+            selectedByKey[key] = { value, rank };
           }
         });
       }
@@ -127,11 +178,11 @@ export async function fetchBuilderTranslations(
     }
 
     const result: TranslationDictionary = {};
-    Object.keys(map).forEach((k) => {
-      result[k] = map[k].preferred ?? map[k].fallback ?? "";
+    Object.keys(selectedByKey).forEach((k) => {
+      result[k] = selectedByKey[k].value;
     });
 
-    // Supplemental fallback: pull from global translations if missing
+    // Final safety net: fill still-missing keys from shared global translations.
     try {
       const global = await fetchGlobalTranslations(locale, fallback);
       Object.keys(global).forEach((k) => {

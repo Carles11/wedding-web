@@ -222,6 +222,7 @@ Builder theme tokens and reusable surface/button styles.
   --builder-color-border: #e8e6e1;
   --builder-color-primary: var(--marketing-color-primary);
   --builder-color-primary-hover: var(--marketing-color-primary-hover);
+  --builder-color-primary-focus: var(--marketing-color-primary-focus);
   --builder-color-secondary-bg: #fdfcfb;
   --builder-color-secondary-hover: #f5f4f2;
   --builder-color-danger: #dc2626;

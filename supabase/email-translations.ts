@@ -35,6 +35,13 @@ export const EMAIL_TRANSLATIONS: Record<string, any> = {
         "Hi {{name}}, your wedding site {{wedding_title}} has been inactive for 5 months. In 30 days, it will become read-only to keep our community fresh. Log in now to reset your timer!",
       button: "Log in to keep editing",
     },
+    rsvp_invite: {
+      subject: "RSVP for {{wedding_title}}",
+      title: "You're invited!",
+      description:
+        "Hi {{party_name}}, please confirm your attendance for {{wedding_title}} by clicking the button below.",
+      button: "Open RSVP",
+    },
   },
   es: {
     signup: {
@@ -71,6 +78,13 @@ export const EMAIL_TRANSLATIONS: Record<string, any> = {
       description:
         "Hola {{name}}, tu sitio de boda {{wedding_title}} ha estado inactivo durante 5 meses. En 30 días, se volverá solo de lectura para mantener nuestra comunidad actualizada. ¡Inicia sesión ahora para reiniciar el contador!",
       button: "Iniciar sesión para seguir editando",
+    },
+    rsvp_invite: {
+      subject: "Confirma tu asistencia a {{wedding_title}}",
+      title: "¡Estás invitado/a!",
+      description:
+        "Hola {{party_name}}, confirma tu asistencia a {{wedding_title}} haciendo clic en el botón de abajo.",
+      button: "Abrir RSVP",
     },
   },
   ca: {
@@ -109,6 +123,13 @@ export const EMAIL_TRANSLATIONS: Record<string, any> = {
         "Hola {{name}}, el teu lloc de casament {{wedding_title}} ha estat inactiu durant 5 mesos. En 30 dies, passarà a només lectura per mantenir la comunitat actualitzada. Inicia sessió ara per reiniciar el comptador!",
       button: "Inicia sessió per seguir editant",
     },
+    rsvp_invite: {
+      subject: "Confirma l'assistència a {{wedding_title}}",
+      title: "Esteu convidats!",
+      description:
+        "Hola {{party_name}}, confirmeu l'assistència a {{wedding_title}} fent clic al botó de sota.",
+      button: "Obrir RSVP",
+    },
   },
   fr: {
     signup: {
@@ -145,6 +166,13 @@ export const EMAIL_TRANSLATIONS: Record<string, any> = {
       description:
         "Bonjour {{name}}, votre site de mariage {{wedding_title}} est inactif depuis 5 mois. Dans 30 jours, il passera en lecture seule pour garder notre communauté à jour. Connectez-vous maintenant pour réinitialiser le compteur !",
       button: "Se connecter pour continuer à éditer",
+    },
+    rsvp_invite: {
+      subject: "Confirmez votre présence à {{wedding_title}}",
+      title: "Vous êtes invité !",
+      description:
+        "Bonjour {{party_name}}, veuillez confirmer votre présence à {{wedding_title}} en cliquant sur le bouton ci-dessous.",
+      button: "Ouvrir RSVP",
     },
   },
   de: {
@@ -184,6 +212,13 @@ export const EMAIL_TRANSLATIONS: Record<string, any> = {
         "Hallo {{name}}, deine Hochzeitsseite {{wedding_title}} war 5 Monate lang inaktiv. In 30 Tagen wird sie schreibgeschützt, um unsere Community aktuell zu halten. Melde dich jetzt an, um den Timer zurückzusetzen!",
       button: "Anmelden, um weiter zu bearbeiten",
     },
+    rsvp_invite: {
+      subject: "Bestätige deine Teilnahme an {{wedding_title}}",
+      title: "Du bist eingeladen!",
+      description:
+        "Hallo {{party_name}}, bitte bestätige deine Teilnahme an {{wedding_title}}, indem du auf den untenstehenden Button klickst.",
+      button: "RSVP öffnen",
+    },
   },
   it: {
     signup: {
@@ -220,6 +255,13 @@ export const EMAIL_TRANSLATIONS: Record<string, any> = {
       description:
         "Ciao {{name}}, il tuo sito di nozze {{wedding_title}} è inattivo da 5 mesi. Tra 30 giorni diventerà di sola lettura per mantenere la nostra community aggiornata. Accedi ora per azzerare il timer!",
       button: "Accedi per continuare a modificare",
+    },
+    rsvp_invite: {
+      subject: "Conferma la tua partecipazione a {{wedding_title}}",
+      title: "Sei invitato!",
+      description:
+        "Ciao {{party_name}}, conferma la tua partecipazione a {{wedding_title}} cliccando il pulsante qui sotto.",
+      button: "Apri RSVP",
     },
   },
   pt: {
@@ -258,6 +300,13 @@ export const EMAIL_TRANSLATIONS: Record<string, any> = {
         "Olá {{name}}, seu site de casamento {{wedding_title}} está inativo há 5 meses. Em 30 dias, ficará somente leitura para manter nossa comunidade atualizada. Faça login agora para reiniciar o contador!",
       button: "Entrar para continuar editando",
     },
+    rsvp_invite: {
+      subject: "Confirme sua presença em {{wedding_title}}",
+      title: "Você está convidado!",
+      description:
+        "Olá {{party_name}}, confirme sua presença em {{wedding_title}} clicando no botão abaixo.",
+      button: "Abrir RSVP",
+    },
   },
   zh: {
     signup: {
@@ -292,6 +341,13 @@ export const EMAIL_TRANSLATIONS: Record<string, any> = {
       description:
         "您好 {{name}}，您的婚礼网站 {{wedding_title}} 已经有5个月未活动。30天后将变为只读，以保持社区活跃。请立即登录以重置计时！",
       button: "登录以继续编辑",
+    },
+    rsvp_invite: {
+      subject: "确认您在 {{wedding_title}} 的出席",
+      title: "您被邀请了！",
+      description:
+        "您好 {{party_name}}，请点击下方按钮确认您在 {{wedding_title}} 的出席。",
+      button: "打开 RSVP",
     },
   },
   hi: {
@@ -330,6 +386,13 @@ export const EMAIL_TRANSLATIONS: Record<string, any> = {
         "नमस्ते {{name}}, आपकी वेडिंग साइट {{wedding_title}} पिछले 5 महीनों से निष्क्रिय है। 30 दिनों में यह केवल पढ़ने योग्य हो जाएगी ताकि हमारी कम्युनिटी ताज़ा बनी रहे। टाइमर रीसेट करने के लिए अभी लॉगिन करें!",
       button: "संपादन जारी रखने के लिए लॉगिन करें",
     },
+    rsvp_invite: {
+      subject: "{{wedding_title}} में अपनी उपस्थिति की पुष्टि करें",
+      title: "आपको आमंत्रित किया गया है!",
+      description:
+        "नमस्ते {{party_name}}, कृपया नीचे दिए गए बटन पर क्लिक करके {{wedding_title}} में अपनी उपस्थिति की पुष्टि करें।",
+      button: "RSVP खोलें",
+    },
   },
   ar: {
     signup: {
@@ -367,6 +430,13 @@ export const EMAIL_TRANSLATIONS: Record<string, any> = {
         "مرحبًا {{name}}، موقع زفافك {{wedding_title}} غير نشط منذ 5 أشهر. خلال 30 يومًا سيصبح للقراءة فقط للحفاظ على مجتمعنا متجددًا. سجّل الدخول الآن لإعادة ضبط المؤقت!",
       button: "سجّل الدخول لمتابعة التعديل",
     },
+    rsvp_invite: {
+      subject: "تأكيد حضورك في {{wedding_title}}",
+      title: "أنت مدعو!",
+      description:
+        "مرحبًا {{party_name}}، يرجى تأكيد حضورك في {{wedding_title}} بالنقر على الزر أدناه.",
+      button: "فتح RSVP",
+    },
   },
   ru: {
     signup: {
@@ -403,6 +473,13 @@ export const EMAIL_TRANSLATIONS: Record<string, any> = {
       description:
         "Здравствуйте, {{name}}! Ваш свадебный сайт {{wedding_title}} неактивен уже 5 месяцев. Через 30 дней он станет только для чтения, чтобы поддерживать актуальность сообщества. Войдите сейчас, чтобы сбросить таймер!",
       button: "Войти для продолжения редактирования",
+    },
+    rsvp_invite: {
+      subject: "Подтвердите свое присутствие на {{wedding_title}}",
+      title: "Вы приглашены!",
+      description:
+        "Здравствуйте, {{party_name}}! Пожалуйста, подтвердите свое присутствие на {{wedding_title}}, нажав на кнопку ниже.",
+      button: "Открыть RSVP",
     },
   },
 };

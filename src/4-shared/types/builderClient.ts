@@ -27,7 +27,7 @@ export interface BuilderStepContentProps {
   langLimit: number;
   planType: PlanType;
   stepStatuses: StepStatuses;
-
+  TEST_ENABLED_SITE_IDS: string[]; // Your test sites id
   // step completeness callbacks
   setHasHeroContent: (v: boolean) => void;
   setHeroImageExists: (v: boolean) => void;
@@ -36,6 +36,7 @@ export interface BuilderStepContentProps {
   setWhatToSeeCount: (v: number) => void;
   setHasWeddingGiftData: (v: boolean) => void;
   setHasContact: (v: boolean) => void;
+  setHasRsvpEnabled: (v: boolean) => void;
 }
 
 export interface BuilderStepNavProps {

@@ -1,3 +1,5 @@
+import type { KeyboardEvent } from "react";
+
 type BuilderLangTabsProps = {
   languages: string[];
   activeLang: string;
@@ -6,6 +8,7 @@ type BuilderLangTabsProps = {
   onSetDefault: (lang: string) => void;
   getLabel?: (lang: string) => string;
   translations: Record<string, string>;
+  programStep?: boolean;
 };
 
 export function BuilderLangTabs({
@@ -16,16 +19,58 @@ export function BuilderLangTabs({
   onSetDefault,
   getLabel,
   translations,
+  programStep = false,
 }: BuilderLangTabsProps) {
   // if (languages.length <= 1) return null;
+
+  const handleTabKeyDown = (
+    event: KeyboardEvent<HTMLButtonElement>,
+    currentIndex: number,
+  ) => {
+    if (!languages.length) return;
+
+    if (event.key === "ArrowRight") {
+      event.preventDefault();
+      const nextIndex = (currentIndex + 1) % languages.length;
+      onChange(languages[nextIndex]);
+      return;
+    }
+
+    if (event.key === "ArrowLeft") {
+      event.preventDefault();
+      const nextIndex =
+        (currentIndex - 1 + languages.length) % languages.length;
+      onChange(languages[nextIndex]);
+      return;
+    }
+
+    if (event.key === "Home") {
+      event.preventDefault();
+      onChange(languages[0]);
+      return;
+    }
+
+    if (event.key === "End") {
+      event.preventDefault();
+      onChange(languages[languages.length - 1]);
+    }
+  };
+
   return (
     <>
       <p className=" pt-6 pb-3 text-gray-500">
         {translations["builder.languages.tabs.edit_selection"] ??
           "Select to edit the fields for each language:"}
       </p>
-      <div className="flex flex-wrap gap-1.5 mb-6 bg-gray-50 rounded-xl w-fit border border-gray-100">
-        {languages.map((lang) => {
+      <div
+        role="tablist"
+        aria-label={
+          translations["builder.languages.tabs.edit_selection"] ??
+          "Select to edit the fields for each language"
+        }
+        className="flex flex-wrap gap-1.5 mb-6 bg-gray-50 rounded-xl w-fit border border-gray-100"
+      >
+        {languages.map((lang, index) => {
           const isActive = activeLang === lang;
           const isDefault = defaultLang === lang;
           const label = getLabel ? getLabel(lang) : lang;
@@ -33,7 +78,12 @@ export function BuilderLangTabs({
           return (
             <button
               type="button"
+              role="tab"
+              aria-selected={isActive}
+              tabIndex={isActive ? 0 : -1}
+              aria-label={`${label}${isDefault ? ", default language" : ""}`}
               key={lang}
+              onKeyDown={(event) => handleTabKeyDown(event, index)}
               onClick={() => {
                 if (isActive && !isDefault) {
                   onSetDefault(lang);
@@ -60,8 +110,9 @@ export function BuilderLangTabs({
               </span>
 
               {/* Always reserve the same space to avoid layout shift */}
-              <span
-                className={`
+              {!programStep && (
+                <span
+                  className={`
   text-[9px] font-medium normal-case tracking-normal leading-none
   transition-opacity duration-150
   ${
@@ -72,9 +123,10 @@ export function BuilderLangTabs({
         : "opacity-0"
   }
 `}
-              >
-                {isDefault ? "Default" : "Set as default"}
-              </span>
+                >
+                  {isDefault ? "Default" : "Set as default"}
+                </span>
+              )}
             </button>
           );
         })}

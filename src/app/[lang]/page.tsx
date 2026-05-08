@@ -13,6 +13,7 @@ import {
 } from "@/4-shared/lib/seo/generateBreadcrumbSchema";
 import { generateSiteMetadata } from "@/4-shared/lib/seo/generateSiteMetadata";
 import { getMetadataBase } from "@/4-shared/lib/seo/getMetadataBase";
+import { WEDDWEB_SOCIAL_PROFILES } from "@/4-shared/lib/seo/socialProfiles";
 import { Footer } from "@/4-shared/ui/commons/footer/Footer";
 import { shouldShowBrandBadge, shouldShowFooter } from "@/4-shared/utils";
 import type { Metadata } from "next";
@@ -50,7 +51,11 @@ export async function generateMetadata({
       pageKind: "tenant",
     });
 
-    const finalMeta = { ...meta, metadataBase };
+    const socialOther = {
+      "og:see_also": [...WEDDWEB_SOCIAL_PROFILES],
+      "twitter:see_also": [...WEDDWEB_SOCIAL_PROFILES],
+    };
+    const finalMeta = { ...meta, metadataBase, other: socialOther };
 
     // 3. SEO Privacy Toggle
     if (site.seo_enabled === false) {
@@ -95,6 +100,10 @@ export async function generateMetadata({
         images: [ogImage],
       },
       robots: { index: true, follow: true },
+      other: {
+        "og:see_also": [...WEDDWEB_SOCIAL_PROFILES],
+        "twitter:see_also": [...WEDDWEB_SOCIAL_PROFILES],
+      },
     };
   }
 }

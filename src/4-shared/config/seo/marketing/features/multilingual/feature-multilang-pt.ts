@@ -13,7 +13,7 @@ export const seoMetadata: SitewideSEO = {
     twitterCard: "summary_large_image",
     keywords: [
       "site de casamento multilingue",
-      "rsvp bilingue casamento",
+      "rsvp multilingue casamento",
       "site de casamento em árabe",
       "casamento internacional",
       "melhor site de casamento 2026",

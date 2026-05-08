@@ -1,9 +1,13 @@
+"use client";
+
 import type { SupportedLanguage } from "@/4-shared/config/i18n";
 import { SUPPORTED_LANGUAGE_LABELS } from "@/4-shared/config/i18n";
-import { interpolate } from "@/4-shared/helpers/interpolateVars";
 import { t } from "@/4-shared/helpers/t";
-import type { WhatToSeeEntryFull } from "@/4-shared/types";
-import { BuilderLanguageCard } from "@/4-shared/ui/builder";
+import { notify } from "@/4-shared/lib/toast/toast";
+import type { PlanType, WhatToSeeEntryFull } from "@/4-shared/types";
+import { BuilderLangTabs } from "@/4-shared/ui/builder";
+import { MultiLangInputsBanner } from "@/4-shared/ui/builder/BuilderLangMultilangInputsBanner";
+import { MagicAIButton } from "@/4-shared/ui/builder/buttons/MagicAIButton";
 import {
   BuilderTextInput,
   BuilderTextarea,
@@ -17,6 +21,8 @@ export type WhatToSeeFormProps = {
   errors: WhatToSeeFormErrors;
   languages: string[];
   defaultLang: string;
+  activeLang: SupportedLanguage;
+  onChangeActiveLang: (lang: SupportedLanguage) => void;
   translations: Record<string, string>;
   onChange: (field: keyof WhatToSeeEntryFull, value: any) => void;
   onChangeI18n: (
@@ -25,6 +31,8 @@ export type WhatToSeeFormProps = {
     value: string,
   ) => void;
   disabled?: boolean;
+  siteId: string;
+  planType: PlanType;
 };
 
 export function WhatToSeeForm({
@@ -32,11 +40,57 @@ export function WhatToSeeForm({
   errors,
   languages,
   defaultLang,
+  activeLang,
+  onChangeActiveLang,
   translations,
   onChange,
   onChangeI18n,
   disabled,
+  siteId,
+  planType,
 }: WhatToSeeFormProps) {
+  // AI Assist handler
+  const handleAIApply = (aiData: any) => {
+    try {
+      if (!aiData) return;
+
+      Object.entries(aiData).forEach(([lang, fields]) => {
+        if (!languages.includes(lang)) return;
+        if (typeof fields !== "object" || !fields) return;
+
+        // Map AI keys to form fields
+        const fieldMapping: Record<string, string> = {
+          title: "name",
+          description: "description",
+          notes: "notes",
+        };
+
+        Object.entries(fieldMapping).forEach(([aiKey, formKey]) => {
+          if ((fields as any)[aiKey]) {
+            onChangeI18n(
+              formKey as keyof WhatToSeeEntryFull,
+              lang,
+              (fields as any)[aiKey],
+            );
+          }
+        });
+      });
+
+      notify.success(
+        translations["ai.content_applied"] || "AI content applied!",
+      );
+    } catch (e) {
+      console.error("AI Apply Error:", e);
+      notify.error("Failed to apply AI content");
+    }
+  };
+
+  const currentContent = {
+    title: form.name || {},
+    description: form.description || {},
+    notes: form.notes || {},
+  };
+
   const locationUrlError =
     form.location_url && !isValidURL(form.location_url)
       ? t(translations, "builder.what_to_see.error.url", "Invalid URL")
@@ -44,90 +98,97 @@ export function WhatToSeeForm({
 
   return (
     <>
-      {languages.map((locale) => (
-        <BuilderLanguageCard
-          key={locale}
-          languageCode={
-            SUPPORTED_LANGUAGE_LABELS[locale as SupportedLanguage] ?? locale
-          }
-          title={interpolate(
-            t(
-              translations,
-              "builder.general.form.language_fields_for",
-              "Fields for {language}",
-            ),
-            {
-              language:
-                SUPPORTED_LANGUAGE_LABELS[locale as SupportedLanguage] ??
-                locale,
-            },
-          )}
-          isDefault={locale === defaultLang}
-          defaultBadgeLabel={t(
-            translations,
-            "builder.what_to_see.badge.default",
-            "Default",
-          )}
-        >
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <BuilderTextInput
-              label={`${t(translations, "builder.what_to_see.field.name", "Name")}${locale === defaultLang ? " *" : ""}`}
-              value={
-                (form.name as Record<string, string> | undefined)?.[locale] ??
-                ""
-              }
-              onChange={(v) => onChangeI18n("name", locale, v)}
-              autoComplete="off"
-            />
+      <span className="font-semibold text-lg text-gray-700">
+        {t(translations, "builder.what_to_see.form.details", "Place Details")}
+      </span>
 
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <BuilderLangTabs
+            languages={languages as SupportedLanguage[]}
+            activeLang={activeLang}
+            defaultLang={defaultLang as SupportedLanguage}
+            onChange={(langCode) =>
+              onChangeActiveLang(langCode as SupportedLanguage)
+            }
+            onSetDefault={() => undefined}
+            getLabel={(langCode) =>
+              SUPPORTED_LANGUAGE_LABELS[langCode as SupportedLanguage] ??
+              langCode
+            }
+            translations={translations}
+          />
+        </div>
+        <MagicAIButton
+          siteId={siteId}
+          planType={planType}
+          languages={languages}
+          currentValues={currentContent}
+          context="Tourist recommendation for wedding guests"
+          onApply={handleAIApply}
+          translations={translations}
+          lang={defaultLang}
+        />
+      </div>
+
+      <MultiLangInputsBanner
+        translations={translations}
+        languages={languages as SupportedLanguage[]}
+        defaultLang={defaultLang as SupportedLanguage}
+      />
+
+      <section className="space-y-4 mt-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <BuilderTextInput
+            label={`${t(translations, "builder.what_to_see.field.name", "Name")}${activeLang === defaultLang ? " *" : ""}`}
+            value={(form.name as Record<string, string>)?.[activeLang] ?? ""}
+            onChange={(v) => onChangeI18n("name", activeLang, v)}
+            error={errors.name}
+            disabled={disabled}
+          />
+
+          <BuilderTextarea
+            label={t(
+              translations,
+              "builder.what_to_see.field.description",
+              "Description",
+            )}
+            value={
+              (form.description as Record<string, string>)?.[activeLang] ?? ""
+            }
+            onChange={(v) => onChangeI18n("description", activeLang, v)}
+            rows={2}
+            disabled={disabled}
+          />
+
+          <div className="sm:col-span-2">
             <BuilderTextarea
               label={t(
                 translations,
-                "builder.what_to_see.field.description",
-                "Description",
+                "builder.what_to_see.field.notes",
+                "Notes",
               )}
-              value={
-                (form.description as Record<string, string> | undefined)?.[
-                  locale
-                ] ?? ""
-              }
-              onChange={(v) => onChangeI18n("description", locale, v)}
+              value={(form.notes as Record<string, string>)?.[activeLang] ?? ""}
+              onChange={(v) => onChangeI18n("notes", activeLang, v)}
               rows={2}
+              disabled={disabled}
             />
-
-            <div className="sm:col-span-2">
-              <BuilderTextarea
-                label={t(
-                  translations,
-                  "builder.what_to_see.field.notes",
-                  "Notes",
-                )}
-                value={
-                  (form.notes as Record<string, string> | undefined)?.[
-                    locale
-                  ] ?? ""
-                }
-                onChange={(v) => onChangeI18n("notes", locale, v)}
-                rows={2}
-              />
-            </div>
           </div>
-        </BuilderLanguageCard>
-      ))}
+        </div>
 
-      <BuilderTextInput
-        label={t(
-          translations,
-          "builder.what_to_see.field.location_url",
-          "Location URL (Google Maps, etc)",
-        )}
-        value={form.location_url ?? ""}
-        onChange={(v) => onChange("location_url", v)}
-        placeholder="https://maps.example.com/location"
-        autoComplete="off"
-        error={locationUrlError}
-        disabled={disabled}
-      />
+        <BuilderTextInput
+          label={t(
+            translations,
+            "builder.what_to_see.field.location_url",
+            "Location URL (Google Maps)",
+          )}
+          value={form.location_url ?? ""}
+          onChange={(v) => onChange("location_url", v)}
+          placeholder="https://maps.google.com/..."
+          error={locationUrlError}
+          disabled={disabled}
+        />
+      </section>
     </>
   );
 }
