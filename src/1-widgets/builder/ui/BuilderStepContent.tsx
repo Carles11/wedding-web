@@ -37,10 +37,12 @@ export default function BuilderStepContent({
   setHasRsvpEnabled,
   account,
   stepStatuses,
+  TEST_ENABLED_SITE_IDS,
 }: BuilderStepContentProps) {
   const requiredSteps = stepStatuses?.filter((s) => s !== "optional") ?? [];
   const allRequiredDone = requiredSteps.every((s) => s === "done");
 
+  const siteId = site?.id;
   return (
     <section className=" flex-1 min-w-0 p-4 sm:p-6">
       <Heading as="h2" className="text-xl font-semibold">
@@ -138,16 +140,18 @@ export default function BuilderStepContent({
               account={account}
             />
           </div>
-          <div className={active !== 7 ? "hidden" : undefined}>
-            <RsvpBuilderStep
-              site={site}
-              refresh={refresh}
-              lang={currentLang}
-              translations={translations}
-              planType={planType}
-              setHasRsvpEnabled={setHasRsvpEnabled}
-            />
-          </div>
+          {!TEST_ENABLED_SITE_IDS.includes(siteId) && (
+            <div className={active !== 7 ? "hidden" : undefined}>
+              <RsvpBuilderStep
+                site={site}
+                refresh={refresh}
+                lang={currentLang}
+                translations={translations}
+                planType={planType}
+                setHasRsvpEnabled={setHasRsvpEnabled}
+              />
+            </div>
+          )}
           <div className={active !== 8 ? "hidden" : undefined}>
             <DomainAndBillingBuilderStep
               site={site}

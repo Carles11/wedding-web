@@ -23,17 +23,6 @@ import { isValidEmail } from "@/4-shared/utils/validations";
 import { usePlan } from "@/app/providers";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState, useTransition } from "react";
-const STEP_KEYS = [
-  "builder.nav.step.general",
-  "builder.nav.step.images",
-  "builder.nav.step.program",
-  "builder.nav.step.accommodation",
-  "builder.nav.step.what_to_see",
-  "builder.nav.step.wedding_gift",
-  "builder.nav.step.contact",
-  "builder.nav.step.rsvp",
-  "builder.nav.step.domain_billing",
-];
 
 export default function BuilderClient({
   initialLang = "en",
@@ -53,6 +42,26 @@ export default function BuilderClient({
     error: siteError,
     refresh,
   } = useSite(user ?? null);
+
+  const TEST_ENABLED_SITE_IDS = [
+    "2dc5d40e-619c-4ab4-978e-4a9ce1bca34a",
+    "95e6f161-2d67-4eba-b54e-adc2806589f7",
+  ]; // Your test sites id
+
+  const STEP_KEYS = [
+    "builder.nav.step.general",
+    "builder.nav.step.images",
+    "builder.nav.step.program",
+    "builder.nav.step.accommodation",
+    "builder.nav.step.what_to_see",
+    "builder.nav.step.wedding_gift",
+    "builder.nav.step.contact",
+    site?.id && TEST_ENABLED_SITE_IDS.includes(site.id)
+      ? "builder.nav.step.rsvp"
+      : "",
+    "builder.nav.step.domain_billing",
+  ];
+
   const { planType } = usePlan();
   // Initialize active step from URL query param
   const searchParams = useSearchParams();
@@ -314,6 +323,7 @@ export default function BuilderClient({
               setHasRsvpEnabled={setHasRsvpEnabled}
               account={account}
               stepStatuses={STEP_STATUS}
+              TEST_ENABLED_SITE_IDS={TEST_ENABLED_SITE_IDS}
             />
           </div>
         </main>
