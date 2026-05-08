@@ -76,7 +76,7 @@ export function AIPromptModal({
           t(
             translations,
             "ai.error.format",
-            "The AI returned an invalid response. Please try one more time.",
+            "The AI returned an invalid response. Please try one more time in a while.",
           ),
         );
       } else {
