@@ -578,7 +578,7 @@ export default function GeneralSiteForm({
               SUPPORTED_LANGUAGE_LABELS[langCode as SupportedLanguage]
             }
             translations={translations}
-          />{" "}
+          />
         </div>
         <MagicAIButton
           siteId={site?.id || ""}
