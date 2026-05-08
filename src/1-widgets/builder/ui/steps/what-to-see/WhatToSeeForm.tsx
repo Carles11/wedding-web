@@ -117,7 +117,7 @@ export function WhatToSeeForm({
               langCode
             }
             translations={translations}
-          />{" "}
+          />
         </div>
         <MagicAIButton
           siteId={siteId}
