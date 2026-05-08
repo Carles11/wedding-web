@@ -1,5 +1,6 @@
 "use client";
 
+import { t } from "@/4-shared/helpers/t";
 import { BuilderStepContentProps } from "@/4-shared/types";
 import Heading from "@/4-shared/ui/commons/typography/Heading";
 import {
@@ -151,7 +152,13 @@ export default function BuilderStepContent({
                 setHasRsvpEnabled={setHasRsvpEnabled}
               />
             ) : (
-              <p>We are working on this one. Coming Soon!</p>
+              <p>
+                {t(
+                  translations,
+                  "common.coming_soon",
+                  "We are working on this one. Coming Soon!",
+                )}
+              </p>
             )}
           </div>
           <div className={active !== 8 ? "hidden" : undefined}>
