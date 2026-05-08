@@ -1,20 +1,18 @@
 "use client";
 
-import { AIPromptModal } from "@/2-features/builder/ai-orchestrator/ui/AIPromptModal";
 import type { SupportedLanguage } from "@/4-shared/config/i18n";
 import { SUPPORTED_LANGUAGE_LABELS } from "@/4-shared/config/i18n";
 import { t } from "@/4-shared/helpers/t";
 import { notify } from "@/4-shared/lib/toast/toast";
 import type { PlanType, WhatToSeeEntryFull } from "@/4-shared/types";
-import { BuilderButton, BuilderLangTabs } from "@/4-shared/ui/builder";
+import { BuilderLangTabs } from "@/4-shared/ui/builder";
 import { MultiLangInputsBanner } from "@/4-shared/ui/builder/BuilderLangMultilangInputsBanner";
+import { MagicAIButton } from "@/4-shared/ui/builder/buttons/MagicAIButton";
 import {
   BuilderTextInput,
   BuilderTextarea,
 } from "@/4-shared/ui/builder/inputs";
 import { isValidURL } from "@/4-shared/utils/validations";
-import { Sparkles } from "lucide-react";
-import { useState } from "react";
 
 export type WhatToSeeFormErrors = Partial<Record<string, string>>;
 
@@ -51,20 +49,16 @@ export function WhatToSeeForm({
   siteId,
   planType,
 }: WhatToSeeFormProps) {
-  const [showAIModal, setShowAIModal] = useState(false);
-
   // AI Assist handler
   const handleAIApply = (aiData: any) => {
     try {
       if (!aiData) return;
 
       Object.entries(aiData).forEach(([lang, fields]) => {
-        // Ensure we only apply translations to languages currently enabled for this site
         if (!languages.includes(lang)) return;
-
         if (typeof fields !== "object" || !fields) return;
 
-        // Map AI keys to form fields (Title in AI = Name in Form)
+        // Map AI keys to form fields
         const fieldMapping: Record<string, string> = {
           title: "name",
           description: "description",
@@ -89,11 +83,10 @@ export function WhatToSeeForm({
       console.error("AI Apply Error:", e);
       notify.error("Failed to apply AI content");
     }
-    setShowAIModal(false);
   };
 
   const currentContent = {
-    title: form.name || {}, // WhatToSee uses 'name' in state but 'title' in DB/AI
+    title: form.name || {},
     description: form.description || {},
     notes: form.notes || {},
   };
@@ -105,39 +98,38 @@ export function WhatToSeeForm({
 
   return (
     <>
-      <div className="flex items-center justify-between mb-4">
-        <span className="font-semibold text-lg text-gray-700">
-          {t(translations, "builder.what_to_see.form.details", "Place Details")}
-        </span>
-        <BuilderButton
-          size="sm"
-          variant="secondary"
-          onClick={() => {
-            if (planType === "free") {
-              notify.info("Upgrade your plan to use AI Assist.");
-              return;
-            }
-            setShowAIModal(true);
-          }}
-          disabled={disabled}
-        >
-          <Sparkles className="w-4 h-4 mr-1 text-emerald-500" /> AI Assist
-        </BuilderButton>
-      </div>
+      <span className="font-semibold text-lg text-gray-700">
+        {t(translations, "builder.what_to_see.form.details", "Place Details")}
+      </span>
 
-      <BuilderLangTabs
-        languages={languages as SupportedLanguage[]}
-        activeLang={activeLang}
-        defaultLang={defaultLang as SupportedLanguage}
-        onChange={(langCode) =>
-          onChangeActiveLang(langCode as SupportedLanguage)
-        }
-        onSetDefault={() => undefined}
-        getLabel={(langCode) =>
-          SUPPORTED_LANGUAGE_LABELS[langCode as SupportedLanguage] ?? langCode
-        }
-        translations={translations}
-      />
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <BuilderLangTabs
+            languages={languages as SupportedLanguage[]}
+            activeLang={activeLang}
+            defaultLang={defaultLang as SupportedLanguage}
+            onChange={(langCode) =>
+              onChangeActiveLang(langCode as SupportedLanguage)
+            }
+            onSetDefault={() => undefined}
+            getLabel={(langCode) =>
+              SUPPORTED_LANGUAGE_LABELS[langCode as SupportedLanguage] ??
+              langCode
+            }
+            translations={translations}
+          />{" "}
+        </div>
+        <MagicAIButton
+          siteId={siteId}
+          planType={planType}
+          languages={languages}
+          currentValues={currentContent}
+          context="Tourist recommendation for wedding guests"
+          onApply={handleAIApply}
+          translations={translations}
+          lang={defaultLang}
+        />
+      </div>
 
       <MultiLangInputsBanner
         translations={translations}
@@ -197,18 +189,6 @@ export function WhatToSeeForm({
           disabled={disabled}
         />
       </section>
-
-      {showAIModal && (
-        <AIPromptModal
-          siteId={siteId}
-          languages={languages as SupportedLanguage[]}
-          currentContent={currentContent}
-          context="Tourist recommendation for wedding guests"
-          onClose={() => setShowAIModal(false)}
-          onSuccess={handleAIApply}
-          translations={translations}
-        />
-      )}
     </>
   );
 }

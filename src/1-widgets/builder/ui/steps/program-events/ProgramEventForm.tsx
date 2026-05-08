@@ -1,6 +1,5 @@
 "use client";
 
-import { AIPromptModal } from "@/2-features/builder/ai-orchestrator/ui/AIPromptModal";
 import {
   SUPPORTED_LANGUAGE_LABELS,
   type SupportedLanguage,
@@ -8,12 +7,9 @@ import {
 import { t } from "@/4-shared/helpers/t";
 import { notify } from "@/4-shared/lib/toast/toast";
 import type { PlanType, ProgramEvent } from "@/4-shared/types";
-import {
-  BuilderButton,
-  BuilderFormCard,
-  BuilderLangTabs,
-} from "@/4-shared/ui/builder";
+import { BuilderFormCard, BuilderLangTabs } from "@/4-shared/ui/builder";
 import { MultiLangInputsBanner } from "@/4-shared/ui/builder/BuilderLangMultilangInputsBanner";
+import { MagicAIButton } from "@/4-shared/ui/builder/buttons/MagicAIButton";
 import {
   BuilderTextInput,
   BuilderTextarea,
@@ -23,9 +19,7 @@ import { DateInput } from "@/4-shared/ui/builder/inputs/DateInput";
 import { TimeInput } from "@/4-shared/ui/builder/inputs/TimeInput";
 import { Toggle } from "@/4-shared/ui/commons/buttons/Toggle";
 import { isValidURL } from "@/4-shared/utils/validations";
-import { Sparkles } from "lucide-react";
 import type { RefObject } from "react";
-import { useState } from "react";
 import { type DayTagOption } from "./dayTags";
 
 type ProgramEventFormProps = {
@@ -55,7 +49,6 @@ type ProgramEventFormProps = {
   onToggleFormMain: (checked: boolean) => void;
 };
 
-// Added the missing 'export' keyword here
 export function ProgramEventForm(props: ProgramEventFormProps) {
   const {
     editingId,
@@ -76,8 +69,6 @@ export function ProgramEventForm(props: ProgramEventFormProps) {
     onToggleFormMain,
     siteId,
   } = props;
-
-  const [showAIModal, setShowAIModal] = useState(false);
 
   const locationUrl = form.location_url ?? "";
   const locationUrlError =
@@ -100,9 +91,7 @@ export function ProgramEventForm(props: ProgramEventFormProps) {
     try {
       if (!aiData) return;
       Object.entries(aiData).forEach(([lang, fields]) => {
-        // Ensure we only apply to languages enabled for this site
         if (!languages.includes(lang as SupportedLanguage)) return;
-
         if (typeof fields !== "object" || !fields) return;
         ["title", "location", "description"].forEach((field) => {
           const value = (fields as Record<string, string>)[field];
@@ -117,7 +106,6 @@ export function ProgramEventForm(props: ProgramEventFormProps) {
     } catch (e) {
       notify.error("Failed to apply AI content");
     }
-    setShowAIModal(false);
   };
 
   const currentContent = {
@@ -128,23 +116,7 @@ export function ProgramEventForm(props: ProgramEventFormProps) {
 
   return (
     <div ref={formRef} className="mt-8">
-      <div className="flex items-center justify-between mb-4">
-        <span className="font-semibold text-lg text-gray-700">{formTitle}</span>
-        <BuilderButton
-          size="sm"
-          variant="secondary"
-          onClick={() => {
-            if (planType === "free") {
-              notify.info("Upgrade your plan to use AI Assist.");
-              return;
-            }
-            setShowAIModal(true);
-          }}
-          disabled={saving}
-        >
-          <Sparkles className="w-4 h-4 mr-1 text-emerald-500" /> AI Assist
-        </BuilderButton>
-      </div>
+      <span className="font-semibold text-lg text-gray-700">{formTitle}</span>
 
       <BuilderFormCard title="" error={error}>
         <div className="space-y-6">
@@ -219,21 +191,34 @@ export function ProgramEventForm(props: ProgramEventFormProps) {
           )}
 
           <div className="space-y-4">
-            <BuilderLangTabs
-              languages={languages}
-              activeLang={activeLang}
-              defaultLang={defaultLang}
-              onChange={(langCode) =>
-                onChangeActiveLang(langCode as SupportedLanguage)
-              }
-              onSetDefault={() => undefined}
-              getLabel={(langCode) =>
-                SUPPORTED_LANGUAGE_LABELS[langCode as SupportedLanguage]
-              }
-              translations={translations}
-              programStep={true}
-            />
-
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <BuilderLangTabs
+                  languages={languages}
+                  activeLang={activeLang}
+                  defaultLang={defaultLang}
+                  onChange={(langCode) =>
+                    onChangeActiveLang(langCode as SupportedLanguage)
+                  }
+                  onSetDefault={() => undefined}
+                  getLabel={(langCode) =>
+                    SUPPORTED_LANGUAGE_LABELS[langCode as SupportedLanguage]
+                  }
+                  translations={translations}
+                  programStep={true}
+                />
+              </div>
+              <MagicAIButton
+                siteId={siteId}
+                planType={planType}
+                languages={languages}
+                currentValues={currentContent}
+                context="Wedding Event Details"
+                onApply={handleAIApply}
+                translations={translations}
+                lang={defaultLang}
+              />
+            </div>
             <MultiLangInputsBanner
               translations={translations}
               languages={languages}
@@ -275,18 +260,6 @@ export function ProgramEventForm(props: ProgramEventFormProps) {
           </div>
         </div>
       </BuilderFormCard>
-
-      {showAIModal && (
-        <AIPromptModal
-          siteId={siteId}
-          languages={languages}
-          currentContent={currentContent}
-          context="Wedding Event Details"
-          onClose={() => setShowAIModal(false)}
-          onSuccess={handleAIApply}
-          translations={translations}
-        />
-      )}
     </div>
   );
 }
