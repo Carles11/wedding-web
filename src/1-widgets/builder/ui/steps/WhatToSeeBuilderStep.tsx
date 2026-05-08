@@ -123,7 +123,7 @@ export default function WhatToSeeBuilderStep({
     if (!languages.includes(activeLang)) {
       setActiveLang(getEffectiveBuilderLanguage(languages, defaultLang));
     }
-  }, [activeLang, defaultLang, languages.join("|")]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [activeLang, defaultLang, languages.join("|")]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!site?.id) return;

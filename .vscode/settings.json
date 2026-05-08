@@ -19,7 +19,8 @@
   "deno.enablePaths": [
     "supabase/functions/resend-auth-hook",
     "supabase/functions/legacy-notification",
-    "supabase/functions/rsvp-invite"
+    "supabase/functions/rsvp-invite",
+    "supabase/functions/ai-orchestrator"
   ],
   "deno.disablePaths": ["src", "e2e", "scripts", "public", "app"],
   "deno.lint": true,

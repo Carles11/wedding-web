@@ -4,6 +4,11 @@ import { updateSiteFonts } from "@/3-entities/sites/api/updateSiteFonts";
 import { getSiteGeneralContent } from "@/4-shared/api/builder/getSiteGeneralContent";
 import { saveSiteGeneralContent } from "@/4-shared/api/builder/saveSiteGeneralContent";
 import type { SupportedLanguage } from "@/4-shared/config/i18n";
+
+import { AIPromptModal } from "@/2-features/builder/ai-orchestrator/ui/AIPromptModal";
+import { BuilderButton } from "@/4-shared/ui/builder";
+import { Sparkles } from "lucide-react";
+
 import {
   SUPPORTED_LANGUAGE_LABELS,
   SUPPORTED_LANGUAGES,
@@ -71,6 +76,7 @@ export default function GeneralSiteForm({
     site?.body_font ?? DEFAULT_TENANT.body,
   );
   const [savingFonts, setSavingFonts] = useState(false);
+  const [showAIModal, setShowAIModal] = useState(false);
 
   function arraysEqual<T>(a: T[], b: T[]) {
     if (a.length !== b.length) return false;
@@ -97,6 +103,18 @@ export default function GeneralSiteForm({
       notify.error(message);
     }
   }, [titleError, subtitleError, languageError, error]);
+
+  const handleAIApply = (newContent: any) => {
+    setContent((prev) => ({
+      ...prev,
+      ...newContent,
+    }));
+
+    notify.success(
+      translations["ai.content_applied"] ??
+        "AI Content applied! You can still edit the fields manually.",
+    );
+  };
 
   function applyGeneralContent(res: GeneralContentState) {
     const normalizedDefaultLang: DefaultLanguageValue = res.languages.includes(
@@ -547,10 +565,25 @@ export default function GeneralSiteForm({
       />
       {/* Title */}
       <div className="mt-8">
-        <p className=" pt-6 pb-3 text-gray-500">
-          {translations["builder.general.form.label.main_title"] ??
-            "Main title"}
-        </p>
+        <div className="flex items-center justify-between pt-6 pb-3">
+          <p className="text-gray-500">
+            {translations["builder.general.form.label.main_title"] ??
+              "Main title"}
+          </p>
+
+          <BuilderButton
+            variant="secondary"
+            size="sm"
+            icon={<Sparkles size={14} className="text-emerald-500" />}
+            onClick={() =>
+              planType === "free"
+                ? setShowUpgradeCTA(true)
+                : setShowAIModal(true)
+            }
+          >
+            AI Assist
+          </BuilderButton>
+        </div>
         <input
           className="mt-1 block w-full rounded border px-3 py-2"
           value={content[activeLang]?.title ?? ""}
@@ -713,6 +746,18 @@ export default function GeneralSiteForm({
         onClose={() => setShowUpgradeCTA(false)}
         onUpgrade={() => router.push(`/${lang}/pricing`)}
       />
+      {/* Render Modal at the end of the return */}
+      {showAIModal && site && (
+        <AIPromptModal
+          siteId={site.id}
+          languages={languages}
+          currentContent={content}
+          context="General Wedding Info"
+          translations={translations}
+          onClose={() => setShowAIModal(false)}
+          onSuccess={handleAIApply}
+        />
+      )}
     </StepLayout>
   );
 }
