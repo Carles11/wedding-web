@@ -23,6 +23,13 @@ const FREE_PLAN_FEATURES: readonly PlanFeatureCatalogItem[] = [
     marketingDescriptionTranslationKey:
       "marketing.features.free_plan_feature_3_description",
   },
+  /* --- NEW AI FEATURE (FREE) --- */
+  {
+    title: "AI Writing & Translation",
+    titleTranslationKeys: ["pricing.plan.free.feature_ai"],
+    marketingDescription: "Not included", // Clear and direct
+    marketingDescriptionTranslationKey: "common.not_included",
+  },
   {
     title: "Custom subdomain (your-names.weddweb.com)",
     titleTranslationKeys: ["pricing.plan.free.feature_8"],
@@ -69,6 +76,15 @@ const PREMIUM_PLAN_FEATURES: readonly PlanFeatureCatalogItem[] = [
     marketingDescription: "Welcome guests from anywhere in the world",
     marketingDescriptionTranslationKey:
       "marketing.features.premium_plan_feature_2_description",
+  },
+  /* --- NEW AI FEATURE (PREMIUM) --- */
+  {
+    title: "Magic AI Content Generation & Translation",
+    titleTranslationKeys: ["pricing.plan.premium.feature_ai"],
+    marketingDescription:
+      "Generate and translate all your content into 11 languages automatically",
+    marketingDescriptionTranslationKey:
+      "marketing.features.premium_plan_feature_ai_description",
   },
   {
     title: "Unlimited content—photos, events & tips",
@@ -117,6 +133,7 @@ export const PLAN_CATALOG = {
       weddingGiftMethods: 1,
       languages: 1,
       customDomains: 0,
+      aiGenerations: 0, // Used for logical gate if needed
     },
     price: -1,
     currency: "EUR",
@@ -136,6 +153,7 @@ export const PLAN_CATALOG = {
       weddingGiftMethods: -1,
       languages: -1,
       customDomains: 1,
+      aiGenerations: -1, // Unlimited for Premium
     },
     price: 39.0,
     currency: "EUR",

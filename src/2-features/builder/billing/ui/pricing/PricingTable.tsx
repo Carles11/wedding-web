@@ -8,7 +8,11 @@ import Heading from "@/4-shared/ui/commons/typography/Heading";
 
 function formatLimit(val: number, t: Record<string, string>, prop: string) {
   if (val === -1) return t["pricing.unlimited"] ?? "Unlimited";
-  if (val === 0 && prop === "customDomains") return t["pricing.none"] ?? "None";
+  if (
+    (val === 0 && prop === "customDomains") ||
+    (val === 0 && prop === "aiGenerations")
+  )
+    return t["pricing.none"] ?? "None";
   return val;
 }
 
