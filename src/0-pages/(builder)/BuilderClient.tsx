@@ -58,7 +58,7 @@ export default function BuilderClient({
     "builder.nav.step.contact",
     site?.id && TEST_ENABLED_SITE_IDS.includes(site.id)
       ? "builder.nav.step.rsvp"
-      : "",
+      : "Comming Soon",
     "builder.nav.step.domain_billing",
   ];
 

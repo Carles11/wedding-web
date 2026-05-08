@@ -140,8 +140,8 @@ export default function BuilderStepContent({
               account={account}
             />
           </div>
-          {TEST_ENABLED_SITE_IDS.includes(siteId) && (
-            <div className={active !== 7 ? "hidden" : undefined}>
+          <div className={active !== 7 ? "hidden" : undefined}>
+            {TEST_ENABLED_SITE_IDS.includes(siteId) ? (
               <RsvpBuilderStep
                 site={site}
                 refresh={refresh}
@@ -150,8 +150,10 @@ export default function BuilderStepContent({
                 planType={planType}
                 setHasRsvpEnabled={setHasRsvpEnabled}
               />
-            </div>
-          )}
+            ) : (
+              <p>We are working on this one. Coming Soon!</p>
+            )}
+          </div>
           <div className={active !== 8 ? "hidden" : undefined}>
             <DomainAndBillingBuilderStep
               site={site}
