@@ -702,7 +702,7 @@ export function RsvpResponsesTab({ siteId, translations }: Props) {
                 <p className="text-(--builder-color-text)">
                   <span className="font-medium">
                     {t(translations, "builder.rsvp.responses.col.name", "Name")}
-                    :{" "}
+                    :{"  "}
                   </span>
                   {selectedRow.party.name}
                 </p>
