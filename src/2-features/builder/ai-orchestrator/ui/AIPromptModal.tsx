@@ -1,7 +1,7 @@
 "use client";
 
 import { t } from "@/4-shared/helpers/t";
-import { notify } from "@/4-shared/lib/toast/toast"; // Ensure toast is imported
+import { notify } from "@/4-shared/lib/toast/toast";
 import { BuilderButton } from "@/4-shared/ui/builder";
 import { useState } from "react";
 import { useAIOrchestrator } from "../model/useAIOrchestrator";
@@ -28,16 +28,13 @@ export function AIPromptModal({
   const { processContent, loading } = useAIOrchestrator(siteId);
   const [tone, setTone] = useState("Romantic");
 
-  // Logic to determine if we are translating or generating
   const hasContent = Object.values(currentContent).some((val: any) => {
-    // Check various common field names for content
     return val?.title?.trim() || val?.name?.trim() || val?.description?.trim();
   });
 
   const action = hasContent ? "translate" : "generate";
 
   const handleRun = async () => {
-    // We wrap everything in a try/catch here to catch parsing errors
     try {
       const result = await processContent({
         action,
@@ -50,16 +47,13 @@ export function AIPromptModal({
       if (result) {
         onSuccess(result);
       } else {
-        // Handle cases where result is empty but no error was thrown
         throw new Error("EMPTY_RESPONSE");
       }
     } catch (err: any) {
       console.error("AI Modal Error:", err);
 
-      // 1. Detect JSON Parsing/Mangled Response errors
       const isParsingError =
         err.message?.includes("JSON") || err.message?.includes("Unexpected");
-      // 2. Detect Gemini overloading
       const isOverloaded =
         err.message?.includes("high demand") || err.status === 503;
 
@@ -68,7 +62,7 @@ export function AIPromptModal({
           t(
             translations,
             "ai.error.overloaded",
-            "AI is busy. Please try again in a moment.",
+            "AI is busy. Please try again.",
           ),
         );
       } else if (isParsingError) {
@@ -76,7 +70,7 @@ export function AIPromptModal({
           t(
             translations,
             "ai.error.format",
-            "The AI returned an invalid response. Please try one more time in a while.",
+            "Invalid AI response. Please try again.",
           ),
         );
       } else {
@@ -88,9 +82,6 @@ export function AIPromptModal({
           ),
         );
       }
-
-      // IMPORTANT: If your useAIOrchestrator doesn't handle its own 'loading' state
-      // perfectly on crash, you might need a local state here to force-disable it.
     }
   };
 
@@ -110,11 +101,13 @@ export function AIPromptModal({
                 "Generate Content",
               )}
         </h3>
+
         <p className="mt-2 text-sm text-gray-500">
+          {/* We keep context/languages count dynamic as they are numbers/technical IDs, but the surrounding text is translated */}
           {t(
             translations,
             "builder.ai.modal.description",
-            `Gemini will ${action} your ${context} details for all ${languages.length} languages.`,
+            `Gemini will process your details for all languages.`,
           )}
         </p>
 
@@ -128,10 +121,18 @@ export function AIPromptModal({
             onChange={(e) => setTone(e.target.value)}
             disabled={loading}
           >
-            <option value="Romantic">Romantic</option>
-            <option value="Minimalist">Minimalist</option>
-            <option value="Funny & Light">Funny & Light</option>
-            <option value="Formal">Formal</option>
+            <option value="Romantic">
+              {t(translations, "ai.tone.romantic", "Romantic")}
+            </option>
+            <option value="Minimalist">
+              {t(translations, "ai.tone.minimalist", "Minimalist")}
+            </option>
+            <option value="Funny & Light">
+              {t(translations, "ai.tone.funny", "Funny & Light")}
+            </option>
+            <option value="Formal">
+              {t(translations, "ai.tone.formal", "Formal")}
+            </option>
           </select>
         </div>
 
