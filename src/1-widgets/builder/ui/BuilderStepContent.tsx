@@ -140,7 +140,7 @@ export default function BuilderStepContent({
               account={account}
             />
           </div>
-          {!TEST_ENABLED_SITE_IDS.includes(siteId) && (
+          {TEST_ENABLED_SITE_IDS.includes(siteId) && (
             <div className={active !== 7 ? "hidden" : undefined}>
               <RsvpBuilderStep
                 site={site}
