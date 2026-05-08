@@ -46,7 +46,7 @@ export default function BuilderClient({
   const TEST_ENABLED_SITE_IDS = [
     "2dc5d40e-619c-4ab4-978e-4a9ce1bca34a",
     "95e6f161-2d67-4eba-b54e-adc2806589f7",
-    "357a074a-5471-4dd6-b5a9-e7f91b16b9e8",
+    "acee380e-9551-4e9e-a845-2180dd32a842",
   ]; // Your test sites id
 
   const STEP_KEYS = [
