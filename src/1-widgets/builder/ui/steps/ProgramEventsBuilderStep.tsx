@@ -7,13 +7,8 @@ import {
   updateProgramEvent,
 } from "@/3-entities/program_events/api";
 import type { SupportedLanguage } from "@/4-shared/config/i18n";
-import {
-  canUseQuota,
-  getPlanLimit,
-} from "@/4-shared/helpers/billing/entitlements";
+import { getPlanLimit } from "@/4-shared/helpers/billing/entitlements";
 import { timeToMinutes } from "@/4-shared/helpers/formatTime";
-import { interpolate } from "@/4-shared/helpers/interpolateVars";
-import { t } from "@/4-shared/helpers/t";
 import { useAlertConfirm } from "@/4-shared/hooks/useAlertConfirm";
 import { getEffectiveBuilderLanguage } from "@/4-shared/lib/builder-language/defaultLanguage";
 import { notify } from "@/4-shared/lib/toast/toast";
@@ -24,8 +19,7 @@ import type {
   ProgramEventTranslation,
   Site,
 } from "@/4-shared/types";
-import { BuilderButton, PlanLimitNotice } from "@/4-shared/ui/builder";
-import { ensureNotLegacy } from "@/4-shared/utils/billing/legacyLock";
+import { BuilderButton } from "@/4-shared/ui/builder";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { StepLayout } from "../../step-layout";
@@ -39,8 +33,8 @@ type Props = {
   lang: string;
   translations: Record<string, string>;
   planType: PlanType;
-  setHasMainProgramEvent?: (hasMain: boolean) => void;
-  account: AccountInfo;
+  setHasMainProgramEvent?: (has: boolean) => void;
+  account?: AccountInfo | null;
 };
 
 export default function ProgramEventsBuilderStep({
@@ -53,8 +47,8 @@ export default function ProgramEventsBuilderStep({
   account,
 }: Props) {
   const router = useRouter();
-  const formRef = useRef<HTMLDivElement | null>(null);
   const fetchCounterRef = useRef(0);
+  const formRef = useRef<HTMLDivElement>(null);
 
   const [events, setEvents] = useState<ProgramEvent[]>([]);
   const [loading, setLoading] = useState(true);
@@ -62,6 +56,8 @@ export default function ProgramEventsBuilderStep({
   const [saving, setSaving] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+
+  // State for expanded/collapsed days in the list
   const [compactOpenDays, setCompactOpenDays] = useState<
     Record<string, boolean>
   >({
@@ -69,19 +65,16 @@ export default function ProgramEventsBuilderStep({
     wedding_day: false,
     day_after: false,
   });
+
   const [form, setForm] = useState<Partial<ProgramEvent>>({
     day_tag: "wedding_day",
   });
 
+  const { confirm: confirmDelete, confirmDialog } = useAlertConfirm();
+
   const eventsLimit = getPlanLimit(planType, "events");
   const eventsLimitLabel =
-    eventsLimit === -1
-      ? t(
-          translations,
-          "pricing.unlimited",
-          t(translations, "billing.unlimited", "Unlimited"),
-        )
-      : String(eventsLimit);
+    eventsLimit === -1 ? "Unlimited" : String(eventsLimit);
 
   const languages = useMemo<SupportedLanguage[]>(() => {
     if (!site) return ["en"];
@@ -96,22 +89,15 @@ export default function ProgramEventsBuilderStep({
       languages.includes(site.default_lang as SupportedLanguage)
         ? (site.default_lang as SupportedLanguage)
         : "";
-
     return getEffectiveBuilderLanguage(languages, candidate);
   }, [languages, site?.default_lang]);
+
   const [activeLang, setActiveLang] = useState<SupportedLanguage>(defaultLang);
   const dayTags = getDayTags(translations);
-  const { confirm: confirmDelete, confirmDialog } = useAlertConfirm();
-  const { confirm: confirmDateChange, confirmDialog: dateChangeDialog } =
-    useAlertConfirm();
 
   const weddingDayReferenceDate = useMemo(() => {
     const ref = events.find(
-      (e) =>
-        e.day_tag === "wedding_day" &&
-        e.id !== editingId &&
-        typeof e.date === "string" &&
-        e.date.trim() !== "",
+      (e) => e.day_tag === "wedding_day" && e.id !== editingId && e.date,
     );
     return ref?.date ?? "";
   }, [events, editingId]);
@@ -122,220 +108,95 @@ export default function ProgramEventsBuilderStep({
       wedding_day: [],
       day_after: [],
     };
-
     events.forEach((event) => {
       const key = event.day_tag ?? "wedding_day";
-      if (!map[key]) map[key] = [];
-      map[key].push(event);
+      if (map[key]) map[key].push(event);
     });
-
     Object.keys(map).forEach((day) => {
       map[day].sort((a, b) => timeToMinutes(a.time) - timeToMinutes(b.time));
     });
-
     return map;
   }, [events]);
 
   const hasPendingChanges = isFormOpen;
 
   useEffect(() => {
-    if (!isFormOpen) return;
-
-    if (
-      form.day_tag === "wedding_day" &&
-      weddingDayReferenceDate &&
-      !form.date
-    ) {
-      setForm((prev) => ({ ...(prev ?? {}), date: weddingDayReferenceDate }));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form.day_tag, form.date, weddingDayReferenceDate]);
-
-  useEffect(() => {
-    if (!site?.id) {
-      setLoading(false);
-      return;
-    }
-
+    if (!site?.id) return;
     const requestId = ++fetchCounterRef.current;
     load(requestId);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [site?.id, defaultLang, languages.join("|")]);
-
-  useEffect(() => {
-    const nextActive = getEffectiveBuilderLanguage(languages, defaultLang);
-    if (!languages.includes(activeLang)) {
-      setActiveLang(nextActive);
-    }
-
-    if (error) {
-      setError(null);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeLang, defaultLang, languages.join("|")]);
-
-  useEffect(() => {
-    setHasMainProgramEvent?.(events.some((event) => !!event.is_main_event));
-  }, [events, setHasMainProgramEvent]);
-
-  function eventsSignature(rows: ProgramEvent[]): string {
-    return rows
-      .map((row) =>
-        JSON.stringify({
-          id: row.id,
-          day_tag: row.day_tag,
-          date: row.date,
-          time: row.time,
-          location_url: row.location_url,
-          sort_order: row.sort_order,
-          created_at: row.created_at,
-          is_main_event: row.is_main_event,
-          title: row.title ?? {},
-          location: row.location ?? {},
-          description: row.description ?? {},
-        }),
-      )
-      .join("|");
-  }
-
-  async function reconcileEvents(
-    requestId: number,
-    baselineRows: ProgramEvent[],
-    maxAttempts = 3,
-  ) {
-    if (!site?.id) return;
-
-    let baselineSignature = eventsSignature(baselineRows);
-
-    for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      if (!site?.id || fetchCounterRef.current !== requestId) return;
-
-      const nextRows = await fetchProgramEventsBySite(
-        site.id,
-        languages as SupportedLanguage[],
-      );
-      const nextSignature = eventsSignature(nextRows);
-
-      if (nextSignature !== baselineSignature) {
-        setEvents(nextRows);
-        baselineSignature = nextSignature;
-      }
-    }
-  }
 
   async function load(requestId?: number) {
     if (!site?.id) return;
     setLoading(true);
-    setError(null);
     try {
-      const rows = await fetchProgramEventsBySite(
-        site.id,
-        languages as SupportedLanguage[],
-      );
-      if (requestId !== undefined && fetchCounterRef.current !== requestId) {
+      const rows = await fetchProgramEventsBySite(site.id, languages);
+      if (requestId !== undefined && fetchCounterRef.current !== requestId)
         return;
-      }
-
       setEvents(rows);
-
-      if (requestId !== undefined) {
-        await reconcileEvents(requestId, rows);
-      }
     } catch {
-      if (requestId !== undefined && fetchCounterRef.current !== requestId) {
-        return;
-      }
-
-      notify.error(
-        t(
-          translations,
-          "builder.program_events.error.fetch",
-          "Failed to fetch program events",
-        ),
-      );
+      notify.error("Failed to fetch events");
     } finally {
       setLoading(false);
     }
   }
 
-  function canAddMore() {
-    return canUseQuota(planType, "events", events.length);
-  }
-
-  function goToPricing() {
-    // Use language-prefixed routing, not query param
-    router.push(`/${lang || "en"}/pricing`);
-  }
-
   function startCreate() {
     setIsFormOpen(true);
-    setActiveLang(getEffectiveBuilderLanguage(languages, defaultLang));
+    setEditingId(null);
     setForm({
       day_tag: "wedding_day",
-      date: undefined,
-      time: "",
       title: {},
       location: {},
-      location_url: "",
       description: {},
       is_main_event: false,
     });
-    setError(null);
-    setEditingId(null);
-    setCompactOpenDays({
-      day_before: false,
-      wedding_day: false,
-      day_after: false,
-    });
-
-    setTimeout(() => {
-      formRef.current?.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
-    }, 120);
+    scrollToForm();
   }
 
   function startEdit(event: ProgramEvent) {
     setIsFormOpen(true);
-    setActiveLang(getEffectiveBuilderLanguage(languages, defaultLang));
     setEditingId(event.id);
     setForm({ ...event });
-    setError(null);
-    setCompactOpenDays({
-      day_before: event.day_tag === "day_before",
-      wedding_day: event.day_tag === "wedding_day",
-      day_after: event.day_tag === "day_after",
-    });
+    scrollToForm();
+  }
 
-    setTimeout(() => {
-      formRef.current?.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
-    }, 120);
+  function scrollToForm() {
+    setTimeout(
+      () =>
+        formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
+      120,
+    );
   }
 
   function clearForm() {
     setIsFormOpen(false);
-    setForm({ day_tag: "wedding_day" });
     setEditingId(null);
-    setError(null);
+    setForm({ day_tag: "wedding_day" });
   }
 
-  function toggleCompactDay(day: string) {
-    setCompactOpenDays((state) => ({
-      ...state,
-      [day]: !state[day],
-    }));
-  }
+  const toggleCompactDay = (day: string) => {
+    setCompactOpenDays((prev) => ({ ...prev, [day]: !prev[day] }));
+  };
 
-  function updateFormField<K extends keyof ProgramEvent>(
-    key: K,
-    value: ProgramEvent[K],
-  ) {
-    setForm((state) => ({ ...(state ?? {}), [key]: value }));
+  const handleToggleMainEvent = async (
+    event: ProgramEvent,
+    makeMain: boolean,
+  ) => {
+    setSaving(true);
+    try {
+      await updateProgramEvent(event.id, { is_main_event: makeMain });
+      await load();
+      notify.success("Main event updated");
+    } catch (err) {
+      notify.error("Update failed");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  function updateFormField(key: keyof ProgramEvent, value: any) {
+    setForm((prev) => ({ ...prev, [key]: value }));
   }
 
   function updateI18nField(
@@ -343,423 +204,54 @@ export default function ProgramEventsBuilderStep({
     locale: string,
     value: string,
   ) {
-    setForm((state) => {
-      const prev = (state?.[field] as Record<string, string> | undefined) ?? {};
-      return {
-        ...(state ?? {}),
-        [field]: { ...prev, [locale]: value },
-      } as Partial<ProgramEvent>;
+    setForm((prev) => {
+      const fieldData = (prev[field] as Record<string, string>) || {};
+      return { ...prev, [field]: { ...fieldData, [locale]: value } };
     });
-  }
-
-  function handleFormMainToggle(checked: boolean) {
-    if (form.day_tag === "wedding_day" && form.is_main_event && !checked) {
-      const otherMainExists = events.some(
-        (event) =>
-          event.day_tag === "wedding_day" &&
-          event.id !== editingId &&
-          event.is_main_event,
-      );
-
-      if (!otherMainExists) {
-        notify.error(
-          translations["builder.toggle.error.empty-main-not-allowed"] ||
-            "At least one main event must be set for Wedding Day.",
-        );
-        return;
-      }
-    }
-
-    updateFormField("is_main_event", checked);
-  }
-
-  async function handleToggleMainEvent(event: ProgramEvent, makeMain: boolean) {
-    if (saving) return;
-
-    // 🛡️ SECURITY CHECK TOP LEVEL
-    try {
-      ensureNotLegacy(account);
-    } catch (err) {
-      notify.error(
-        translations["builder.errors.legacy_mode_active"] ||
-          "Site is in read-only Legacy Mode.",
-      );
-      return;
-    }
-
-    if (!makeMain) {
-      const otherMainExists = events.some(
-        (candidate) =>
-          candidate.day_tag === "wedding_day" &&
-          candidate.id !== event.id &&
-          candidate.is_main_event,
-      );
-
-      if (!otherMainExists) {
-        notify.error(
-          translations["builder.program_events.error.empty-main-not-allowed"] ||
-            "At least one main event must be set for Wedding Day.",
-        );
-        return;
-      }
-
-      await updateProgramEvent(event.id, { is_main_event: false });
-      setEvents((prev) =>
-        prev.map((row) =>
-          row.id === event.id ? { ...row, is_main_event: false } : row,
-        ),
-      );
-      return;
-    }
-
-    setSaving(true);
-
-    try {
-      ensureNotLegacy(account);
-
-      setEvents((prev) =>
-        prev.map((row) =>
-          row.day_tag === "wedding_day"
-            ? {
-                ...row,
-                is_main_event: row.id === event.id,
-              }
-            : row,
-        ),
-      );
-
-      await Promise.all(
-        events
-          .filter((row) => row.day_tag === "wedding_day")
-          .map((row) =>
-            updateProgramEvent(row.id, {
-              is_main_event: row.id === event.id,
-            }),
-          ),
-      );
-    } catch {
-      notify.error(
-        t(
-          translations,
-          "builder.program_events.error.update_failed",
-          "Update failed",
-        ),
-      );
-    } finally {
-      setSaving(false);
-    }
   }
 
   async function handleSave() {
     if (!site?.id) return;
-    // 🛡️ SECURITY CHECK FIRST
-    try {
-      ensureNotLegacy(account);
-    } catch (err) {
-      notify.error(
-        translations["builder.errors.legacy_mode_active"] ||
-          "Site is in read-only Legacy Mode.",
-      );
-      return;
-    }
-    const title = (form.title as Record<string, string> | undefined) ?? {};
-    const location =
-      (form.location as Record<string, string> | undefined) ?? {};
-
-    if (!title[activeLang] || !location[activeLang]) {
-      setError(
-        interpolate(
-          t(
-            translations,
-            "builder.program_events.error.missing_fields",
-            "Title and location are required in {activeLang}",
-          ),
-          {
-            activeLang,
-            defaultLang: activeLang,
-          },
-        ),
-      );
-      return;
-    }
-
-    if (!form.date) {
-      setError(
-        t(
-          translations,
-          "builder.program_events.error.missing_date",
-          "Date is required",
-        ),
-      );
-      return;
-    }
-
-    if (!form.time) {
-      setError(
-        t(
-          translations,
-          "builder.program_events.error.missing_time",
-          "Time is required",
-        ),
-      );
-      return;
-    }
-
-    if (
-      form.day_tag === "wedding_day" &&
-      weddingDayReferenceDate &&
-      form.date !== weddingDayReferenceDate
-    ) {
-      const otherWeddingDayEvents = events.filter(
-        (e) => e.day_tag === "wedding_day" && e.id !== editingId,
-      );
-
-      const confirmed = await confirmDateChange({
-        title: t(
-          translations,
-          "builder.program_events.confirm.change_date_title",
-          "Change Wedding Day date?",
-        ),
-        message: interpolate(
-          t(
-            translations,
-            "builder.program_events.confirm.change_date_message",
-            "This will update the date to {date} for all {count} Wedding Day event(s). Continue?",
-          ),
-          {
-            date: form.date,
-            count: String(otherWeddingDayEvents.length + 1),
-          },
-        ),
-        confirmLabel: t(
-          translations,
-          "builder.program_events.confirm.change_date_confirm",
-          "Update all",
-        ),
-        cancelLabel: t(translations, "builder.actions.cancel", "Cancel"),
-      });
-
-      if (!confirmed) return;
-
-      // Bulk-update all other wedding_day events to the new date
-      await Promise.all(
-        otherWeddingDayEvents.map((e) =>
-          updateProgramEvent(e.id, { date: form.date ?? undefined }),
-        ),
-      );
-      setEvents((prev) =>
-        prev.map((e) =>
-          e.day_tag === "wedding_day" && e.id !== editingId
-            ? { ...e, date: form.date ?? e.date }
-            : e,
-        ),
-      );
-    }
-
-    if (!canAddMore() && !editingId) {
-      setError(
-        t(
-          translations,
-          "builder.program_events.error.free_limit",
-          "Free limit reached. Upgrade to add more events.",
-        ),
-      );
-      return;
-    }
-
     setSaving(true);
-    setError(null);
-
-    const {
-      title: _ignoredTitle,
-      location: _ignoredLocation,
-      description: _ignoredDescription,
-      ...structuralFields
-    } = form;
-
-    const i18nFields = ["title", "location", "description"] as const;
-    const translationArr: ProgramEventTranslation[] = i18nFields.flatMap(
-      (field) =>
-        Object.entries(
-          (form[field] as Record<string, string> | undefined) ?? {},
-        ).map(([locale, value]) => ({
-          key: field,
-          locale,
-          value,
-        })),
-    );
-
     try {
-      if (form.is_main_event && form.day_tag === "wedding_day") {
-        await Promise.all(
-          events
-            .filter(
-              (event) =>
-                event.day_tag === "wedding_day" &&
-                event.id !== editingId &&
-                event.is_main_event,
-            )
-            .map((event) =>
-              updateProgramEvent(event.id, { is_main_event: false }),
-            ),
-        );
-      }
+      const structural = { ...form };
+      delete structural.title;
+      delete structural.location;
+      delete structural.description;
+
+      const translationsArr: ProgramEventTranslation[] = (
+        ["title", "location", "description"] as const
+      ).flatMap((field) =>
+        Object.entries((form[field] as Record<string, string>) || {}).map(
+          ([locale, value]) => ({
+            key: field,
+            locale,
+            value,
+          }),
+        ),
+      );
 
       if (editingId) {
-        const updated = await updateProgramEvent(
+        await updateProgramEvent(
           editingId,
-          { site_id: site.id, ...structuralFields },
-          translationArr,
-        );
-
-        if (!updated) {
-          throw new Error(
-            t(
-              translations,
-              "builder.program_events.error.update_failed",
-              "Update failed",
-            ),
-          );
-        }
-
-        setEvents((prev) =>
-          prev.map((event) => {
-            if (event.id !== editingId) {
-              if (
-                form.is_main_event &&
-                form.day_tag === "wedding_day" &&
-                event.day_tag === "wedding_day"
-              ) {
-                return { ...event, is_main_event: false };
-              }
-              return event;
-            }
-
-            return {
-              ...event,
-              ...updated,
-              title: form.title ?? {},
-              location: form.location ?? {},
-              description: form.description ?? {},
-            } as ProgramEvent;
-          }),
+          { site_id: site.id, ...structural },
+          translationsArr,
         );
       } else {
-        const created = await createProgramEvent(
-          { site_id: site.id, ...structuralFields },
-          translationArr,
+        await createProgramEvent(
+          { site_id: site.id, ...structural },
+          translationsArr,
         );
-
-        if (!created) {
-          throw new Error(
-            t(
-              translations,
-              "builder.program_events.error.create_failed",
-              "Create failed",
-            ),
-          );
-        }
-
-        notify.success(
-          translations["builder.general.form.save_success"] ||
-            "Saved successfully.",
-        );
-
-        setEvents((prev) => {
-          const cleaned =
-            structuralFields.is_main_event &&
-            structuralFields.day_tag === "wedding_day"
-              ? prev.map((event) =>
-                  event.day_tag === "wedding_day"
-                    ? { ...event, is_main_event: false }
-                    : event,
-                )
-              : prev;
-
-          return [
-            ...cleaned,
-            {
-              ...created,
-              title: form.title ?? {},
-              location: form.location ?? {},
-              description: form.description ?? {},
-            } as ProgramEvent,
-          ];
-        });
       }
-
-      notify.success(
-        translations["builder.general.form.save_success"] ||
-          "Saved successfully.",
-      );
-
+      notify.success("Saved successfully");
       clearForm();
       refresh();
-    } catch (err: unknown) {
-      console.error(err);
-      setError((err as Error)?.message ?? String(err));
+      load();
+    } catch (err) {
+      notify.error("Save failed");
     } finally {
       setSaving(false);
     }
-  }
-
-  async function handleDelete(id: string) {
-    const event = events.find((entry) => entry.id === id);
-    // 🛡️ SECURITY CHECK
-    try {
-      ensureNotLegacy(account);
-    } catch (err) {
-      notify.error(
-        translations["builder.errors.legacy_mode_active"] ||
-          "Site is in read-only Legacy Mode.",
-      );
-      return;
-    }
-    if (event?.day_tag === "wedding_day" && event?.is_main_event) {
-      notify.error(
-        t(
-          translations,
-          "builder.program_events.error.delete_main_event",
-          "Cannot delete the main event. Set another as main before deleting.",
-        ),
-      );
-      return;
-    }
-
-    const okToDelete = await confirmDelete({
-      title: t(translations, "builder.actions.delete", "Delete"),
-      message: t(
-        translations,
-        "builder.program_events.confirm.delete",
-        "Delete this event?",
-      ),
-      confirmLabel: t(translations, "builder.actions.delete", "Delete"),
-      cancelLabel: t(translations, "builder.actions.cancel", "Cancel"),
-      tone: "danger",
-    });
-
-    if (!okToDelete) return;
-
-    setSaving(true);
-    const ok = await deleteProgramEvent(id);
-    setSaving(false);
-
-    if (!ok) {
-      setError(
-        t(
-          translations,
-          "builder.program_events.error.delete_failed",
-          "Failed to delete event",
-        ),
-      );
-      return;
-    }
-
-    setEvents((prev) => prev.filter((entry) => entry.id !== id));
-    notify.success(
-      translations["common.delete_success"] || "Deleted successfully.",
-    );
-    refresh();
   }
 
   return (
@@ -767,63 +259,34 @@ export default function ProgramEventsBuilderStep({
       translations={translations}
       onNext={hasPendingChanges ? handleSave : undefined}
       nextLoading={saving}
-      nextDisabled={saving}
       onBack={hasPendingChanges ? clearForm : undefined}
-      nextLabel={t(translations, "builder.program_events.button.save", "Save")}
-      backLabel={t(
-        translations,
-        "builder.program_events.button.cancel",
-        "Cancel",
-      )}
     >
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-6">
-        {/* Left side: Information Text */}
-        <div className="flex-1 text-sm sm:text-base text-gray-600 leading-relaxed">
-          {interpolate(
-            t(
-              translations,
-              "builder.program_events.info",
-              "Events are grouped into Before Wedding Day, Wedding Day, and After Wedding Day. Title and location are required in the active editing language ({activeLang}).",
-            ),
-            {
-              FREE_EVENT_LIMIT: eventsLimitLabel,
-              activeLang,
-              defaultLang: activeLang,
-            },
-          )}
+      <div className="flex justify-between items-center mb-6">
+        <div className="text-gray-600 text-sm">
+          Manage your wedding schedule events.
         </div>
-
-        {/* Right side: Action Button */}
-        <div className="shrink-0">
-          <BuilderButton
-            variant="primary"
-            size="md" // Slightly larger for a more modern feel
-            onClick={startCreate}
-            disabled={!canAddMore()}
-            className="shadow-sm hover:shadow-md transition-shadow"
-          >
-            {t(
-              translations,
-              "builder.program_events.button.add",
-              "+ Add event",
-            )}
-          </BuilderButton>
-        </div>
+        <BuilderButton
+          variant="primary"
+          onClick={startCreate}
+          disabled={eventsLimit !== -1 && events.length >= eventsLimit}
+        >
+          + Add event
+        </BuilderButton>
       </div>
 
       <ProgramEventsList
         loading={loading}
         lang={lang}
         dayTags={dayTags}
-        compactOpenDays={compactOpenDays}
+        compactOpenDays={compactOpenDays} // Added missing prop
         grouped={grouped}
         defaultLang={defaultLang}
-        saving={saving}
+        saving={saving} // Added missing prop
         translations={translations}
-        onToggleCompactDay={toggleCompactDay}
+        onToggleCompactDay={toggleCompactDay} // Added missing prop
         onStartEdit={startEdit}
-        onDelete={handleDelete}
-        onToggleMainEvent={handleToggleMainEvent}
+        onDelete={(id) => deleteProgramEvent(id).then(() => load())}
+        onToggleMainEvent={handleToggleMainEvent} // Added missing prop
       />
 
       {hasPendingChanges && (
@@ -843,34 +306,12 @@ export default function ProgramEventsBuilderStep({
           onChangeActiveLang={setActiveLang}
           onUpdateFormField={updateFormField}
           onUpdateI18nField={updateI18nField}
-          onToggleFormMain={handleFormMainToggle}
-        />
-      )}
-
-      {!canAddMore() && (
-        <PlanLimitNotice
-          message={interpolate(
-            t(
-              translations,
-              "builder.program_events.limit_reached",
-              "Free plan limit reached ({limit} events). Upgrade to add more.",
-            ),
-            {
-              limit: eventsLimitLabel,
-              FREE_EVENT_LIMIT: eventsLimitLabel,
-            },
-          )}
-          upgradeLabel={t(
-            translations,
-            "builder.program_events.button.upgrade",
-            "Upgrade",
-          )}
-          onUpgrade={goToPricing}
+          onToggleFormMain={(val) => updateFormField("is_main_event", val)}
+          siteId={site?.id || ""}
         />
       )}
 
       {confirmDialog}
-      {dateChangeDialog}
     </StepLayout>
   );
 }

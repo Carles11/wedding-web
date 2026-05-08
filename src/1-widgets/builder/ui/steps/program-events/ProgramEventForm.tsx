@@ -1,11 +1,18 @@
+"use client";
+
+import { AIPromptModal } from "@/2-features/builder/ai-orchestrator/ui/AIPromptModal";
 import {
   SUPPORTED_LANGUAGE_LABELS,
   type SupportedLanguage,
 } from "@/4-shared/config/i18n";
-import { interpolate } from "@/4-shared/helpers/interpolateVars";
 import { t } from "@/4-shared/helpers/t";
+import { notify } from "@/4-shared/lib/toast/toast";
 import type { PlanType, ProgramEvent } from "@/4-shared/types";
-import { BuilderFormCard, BuilderLangTabs } from "@/4-shared/ui/builder";
+import {
+  BuilderButton,
+  BuilderFormCard,
+  BuilderLangTabs,
+} from "@/4-shared/ui/builder";
 import { MultiLangInputsBanner } from "@/4-shared/ui/builder/BuilderLangMultilangInputsBanner";
 import {
   BuilderTextInput,
@@ -16,8 +23,10 @@ import { DateInput } from "@/4-shared/ui/builder/inputs/DateInput";
 import { TimeInput } from "@/4-shared/ui/builder/inputs/TimeInput";
 import { Toggle } from "@/4-shared/ui/commons/buttons/Toggle";
 import { isValidURL } from "@/4-shared/utils/validations";
+import { Sparkles } from "lucide-react";
 import type { RefObject } from "react";
-import { getLanguageDisplay, type DayTagOption } from "./dayTags";
+import { useState } from "react";
+import { type DayTagOption } from "./dayTags";
 
 type ProgramEventFormProps = {
   editingId: string | null;
@@ -29,6 +38,7 @@ type ProgramEventFormProps = {
   activeLang: SupportedLanguage;
   languages: SupportedLanguage[];
   planType: PlanType;
+  siteId: string;
   weddingDayReferenceDate: string;
   saving: boolean;
   error: string | null;
@@ -45,30 +55,36 @@ type ProgramEventFormProps = {
   onToggleFormMain: (checked: boolean) => void;
 };
 
-export function ProgramEventForm({
-  editingId,
-  form,
-  formRef,
-  translations,
-  dayTags,
-  defaultLang,
-  activeLang,
-  languages,
-  planType,
-  weddingDayReferenceDate,
-  saving,
-  error,
-  onChangeActiveLang,
-  onUpdateFormField,
-  onUpdateI18nField,
-  onToggleFormMain,
-}: ProgramEventFormProps) {
-  // URL validation for location_url
+// Added the missing 'export' keyword here
+export function ProgramEventForm(props: ProgramEventFormProps) {
+  const {
+    editingId,
+    form,
+    formRef,
+    translations,
+    dayTags,
+    defaultLang,
+    activeLang,
+    languages,
+    planType,
+    weddingDayReferenceDate,
+    saving,
+    error,
+    onChangeActiveLang,
+    onUpdateFormField,
+    onUpdateI18nField,
+    onToggleFormMain,
+    siteId,
+  } = props;
+
+  const [showAIModal, setShowAIModal] = useState(false);
+
   const locationUrl = form.location_url ?? "";
   const locationUrlError =
     locationUrl && !isValidURL(locationUrl)
       ? t(translations, "builder.program_events.error.url", "Invalid URL")
       : undefined;
+
   const formTitle = editingId
     ? t(translations, "builder.program_events.form.edit", "Edit event")
     : t(translations, "builder.program_events.form.create", "Create event");
@@ -80,172 +96,163 @@ export function ProgramEventForm({
     "Date",
   );
 
+  const handleAIApply = (aiData: any) => {
+    try {
+      if (!aiData) return;
+      Object.entries(aiData).forEach(([lang, fields]) => {
+        // Ensure we only apply to languages enabled for this site
+        if (!languages.includes(lang as SupportedLanguage)) return;
+
+        if (typeof fields !== "object" || !fields) return;
+        ["title", "location", "description"].forEach((field) => {
+          const value = (fields as Record<string, string>)[field];
+          if (value) {
+            onUpdateI18nField(field as any, lang, value);
+          }
+        });
+      });
+      notify.success(
+        translations["ai.content_applied"] || "AI content applied!",
+      );
+    } catch (e) {
+      notify.error("Failed to apply AI content");
+    }
+    setShowAIModal(false);
+  };
+
+  const currentContent = {
+    title: form.title || {},
+    location: form.location || {},
+    description: form.description || {},
+  };
+
   return (
-    <div ref={formRef}>
-      <BuilderFormCard title={formTitle} error={error}>
-        {/* Responsive row for Day, Date, Time */}
-        <div className="flex flex-col gap-3 md:flex-row md:items-start">
-          {/* Day select */}
-          <div className="flex-1 min-w-0 flex flex-col">
-            <BuilderDropdownInput
-              label={dayLabel}
-              value={form.day_tag ?? "wedding_day"}
-              options={dayTags.map((d) => ({
-                key: d.key ?? "wedding_day",
-                label: d.label,
-              }))}
-              onChange={(v) =>
-                onUpdateFormField("day_tag", v as ProgramEvent["day_tag"])
-              }
-              prominent
-            />
-          </div>
-          {/* Date input */}
-          <div className="flex-1 min-w-0 flex flex-col">
-            <label className="block text-xs text-gray-600 mb-1">
-              {dateLabel} *
-            </label>
-            <DateInput
-              value={form.date ?? ""}
-              onChange={(newDate: string) => onUpdateFormField("date", newDate)}
-              required
-            />
-            {form.day_tag === "wedding_day" &&
-              weddingDayReferenceDate &&
-              form.date &&
-              form.date !== weddingDayReferenceDate && (
-                <p className="mt-1 text-xs text-amber-600">
-                  {t(
-                    translations,
-                    "builder.program_events.hint.date_will_update_all",
-                    "Saving will update all Wedding Day events to this date.",
-                  )}
-                </p>
-              )}
-          </div>
-          {/* Time input */}
-          <div className="flex-1 min-w-0 flex flex-col">
-            <label className="block text-xs text-gray-600 mb-1">
-              {t(translations, "builder.program_events.field.time", "Time")} *
-            </label>
-            <TimeInput
-              value={form.time ?? ""}
-              onChange={(newTime: string) => onUpdateFormField("time", newTime)}
-              required
-            />
-          </div>
-        </div>
+    <div ref={formRef} className="mt-8">
+      <div className="flex items-center justify-between mb-4">
+        <span className="font-semibold text-lg text-gray-700">{formTitle}</span>
+        <BuilderButton
+          size="sm"
+          variant="secondary"
+          onClick={() => {
+            if (planType === "free") {
+              notify.info("Upgrade your plan to use AI Assist.");
+              return;
+            }
+            setShowAIModal(true);
+          }}
+          disabled={saving}
+        >
+          <Sparkles className="w-4 h-4 mr-1 text-emerald-500" /> AI Assist
+        </BuilderButton>
+      </div>
 
-        {/* All other fields below the row */}
-
-        {form.day_tag === "wedding_day" && weddingDayReferenceDate && (
-          <p className="text-xs text-gray-500 mt-2">
-            {interpolate(
-              t(
-                translations,
-                "builder.program_events.hint.wedding_day_same_date",
-                "Wedding Day events share one date. Use {date} for this event.",
-              ),
-              { date: weddingDayReferenceDate },
-            )}
-          </p>
-        )}
-
-        <div className="mt-2 md:w-1/2">
-          <BuilderTextInput
-            label={t(
-              translations,
-              "builder.program_events.field.location_url",
-              "Location URL (optional)",
-            )}
-            value={locationUrl}
-            onChange={(v) => onUpdateFormField("location_url", v)}
-            error={locationUrlError}
-          />
-        </div>
-
-        {form.day_tag === "wedding_day" && (
-          <div>
-            <Toggle
-              checked={!!form.is_main_event}
-              label={t(
-                translations,
-                "builder.program_events.main_event.label",
-                "Main event",
-              )}
-              id="main-event-toggle-form"
-              disabled={saving}
-              onChange={onToggleFormMain}
-              aria-label={t(
-                translations,
-                "builder.program_events.main_aria",
-                "Mark as main event",
-              )}
-            />
-            <div className="mt-1 text-xs text-gray-500">
-              {t(
-                translations,
-                "builder.program_events.main.info",
-                "Only one main event can be set for Wedding Day.",
-              )}
+      <BuilderFormCard title="" error={error}>
+        <div className="space-y-6">
+          <div className="flex flex-col gap-4 md:flex-row md:items-start">
+            <div className="flex-1">
+              <BuilderDropdownInput
+                label={dayLabel}
+                value={form.day_tag ?? "wedding_day"}
+                options={dayTags.map((d) => ({
+                  key: d.key ?? "wedding_day",
+                  label: d.label,
+                }))}
+                onChange={(v) =>
+                  onUpdateFormField("day_tag", v as ProgramEvent["day_tag"])
+                }
+                prominent
+              />
+            </div>
+            <div className="flex-1">
+              <label className="block text-xs font-medium text-gray-600 mb-1">
+                {dateLabel} *
+              </label>
+              <DateInput
+                value={form.date ?? ""}
+                onChange={(newDate: string) =>
+                  onUpdateFormField("date", newDate)
+                }
+                required
+              />
+            </div>
+            <div className="flex-1">
+              <label className="block text-xs font-medium text-gray-600 mb-1">
+                {t(translations, "builder.program_events.field.time", "Time")} *
+              </label>
+              <TimeInput
+                value={form.time ?? ""}
+                onChange={(newTime: string) =>
+                  onUpdateFormField("time", newTime)
+                }
+                required
+              />
             </div>
           </div>
-        )}
 
-        <div>
-          {/* <BuilderLangPills
-            languages={languages}
-            planType={planType}
-            onToggle={() => undefined}
-            onLockedClick={() => undefined}
-            readOnly
-            translations={translations}
-          /> */}
+          <div className="md:w-1/2">
+            <BuilderTextInput
+              label={t(
+                translations,
+                "builder.program_events.field.location_url",
+                "Location URL (optional)",
+              )}
+              value={locationUrl}
+              onChange={(v) => onUpdateFormField("location_url", v)}
+              error={locationUrlError}
+            />
+          </div>
 
-          <BuilderLangTabs
-            languages={languages}
-            activeLang={activeLang}
-            defaultLang={defaultLang}
-            onChange={(langCode) =>
-              onChangeActiveLang(langCode as SupportedLanguage)
-            }
-            onSetDefault={() => undefined}
-            getLabel={(langCode) =>
-              SUPPORTED_LANGUAGE_LABELS[langCode as SupportedLanguage]
-            }
-            translations={translations}
-            programStep={true}
-          />
+          {form.day_tag === "wedding_day" && (
+            <div className="py-2 border-y border-gray-100">
+              <Toggle
+                checked={!!form.is_main_event}
+                label={t(
+                  translations,
+                  "builder.program_events.main_event.label",
+                  "Main event",
+                )}
+                id="main-event-toggle-form"
+                disabled={saving}
+                onChange={onToggleFormMain}
+              />
+            </div>
+          )}
 
-          <MultiLangInputsBanner
-            translations={translations}
-            languages={languages}
-            defaultLang={defaultLang}
-          />
+          <div className="space-y-4">
+            <BuilderLangTabs
+              languages={languages}
+              activeLang={activeLang}
+              defaultLang={defaultLang}
+              onChange={(langCode) =>
+                onChangeActiveLang(langCode as SupportedLanguage)
+              }
+              onSetDefault={() => undefined}
+              getLabel={(langCode) =>
+                SUPPORTED_LANGUAGE_LABELS[langCode as SupportedLanguage]
+              }
+              translations={translations}
+              programStep={true}
+            />
 
-          <section
-            role="tabpanel"
-            id={`program-lang-panel-${activeLang}`}
-            aria-label={getLanguageDisplay(activeLang)}
-            className="space-y-3"
-          >
-            <div className="grid grid-cols-1 gap-2">
+            <MultiLangInputsBanner
+              translations={translations}
+              languages={languages}
+              defaultLang={defaultLang}
+            />
+
+            <section className="grid grid-cols-1 gap-4">
               <BuilderTextInput
-                label={`${t(translations, "builder.program_events.field.title", "Title")}${activeLang === defaultLang ? ` ${t(translations, "builder.form.required", "(required)")}` : ""}`}
+                label={`${t(translations, "builder.program_events.field.title", "Title")}${activeLang === defaultLang ? " *" : ""}`}
                 value={
-                  (form.title as Record<string, string> | undefined)?.[
-                    activeLang
-                  ] ?? ""
+                  (form.title as Record<string, string>)?.[activeLang] ?? ""
                 }
                 onChange={(v) => onUpdateI18nField("title", activeLang, v)}
               />
 
               <BuilderTextInput
-                label={`${t(translations, "builder.program_events.field.location", "Location")}${activeLang === defaultLang ? ` ${t(translations, "builder.form.required", "(required)")}` : ""}`}
+                label={`${t(translations, "builder.program_events.field.location", "Location")}${activeLang === defaultLang ? " *" : ""}`}
                 value={
-                  (form.location as Record<string, string> | undefined)?.[
-                    activeLang
-                  ] ?? ""
+                  (form.location as Record<string, string>)?.[activeLang] ?? ""
                 }
                 onChange={(v) => onUpdateI18nField("location", activeLang, v)}
               />
@@ -257,18 +264,29 @@ export function ProgramEventForm({
                   "Description (optional)",
                 )}
                 value={
-                  (form.description as Record<string, string> | undefined)?.[
-                    activeLang
-                  ] ?? ""
+                  (form.description as Record<string, string>)?.[activeLang] ??
+                  ""
                 }
                 onChange={(v) =>
                   onUpdateI18nField("description", activeLang, v)
                 }
               />
-            </div>
-          </section>
+            </section>
+          </div>
         </div>
       </BuilderFormCard>
+
+      {showAIModal && (
+        <AIPromptModal
+          siteId={siteId}
+          languages={languages}
+          currentContent={currentContent}
+          context="Wedding Event Details"
+          onClose={() => setShowAIModal(false)}
+          onSuccess={handleAIApply}
+          translations={translations}
+        />
+      )}
     </div>
   );
 }

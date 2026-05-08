@@ -3,7 +3,6 @@
 import type { SupportedLanguage } from "@/4-shared/config/i18n";
 import { interpolate } from "@/4-shared/helpers/interpolateVars";
 import type {
-  CreateWhatToSeePayload,
   PlanType,
   Site,
   WhatToSeeEntryFull,
@@ -31,7 +30,6 @@ import {
   PlanLimitNotice,
   UpgradeCTAModal,
 } from "@/4-shared/ui/builder";
-import { CustomLoader } from "@/4-shared/ui/commons/loader/CustomLoader";
 import { useRouter } from "next/navigation";
 import { StepLayout } from "../../step-layout";
 import { WhatToSeeForm } from "./what-to-see/WhatToSeeForm";
@@ -42,7 +40,6 @@ type Props = {
   lang: string;
   translations: Record<string, string>;
   planType: PlanType;
-  /** Fired whenever the item count changes (initial load + add/delete). */
   setItemCount?: (count: number) => void;
 };
 
@@ -56,18 +53,39 @@ export default function WhatToSeeBuilderStep({
 }: Props) {
   const router = useRouter();
   const fetchCounterRef = useRef(0);
-  const [items, setItems] = useState<WhatToSeeEntryFull[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [collapsed, setCollapsed] = useState(false);
-  const [showUpgradeCTA, setShowUpgradeCTA] = useState(false);
+  const formRef = useRef<HTMLDivElement>(null);
   const { confirm: confirmDelete, confirmDialog } = useAlertConfirm();
 
-  const formRef = useRef<HTMLDivElement | null>(null);
+  const [items, setItems] = useState<WhatToSeeEntryFull[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [collapsed, setCollapsed] = useState(false);
+  const [showUpgradeCTA, setShowUpgradeCTA] = useState(false);
+
   const whatToSeeLimit = getPlanLimit(planType, "whatToSee");
 
+  // Logic for languages
+  const languages = useMemo<SupportedLanguage[]>(() => {
+    if (!site) return ["en"];
+    return site.languages && site.languages.length > 0
+      ? (site.languages as SupportedLanguage[])
+      : [(site.default_lang as SupportedLanguage | null) ?? "en"];
+  }, [site?.default_lang, site?.languages]);
+
+  const defaultLang = useMemo(() => {
+    const candidate =
+      site?.default_lang &&
+      languages.includes(site.default_lang as SupportedLanguage)
+        ? (site.default_lang as SupportedLanguage)
+        : "";
+    return getEffectiveBuilderLanguage(languages, candidate);
+  }, [languages, site?.default_lang]);
+
+  const [activeLang, setActiveLang] = useState<SupportedLanguage>(defaultLang);
+
+  // Sync logic
   function itemsSignature(rows: WhatToSeeEntryFull[]): string {
     return rows
       .map(
@@ -82,17 +100,13 @@ export default function WhatToSeeBuilderStep({
     maxAttempts = 3,
   ) {
     if (!site?.id) return;
-
     let baselineSignature = itemsSignature(baselineRows);
-
     for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
       await new Promise((resolve) => setTimeout(resolve, 500));
       if (!site?.id || fetchCounterRef.current !== requestId) return;
-
       const nextRows = await fetchWhatToSeeEntries(site.id);
       const safeNextRows = nextRows ?? [];
       const nextSignature = itemsSignature(safeNextRows);
-
       if (nextSignature !== baselineSignature) {
         setItems(safeNextRows);
         baselineSignature = nextSignature;
@@ -100,44 +114,16 @@ export default function WhatToSeeBuilderStep({
     }
   }
 
-  const languages = useMemo<SupportedLanguage[]>(() => {
-    if (!site) return ["en"];
-    return site.languages && site.languages.length > 0
-      ? (site.languages as SupportedLanguage[])
-      : [(site.default_lang as SupportedLanguage | null) ?? "en"];
-  }, [site?.default_lang, site?.languages]);
-
-  const defaultLang = useMemo(() => {
-    const candidate =
-      site?.default_lang &&
-      languages.includes(site.default_lang as SupportedLanguage)
-        ? (site.default_lang as SupportedLanguage)
-        : "";
-
-    return getEffectiveBuilderLanguage(languages, candidate);
-  }, [languages, site?.default_lang]);
-
-  const [activeLang, setActiveLang] = useState<SupportedLanguage>(defaultLang);
-
-  useEffect(() => {
-    if (!languages.includes(activeLang)) {
-      setActiveLang(getEffectiveBuilderLanguage(languages, defaultLang));
-    }
-  }, [activeLang, defaultLang, languages.join("|")]); // eslint-disable-line react-hooks/exhaustive-deps
-
   useEffect(() => {
     if (!site?.id) return;
     let mounted = true;
     const requestId = ++fetchCounterRef.current;
-
     const loadInitial = async () => {
       setLoading(true);
       setError(null);
-
       try {
         const rows = await fetchWhatToSeeEntries(site.id);
         if (!mounted || fetchCounterRef.current !== requestId) return;
-
         const safeRows = rows ?? [];
         setItems(safeRows);
         await reconcileItems(requestId, safeRows);
@@ -151,63 +137,30 @@ export default function WhatToSeeBuilderStep({
         }
       }
     };
-
     loadInitial();
-
     return () => {
       mounted = false;
     };
   }, [site?.id, defaultLang, languages.join("|")]);
 
-  // Notify parent whenever item count changes
   useEffect(() => {
     setItemCount?.(items.length);
   }, [items.length, setItemCount]);
-
-  async function load() {
-    if (!site?.id) return;
-    setLoading(true);
-    setError(null);
-    try {
-      const rows = await fetchWhatToSeeEntries(site.id);
-      setItems(rows ?? []);
-    } catch (err: unknown) {
-      setError((err as Error)?.message ?? String(err));
-    } finally {
-      setLoading(false);
-    }
-  }
 
   function canAddMore() {
     return canUseQuota(planType, "whatToSee", items.length);
   }
 
   function goToPricing() {
-    // Use language-prefixed routing, not query param
     router.push(`/${lang || "en"}/pricing`);
   }
 
-  // Form state for the currently editing/creating item
   const [form, setForm] = useState<Partial<WhatToSeeEntryFull>>({});
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
-  useEffect(() => {
-    if (!error && !formErrors.name) return;
-
-    setError(null);
-    setFormErrors((prev) => {
-      if (!prev.name) return prev;
-      const { name: _removed, ...rest } = prev;
-      return rest;
-    });
-  }, [activeLang, defaultLang, error, formErrors.name, languages]);
-
   function scrollToForm() {
     setTimeout(() => {
-      formRef.current?.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
+      formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 50);
   }
 
@@ -235,166 +188,96 @@ export default function WhatToSeeBuilderStep({
     setForm((s) => {
       const prev = (s?.[field] as Record<string, string> | undefined) ?? {};
       return {
-        ...(s ?? {}),
+        ...s,
         [field]: { ...prev, [lang]: value },
       } as Partial<WhatToSeeEntryFull>;
     });
-    setFormErrors((errs) => {
-      const { [field]: _removed, ...rest } = errs;
-      return rest;
-    });
   }
 
-  function updateField(
-    field: keyof WhatToSeeEntryFull,
-    value: WhatToSeeEntryFull[keyof WhatToSeeEntryFull],
-  ) {
-    setForm((s) => ({ ...(s ?? {}), [field]: value }));
-    setFormErrors((errs) => {
-      const { [field]: _removed, ...rest } = errs;
-      return rest;
-    });
+  function updateField(field: keyof WhatToSeeEntryFull, value: any) {
+    setForm((s) => ({ ...s, [field]: value }));
   }
 
   async function handleSave() {
     if (!site?.id) return;
-
-    const name = (form.name as Record<string, string> | undefined) ?? {};
-    const errors: Record<string, string> = {};
-    if (!name[activeLang]) {
-      errors.name = interpolate(
-        t(
-          translations,
-          "builder.what_to_see.error.required_name",
-          `Name is required in ${activeLang}`,
-        ),
-        { defaultLang: activeLang },
-      );
-    }
-    // Validate location_url if present
-    if (form.location_url && typeof form.location_url === "string") {
-      // Use centralized validation if needed (already in WhatToSeeForm)
-    }
-    if (!canAddMore() && !editingId) {
-      errors.limit = t(
-        translations,
-        "builder.what_to_see.error.limit",
-        "Free limit reached. Upgrade to add more entries.",
-      );
-    }
-    if (Object.keys(errors).length > 0) {
-      setFormErrors(errors);
-      setError(errors.name || errors.limit || "");
-      return;
-    }
-
     setSaving(true);
     setError(null);
-
-    const payload: CreateWhatToSeePayload = {
-      site_id: site.id,
-      location_url: form.location_url ?? null,
-      sort_order: form.sort_order ?? null,
-    };
-
-    const i18nFields = [
-      { formKey: "name", dbKey: "title" },
-      { formKey: "description", dbKey: "description" },
-      { formKey: "notes", dbKey: "notes" },
-    ] as const;
-
-    const translationsDB: WhatToSeeTranslation[] = i18nFields.flatMap(
-      ({ formKey, dbKey }) =>
-        Object.entries(
-          (form[formKey] as Record<string, string> | undefined) ?? {},
-        ).map(([locale, value]) => ({
-          key: dbKey,
-          locale,
-          value,
-        })),
-    );
-
-    const updates = {
-      location_url: form.location_url,
-      sort_order: form.sort_order,
-    };
-
     try {
+      const i18nFields = [
+        { formKey: "name", dbKey: "title" },
+        { formKey: "description", dbKey: "description" },
+        { formKey: "notes", dbKey: "notes" },
+      ] as const;
+
+      const translationsDB: WhatToSeeTranslation[] = i18nFields.flatMap(
+        ({ formKey, dbKey }) =>
+          Object.entries((form[formKey] as Record<string, string>) ?? {}).map(
+            ([locale, value]) => ({
+              key: dbKey,
+              locale,
+              value,
+            }),
+          ),
+      );
+
       if (editingId) {
         const updated = await updateWhatToSeeEntry(
           site.id,
           editingId,
-          updates,
+          { location_url: form.location_url },
           translationsDB,
         );
-        if (!updated)
-          throw new Error(
-            t(
-              translations,
-              "builder.what_to_see.error.update_failed",
-              "Update failed",
+        if (updated) {
+          setItems((prev) =>
+            prev.map((it) =>
+              it.id === updated.id
+                ? {
+                    ...updated,
+                    name: form.name ?? {},
+                    description: form.description ?? {},
+                    notes: form.notes ?? {},
+                  }
+                : it,
             ),
           );
-
-        setItems((prev) =>
-          prev.map((item) =>
-            item.id === updated.id
-              ? {
-                  ...updated,
-                  name: form.name ?? {},
-                  description: form.description ?? {},
-                  notes: form.notes ?? {},
-                }
-              : item,
-          ),
-        );
-
-        notify.success(
-          translations["builder.general.form.save_success"] ||
-            "Saved successfully.",
-        );
+          notify.success(
+            translations["builder.general.form.save_success"] ||
+              "Saved successfully.",
+          );
+        }
       } else {
-        const created = await createWhatToSeeEntry(payload, translationsDB);
-        if (!created)
-          throw new Error(
-            t(
-              translations,
-              "builder.what_to_see.error.create_failed",
-              "Create failed",
-            ),
-          );
-
-        setItems((prev) => [
-          ...prev,
-          {
-            ...created,
-            name: form.name ?? {},
-            description: form.description ?? {},
-            notes: form.notes ?? {},
-          },
-        ]);
-
-        notify.success(
-          translations["builder.general.form.save_success"] ||
-            "Saved successfully.",
+        const created = await createWhatToSeeEntry(
+          { site_id: site.id, location_url: form.location_url ?? null },
+          translationsDB,
         );
+        if (created) {
+          setItems((prev) => [
+            ...prev,
+            {
+              ...created,
+              name: form.name ?? {},
+              description: form.description ?? {},
+              notes: form.notes ?? {},
+            },
+          ]);
+          notify.success(
+            translations["builder.general.form.save_success"] ||
+              "Saved successfully.",
+          );
+        }
       }
-
       setForm({});
       setEditingId(null);
       setCollapsed(false);
-      setFormErrors({});
-      // No refresh() here: doesn't change the sites table; local state is authoritative.
-    } catch (err: unknown) {
-      setError((err as Error)?.message ?? String(err));
-      setFormErrors({});
+    } catch (err: any) {
+      setError(err.message);
     } finally {
       setSaving(false);
     }
   }
 
   async function handleDelete(id: string) {
-    const okToDelete = await confirmDelete({
+    const ok = await confirmDelete({
       title: t(translations, "builder.actions.delete", "Delete"),
       message: t(
         translations,
@@ -405,32 +288,19 @@ export default function WhatToSeeBuilderStep({
       cancelLabel: t(translations, "builder.actions.cancel", "Cancel"),
       tone: "danger",
     });
-    if (!okToDelete) return;
+    if (!ok) return;
     setSaving(true);
-    const ok = await deleteWhatToSeeEntry(site?.id ?? "", id);
-    setSaving(false);
-
-    if (!ok) {
-      setError(
-        t(
-          translations,
-          "builder.what_to_see.error.delete_failed",
-          "Failed to delete entry",
-        ),
+    const success = await deleteWhatToSeeEntry(site?.id ?? "", id);
+    if (success) {
+      setItems((prev) => prev.filter((it) => it.id !== id));
+      notify.success(
+        translations["common.delete_success"] || "Deleted successfully.",
       );
-      return;
     }
-
-    setItems((prev) => prev.filter((item) => item.id !== id));
-    notify.success(
-      translations["common.delete_success"] || "Deleted successfully.",
-    );
+    setSaving(false);
   }
 
   const isUnlimited = whatToSeeLimit === -1;
-  const descriptionKey = isUnlimited
-    ? "builder.what_to_see.limit_info_unlimited"
-    : "builder.what_to_see.limit_info";
 
   return (
     <StepLayout
@@ -454,136 +324,68 @@ export default function WhatToSeeBuilderStep({
       }
       backLabel={t(translations, "builder.what_to_see.cancel_button", "Cancel")}
     >
-      {/* Header */}
       <div className="mb-3 flex items-center justify-end">
         <BuilderButton
           variant="primary"
           size="sm"
-          onClick={() => {
-            if (!canAddMore()) {
-              if (planType === "free") {
-                setShowUpgradeCTA(true);
-              }
-              return;
-            }
-            startCreate();
-          }}
+          onClick={() =>
+            !canAddMore()
+              ? planType === "free" && setShowUpgradeCTA(true)
+              : startCreate()
+          }
           disabled={!canAddMore()}
         >
           {t(translations, "builder.what_to_see.add_button", "+ Add place")}
         </BuilderButton>
       </div>
 
-      <div className="text-gray-600">
+      <div className="text-gray-600 mb-4">
         {isUnlimited
-          ? translations[descriptionKey] ||
+          ? translations["builder.what_to_see.limit_info_unlimited"] ||
             "With your Premium plan, add as many as you like."
           : interpolate(
-              translations[descriptionKey] || "Add up to {limit} places.",
+              translations["builder.what_to_see.limit_info"] ||
+                "Add up to {limit} places.",
               { limit: whatToSeeLimit },
             )}
       </div>
 
-      {/* Collapsible list */}
-      <div className="mb-2">
-        <button
-          onClick={() => setCollapsed((v) => !v)}
-          className="text-xs text-gray-500 hover:text-gray-700"
-        >
-          {collapsed
-            ? t(translations, "builder.what_to_see.show_button", "Show places")
-            : t(translations, "builder.what_to_see.hide_button", "Hide places")}
-        </button>
-      </div>
-
-      {!collapsed && (
-        <>
-          {loading ? (
-            <CustomLoader
-              message={t(
-                translations,
-                "builder.what_to_see.loading",
-                "Loading…",
-              )}
-            />
-          ) : items.length === 0 ? (
-            <div className="text-sm text-gray-500">
-              {t(translations, "builder.what_to_see.empty", "No entries yet.")}
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {items.map((it) => (
-                <div
-                  key={it.id}
-                  className="
-                    group
-                    border rounded-lg p-3
-                    sm:p-0 sm:border-0 sm:rounded-none
-                    flex flex-col sm:flex-row
-                    sm:items-start sm:justify-between
-                    gap-3 sm:gap-4
-                    bg-white sm:bg-transparent
-                  "
-                >
-                  <div className="min-w-0">
-                    <div className="font-medium text-sm truncate">
-                      {(typeof it.name === "string"
-                        ? it.name
-                        : it.name?.[defaultLang]) ??
-                        t(
-                          translations,
-                          "builder.what_to_see.empty",
-                          "(no name)",
-                        )}
-                    </div>
-
-                    <div className="text-xs text-gray-600 line-clamp-2">
-                      {(it.description && it.description[defaultLang]) || ""}
-                    </div>
-
-                    {it.location_url && (
-                      <div className="text-xs text-blue-600 break-all mt-1">
-                        <a
-                          href={it.location_url}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          {it.location_url}
-                        </a>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex gap-2 shrink-0">
-                    <BuilderButton
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => startEdit(it)}
-                    >
-                      {t(translations, "builder.what_to_see.edit_edit", "Edit")}
-                    </BuilderButton>
-                    <BuilderButton
-                      variant="secondary"
-                      tone="danger"
-                      size="sm"
-                      onClick={() => handleDelete(it.id)}
-                      disabled={saving}
-                    >
-                      {t(
-                        translations,
-                        "builder.what_to_see.delete_button",
-                        "Delete",
-                      )}
-                    </BuilderButton>
-                  </div>
+      {!collapsed && items.length > 0 && (
+        <div className="space-y-2 mb-6">
+          {items.map((it) => (
+            <div
+              key={it.id}
+              className="border rounded-lg p-3 flex justify-between items-start bg-white"
+            >
+              <div className="min-w-0">
+                <div className="font-medium text-sm truncate">
+                  {(typeof it.name === "string"
+                    ? it.name
+                    : it.name?.[defaultLang]) || "(no name)"}
                 </div>
-              ))}
+              </div>
+              <div className="flex gap-2">
+                <BuilderButton
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => startEdit(it)}
+                >
+                  Edit
+                </BuilderButton>
+                <BuilderButton
+                  variant="secondary"
+                  tone="danger"
+                  size="sm"
+                  onClick={() => handleDelete(it.id)}
+                >
+                  Delete
+                </BuilderButton>
+              </div>
             </div>
-          )}
-        </>
+          ))}
+        </div>
       )}
 
-      {/* Form */}
       {(editingId !== null || Object.keys(form).length > 0) && (
         <div ref={formRef}>
           <BuilderFormCard
@@ -609,6 +411,8 @@ export default function WhatToSeeBuilderStep({
               onChange={updateField}
               onChangeI18n={updateI18n}
               disabled={saving}
+              siteId={site?.id || ""}
+              planType={planType}
             />
           </BuilderFormCard>
         </div>
@@ -622,16 +426,9 @@ export default function WhatToSeeBuilderStep({
               "builder.what_to_see.limit_reached",
               `Free plan limit reached (${whatToSeeLimit}).`,
             ),
-            {
-              limit: whatToSeeLimit,
-              FREE_WHATTOSEE_LIMIT: whatToSeeLimit,
-            },
+            { limit: whatToSeeLimit },
           )}
-          upgradeLabel={t(
-            translations,
-            "builder.what_to_see.button.upgrade",
-            "Upgrade",
-          )}
+          upgradeLabel="Upgrade"
           onUpgrade={goToPricing}
         />
       )}
@@ -644,11 +441,7 @@ export default function WhatToSeeBuilderStep({
         }
         description={
           translations["builder.what_to_see.upgrade_description"] ||
-          "Your current plan allows up to 2 recommended places. Upgrade to Premium to add as many as you like."
-        }
-        cancelLabel={translations["builder.actions.cancel"] || "Cancel"}
-        upgradeLabel={
-          translations["builder.general.form.upgrade"] || "Upgrade to Premium"
+          "Upgrade to Premium to add as many as you like."
         }
         onClose={() => setShowUpgradeCTA(false)}
         onUpgrade={goToPricing}

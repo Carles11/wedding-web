@@ -1,28 +1,37 @@
-import { UpgradeCTAModal } from "@/features/billing/ui/UpgradeCTAModal";
-import { Button } from "@/shared/ui/button"; // Assuming shadcn/ui or similar
+"use client";
+
+import { AIPromptModal } from "@/2-features/builder/ai-orchestrator/ui/AIPromptModal";
+import { BuilderButton, UpgradeCTAModal } from "@/4-shared/ui/builder";
 import { Sparkles } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { AIPromptModal } from "./AIPromptModal";
 
 interface Props {
   siteId: string;
-  isPremium: boolean;
-  siteLanguages: string[];
+  planType: string;
+  languages: any[];
   currentValues: any;
-  context: "general" | "program" | "what-to-see";
-  onApply: (translatedData: any) => void;
+  context: string;
+  onApply: (data: any) => void;
+  translations: Record<string, string>;
+  lang: string; // current UI language for the router
 }
 
 export const MagicAIButton = ({
-  isPremium,
-  siteLanguages,
-  currentValues,
-  onApply,
-  context,
   siteId,
+  planType,
+  languages,
+  currentValues,
+  context,
+  onApply,
+  translations,
+  lang,
 }: Props) => {
   const [showModal, setShowModal] = useState(false);
   const [showUpgrade, setShowUpgrade] = useState(false);
+  const router = useRouter();
+
+  const isPremium = planType !== "free";
 
   const handleClick = () => {
     if (!isPremium) {
@@ -34,21 +43,32 @@ export const MagicAIButton = ({
 
   return (
     <>
-      <Button
-        variant="outline"
+      <BuilderButton
+        variant="secondary"
+        size="sm"
+        icon={<Sparkles size={14} className="text-emerald-500" />}
         onClick={handleClick}
-        className="flex items-center gap-2 border-emerald-200 text-emerald-700 hover:bg-emerald-50"
       >
-        <Sparkles size={16} />
-        <span>AI Assist</span>
-      </Button>
+        AI Assist
+      </BuilderButton>
 
-      {showUpgrade && <UpgradeCTAModal onClose={() => setShowUpgrade(false)} />}
+      <UpgradeCTAModal
+        open={showUpgrade}
+        title={
+          translations["builder.ai.upgrade_title"] || "AI Assist is Premium"
+        }
+        description={
+          translations["builder.ai.upgrade_desc"] ||
+          "Upgrade to Premium to use AI to generate and translate your content automatically."
+        }
+        onClose={() => setShowUpgrade(false)}
+        onUpgrade={() => router.push(`/${lang}/pricing`)}
+      />
 
       {showModal && (
         <AIPromptModal
           siteId={siteId}
-          languages={siteLanguages}
+          languages={languages}
           currentContent={currentValues}
           context={context}
           onClose={() => setShowModal(false)}
@@ -56,6 +76,7 @@ export const MagicAIButton = ({
             onApply(data);
             setShowModal(false);
           }}
+          translations={translations}
         />
       )}
     </>
