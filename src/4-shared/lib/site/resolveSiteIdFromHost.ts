@@ -11,17 +11,11 @@ export type ResolveSiteIdResult = {
 
 /**
  * Normalizes a raw Host header value for consistent DB lookups.
- * - lowercase + trim
- * - strip bracketed IPv6 (e.g. [::1]:3000 → ::1)
- * - strip port suffix
- * - strip trailing dot
- * - returns empty string for falsy input (caller should guard)
  */
 export function normalizeHost(input: string): string {
   if (!input) return "";
 
   let host = input.toLowerCase().trim();
-
   // Handle IPv6 bracketed notation: [::1] or [::1]:3000
   if (host.startsWith("[")) {
     const closingBracket = host.indexOf("]");
@@ -30,64 +24,49 @@ export function normalizeHost(input: string): string {
     }
     return host;
   }
-
-  // Strip trailing port only when it is a pure decimal number (e.g. example.com:3000 → example.com).
-  // Using a regex instead of lastIndexOf(":") avoids accidentally truncating bare IPv6
-  // addresses that were not wrapped in brackets.
+  // Strip trailing port (e.g. example.com:3000 → example.com)
   host = host.replace(/:\d+$/, "");
-
   // Strip trailing dot (FQDN form: example.com.)
   if (host.endsWith(".")) {
     host = host.slice(0, -1);
   }
-
   return host;
 }
 
 /**
  * Extracts the effective subdomain from a normalized hostname.
- * - www.foo.weddweb.com → "foo"
- * - foo.weddweb.com     → "foo"
- * - localhost           → null (single segment, no subdomain)
- * - foo.localhost       → null (local dev guard — resolve via domains[] only)
- * - ::1                 → null (IPv6 bare address)
+ * e.g. carlesdelrio.weddweb.com → carlesdelrio
  */
 export function extractSubdomain(normalizedHost: string): string | null {
   if (!normalizedHost) return null;
-
   // Guard: .localhost suffix — do not attempt subdomain DB lookup
   if (normalizedHost.endsWith(".localhost")) return null;
-
   const parts = normalizedHost.split(".");
-
-  // Single segment (e.g. "localhost", "::1") — no subdomain
   if (parts.length < 2) return null;
-
-  // www.foo.tld → use parts[1] as subdomain
-  if (parts[0] === "www" && parts.length >= 3) {
-    return parts[1];
-  }
-
+  // www.foo.tld → parts[1] as subdomain
+  if (parts[0] === "www" && parts.length >= 3) return parts[1];
   return parts[0];
 }
 
-/**
- * Resolves a tenant site_id from the incoming request Host header.
- *
- * Lookup priority:
- *   1. sites.domains contains normalizedHost  → resolvedBy: "domain"
- *   2. sites.subdomain = extractSubdomain(…)  → resolvedBy: "subdomain"
- *
- * Returns null if the host is empty, no site is found, or a DB error occurs.
- */
 export async function resolveSiteIdFromHost(
   host: string,
 ): Promise<ResolveSiteIdResult> {
-  let normalizedHost = normalizeHost(host);
+  const normalizedHost = normalizeHost(host);
 
-  if (!normalizedHost) return null;
+  // DEBUG
+  console.log(
+    "[resolveSiteIdFromHost] raw host:",
+    host,
+    "| normalizedHost:",
+    normalizedHost,
+  );
 
-  // Always allow matching with and without 'www.'
+  if (!normalizedHost) {
+    console.warn("[resolveSiteIdFromHost] No normalizedHost from", host);
+    return null;
+  }
+
+  // Handle both plain and www-prefixed variants everywhere
   const hostVariants = [normalizedHost];
   if (normalizedHost.startsWith("www.")) {
     hostVariants.push(normalizedHost.replace(/^www\./, ""));
@@ -95,49 +74,73 @@ export async function resolveSiteIdFromHost(
     hostVariants.push("www." + normalizedHost);
   }
 
+  console.log(
+    "[resolveSiteIdFromHost] Trying host variants for domains:",
+    hostVariants,
+  );
+
   const supabase = await createSupabaseSSRClient();
 
-  // --- 1: Check custom domains (with and without www.)
-  const { data: domainRow, error: domainError } = await supabase
-    .from("sites")
-    .select("id")
-    .or(
-      hostVariants.map((h) => `domains.cs.{${JSON.stringify([h])}}`).join(","),
-    )
-    .maybeSingle();
+  // --- 1. Domains[] (Custom domain or .weddweb.com in domains array) ---
+  let domainRow = null as SiteIdLookupResult | null;
+  let domainError = null;
+
+  for (const h of hostVariants) {
+    const { data, error } = await supabase
+      .from("sites")
+      .select("id, subdomain, domains")
+      .contains("domains", [h])
+      .maybeSingle();
+    if (data?.id) {
+      domainRow = data as SiteIdLookupResult;
+      break;
+    }
+    if (error) domainError = error;
+  }
 
   if (domainError) {
     console.error("[resolveSiteIdFromHost] domain lookup error:", domainError);
     return null;
   }
 
-  const domainResult = domainRow as SiteIdLookupResult | null;
-  if (domainResult?.id) {
-    return { siteId: domainResult.id, resolvedBy: "domain", normalizedHost };
+  if (domainRow && domainRow.id) {
+    console.log(
+      "[resolveSiteIdFromHost] Found using domains, id:",
+      domainRow.id,
+      "| variant:",
+      domainRow.domains,
+    );
+    return { siteId: domainRow.id, resolvedBy: "domain", normalizedHost };
   }
 
-  // --- 2: Try subdomain (bare and with www.)
+  // --- 2. Subdomain (Free-tier tenants or fallback) ---
   const subdomain = extractSubdomain(normalizedHost);
-  const subVariants = [subdomain];
+  const subVariants = [subdomain].filter(Boolean) as string[];
+  // For extra safety, add www-less if starts with www.
   if (subdomain && subdomain.startsWith("www")) {
     subVariants.push(subdomain.replace(/^www\./, ""));
   }
 
-  let subdomainResult: SiteIdLookupResult | null = null;
+  console.log(
+    "[resolveSiteIdFromHost] Trying subdomain variants for subdomain:",
+    subVariants,
+  );
+
+  let subdomainRow = null as SiteIdLookupResult | null;
   let subdomainError = null;
 
   for (const subd of subVariants) {
     if (!subd) continue;
     const { data, error } = await supabase
       .from("sites")
-      .select("id")
+      .select("id, subdomain, domains")
       .eq("subdomain", subd)
       .maybeSingle();
-    subdomainError = error;
     if (data?.id) {
-      subdomainResult = data as SiteIdLookupResult;
+      subdomainRow = data as SiteIdLookupResult;
       break;
     }
+    if (error) subdomainError = error;
   }
 
   if (subdomainError) {
@@ -148,17 +151,23 @@ export async function resolveSiteIdFromHost(
     return null;
   }
 
-  if (subdomainResult?.id) {
+  if (subdomainRow && subdomainRow.id) {
+    console.log(
+      "[resolveSiteIdFromHost] Found using subdomain, id:",
+      subdomainRow.id,
+      "| subdomain:",
+      subdomainRow.subdomain,
+    );
     return {
-      siteId: subdomainResult.id,
+      siteId: subdomainRow.id,
       resolvedBy: "subdomain",
       normalizedHost,
     };
   }
 
-  // --- NOT FOUND ---
+  // --- Not found anywhere ---
   console.warn(
-    "[resolveSiteIdFromHost] Host not matched:",
+    "[resolveSiteIdFromHost] Host NOT matched!",
     host,
     "| normalized:",
     normalizedHost,
