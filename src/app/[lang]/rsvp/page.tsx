@@ -41,10 +41,8 @@ export default async function RsvpPage({
 
   const host = (await headers()).get("host") ?? "";
   const resolved = await resolveSiteIdFromHost(host);
-  console.log("DEBUG host, resolved tenant:", host, resolved);
 
   const globalTranslations = await fetchGlobalTranslations(lang, "en");
-  console.log({ globalTranslations });
   // --- State A: site not found ---
   if (!resolved) {
     return (
@@ -97,7 +95,6 @@ export default async function RsvpPage({
   }
 
   const result = await validateRsvpAccessCode({ siteId, rawCode });
-  console.log("DEBUG validateRsvpAccessCode:", { siteId, rawCode, result });
 
   // --- State C: invalid/expired code ---
   if (!result.ok) {

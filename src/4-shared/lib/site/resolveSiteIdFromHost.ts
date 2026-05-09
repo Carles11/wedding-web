@@ -54,12 +54,12 @@ export async function resolveSiteIdFromHost(
   const normalizedHost = normalizeHost(host);
 
   // DEBUG
-  console.log(
-    "[resolveSiteIdFromHost] raw host:",
-    host,
-    "| normalizedHost:",
-    normalizedHost,
-  );
+  // console.log(
+  //   "[resolveSiteIdFromHost] raw host:",
+  //   host,
+  //   "| normalizedHost:",
+  //   normalizedHost,
+  // );
 
   if (!normalizedHost) {
     console.warn("[resolveSiteIdFromHost] No normalizedHost from", host);
@@ -74,10 +74,10 @@ export async function resolveSiteIdFromHost(
     hostVariants.push("www." + normalizedHost);
   }
 
-  console.log(
-    "[resolveSiteIdFromHost] Trying host variants for domains:",
-    hostVariants,
-  );
+  // console.log(
+  //   "[resolveSiteIdFromHost] Trying host variants for domains:",
+  //   hostVariants,
+  // );
 
   const supabase = await createSupabaseSSRClient();
 
@@ -104,12 +104,12 @@ export async function resolveSiteIdFromHost(
   }
 
   if (domainRow && domainRow.id) {
-    console.log(
-      "[resolveSiteIdFromHost] Found using domains, id:",
-      domainRow.id,
-      "| variant:",
-      domainRow.domains,
-    );
+    // console.log(
+    //   "[resolveSiteIdFromHost] Found using domains, id:",
+    //   domainRow.id,
+    //   "| variant:",
+    //   domainRow.domains,
+    // );
     return { siteId: domainRow.id, resolvedBy: "domain", normalizedHost };
   }
 
@@ -121,10 +121,10 @@ export async function resolveSiteIdFromHost(
     subVariants.push(subdomain.replace(/^www\./, ""));
   }
 
-  console.log(
-    "[resolveSiteIdFromHost] Trying subdomain variants for subdomain:",
-    subVariants,
-  );
+  // console.log(
+  //   "[resolveSiteIdFromHost] Trying subdomain variants for subdomain:",
+  //   subVariants,
+  // );
 
   let subdomainRow = null as SiteIdLookupResult | null;
   let subdomainError = null;
@@ -152,12 +152,12 @@ export async function resolveSiteIdFromHost(
   }
 
   if (subdomainRow && subdomainRow.id) {
-    console.log(
-      "[resolveSiteIdFromHost] Found using subdomain, id:",
-      subdomainRow.id,
-      "| subdomain:",
-      subdomainRow.subdomain,
-    );
+    // console.log(
+    //   "[resolveSiteIdFromHost] Found using subdomain, id:",
+    //   subdomainRow.id,
+    //   "| subdomain:",
+    //   subdomainRow.subdomain,
+    // );
     return {
       siteId: subdomainRow.id,
       resolvedBy: "subdomain",

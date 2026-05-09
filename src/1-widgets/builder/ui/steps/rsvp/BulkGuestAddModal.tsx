@@ -355,7 +355,7 @@ export function BulkGuestAddModal({
       <div className="space-y-5">
         <p className="text-sm text-(--builder-color-text-muted)">
           {translations["builder.rsvp.guests.bulk_add.description"] ||
-            "Upload a CSV or paste guest rows using name,email,preferred_lang,max_guests. Language and max guests are optional."}
+            "Upload a .CSV or paste your list. For .CSV files, use a header row with name, email, language, and guests to ensure data maps correctly. Language and guest count are optional."}
         </p>
 
         <div className="flex items-center gap-2">

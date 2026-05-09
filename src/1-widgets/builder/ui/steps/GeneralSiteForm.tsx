@@ -123,7 +123,7 @@ export default function GeneralSiteForm({
 
     notify.success(
       translations["ai.content_applied"] ??
-        "AI Content applied! You can still edit the fields manually.",
+        "Content generated! Don't forget to save your changes.",
     );
   };
 

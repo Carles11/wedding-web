@@ -77,7 +77,8 @@ export function WhatToSeeForm({
       });
 
       notify.success(
-        translations["ai.content_applied"] || "AI content applied!",
+        translations["ai.content_applied"] ||
+          "Content generated! Don't forget to save your changes.",
       );
     } catch (e) {
       console.error("AI Apply Error:", e);

@@ -101,7 +101,8 @@ export function ProgramEventForm(props: ProgramEventFormProps) {
         });
       });
       notify.success(
-        translations["ai.content_applied"] || "AI content applied!",
+        translations["ai.content_applied"] ||
+          "Content generated! Don't forget to save your changes.",
       );
     } catch (e) {
       notify.error("Failed to apply AI content");

@@ -3,6 +3,7 @@
 import { t } from "@/4-shared/helpers/t";
 import { notify } from "@/4-shared/lib/toast/toast";
 import { BuilderButton } from "@/4-shared/ui/builder";
+import { Info } from "lucide-react";
 import { useState } from "react";
 import { useAIOrchestrator } from "../model/useAIOrchestrator";
 
@@ -26,11 +27,13 @@ export function AIPromptModal({
   translations,
 }: Props) {
   const { processContent, loading } = useAIOrchestrator(siteId);
-  const [tone, setTone] = useState("Romantic");
 
+  // Default to "Natural" for translation or "Romantic" for generation
   const hasContent = Object.values(currentContent).some((val: any) => {
     return val?.title?.trim() || val?.name?.trim() || val?.description?.trim();
   });
+
+  const [tone, setTone] = useState(hasContent ? "Natural" : "Minimalist");
 
   const action = hasContent ? "translate" : "generate";
 
@@ -51,7 +54,6 @@ export function AIPromptModal({
       }
     } catch (err: any) {
       console.error("AI Modal Error:", err);
-
       const isParsingError =
         err.message?.includes("JSON") || err.message?.includes("Unexpected");
       const isOverloaded =
@@ -103,17 +105,16 @@ export function AIPromptModal({
         </h3>
 
         <p className="mt-2 text-sm text-gray-500">
-          {/* We keep context/languages count dynamic as they are numbers/technical IDs, but the surrounding text is translated */}
           {t(
             translations,
             "builder.ai.modal.description",
-            `Gemini will process your details for all languages.`,
+            "Gemini will process your details for all languages.",
           )}
         </p>
 
         <div className="mt-6">
           <label className="text-sm font-medium text-gray-700">
-            {t(translations, "builder.ai.modal.label.tone", "Writing Tone")}
+            {t(translations, "builder.ai.modal.label.mode", "Select AI Mode")}
           </label>
           <select
             className="mt-1 block w-full rounded border border-gray-200 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none"
@@ -121,19 +122,67 @@ export function AIPromptModal({
             onChange={(e) => setTone(e.target.value)}
             disabled={loading}
           >
-            <option value="Romantic">
-              {t(translations, "ai.tone.romantic", "Romantic")}
-            </option>
-            <option value="Minimalist">
-              {t(translations, "ai.tone.minimalist", "Minimalist")}
-            </option>
-            <option value="Funny & Light">
-              {t(translations, "ai.tone.funny", "Funny & Light")}
-            </option>
-            <option value="Formal">
-              {t(translations, "ai.tone.formal", "Formal")}
-            </option>
+            {/* Subsection: Translate */}
+            <optgroup
+              label={t(translations, "ai.category.translate", "Translate")}
+            >
+              <option value="Natural">
+                {t(
+                  translations,
+                  "ai.tone.natural",
+                  "Just translate (Natural tone)",
+                )}
+              </option>
+            </optgroup>
+
+            {/* Subsection: Generate */}
+            <optgroup
+              label={t(
+                translations,
+                "ai.category.generate",
+                "Generate with Style",
+              )}
+            >
+              <option value="Romantic">
+                {t(translations, "ai.tone.romantic", "Romantic")}
+              </option>
+              <option value="Minimalist">
+                {t(translations, "ai.tone.minimalist", "Minimalist")}
+              </option>
+              <option value="Funny & Light">
+                {t(translations, "ai.tone.funny", "Funny & Light")}
+              </option>
+              <option value="Formal">
+                {t(translations, "ai.tone.formal", "Formal")}
+              </option>
+            </optgroup>
           </select>
+
+          <p className="mt-2 text-[11px] text-gray-400 italic">
+            {tone === "Natural"
+              ? t(
+                  translations,
+                  "ai.mode.help.translate",
+                  "Maintains your original meaning accurately.",
+                )
+              : t(
+                  translations,
+                  "ai.mode.help.generate",
+                  "AI will rewrite content to match this personality.",
+                )}
+          </p>
+        </div>
+        <div className="mt-4 rounded-lg bg-amber-50 p-3 flex gap-3">
+          <div className="text-amber-600">
+            <Info size={16} />
+          </div>
+          <p className="text-[12px] leading-tight text-amber-700">
+            {t(
+              translations,
+              "builder.ai.modal.save_reminder",
+              "AI results will be applied to your fields, but you must click 'Save' in the builder to keep changes permanently.",
+            )}
+          </p>
         </div>
 
         <div className="mt-8 flex gap-3">
@@ -150,6 +199,11 @@ export function AIPromptModal({
             fullWidth
             onClick={handleRun}
             loading={loading}
+            loadingLabel={t(
+              translations,
+              "builder.ai.modal.button.translating",
+              "Translating...",
+            )}
           >
             {t(translations, "builder.ai.modal.button.start", "Start AI")}
           </BuilderButton>

@@ -177,7 +177,7 @@ async function handleCheckoutSessionCompleted(
           }),
         },
       );
-      console.log("[Stripe Webhook] GA4 Purchase tracked successfully");
+      // console.log("[Stripe Webhook] GA4 Purchase tracked successfully");
     } else {
       console.warn(
         "[Stripe Webhook] GA4 credentials missing in environment variables",

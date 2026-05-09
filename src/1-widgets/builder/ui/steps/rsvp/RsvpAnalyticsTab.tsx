@@ -44,7 +44,6 @@ function BreakdownChart({
       </div>
     );
   }
-  console.log("analytics items", { items });
   return (
     <div className="space-y-4 rounded-lg border border-(--builder-color-border) bg-white p-4">
       <h3 className="text-base font-semibold text-(--builder-color-text)">

@@ -21,7 +21,7 @@ Deno.serve(async (req) => {
   const authHeader = req.headers.get("Authorization") || "";
 
   // 2. LOG THE TRUTH (This will show us exactly what's wrong)
-  console.log("Header start:", authHeader.substring(0, 20));
+  // console.log("Header start:", authHeader.substring(0, 20));
 
   // 3. THE FIX: Trust the 'service_role' claim in the JWT
   // If you use the Supabase 'Test' sidebar with 'service_role' selected,
@@ -36,7 +36,6 @@ Deno.serve(async (req) => {
 
   try {
     const body = await req.json();
-    console.log("Processing email for:", body.email);
 
     const { email, name, lang, wedding_title, subdomain } = body;
 

@@ -42,11 +42,11 @@ function getSubdomainFromHost(host: string): string | null {
   return null;
 }
 
-console.log("[SITEMAP] SUPABASE_URL", process.env.SUPABASE_URL);
-console.log(
-  "[SITEMAP] SUPABASE_SERVICE_ROLE_KEY",
-  Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY),
-);
+// console.log("[SITEMAP] SUPABASE_URL", process.env.SUPABASE_URL);
+// console.log(
+//   "[SITEMAP] SUPABASE_SERVICE_ROLE_KEY",
+//   Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY),
+// );
 
 export async function GET(request: Request) {
   const host = request.headers.get("host")?.toLowerCase() || "";
@@ -61,17 +61,17 @@ export async function GET(request: Request) {
     )
     .eq("seo_enabled", true);
 
-  console.log("[SITEMAP] Supabase error:", sitesError);
-  console.log("raw host:", host);
-  console.log("normalized host:", normalizedHost);
-  console.log(
-    "Supabase sites:",
-    sites &&
-      sites.map((s) => ({
-        domains: s.domains,
-        subdomain: s.subdomain,
-      })),
-  );
+  // console.log("[SITEMAP] Supabase error:", sitesError);
+  // console.log("raw host:", host);
+  // console.log("normalized host:", normalizedHost);
+  // console.log(
+  //   "Supabase sites:",
+  //   sites &&
+  //     sites.map((s) => ({
+  //       domains: s.domains,
+  //       subdomain: s.subdomain,
+  //     })),
+  // );
 
   if (sites) {
     for (const s of sites) {
