@@ -1,6 +1,5 @@
 "use client";
 
-import { t } from "@/4-shared/helpers/t";
 import { BuilderStepContentProps } from "@/4-shared/types";
 import Heading from "@/4-shared/ui/commons/typography/Heading";
 import {
@@ -38,7 +37,6 @@ export default function BuilderStepContent({
   setHasRsvpEnabled,
   account,
   stepStatuses,
-  TEST_ENABLED_SITE_IDS,
 }: BuilderStepContentProps) {
   const requiredSteps = stepStatuses?.filter((s) => s !== "optional") ?? [];
   const allRequiredDone = requiredSteps.every((s) => s === "done");
@@ -142,24 +140,14 @@ export default function BuilderStepContent({
             />
           </div>
           <div className={active !== 7 ? "hidden" : undefined}>
-            {TEST_ENABLED_SITE_IDS.includes(siteId) ? (
-              <RsvpBuilderStep
-                site={site}
-                refresh={refresh}
-                lang={currentLang}
-                translations={translations}
-                planType={planType}
-                setHasRsvpEnabled={setHasRsvpEnabled}
-              />
-            ) : (
-              <p>
-                {t(
-                  translations,
-                  "common.coming_soon",
-                  "We are working on this one. Coming Soon!",
-                )}
-              </p>
-            )}
+            <RsvpBuilderStep
+              site={site}
+              refresh={refresh}
+              lang={currentLang}
+              translations={translations}
+              planType={planType}
+              setHasRsvpEnabled={setHasRsvpEnabled}
+            />
           </div>
           <div className={active !== 8 ? "hidden" : undefined}>
             <DomainAndBillingBuilderStep

@@ -43,11 +43,12 @@ export default function BuilderClient({
     refresh,
   } = useSite(user ?? null);
 
-  const TEST_ENABLED_SITE_IDS = [
-    "2dc5d40e-619c-4ab4-978e-4a9ce1bca34a",
-    "95e6f161-2d67-4eba-b54e-adc2806589f7",
-    "acee380e-9551-4e9e-a845-2180dd32a842",
-  ]; // Your test sites id
+  // Testing siteIds for users c.delriofrances@gmail.com | carles.delrio@gmx.net | carles@rio-frances.com
+  // const TEST_ENABLED_SITE_IDS = [
+  //   "2dc5d40e-619c-4ab4-978e-4a9ce1bca34a",
+  //   "95e6f161-2d67-4eba-b54e-adc2806589f7",
+  //   "acee380e-9551-4e9e-a845-2180dd32a842",
+  // ];
 
   const STEP_KEYS = [
     "builder.nav.step.general",
@@ -57,9 +58,7 @@ export default function BuilderClient({
     "builder.nav.step.what_to_see",
     "builder.nav.step.wedding_gift",
     "builder.nav.step.contact",
-    site?.id && TEST_ENABLED_SITE_IDS.includes(site.id)
-      ? "builder.nav.step.rsvp"
-      : "Comming Soon",
+    "builder.nav.step.rsvp",
     "builder.nav.step.domain_billing",
   ];
 
@@ -324,7 +323,6 @@ export default function BuilderClient({
               setHasRsvpEnabled={setHasRsvpEnabled}
               account={account}
               stepStatuses={STEP_STATUS}
-              TEST_ENABLED_SITE_IDS={TEST_ENABLED_SITE_IDS}
             />
           </div>
         </main>
