@@ -6,20 +6,9 @@ import { useEffect, useState } from "react";
 import { RsvpPartiesTab } from "./rsvp/RsvpPartiesTab";
 import { RsvpResponsesTab } from "./rsvp/RsvpResponsesTab";
 
-type Props = {
-  site: Site | null;
-  refresh: () => void;
-  lang: string;
-  translations: Record<string, string>;
-  planType: PlanType;
-  setHasRsvpEnabled: (v: boolean) => void;
-};
-
 /** Convert an ISO string (UTC) to the value expected by <input type="datetime-local">. */
 function isoToDatetimeLocal(iso: string | null): string {
   if (!iso) return "";
-  // Date constructor parses ISO correctly; toISOString gives UTC YYYY-MM-DDTHH:mm:ss.sssZ
-  // Slice to minute precision and replace 'Z' — the native input expects local time without timezone
   const d = new Date(iso);
   if (isNaN(d.getTime())) return "";
   const pad = (n: number) => String(n).padStart(2, "0");
@@ -32,10 +21,19 @@ function isoToDatetimeLocal(iso: string | null): string {
 /** Convert a datetime-local string (local time) to ISO UTC string, or null if empty. */
 function datetimeLocalToIso(local: string): string | null {
   if (!local) return null;
-  const d = new Date(local); // parsed as local time by spec
+  const d = new Date(local);
   if (isNaN(d.getTime())) return null;
   return d.toISOString();
 }
+
+type Props = {
+  site: Site | null;
+  refresh: () => void;
+  lang: string;
+  translations: Record<string, string>;
+  planType: PlanType;
+  setHasRsvpEnabled: (v: boolean) => void;
+};
 
 export default function RsvpBuilderStep({
   site,
@@ -50,16 +48,15 @@ export default function RsvpBuilderStep({
   const [isEnabled, setIsEnabled] = useState(false);
   const [deadlineLocal, setDeadlineLocal] = useState(""); // datetime-local string
   const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
-  const [saveSuccess, setSaveSuccess] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   // Load current settings via the authenticated GET route
   useEffect(() => {
     if (!site?.id) return;
     setLoading(true);
-    setLoadError(null);
+    setSaveError(null);
     fetch(`/api/sites/${site.id}/rsvp-settings`, { method: "GET" })
       .then(async (res) => {
         const json = (await res.json()) as {
@@ -72,56 +69,83 @@ export default function RsvpBuilderStep({
           setDeadlineLocal(
             isoToDatetimeLocal(json.settings.deadline_at ?? null),
           );
-        } else if (!json.success) {
-          setLoadError(
-            translations["builder.rsvp.load.error"] ||
-              "Failed to load RSVP settings.",
-          );
+        } else {
+          setIsEnabled(false);
+          setDeadlineLocal("");
         }
       })
       .catch(() => {
-        setLoadError(
+        setSaveError(
           translations["builder.rsvp.load.error"] ||
             "Failed to load RSVP settings.",
         );
       })
       .finally(() => setLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [site?.id]);
 
-  async function handleSave(e: React.FormEvent) {
-    e.preventDefault();
+  // AUTOSAVE RSVP ENABLE TOGGLE & DEADLINE
+  async function autosave(next: {
+    is_enabled?: boolean;
+    deadlineLocal?: string;
+  }) {
     if (!site?.id) return;
-
     setSaving(true);
-    setSaveSuccess(false);
     setSaveError(null);
-
     try {
+      // Compose new values for autosave
+      const newVal: { is_enabled: boolean; deadline_at: string | null } = {
+        is_enabled:
+          typeof next.is_enabled === "boolean" ? next.is_enabled : isEnabled,
+        deadline_at:
+          typeof next.deadlineLocal === "string"
+            ? (next.is_enabled ?? isEnabled)
+              ? datetimeLocalToIso(next.deadlineLocal)
+              : null
+            : isEnabled
+              ? datetimeLocalToIso(deadlineLocal)
+              : null,
+      };
+      // Save
       const res = await fetch(`/api/sites/${site.id}/rsvp-settings`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          is_enabled: isEnabled,
-          deadline_at: isEnabled ? datetimeLocalToIso(deadlineLocal) : null,
-        }),
+        body: JSON.stringify(newVal),
       });
-
-      const json = (await res.json()) as { success: boolean; error?: string };
-
+      const json = await res.json();
       if (!res.ok || !json.success) {
         setSaveError(json.error ?? "Save failed");
+        setSaveSuccess(false);
       } else {
+        setHasRsvpEnabled(newVal.is_enabled);
         setSaveSuccess(true);
-        setHasRsvpEnabled(isEnabled);
-        // Clear success flash after 3 s
-        setTimeout(() => setSaveSuccess(false), 3000);
+        setTimeout(() => setSaveSuccess(false), 2000);
       }
     } catch {
       setSaveError("Network error — please try again.");
+      setSaveSuccess(false);
     } finally {
       setSaving(false);
     }
   }
+
+  // Handler for RSVP toggle (autosave)
+  const handleToggle = async () => {
+    const nextEnabled = !isEnabled;
+    setIsEnabled(nextEnabled); // optimistic update
+    // If turning OFF, clear deadline for clarity
+    if (!nextEnabled) setDeadlineLocal("");
+    await autosave({ is_enabled: nextEnabled });
+  };
+
+  // Handler for deadline (autosave)
+  const handleDeadlineChange = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const val = e.target.value;
+    setDeadlineLocal(val); // update UI locally
+    if (isEnabled) await autosave({ deadlineLocal: val });
+  };
 
   if (loading) {
     return (
@@ -132,10 +156,10 @@ export default function RsvpBuilderStep({
       </div>
     );
   }
-  if (loadError) {
+  if (saveError) {
     return (
       <div className="rounded border border-(--builder-color-border) bg-white p-6">
-        <p className="text-sm text-red-600">{loadError}</p>
+        <p className="text-sm text-red-600">{saveError}</p>
       </div>
     );
   }
@@ -190,6 +214,7 @@ export default function RsvpBuilderStep({
         </button>
       </div>
 
+      {/* Render tab content */}
       {activeTab === "parties" && site?.id ? (
         <RsvpPartiesTab
           siteId={site.id}
@@ -213,17 +238,19 @@ export default function RsvpBuilderStep({
               "Let guests RSVP online. Enable this step to activate the RSVP flow on your site."}
           </p>
 
-          <form onSubmit={handleSave} className="mt-6 space-y-6">
+          {/* Fully Autosaving Toggle and Deadline */}
+          <div className="mt-6 space-y-6">
             {/* Enable toggle */}
             <label className="flex items-center gap-3 cursor-pointer select-none">
               <button
                 type="button"
                 role="switch"
                 aria-checked={isEnabled}
-                onClick={() => setIsEnabled((v) => !v)}
+                onClick={handleToggle}
+                disabled={loading || saving}
                 className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${
                   isEnabled ? "bg-(--builder-color-primary)" : "bg-gray-200"
-                }`}
+                } ${saving ? "opacity-70 pointer-events-none" : ""}`}
               >
                 <span
                   className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition-transform ${
@@ -239,7 +266,6 @@ export default function RsvpBuilderStep({
                     "RSVP disabled"}
               </span>
             </label>
-
             {/* Deadline (shown only when enabled) */}
             {isEnabled && (
               <div className="space-y-1">
@@ -260,7 +286,8 @@ export default function RsvpBuilderStep({
                   id="rsvp-deadline"
                   type="datetime-local"
                   value={deadlineLocal}
-                  onChange={(e) => setDeadlineLocal(e.target.value)}
+                  onChange={handleDeadlineChange}
+                  disabled={saving}
                   className="block w-full max-w-xs rounded border border-(--builder-color-border) bg-white px-3 py-1.5 text-sm text-(--builder-color-text) focus:outline-none focus:ring-2 focus:ring-(--builder-color-primary, #4f46e5)"
                 />
                 <p className="text-xs text-(--builder-color-text-muted)">
@@ -269,29 +296,15 @@ export default function RsvpBuilderStep({
                 </p>
               </div>
             )}
-
-            {/* Save row */}
-            <div className="flex items-center gap-3">
-              <button
-                type="submit"
-                disabled={saving}
-                className="rounded bg-(--builder-color-primary, #4f46e5) px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50 transition-opacity"
-              >
-                {saving
-                  ? translations["builder.rsvp.saving"] || "Saving…"
-                  : translations["builder.rsvp.save"] || "Save"}
-              </button>
-
-              {saveSuccess && (
-                <span className="text-sm text-green-600">
-                  {translations["builder.rsvp.save.success"] || "Saved!"}
-                </span>
-              )}
-              {saveError && (
-                <span className="text-sm text-red-600">{saveError}</span>
-              )}
-            </div>
-          </form>
+            {saveSuccess && (
+              <span className="text-sm ml-2 text-green-600">
+                {translations["builder.rsvp.save.success"] || "Saved!"}
+              </span>
+            )}
+            {saveError && (
+              <span className="text-sm ml-2 text-red-600">{saveError}</span>
+            )}
+          </div>
         </>
       )}
     </div>
