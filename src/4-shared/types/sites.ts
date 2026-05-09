@@ -30,4 +30,6 @@ export type Site = {
 // Helper type for queries that only select `id`.
 export type SiteIdLookupResult = {
   id: string;
+  domains: string[] | null;
+  subdomain: string | null;
 };
