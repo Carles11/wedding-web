@@ -83,17 +83,27 @@ export function extractSubdomain(normalizedHost: string): string | null {
 export async function resolveSiteIdFromHost(
   host: string,
 ): Promise<ResolveSiteIdResult> {
-  const normalizedHost = normalizeHost(host);
+  let normalizedHost = normalizeHost(host);
 
   if (!normalizedHost) return null;
 
+  // Always allow matching with and without 'www.'
+  const hostVariants = [normalizedHost];
+  if (normalizedHost.startsWith("www.")) {
+    hostVariants.push(normalizedHost.replace(/^www\./, ""));
+  } else {
+    hostVariants.push("www." + normalizedHost);
+  }
+
   const supabase = await createSupabaseSSRClient();
 
-  // --- Lookup 1: custom domain ---
+  // --- 1: Check custom domains (with and without www.)
   const { data: domainRow, error: domainError } = await supabase
     .from("sites")
     .select("id")
-    .contains("domains", [normalizedHost])
+    .or(
+      hostVariants.map((h) => `domains.cs.{${JSON.stringify([h])}}`).join(","),
+    )
     .maybeSingle();
 
   if (domainError) {
@@ -106,15 +116,29 @@ export async function resolveSiteIdFromHost(
     return { siteId: domainResult.id, resolvedBy: "domain", normalizedHost };
   }
 
-  // --- Lookup 2: subdomain ---
+  // --- 2: Try subdomain (bare and with www.)
   const subdomain = extractSubdomain(normalizedHost);
-  if (!subdomain) return null;
+  const subVariants = [subdomain];
+  if (subdomain && subdomain.startsWith("www")) {
+    subVariants.push(subdomain.replace(/^www\./, ""));
+  }
 
-  const { data: subdomainRow, error: subdomainError } = await supabase
-    .from("sites")
-    .select("id")
-    .eq("subdomain", subdomain)
-    .maybeSingle();
+  let subdomainResult: SiteIdLookupResult | null = null;
+  let subdomainError = null;
+
+  for (const subd of subVariants) {
+    if (!subd) continue;
+    const { data, error } = await supabase
+      .from("sites")
+      .select("id")
+      .eq("subdomain", subd)
+      .maybeSingle();
+    subdomainError = error;
+    if (data?.id) {
+      subdomainResult = data as SiteIdLookupResult;
+      break;
+    }
+  }
 
   if (subdomainError) {
     console.error(
@@ -124,7 +148,6 @@ export async function resolveSiteIdFromHost(
     return null;
   }
 
-  const subdomainResult = subdomainRow as SiteIdLookupResult | null;
   if (subdomainResult?.id) {
     return {
       siteId: subdomainResult.id,
@@ -133,5 +156,16 @@ export async function resolveSiteIdFromHost(
     };
   }
 
+  // --- NOT FOUND ---
+  console.warn(
+    "[resolveSiteIdFromHost] Host not matched:",
+    host,
+    "| normalized:",
+    normalizedHost,
+    "| Tried domains:",
+    hostVariants,
+    "| Tried subdomains:",
+    subVariants,
+  );
   return null;
 }
