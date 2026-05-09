@@ -165,13 +165,14 @@ export default function RsvpBuilderStep({
   }
 
   return (
-    <div className="rounded border border-(--builder-color-border) bg-white p-6">
+    <div className="rounded border border-(--builder-color-border) bg-white p-3 md:p-6">
       {/* Tab switcher */}
-      <div className="flex gap-1 mb-6 border-b border-(--builder-color-border)">
+      <div className="flex gap-1 mb-6 border-b border-(--builder-color-border) overflow-x-auto scrollbar-none">
+        {" "}
         <button
           type="button"
           onClick={() => setActiveTab("settings")}
-          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors shrink-0 ${
             activeTab === "settings"
               ? "border-(--builder-color-primary) text-(--builder-color-primary)"
               : "border-transparent text-(--builder-color-text-muted) hover:text-(--builder-color-text)"
@@ -182,7 +183,7 @@ export default function RsvpBuilderStep({
         <button
           type="button"
           onClick={() => setActiveTab("parties")}
-          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors shrink-0 ${
             activeTab === "parties"
               ? "border-(--builder-color-primary) text-(--builder-color-primary)"
               : "border-transparent text-(--builder-color-text-muted) hover:text-(--builder-color-text)"
@@ -193,7 +194,7 @@ export default function RsvpBuilderStep({
         <button
           type="button"
           onClick={() => setActiveTab("responses")}
-          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors shrink-0 ${
             activeTab === "responses"
               ? "border-(--builder-color-primary) text-(--builder-color-primary)"
               : "border-transparent text-(--builder-color-text-muted) hover:text-(--builder-color-text)"
@@ -204,7 +205,7 @@ export default function RsvpBuilderStep({
         <button
           type="button"
           onClick={() => setActiveTab("analytics")}
-          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors shrink-0 ${
             activeTab === "analytics"
               ? "border-(--builder-color-primary) text-(--builder-color-primary)"
               : "border-transparent text-(--builder-color-text-muted) hover:text-(--builder-color-text)"

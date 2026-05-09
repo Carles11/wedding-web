@@ -1,5 +1,6 @@
 "use client";
 
+import { Info } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { BuilderButton } from "./BuilderButton";
@@ -10,6 +11,7 @@ type UpgradeCTAModalProps = {
   onUpgrade: () => void;
   title: string;
   description: string;
+  note?: string;
   cancelLabel?: string;
   upgradeLabel?: string;
 };
@@ -20,6 +22,7 @@ export function UpgradeCTAModal({
   onUpgrade,
   title,
   description,
+  note,
   cancelLabel = "Cancel",
   upgradeLabel = "Upgrade to Premium",
 }: UpgradeCTAModalProps) {
@@ -99,6 +102,12 @@ export function UpgradeCTAModal({
             {title}
           </h2>
           <p className="text-sm text-gray-500 mb-6">{description}</p>
+          {note && (
+            <p className="flex items-start gap-2 text-xs italic text-gray-500 border-t pt-3 pb-3">
+              <Info className="w-4 h-4 shrink-0 mt-0.5 text-blue-500" />
+              <span>{note}</span>
+            </p>
+          )}
 
           {/* Actions — stacked on mobile, row on sm+ */}
           <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2">

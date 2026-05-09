@@ -4,7 +4,6 @@ import { updateSiteFonts } from "@/3-entities/sites/api/updateSiteFonts";
 import { getSiteGeneralContent } from "@/4-shared/api/builder/getSiteGeneralContent";
 import { saveSiteGeneralContent } from "@/4-shared/api/builder/saveSiteGeneralContent";
 import type { SupportedLanguage } from "@/4-shared/config/i18n";
-
 import { MagicAIButton } from "@/4-shared/ui/builder/buttons/MagicAIButton";
 
 import {
@@ -355,6 +354,7 @@ export default function GeneralSiteForm({
       }
       return;
     }
+    notify.success("Language added successfully.");
 
     if (langLimit !== -1 && languages.length >= langLimit) {
       setShowUpgradeCTA(true);
@@ -752,6 +752,10 @@ export default function GeneralSiteForm({
         description={
           translations["builder.general.form.upgrade_description"] ||
           "Your current plan only allows one language. Upgrade to Premium to unlock all languages for your wedding site."
+        }
+        note={
+          translations["builder.general.form.upgrade_note"] ||
+          "Trying to switch languages? Simply deselect your active one to pick a new one."
         }
         cancelLabel={translations["builder.general.form.cancel"] || "Cancel"}
         upgradeLabel={
