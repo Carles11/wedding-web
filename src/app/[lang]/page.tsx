@@ -82,13 +82,20 @@ export async function generateMetadata({
       title: seo.title,
       description: seo.description,
       alternates: {
-        canonical: `/${lang}`,
-        languages: { ...languages, "x-default": "/en" },
+        // canonical: `/${lang}`,
+        // languages: { ...languages, "x-default": "/en" },
+        canonical: `${baseUrl}/${lang}`,
+        languages: {
+          ...Object.fromEntries(
+            SUPPORTED_LANGUAGES.map((l) => [l, `${baseUrl}/${l}`]),
+          ),
+          "x-default": `${baseUrl}/en`, // Keep it inside the languages object
+        },
       },
       openGraph: {
         title: seo.ogTitle || seo.title,
         description: seo.ogDescription || seo.description,
-        url: `/${lang}`,
+        url: `${baseUrl}/${lang}`,
         siteName: "WeddWeb",
         images: [ogImage],
         type: "website",
@@ -158,9 +165,12 @@ export default async function Page({
     ? (langInput as SupportedLanguage)
     : "en";
 
-  // Parallel Data Fetching for Marketing
-  const translations = await fetchMarketingTranslations(lang, "en");
-  const { baseUrl } = getMetadataBase(host, false);
+  // 🚀 Optimization: Run data fetching and base calculations in parallel
+  const [translations, { baseUrl }] = await Promise.all([
+    fetchMarketingTranslations(lang, "en"),
+    Promise.resolve(getMetadataBase(host, false)),
+  ]);
+
   const labels = BREADCRUMB_LABELS[lang] ?? BREADCRUMB_LABELS.en;
 
   const breadcrumbSchema = generateBreadcrumbSchema([

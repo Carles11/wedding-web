@@ -8,22 +8,23 @@ export function getMetadataBase(
   host: string | null,
   isTenant: boolean = false,
 ) {
-  // 1. Fallback for local development or missing headers
-  const defaultHost = isTenant
-    ? "your-default-tenant-subdomain.weddweb.com"
-    : "weddweb.com";
-  const currentHost = host || defaultHost;
+  // 1. Fallback & Normalization
+  let currentHost = host || (isTenant ? "tenant.weddweb.com" : "weddweb.com");
 
-  // 2. Protocol - almost always https in production
+  // 🚀 SEO Fix: Force non-www for the marketing site to prevent duplicate indexing
+  // Only do this if you prefer weddweb.com over www.weddweb.com
+  if (!isTenant && currentHost.startsWith("www.")) {
+    currentHost = currentHost.slice(4);
+  }
+
+  // 2. Protocol
   const protocol = currentHost.includes("localhost") ? "http" : "https";
 
-  // 3. The absolute Base URL
+  // 3. Absolute Base URL
   const baseUrl = `${protocol}://${currentHost}`;
 
   return {
-    // The URL object Next.js expects for metadataBase
     metadataBase: new URL(baseUrl),
-    // The raw string for use in other logic
     baseUrl,
   };
 }

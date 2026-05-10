@@ -10,15 +10,20 @@ export async function notifyIndexNow(urls: string[], host: string) {
       body: JSON.stringify({
         host: host,
         key: BING_KEY,
-        // Pointing to your central verification file on the main domain
-        keyLocation: `https://weddweb.com/${BING_KEY}.txt`,
+        // 🚀 THE FIX: Point to the key on the TARGET host being submitted
+        keyLocation: `https://${host}/${BING_KEY}.txt`,
         urlList: urls,
       }),
     });
 
     if (!response.ok) {
+      const errorText = await response.text();
       console.error(
-        `IndexNow Error: ${response.status} ${await response.text()}`,
+        `IndexNow Error (${host}): ${response.status} ${errorText}`,
+      );
+    } else {
+      console.log(
+        `IndexNow Success for ${host}: ${urls.length} URLs submitted.`,
       );
     }
   } catch (err) {

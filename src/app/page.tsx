@@ -1,6 +1,6 @@
 import { getSiteByDomain } from "@/4-shared/lib/getSiteByDomain";
 import { headers } from "next/headers";
-import { redirect } from "next/navigation";
+import Page from "./[lang]/page";
 
 export const dynamic = "force-dynamic";
 
@@ -13,5 +13,5 @@ export default async function RootPage() {
   const site = await getSiteByDomain(host);
 
   const lang = site?.default_lang ?? "en";
-  redirect(`/${lang}`);
+  return <Page params={Promise.resolve({ lang })} />;
 }
