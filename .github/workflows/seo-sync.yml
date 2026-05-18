@@ -1,0 +1,14 @@
+name: Automated Marketing IndexNow Sync
+
+on:
+  deployment_status: # Fires whenever a deployment status changes in your repo
+
+jobs:
+  ping-indexnow:
+    # Only execute if the deployment was successful AND it belongs to your production environment
+    if: github.event.deployment_status.state == 'success' && github.event.deployment.environment == 'production'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping WeddWeb SEO Sync Endpoint
+        run: |
+          curl -X POST "https://weddweb.com/api/seo/sync-marketing?secret=${{ secrets.INDEXNOW_KEY }}"
