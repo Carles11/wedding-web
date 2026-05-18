@@ -1,5 +1,6 @@
 import OnboardingClient from "@/0-pages/(builder)/onboarding/OnboardingClient";
 import { fetchBuilderTranslations } from "@/4-shared/api/builder/getTranslations";
+import { getPriceForCountry } from "@/4-shared/helpers/billing/geoCurrency";
 import { isValidLanguage } from "@/4-shared/helpers/isValidLanguage";
 import {
   resolveLanguageFromParams,
@@ -23,6 +24,7 @@ export async function generateMetadata({
   const lang = isValidLanguage(realParams?.lang) ? realParams.lang : "en";
 
   const host = (await headers()).get("host");
+
   // We treat onboarding as a marketing/main-app state for the base URL logic
   const { metadataBase } = getMetadataBase(host, false);
 
@@ -52,6 +54,11 @@ export default async function OnboardingPage({
 }) {
   const resolvedParams = await resolveSearchParams(params);
   const langRaw = resolvedParams?.lang;
+
+  const headersList = await headers();
+  const countryHeader = headersList.get("x-vercel-ip-country") || "US";
+  const resolvedPrice = getPriceForCountry(countryHeader);
+
   const langCandidate =
     typeof langRaw === "string"
       ? langRaw
@@ -68,5 +75,11 @@ export default async function OnboardingPage({
   const supabase = await createSupabaseSSRClient();
   const translations = await fetchBuilderTranslations(supabase, lang, "en");
 
-  return <OnboardingClient translations={translations} lang={lang} />;
+  return (
+    <OnboardingClient
+      translations={translations}
+      lang={lang}
+      priceOverrides={resolvedPrice}
+    />
+  );
 }

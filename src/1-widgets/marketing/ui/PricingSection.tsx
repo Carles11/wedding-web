@@ -42,7 +42,6 @@ export default function PricingSection({
 
             <div className="mt-6 flex-1">
               <div className="text-4xl md:text-5xl font-extrabold text-gray-900">
-                <span>$</span>
                 <span>{freePlanPrice}</span>
               </div>
 
@@ -90,7 +89,6 @@ export default function PricingSection({
 
             <div className="mt-6 flex-1">
               <div className="text-4xl md:text-5xl font-extrabold text-gray-900">
-                <span>$</span>
                 <span>{premiumPlanPrice}</span>
               </div>
               <div className="text-sm text-gray-600 mt-2">{perSiteText}</div>

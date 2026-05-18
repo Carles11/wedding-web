@@ -8,9 +8,11 @@ import PricingTable from "./PricingTable";
 export default function PricingCTATable({
   t,
   lang,
+  priceOverrides,
 }: {
   t: Record<string, string>;
   lang: string;
+  priceOverrides?: { price: number; currency: string };
 }) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false); // Manage loading state
@@ -37,7 +39,8 @@ export default function PricingCTATable({
           type="private"
           lang={lang}
           onSelect={handleSelect}
-          isLoading={isLoading} // Pass it down
+          isLoading={isLoading}
+          priceOverrides={priceOverrides}
         />
       </div>
     </>

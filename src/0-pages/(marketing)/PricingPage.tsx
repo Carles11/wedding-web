@@ -6,9 +6,14 @@ import type { MarketingTranslations } from "@/4-shared/types";
 type Props = {
   translations: MarketingTranslations;
   lang: string;
+  priceOverrides?: { price: number; currency: string };
 };
 
-export default function PricingPage({ translations, lang }: Props) {
+export default function PricingPage({
+  translations,
+  lang,
+  priceOverrides,
+}: Props) {
   return (
     <>
       <PricingPageShell
@@ -22,7 +27,11 @@ export default function PricingPage({ translations, lang }: Props) {
           "All prices are in EUR and include any applicable taxes. The Premium plan is a single, one-time payment—no annual renewals, no hidden costs, no surprises."
         }
       >
-        <PricingCTATableAdapter lang={lang} t={translations} />
+        <PricingCTATableAdapter
+          lang={lang}
+          t={translations}
+          priceOverrides={priceOverrides}
+        />
       </PricingPageShell>
     </>
   );

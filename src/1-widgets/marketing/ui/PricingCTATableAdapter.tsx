@@ -4,6 +4,7 @@ import type { TranslationDictionary } from "@/4-shared/types";
 export interface PricingCTATableAdapterProps {
   lang: string;
   t: TranslationDictionary;
+  priceOverrides?: { price: number; currency: string };
 }
 
 /**
@@ -13,6 +14,7 @@ export interface PricingCTATableAdapterProps {
 export default function PricingCTATableAdapter({
   lang,
   t,
+  priceOverrides,
 }: PricingCTATableAdapterProps) {
-  return <PricingCTATable lang={lang} t={t} />;
+  return <PricingCTATable lang={lang} t={t} priceOverrides={priceOverrides} />;
 }

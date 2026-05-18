@@ -9,9 +9,14 @@ import { useState } from "react";
 interface Props {
   translations: Record<string, string>;
   lang: string;
+  priceOverrides?: { price: number; currency: string };
 }
 
-export default function OnboardingClient({ translations, lang }: Props) {
+export default function OnboardingClient({
+  translations,
+  lang,
+  priceOverrides,
+}: Props) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -75,6 +80,7 @@ export default function OnboardingClient({ translations, lang }: Props) {
             lang={lang}
             onSelect={handlePlanSelect}
             isLoading={isLoading}
+            priceOverrides={priceOverrides}
             // Logic note: Ensure PricingTable internal buttons are
             // also disabled if you pass 'isLoading' down.
           />

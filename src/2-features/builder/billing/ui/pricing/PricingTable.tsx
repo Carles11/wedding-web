@@ -1,3 +1,4 @@
+// src/2-features/builder/billing/ui/pricing/PricingTable.tsx
 "use client";
 
 import { PLAN_CATALOG } from "@/4-shared/config/plans/planCatalog";
@@ -22,12 +23,14 @@ export default function PricingTable({
   onSelect,
   lang = "en",
   isLoading = false,
+  priceOverrides, // <-- ADDED: Accept dynamic pricing properties from the server
 }: {
   translations: Record<string, string>;
   type: "private" | "agency";
   onSelect?: (plan: PlanType) => void;
   lang?: string;
   isLoading?: boolean;
+  priceOverrides?: { price: number; currency: string }; // <-- ADDED: Type definition
 }) {
   const planKeys = Object.keys(PLAN_CATALOG) as PlanType[];
 
@@ -41,16 +44,26 @@ export default function PricingTable({
         const def = PLAN_CATALOG[plan];
         const highlight = plan === "premium";
 
+        // OPTIMIZED: If it's the premium plan and overrides are provided, swap them cleanly
+        const targetPrice =
+          plan === "premium" && priceOverrides
+            ? priceOverrides.price
+            : def.price;
+        const targetCurrency =
+          plan === "premium" && priceOverrides
+            ? priceOverrides.currency
+            : def.currency;
+
         const formattedPrice =
-          def.price === -1
+          targetPrice === -1
             ? new Intl.NumberFormat(lang, {
                 style: "currency",
-                currency: def.currency,
+                currency: targetCurrency,
               }).format(0.0)
             : new Intl.NumberFormat(lang, {
                 style: "currency",
-                currency: def.currency,
-              }).format(def.price);
+                currency: targetCurrency,
+              }).format(targetPrice);
 
         const planName = t(translations, `pricing.plan.${plan}.name`, def.name);
 
@@ -98,7 +111,7 @@ export default function PricingTable({
 
             {/* PRICE */}
             <div className="text-center mb-6">
-              {formattedPrice ? (
+              {targetPrice !== -1 ? (
                 <>
                   <p className="text-4xl font-bold">{formattedPrice}</p>
                   <p className="text-sm text-gray-500">
@@ -179,13 +192,13 @@ export default function PricingTable({
                     (window as any).gtag
                   ) {
                     (window as any).gtag("event", "begin_checkout", {
-                      currency: def.currency,
-                      value: def.price, // GA4 expects major units (e.g. 19.00)
+                      currency: targetCurrency, // OPTIMIZED: Track actual local currency
+                      value: targetPrice, // OPTIMIZED: Track actual local price
                       items: [
                         {
                           item_id: plan,
                           item_name: planName,
-                          price: def.price,
+                          price: targetPrice,
                         },
                       ],
                     });

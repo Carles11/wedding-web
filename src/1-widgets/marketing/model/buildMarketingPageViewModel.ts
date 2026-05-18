@@ -7,6 +7,11 @@ import type {
   MarketingTranslations,
 } from "@/4-shared/types";
 
+import {
+  formatLocalPrice,
+  getPriceForCountry,
+} from "@/4-shared/helpers/billing/geoCurrency"; // <-- IMPORT HELPERS
+
 const MARKETING_EXAMPLE_SITES = [
   {
     siteName: "Ines & Carles",
@@ -28,12 +33,23 @@ type Handlers = {
 export function buildMarketingPageViewModel(
   translations: MarketingTranslations,
   handlers: Handlers,
+  countryCode: string | null = "US", // <-- ADDED: countryCode argument
+  lang: string = "en", // <-- ADDED: lang argument
 ): MarketingPageViewModel {
   const freeFeatures = getLocalizedMarketingPlanFeatures("free", translations);
   const premiumFeatures = getLocalizedMarketingPlanFeatures(
     "premium",
     translations,
   );
+
+  // DYNAMIC GEOTARGETING LOGIC
+  const localPriceObj = getPriceForCountry(countryCode);
+  const formattedPremiumPrice = formatLocalPrice(
+    localPriceObj.price,
+    localPriceObj.currency,
+    lang,
+  );
+  const formattedFreePrice = formatLocalPrice(0, localPriceObj.currency, lang);
 
   return {
     hero: {
@@ -87,15 +103,14 @@ export function buildMarketingPageViewModel(
         translations["marketing.pricing.section_title"] ||
         "One Price. No Surprises. Yours Forever.",
       freePlanName: translations["marketing.pricing.free_plan_name"] || "Free",
-      freePlanPrice: translations["marketing.pricing.free_plan_price"] || "0 €",
+      freePlanPrice: formattedFreePrice, // <-- DYNAMICALLY OVERRIDDEN
       freePlanCTA:
         translations["marketing.pricing.free_plan_cta"] ||
         "Begin Your Story, Free",
       freePlanFeatures: getLocalizedPlanFeatureTitles("free", translations),
       premiumPlanName:
         translations["marketing.pricing.premium_plan_name"] || "Premium",
-      premiumPlanPrice:
-        translations["marketing.pricing.premium_plan_price"] || "39,00 €",
+      premiumPlanPrice: formattedPremiumPrice, // <-- DYNAMICALLY OVERRIDDEN
       perSiteText:
         translations["marketing.pricing.per_site"] || "Once. Yours for life.",
       premiumPlanCTA:

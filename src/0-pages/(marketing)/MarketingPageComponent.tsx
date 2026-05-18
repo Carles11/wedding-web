@@ -25,7 +25,8 @@ import { useRouter } from "next/navigation";
 export default function MarketingPageComponent({
   initialLang = "en",
   translations,
-}: MarketingPageProps) {
+  countryCode = "US", // <-- ADDED: Accept countryCode prop from Server Page
+}: MarketingPageProps & { countryCode?: string | null }) {
   const router = useRouter();
   const { user, supabase } = useSupabaseAuth();
 
@@ -57,10 +58,15 @@ export default function MarketingPageComponent({
   };
 
   // VIEW MODEL: Generated directly from props for instant hydration
-  const viewModel = buildMarketingPageViewModel(translations, {
-    onPrimaryClick: handlePrimaryClick,
-    onSecondaryClick: handleSecondaryClick,
-  });
+  const viewModel = buildMarketingPageViewModel(
+    translations,
+    {
+      onPrimaryClick: handlePrimaryClick,
+      onSecondaryClick: handleSecondaryClick,
+    },
+    countryCode,
+    initialLang,
+  );
 
   // FAQ Schema — Updated with "Senior Copywriter" fallbacks
   const faqSchema = {

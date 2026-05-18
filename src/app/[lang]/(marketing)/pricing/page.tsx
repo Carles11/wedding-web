@@ -3,6 +3,7 @@ import { fetchMarketingTranslations } from "@/4-shared/api/marketing";
 import type { SupportedLanguage } from "@/4-shared/config/i18n";
 import { SUPPORTED_LANGUAGES } from "@/4-shared/config/i18n";
 import { getSEOMetadata } from "@/4-shared/config/seo";
+import { getPriceForCountry } from "@/4-shared/helpers/billing/geoCurrency";
 import { isValidLanguage } from "@/4-shared/helpers/isValidLanguage";
 import {
   BREADCRUMB_LABELS,
@@ -75,6 +76,10 @@ export default async function Page({
   const realParams = await params;
   const lang = isValidLanguage(realParams?.lang) ? realParams.lang : "en";
 
+  const headersList = await headers();
+  const countryHeader = headersList.get("x-vercel-ip-country") || "US";
+  const resolvedPrice = getPriceForCountry(countryHeader);
+
   const host = ((await headers()).get("host") ?? "").toLowerCase().trim();
   const { baseUrl } = getMetadataBase(host, false);
 
@@ -91,7 +96,11 @@ export default async function Page({
   return (
     <>
       <JsonLd data={breadcrumbSchema} />
-      <PricingPage translations={translations} lang={lang} />
+      <PricingPage
+        translations={translations}
+        lang={lang}
+        priceOverrides={resolvedPrice}
+      />
     </>
   );
 }
