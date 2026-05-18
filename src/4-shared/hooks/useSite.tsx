@@ -39,6 +39,8 @@ export function useSite(user: User | null) {
           domains,
           created_at,
           pending_custom_domains,
+          seo_enabled,
+          plan_type,
           domain_statuses
         `,
         )
