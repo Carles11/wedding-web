@@ -1,7 +1,7 @@
 import { BuilderButton } from "@/4-shared/ui/builder/BuilderButton";
 import { UpgradeCTAModal } from "@/4-shared/ui/builder/UpgradeCTAModal";
 import { Toggle } from "@/4-shared/ui/commons/buttons/Toggle";
-import { useState } from "react";
+import { useEffect, useState } from "react"; // 🚀 Added useEffect
 import { PasswordChangeModal } from "../PasswordChangeModal";
 
 import { triggerSeoSync } from "@/4-shared/api/seo/triggerSeoSync";
@@ -29,12 +29,18 @@ export const SecurityTab = ({
   const userIsPremium = planType === "premium";
 
   const [showModal, setShowModal] = useState(false);
-  const [seoEnabled, setSeoEnabled] = useState(site?.seo_enabled ?? true);
+  const [seoEnabled, setSeoEnabled] = useState(true); // 🚀 Set a neutral default state
   const [seoLoading, setSeoLoading] = useState(false);
   const [showUpgrade, setShowUpgrade] = useState(false);
 
+  // 🚀 THE FIX: Sync the UI toggle state whenever the async site data resolves
+  useEffect(() => {
+    if (site && site.seo_enabled !== undefined && site.seo_enabled !== null) {
+      setSeoEnabled(site.seo_enabled);
+    }
+  }, [site]);
+
   function goToPricing() {
-    // Use language-prefixed routing, not query param
     router.push(`/${lang || "en"}/pricing`);
   }
 
@@ -55,7 +61,7 @@ export const SecurityTab = ({
         .update({ seo_enabled: value })
         .eq("id", site.id);
 
-      // Trigger IndexNow when SEO is enabled (false → true)
+      // Trigger IndexNow when SEO is flipped from false → true
       if (value && wasDisabled) {
         void triggerSeoSync(site.id);
       }
@@ -78,7 +84,6 @@ export const SecurityTab = ({
         </div>
 
         <div className="p-6 space-y-4">
-          {/* SEO Visibility Row (Matches Password Row Style) */}
           <div className="flex items-center justify-between p-4 bg-(--builder-color-muted-surface)/20 rounded-lg border border-transparent hover:border-(--builder-color-primary)/10 transition-colors">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-(--builder-color-primary)/10 flex items-center justify-center">
@@ -119,7 +124,6 @@ export const SecurityTab = ({
                 disabled={seoLoading}
                 aria-label="Toggle SEO"
               />
-              {/* Upgrade Modal for Free Users */}
               <UpgradeCTAModal
                 open={showUpgrade}
                 onClose={() => setShowUpgrade(false)}

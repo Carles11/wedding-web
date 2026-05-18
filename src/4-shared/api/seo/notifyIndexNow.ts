@@ -1,8 +1,7 @@
 export async function notifyIndexNow(urls: string[], host: string) {
   if (!urls.length || !process.env.INDEXNOW_KEY) return;
 
-  const BING_KEY = process.env.INDEXNOW_KEY;
-
+  const BING_KEY = process.env.INDEXNOW_KEY.trim().replace(/['"]/g, "");
   try {
     const response = await fetch("https://api.indexnow.org/indexnow", {
       method: "POST",
