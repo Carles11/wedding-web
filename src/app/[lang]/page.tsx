@@ -128,7 +128,10 @@ export default async function Page({
   const resolvedParams = await params;
   const langInput = resolvedParams?.lang || "en";
 
-  const host = ((await headers()).get("host") ?? "").toLowerCase().trim();
+  const headersList = await headers();
+  const host = (headersList.get("host") ?? "").toLowerCase().trim();
+  const countryHeader = headersList.get("x-vercel-ip-country") || "US";
+
   const site = await getSiteByDomain(host);
 
   // --- CASE A: TENANT SITE ---
@@ -181,7 +184,11 @@ export default async function Page({
     <div className="marketing-theme">
       <JsonLd data={breadcrumbSchema} />
       <MarketingHeader lang={lang} translations={translations} />
-      <MarketingPageComponent initialLang={lang} translations={translations} />
+      <MarketingPageComponent
+        initialLang={lang}
+        translations={translations}
+        countryCode={countryHeader}
+      />
       <Footer lang={lang} translations={translations} />
     </div>
   );

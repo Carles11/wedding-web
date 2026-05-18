@@ -24,7 +24,7 @@ export default function PricingPage({
         }
         fine_print={
           translations["pricing.fine_print"] ??
-          "All prices are in EUR and include any applicable taxes. The Premium plan is a single, one-time payment—no annual renewals, no hidden costs, no surprises."
+          "All prices include any applicable local taxes. This plan is a single, one-time payment—no annual renewals, no hidden costs, no surprises."
         }
       >
         <PricingCTATableAdapter
