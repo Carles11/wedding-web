@@ -1,6 +1,7 @@
 "use server";
 
 import { createSupabaseSSRClient } from "@/4-shared/lib/supabase/server";
+import { cache as reactCache } from "react"; // 🚀 Added for single-request deduplication
 import {
   GlobalTranslationRow,
   TranslationDictionary,
@@ -8,7 +9,11 @@ import {
 } from "../types";
 
 const CACHE_TTL_MS = 1000 * 60 * 2; // 2 minutes (site+locale cache)
-const cache = new Map<string, { ts: number; data: TranslationDictionary }>();
+// 🚀 Renamed to avoid collision with React's cache utility
+const perSiteCache = new Map<
+  string,
+  { ts: number; data: TranslationDictionary }
+>();
 
 function cacheKey(siteId: string | null, locale: string) {
   return `${siteId ?? "global"}:${locale}`;
@@ -85,7 +90,6 @@ export async function fetchGlobalTranslations(
 
   try {
     const supabase = await createSupabaseSSRClient();
-    // NOTE: avoid putting a generic type argument on .from(...) to keep compatibility across SDK versions.
     const { data, error } = await supabase
       .from("global_translations")
       .select("key, locale, value")
@@ -167,36 +171,33 @@ export async function fetchSiteTranslations(
 
 /**
  * Returns merged translations for a site and locale.
- *
- * Merge order (priority highest to lowest):
- *  - site-specific translations (site_translations)
- *  - global translations (global_translations) with primary locale preferred over fallback
- *
- * A per-site+locale in-memory cache prevents repeated merges for the CACHE_TTL_MS duration.
+ * Wrapped in reactCache to eliminate duplicate parallel fetches during a single request layout lifecycle.
  */
-export async function getMergedTranslations(
-  siteId: string | null,
-  locale: string,
-  fallbackLocale = "en",
-): Promise<TranslationDictionary> {
-  const key = cacheKey(siteId, locale);
-  const cached = cache.get(key);
-  if (cached && Date.now() - cached.ts < CACHE_TTL_MS) return cached.data;
+export const getMergedTranslations = reactCache(
+  async function getMergedTranslations(
+    siteId: string | null,
+    locale: string,
+    fallbackLocale = "en",
+  ): Promise<TranslationDictionary> {
+    const key = cacheKey(siteId, locale);
+    const cached = perSiteCache.get(key);
+    if (cached && Date.now() - cached.ts < CACHE_TTL_MS) return cached.data;
 
-  // Fetch global translations in one call (helper prefers primary locale over fallback)
-  const [globalMerged, siteRequested] = await Promise.all([
-    fetchGlobalTranslations(locale, fallbackLocale),
-    siteId ? fetchSiteTranslations(siteId, locale) : Promise.resolve({}),
-  ]);
+    // Fetch global translations in one call (helper prefers primary locale over fallback)
+    const [globalMerged, siteRequested] = await Promise.all([
+      fetchGlobalTranslations(locale, fallbackLocale),
+      siteId ? fetchSiteTranslations(siteId, locale) : Promise.resolve({}),
+    ]);
 
-  const merged: TranslationDictionary = {
-    ...(globalMerged || {}),
-    ...(siteRequested || {}),
-  };
+    const merged: TranslationDictionary = {
+      ...(globalMerged || {}),
+      ...(siteRequested || {}),
+    };
 
-  cache.set(key, { ts: Date.now(), data: merged });
-  return merged;
-}
+    perSiteCache.set(key, { ts: Date.now(), data: merged });
+    return merged;
+  },
+);
 
 /* =========================
    Convenience helpers
@@ -220,11 +221,11 @@ export async function invalidateTranslationsCache(
   locale?: string,
 ) {
   if (locale) {
-    cache.delete(cacheKey(siteId, locale));
+    perSiteCache.delete(cacheKey(siteId, locale));
     return;
   }
   const prefix = cacheKey(siteId, "");
-  for (const k of cache.keys()) {
-    if (k.startsWith(prefix)) cache.delete(k);
+  for (const k of perSiteCache.keys()) {
+    if (k.startsWith(prefix)) perSiteCache.delete(k);
   }
 }

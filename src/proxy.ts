@@ -1,42 +1,25 @@
 import { SUPPORTED_LANGUAGES } from "@/4-shared/config/i18n";
+import { getSiteByDomain } from "@/4-shared/lib/getSiteByDomain";
 import { updateSession } from "@/4-shared/lib/supabase/middleware";
-import { createSupabaseSSRClient } from "@/4-shared/lib/supabase/server";
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function proxy(request: NextRequest) {
   const { pathname, hostname } = request.nextUrl;
 
-  // 1. PHASE ONE: Handle the Root Redirect (/)
+  // 1. PHASE ONE: Handle Root Language Routing (/)
   if (pathname === "/") {
-    const acceptLang = request.headers.get("accept-language") || "";
-    const langCandidates = acceptLang
-      .split(",")
-      .map((l) => l.split("-")[0].split(";")[0].toLowerCase().trim());
+    const host = hostname.toLowerCase().trim();
 
-    // Initialize Supabase to check the specific tenant's settings
-    const supabase = await createSupabaseSSRClient();
-
-    // Resolve the subdomain from the host (e.g., 'carles.weddweb.com' -> 'carles')
-    // Adjust this logic if you use custom domains or different local dev setups
-    const subdomain = hostname.split(".")[0];
     const isMarketing =
-      hostname === "weddweb.com" ||
-      hostname === "localhost" ||
-      hostname === "127.0.0.1";
+      host === "weddweb.com" || host === "localhost" || host === "127.0.0.1";
 
     let allowedLangs: string[] = [...SUPPORTED_LANGUAGES];
     let defaultLang = "en";
 
-    // If it's a tenant site, fetch its specific language constraints
+    // Safely resolve tenant language preferences (handles custom domains correctly)
     if (!isMarketing) {
-      const { data: site } = await supabase
-        .from("sites")
-        .select("languages, default_lang")
-        .eq("subdomain", subdomain)
-        .single();
-
+      const site = await getSiteByDomain(host);
       if (site) {
-        // Use site-specific languages if they exist, otherwise fallback to its default
         allowedLangs =
           site.languages?.length > 0
             ? site.languages
@@ -45,26 +28,28 @@ export async function proxy(request: NextRequest) {
       }
     }
 
-    // Find the first match that the user wants AND the site supports
+    // Parse guest browser preferences
+    const acceptLang = request.headers.get("accept-language") || "";
+    const langCandidates = acceptLang
+      .split(",")
+      .map((l) => l.split("-")[0].split(";")[0].toLowerCase().trim());
+
+    // Match browser request with site allocation
     const bestLang =
       langCandidates.find((candidate) => allowedLangs.includes(candidate)) ||
       defaultLang;
 
+    // Fast HTTP Redirect to the true canonical language instance
     return NextResponse.redirect(new URL(`/${bestLang}`, request.url));
   }
 
-  // 2. PHASE TWO: Handle Supabase Session & Protected Routes (Auth/Builder)
+  // 2. PHASE TWO: Handle Supabase Session & Protected Dashboard Routes
   return await updateSession(request);
 }
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except:
-     * - api routes
-     * - Next.js internals
-     * - any path that resolves to a static asset file
-     */
+    // Match all paths except API routes, static assets, and optimization targets
     "/((?!api|_next/static|_next/image|.*\\.[^/]+$).*)",
   ],
 };
