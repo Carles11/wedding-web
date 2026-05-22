@@ -55,7 +55,7 @@ export default async function LangLayout({
           name="google-site-verification"
           content={GOOGLE_SITE_VERIFICATION}
         />
-
+        <meta name="yandex-verification" content="21ca7d8dc3b9cc74" />
         {/*
         Single consolidated @graph block — Organization, WebSite, and SoftwareApplication
         are linked via @id references so LLMs and structured-data validators see one
