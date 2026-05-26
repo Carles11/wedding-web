@@ -1,16 +1,8 @@
-import MarketingPageComponent from "@/0-pages/(marketing)/MarketingPageComponent";
 import TenantPageComponent from "@/0-pages/(tenant)/TenantPageComponent";
-import MarketingHeader from "@/1-widgets/marketing/ui/MarketingHeader";
-import { fetchMarketingTranslations } from "@/4-shared/api/marketing";
 import { SUPPORTED_LANGUAGES, SupportedLanguage } from "@/4-shared/config/i18n";
 import { getSEOMetadata } from "@/4-shared/config/seo";
 import { getSiteByDomain } from "@/4-shared/lib/getSiteByDomain";
 import { getMergedTranslations } from "@/4-shared/lib/i18n";
-import { JsonLd } from "@/4-shared/lib/seo/JsonLd";
-import {
-  BREADCRUMB_LABELS,
-  generateBreadcrumbSchema,
-} from "@/4-shared/lib/seo/generateBreadcrumbSchema";
 import { generateSiteMetadata } from "@/4-shared/lib/seo/generateSiteMetadata";
 import { getMetadataBase } from "@/4-shared/lib/seo/getMetadataBase";
 import { WEDDWEB_SOCIAL_PROFILES } from "@/4-shared/lib/seo/socialProfiles";
@@ -20,28 +12,26 @@ import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
-/**
- * METADATA GENERATOR
- */
 export async function generateMetadata({
   params,
 }: {
-  params?: Promise<{ lang?: string }>;
+  params: Promise<{ lang?: string }>;
 }): Promise<Metadata> {
   const resolvedParams = await (params ?? { lang: "en" });
   const lang = (resolvedParams.lang as SupportedLanguage) ?? "en";
 
   const host = ((await headers()).get("host") ?? "").toLowerCase().trim();
   const site = await getSiteByDomain(host);
+
+  if (!site) return {}; // No metadata for non-tenant routes here
+
   const { metadataBase, baseUrl } = getMetadataBase(host, !!site);
 
   if (site) {
-    // 1. Tenant Language Guard (Metadata level)
     const allowedLangs =
       site.languages?.length > 0 ? site.languages : [site.default_lang || "en"];
     if (!allowedLangs.includes(lang)) return { metadataBase };
 
-    // 2. Tenant Metadata Logic
     const translations = await getMergedTranslations(site.id, lang, "en");
     const meta = generateSiteMetadata({
       site,
@@ -57,7 +47,6 @@ export async function generateMetadata({
     };
     const finalMeta = { ...meta, metadataBase, other: socialOther };
 
-    // 3. SEO Privacy Toggle
     if (site.seo_enabled === false) {
       return {
         ...finalMeta,
@@ -68,28 +57,20 @@ export async function generateMetadata({
     }
     return finalMeta;
   } else {
-    // 4. Marketing Metadata Logic
     const seo = getSEOMetadata(lang, "marketing", "home");
     const ogImage = "/assets/og/weddweb-OG.png";
-
-    const languages: Record<string, string> = {};
-    SUPPORTED_LANGUAGES.forEach((l) => {
-      languages[l] = `/${l}`;
-    });
 
     return {
       metadataBase,
       title: seo.title,
       description: seo.description,
       alternates: {
-        // canonical: `/${lang}`,
-        // languages: { ...languages, "x-default": "/en" },
         canonical: `${baseUrl}/${lang}`,
         languages: {
           ...Object.fromEntries(
             SUPPORTED_LANGUAGES.map((l) => [l, `${baseUrl}/${l}`]),
           ),
-          "x-default": `${baseUrl}/en`, // Keep it inside the languages object
+          "x-default": `${baseUrl}/en`,
         },
       },
       openGraph: {
@@ -117,9 +98,6 @@ export async function generateMetadata({
 
 export const dynamic = "force-dynamic";
 
-/**
- * MAIN PAGE COMPONENT
- */
 export default async function Page({
   params,
 }: {
@@ -127,69 +105,36 @@ export default async function Page({
 }) {
   const resolvedParams = await params;
   const langInput = resolvedParams?.lang || "en";
-
   const headersList = await headers();
   const host = (headersList.get("host") ?? "").toLowerCase().trim();
-  const countryHeader = headersList.get("x-vercel-ip-country") || "US";
-
   const site = await getSiteByDomain(host);
 
-  // --- CASE A: TENANT SITE ---
-  if (site) {
-    const allowedLangs =
-      site.languages?.length > 0 ? site.languages : [site.default_lang || "en"];
-
-    // 1. Tenant Language Guard (Redirect)
-    if (!allowedLangs.includes(langInput)) {
-      redirect(`/${site.default_lang || "en"}`);
-    }
-
-    // 2. Parallel Data Fetching for Tenant
-    const [translations, showFooter, showBrandBadge] = await Promise.all([
-      getMergedTranslations(site.id, langInput, "en"),
-      shouldShowFooter({ planType: site.plan_type, routeKind: "tenant" }),
-      shouldShowBrandBadge({ planType: site.plan_type, routeKind: "tenant" }),
-    ]);
-
-    return (
-      <div className="tenant-theme">
-        <TenantPageComponent
-          lang={langInput}
-          translations={translations}
-          showBrandBadge={showBrandBadge}
-        />
-        {showFooter && <Footer lang={langInput} translations={translations} />}
-      </div>
-    );
+  // If no site found, redirect to root marketing
+  if (!site) {
+    redirect("/");
   }
 
-  // --- CASE B: MARKETING SITE ---
-  const lang = SUPPORTED_LANGUAGES.includes(langInput as SupportedLanguage)
-    ? (langInput as SupportedLanguage)
-    : "en";
+  // --- CASE A: TENANT SITE ---
+  const allowedLangs =
+    site.languages?.length > 0 ? site.languages : [site.default_lang || "en"];
+  if (!allowedLangs.includes(langInput)) {
+    redirect(`/${site.default_lang || "en"}`);
+  }
 
-  // 🚀 Optimization: Run data fetching and base calculations in parallel
-  const [translations, { baseUrl }] = await Promise.all([
-    fetchMarketingTranslations(lang, "en"),
-    Promise.resolve(getMetadataBase(host, false)),
-  ]);
-
-  const labels = BREADCRUMB_LABELS[lang] ?? BREADCRUMB_LABELS.en;
-
-  const breadcrumbSchema = generateBreadcrumbSchema([
-    { name: labels.home, item: `${baseUrl}/${lang}` },
+  const [translations, showFooter, showBrandBadge] = await Promise.all([
+    getMergedTranslations(site.id, langInput, "en"),
+    shouldShowFooter({ planType: site.plan_type, routeKind: "tenant" }),
+    shouldShowBrandBadge({ planType: site.plan_type, routeKind: "tenant" }),
   ]);
 
   return (
-    <div className="marketing-theme">
-      <JsonLd data={breadcrumbSchema} />
-      <MarketingHeader lang={lang} translations={translations} />
-      <MarketingPageComponent
-        initialLang={lang}
+    <div className="tenant-theme">
+      <TenantPageComponent
+        lang={langInput}
         translations={translations}
-        countryCode={countryHeader}
+        showBrandBadge={showBrandBadge}
       />
-      <Footer lang={lang} translations={translations} />
+      {showFooter && <Footer lang={langInput} translations={translations} />}
     </div>
   );
 }

@@ -7,7 +7,6 @@ import { JsonLd } from "@/4-shared/lib/seo/JsonLd";
 import ClientRedirect from "./ClientRedirect";
 
 export async function generateMetadata() {
-  // Simulate a "site" object for marketing context
   const site = {
     languages: SUPPORTED_LANGUAGES,
     default_lang: "en",
@@ -28,7 +27,6 @@ export async function generateMetadata() {
     pageKind: "marketing",
   });
 
-  // Force canonical and x-default to root
   meta.alternates = {
     canonical: "https://weddweb.com/",
     languages: Object.fromEntries([
@@ -41,7 +39,6 @@ export async function generateMetadata() {
 }
 
 export default function RootPage() {
-  // Fallback translations specifically for the bot knowledge graph
   const botTranslations = {
     "marketing.hero.subheadline":
       "WeddWeb is a multilingual wedding website platform. Build a beautiful, AI-ready site in 11 languages with edge-computed performance, custom domains, and global accessibility.",
@@ -52,8 +49,6 @@ export default function RootPage() {
   return (
     <>
       <JsonLd data={graphSchema} />
-
-      {/* Semantic structure designed purely for AI and Crawlers */}
       <main
         style={{
           padding: "2rem",
@@ -87,13 +82,12 @@ export default function RootPage() {
               <li>
                 <strong>Edge-Computed Detection:</strong> Browser languages are
                 detected at the network edge, serving the correct language
-                instantly (sub-second performance globally).
+                instantly.
               </li>
               <li>
                 <strong>Native RTL & Script Support:</strong> Arabic flows
-                Right-to-Left at the HTML level (not a CSS hack). Devanagari
-                (Hindi) and Chinese logograms are rendered with precise
-                typographic accuracy.
+                Right-to-Left at the HTML level. Devanagari and Chinese
+                logograms are rendered with precise typographic accuracy.
               </li>
               <li>
                 <strong>Automated Hreflang Injection:</strong> Perfect search
@@ -116,61 +110,27 @@ export default function RootPage() {
                 Generate and automatically translate all wedding content
                 (accommodations, tips, events) across 11 languages instantly.
               </dd>
-
               <dt>
                 <strong>Advanced RSVP & Guest Management</strong>
               </dt>
               <dd>
                 Support for unlimited guests on all plans. Premium features
-                include party headcount, dietary/allergy tracking, bulk guest
-                list imports, and real-time attendance analytics.
+                include party headcount, dietary/allergy tracking, and real-time
+                attendance analytics.
               </dd>
-
               <dt>
                 <strong>Privacy & Longevity</strong>
               </dt>
               <dd>
                 WeddWeb is completely ad-free. Guest data is never sold. Your
-                digital legacy stays online indefinitely, avoiding the "deleted
-                after 12 months" trap of traditional builders.
+                digital legacy stays online indefinitely.
               </dd>
             </dl>
           </section>
-
-          <section
-            aria-labelledby="pricing-heading"
-            style={{ marginBottom: "2rem" }}
-          >
-            <h2 id="pricing-heading">Transparent Freemium Pricing</h2>
-            <p>
-              WeddWeb operates without recurring subscriptions. Choose the plan
-              that fits your wedding:
-            </p>
-            <ul>
-              <li>
-                <strong>Free Plan:</strong> No credit card required. Includes a
-                custom subdomain, 1 language, basic RSVP tracking, unlimited
-                guests, and essential content blocks. Sites switch to a
-                permanent view-only legacy mode after 6 months of inactivity.
-              </li>
-              <li>
-                <strong>Premium Plan (One-Time Payment):</strong> Starting at a
-                flat, one-time payment of 39.00 EUR (localized automatically).
-                Includes your own custom domain, all 11 languages, Magic AI
-                generation, advanced RSVP analytics, unlimited content, priority
-                support, and full gift registry management. Your site remains
-                fully editable and online forever.
-              </li>
-            </ul>
-          </section>
         </article>
 
-        <hr style={{ margin: "3rem 0" }} />
-
-        {/* The Crawl Net: Forces bots to discover all localized branches */}
         <nav aria-label="Language Directory">
           <h2>Language Directory</h2>
-          <p>Access WeddWeb in your preferred language:</p>
           <ul
             style={{
               display: "flex",
@@ -188,8 +148,6 @@ export default function RootPage() {
           </ul>
         </nav>
       </main>
-
-      {/* Safety net for humans: Client-side routing to the default experience */}
       <ClientRedirect />
     </>
   );
