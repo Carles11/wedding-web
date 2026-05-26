@@ -4,8 +4,16 @@ import { SUPPORTED_LANGUAGES } from "@/4-shared/config/i18n";
 import { generateGraphSchema } from "@/4-shared/lib/seo/generateGraphSchema";
 import { generateSiteMetadata } from "@/4-shared/lib/seo/generateSiteMetadata";
 import { JsonLd } from "@/4-shared/lib/seo/JsonLd";
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
+
+/**
+ * Root page — only reached by search engine bots.
+ * Human users are redirected at the edge in src/proxy.ts before this renders.
+ *
+ * Renders real, indexable English marketing content with:
+ * - Self-referencing canonical: https://weddweb.com/
+ * - Full hreflang set for all supported languages
+ * - x-default pointing to https://weddweb.com/ (not /en/)
+ */
 
 export async function generateMetadata() {
   const site = { languages: SUPPORTED_LANGUAGES, default_lang: "en" };
@@ -24,6 +32,9 @@ export async function generateMetadata() {
     baseUrl,
     pageKind: "marketing",
   });
+
+  // Override alternates to ensure canonical is the root URL,
+  // and x-default points to the root — not /en/
   meta.alternates = {
     canonical: "https://weddweb.com/",
     languages: Object.fromEntries([
@@ -31,34 +42,14 @@ export async function generateMetadata() {
       ["x-default", "https://weddweb.com/"],
     ]),
   };
+
   return meta;
 }
 
 export default async function RootPage() {
-  const headersList = await headers();
-  const ua = (headersList.get("user-agent") || "").toLowerCase();
+  // No UA detection or redirect here — that is handled upstream in proxy.ts.
+  // This page always renders SEO content for bots that reach it.
 
-  const BOT_REGEX =
-    /googlebot|bingbot|duckduckbot|slurp|yandexbot|baiduspider|applebot|facebookexternalhit|twitterbot|linkedinbot|rogerbot|ahrefsbot|semrushbot|mj12bot|chatgpt-user|oai-searchbot|gptbot|claudebot|anthropic-ai|perplexitybot/i;
-
-  const isBot = BOT_REGEX.test(ua);
-
-  // HUMAN USERS: Redirect immediately on server
-  if (!isBot) {
-    const acceptLang = headersList.get("accept-language") || "";
-    const langCandidates = acceptLang
-      .split(",")
-      .map((l) => l.split("-")[0].split(";")[0].toLowerCase().trim());
-
-    const bestLang =
-      langCandidates.find((c) => SUPPORTED_LANGUAGES.includes(c as any)) ||
-      "en";
-
-    // Redirect happens server-side, no flash to client
-    redirect(`/${bestLang}`);
-  }
-
-  // BOTS ONLY: Render the static SEO structure
   const botTranslations = {
     "marketing.hero.subheadline":
       "WeddWeb is a multilingual wedding website platform. Build a beautiful, AI-ready site in 11 languages with edge-computed performance, custom domains, and global accessibility.",
