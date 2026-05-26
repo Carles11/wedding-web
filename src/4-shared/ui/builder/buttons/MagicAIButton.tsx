@@ -49,7 +49,7 @@ export const MagicAIButton = ({
         icon={<Sparkles size={14} className="text-emerald-500" />}
         onClick={handleClick}
       >
-        AI Assist
+        {translations["builder.ai.button_text"] || "Write & Translate"}
       </BuilderButton>
 
       <UpgradeCTAModal
