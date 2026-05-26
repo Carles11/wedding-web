@@ -17,6 +17,7 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
         disallow: [
           "/_next/data/", // Block ISR/SSR JSON payloads (duplicate content)
           "/api/", // API routes — no HTML, must stay blocked
+          "/_next/static/", // Block static assets (fonts, etc) from being crawled
         ],
       },
 
