@@ -14,8 +14,10 @@ export async function proxy(request: NextRequest) {
       ua.includes("googlebot") ||
       ua.includes("bingbot") ||
       ua.includes("duckduckbot") ||
-      ua.includes("slurp")
+      ua.includes("slurp") ||
+      ua.includes("yandexbot")
     ) {
+      // Return early here so the redirect logic below is never reached
       return NextResponse.next();
     }
 
