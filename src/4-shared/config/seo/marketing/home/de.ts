@@ -46,7 +46,7 @@ export const seoMetadata: SitewideSEO = {
       { locale: "pt", url: "https://weddweb.com/pt" },
       { locale: "ru", url: "https://weddweb.com/ru" },
       { locale: "it", url: "https://weddweb.com/it" },
-      { locale: "x-default", url: "https://weddweb.com/en" },
+      { locale: "x-default", url: "https://weddweb.com/" },
     ],
   },
 };

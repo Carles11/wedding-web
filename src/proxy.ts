@@ -8,8 +8,18 @@ export async function proxy(request: NextRequest) {
 
   // 1. PHASE ONE: Handle Root Language Routing (/)
   if (pathname === "/") {
-    const host = hostname.toLowerCase().trim();
+    // Crawler bypass: let known bots see the root page for indexing
+    const ua = (request.headers.get("user-agent") || "").toLowerCase();
+    if (
+      ua.includes("googlebot") ||
+      ua.includes("bingbot") ||
+      ua.includes("duckduckbot") ||
+      ua.includes("slurp")
+    ) {
+      return NextResponse.next();
+    }
 
+    const host = hostname.toLowerCase().trim();
     const isMarketing =
       host === "weddweb.com" || host === "localhost" || host === "127.0.0.1";
 

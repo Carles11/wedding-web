@@ -52,14 +52,17 @@ export async function GET() {
         p: "0.5",
         f: "monthly",
       };
-      // x-default always points to English
+      // x-default points to root for homepage, /en/... for inner pages
+      const xDefaultHref =
+        page === "" ? `${baseUrl}/` : `${baseUrl}/en${page ? `/${page}` : ""}`;
       const alternates = [
-        `<xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"${baseUrl}/en${page ? `/${page}` : ""}\" />`,
+        `<xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"${xDefaultHref}\" />`,
         ...SUPPORTED_LANGUAGES.map(
           (l: string) =>
             `<xhtml:link rel=\"alternate\" hreflang=\"${l}\" href=\"${baseUrl}/${l}${page ? `/${page}` : ""}\" />`,
         ),
       ].join("");
+
       return SUPPORTED_LANGUAGES.map((lang: string) => {
         const loc = `${baseUrl}/${lang}${page ? `/${page}` : ""}`;
         return `<url>\n<loc>${escapeXml(loc)}</loc>\n<lastmod>${getW3CDate()}</lastmod>\n<changefreq>${changefreq}</changefreq>\n<priority>${priority}</priority>\n${alternates}\n</url>`;
