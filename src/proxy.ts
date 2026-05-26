@@ -4,6 +4,7 @@ import { updateSession } from "@/4-shared/lib/supabase/middleware";
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function proxy(request: NextRequest) {
+  console.log("PROXY_MIDDLEWARE_TRIGGERED_FOR:", request.nextUrl.pathname);
   const { pathname, hostname } = request.nextUrl;
 
   // 1. PHASE ONE: Handle Root Language Routing (/)
