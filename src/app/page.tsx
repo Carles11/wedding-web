@@ -4,13 +4,11 @@ import { SUPPORTED_LANGUAGES } from "@/4-shared/config/i18n";
 import { generateGraphSchema } from "@/4-shared/lib/seo/generateGraphSchema";
 import { generateSiteMetadata } from "@/4-shared/lib/seo/generateSiteMetadata";
 import { JsonLd } from "@/4-shared/lib/seo/JsonLd";
-import ClientRedirect from "./ClientRedirect";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 
 export async function generateMetadata() {
-  const site = {
-    languages: SUPPORTED_LANGUAGES,
-    default_lang: "en",
-  };
+  const site = { languages: SUPPORTED_LANGUAGES, default_lang: "en" };
   const baseUrl = "https://weddweb.com";
   const lang = "en";
   const translations = {
@@ -26,7 +24,6 @@ export async function generateMetadata() {
     baseUrl,
     pageKind: "marketing",
   });
-
   meta.alternates = {
     canonical: "https://weddweb.com/",
     languages: Object.fromEntries([
@@ -34,11 +31,34 @@ export async function generateMetadata() {
       ["x-default", "https://weddweb.com/"],
     ]),
   };
-
   return meta;
 }
 
-export default function RootPage() {
+export default async function RootPage() {
+  const headersList = await headers();
+  const ua = (headersList.get("user-agent") || "").toLowerCase();
+
+  const BOT_REGEX =
+    /googlebot|bingbot|duckduckbot|slurp|yandexbot|baiduspider|applebot|facebookexternalhit|twitterbot|linkedinbot|rogerbot|ahrefsbot|semrushbot|mj12bot|chatgpt-user|oai-searchbot|gptbot|claudebot|anthropic-ai|perplexitybot/i;
+
+  const isBot = BOT_REGEX.test(ua);
+
+  // HUMAN USERS: Redirect immediately on server
+  if (!isBot) {
+    const acceptLang = headersList.get("accept-language") || "";
+    const langCandidates = acceptLang
+      .split(",")
+      .map((l) => l.split("-")[0].split(";")[0].toLowerCase().trim());
+
+    const bestLang =
+      langCandidates.find((c) => SUPPORTED_LANGUAGES.includes(c as any)) ||
+      "en";
+
+    // Redirect happens server-side, no flash to client
+    redirect(`/${bestLang}`);
+  }
+
+  // BOTS ONLY: Render the static SEO structure
   const botTranslations = {
     "marketing.hero.subheadline":
       "WeddWeb is a multilingual wedding website platform. Build a beautiful, AI-ready site in 11 languages with edge-computed performance, custom domains, and global accessibility.",
@@ -73,26 +93,18 @@ export default function RootPage() {
             style={{ marginBottom: "2rem" }}
           >
             <h2 id="localization-heading">Global Localization Engine</h2>
-            <p>
-              WeddWeb ensures that every guest feels honored in their native
-              language without jarring redirects or hunting for language
-              selectors.
-            </p>
             <ul>
               <li>
-                <strong>Edge-Computed Detection:</strong> Browser languages are
-                detected at the network edge, serving the correct language
-                instantly.
+                <strong>Edge-Computed Detection:</strong> Browser languages
+                detected at the network edge.
               </li>
               <li>
-                <strong>Native RTL & Script Support:</strong> Arabic flows
-                Right-to-Left at the HTML level. Devanagari and Chinese
-                logograms are rendered with precise typographic accuracy.
+                <strong>Native RTL & Script Support:</strong> Proper HTML-level
+                flow for Arabic, Hindi, and Chinese.
               </li>
               <li>
-                <strong>Automated Hreflang Injection:</strong> Perfect search
-                engine visibility in all 11 supported languages with zero
-                duplicate content penalties.
+                <strong>Automated Hreflang Injection:</strong> Perfect SEO
+                visibility in 11 languages.
               </li>
             </ul>
           </section>
@@ -104,26 +116,23 @@ export default function RootPage() {
             <h2 id="features-heading">Core Platform Capabilities</h2>
             <dl>
               <dt>
-                <strong>Magic AI Writer & Translation</strong>
+                <strong>Magic AI Writer</strong>
               </dt>
               <dd>
-                Generate and automatically translate all wedding content
-                (accommodations, tips, events) across 11 languages instantly.
+                Generate and translate wedding content across 11 languages
+                instantly.
               </dd>
               <dt>
-                <strong>Advanced RSVP & Guest Management</strong>
+                <strong>Advanced RSVP</strong>
               </dt>
               <dd>
-                Support for unlimited guests on all plans. Premium features
-                include party headcount, dietary/allergy tracking, and real-time
-                attendance analytics.
+                Unlimited guests, dietary tracking, and attendance analytics.
               </dd>
               <dt>
-                <strong>Privacy & Longevity</strong>
+                <strong>Privacy</strong>
               </dt>
               <dd>
-                WeddWeb is completely ad-free. Guest data is never sold. Your
-                digital legacy stays online indefinitely.
+                Ad-free, zero data selling, and permanent online longevity.
               </dd>
             </dl>
           </section>
@@ -148,7 +157,6 @@ export default function RootPage() {
           </ul>
         </nav>
       </main>
-      <ClientRedirect />
     </>
   );
 }

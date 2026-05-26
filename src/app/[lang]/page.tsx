@@ -90,7 +90,6 @@ export default async function Page({
   const countryHeader = headersList.get("x-vercel-ip-country") || "US";
   const site = await getSiteByDomain(host);
 
-  // --- CASE A: TENANT SITE ---
   if (site) {
     const allowedLangs =
       site.languages?.length > 0 ? site.languages : [site.default_lang || "en"];
@@ -115,7 +114,6 @@ export default async function Page({
     );
   }
 
-  // --- CASE B: MARKETING SITE (FALLBACK - NOT REDIRECTED) ---
   const lang = SUPPORTED_LANGUAGES.includes(langInput as SupportedLanguage)
     ? (langInput as SupportedLanguage)
     : "en";

@@ -2,10 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 /**
- * Middleware helper to refresh auth sessions and protect routes.
- *
- * This creates a Supabase client that can read/write cookies in middleware,
- * ensuring user sessions are kept fresh across requests.
+ * Refresh Supabase auth sessions and protect authenticated routes.
  */
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
@@ -20,13 +17,16 @@ export async function updateSession(request: NextRequest) {
         getAll() {
           return request.cookies.getAll();
         },
+
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) =>
+          cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value),
           );
+
           supabaseResponse = NextResponse.next({
             request,
           });
+
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options),
           );
@@ -35,32 +35,37 @@ export async function updateSession(request: NextRequest) {
     },
   );
 
-  // IMPORTANT: Avoid writing any logic between createServerClient and
-  // supabase.auth.getUser(). A simple mistake could make it very hard to debug
-  // issues with users being randomly logged out.
+  const pathname = request.nextUrl.pathname;
 
+  // Only protect authenticated app routes
+  const isProtectedRoute = /^\/[a-z]{2}\/(builder|dashboard)(\/|$)/.test(
+    pathname,
+  );
+
+  // Public routes do not require auth checks
+  if (!isProtectedRoute) {
+    return supabaseResponse;
+  }
+
+  // IMPORTANT:
+  // Avoid inserting logic between createServerClient()
+  // and supabase.auth.getUser()
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Protected routes: redirect to login if not authenticated
-  if (
-    !user &&
-    /^\/[a-z]{2}\/(builder|dashboard)/.test(request.nextUrl.pathname)
-  ) {
-    // Use language-prefixed routing for login redirect
-    const lang = request.nextUrl.pathname.split("/")[1] || "en";
+  // Redirect unauthenticated users to localized login
+  if (!user) {
+    const lang = pathname.split("/")[1] || "en";
+
     const url = request.nextUrl.clone();
+
     url.pathname = `/${lang}/auth/login`;
-    url.searchParams.set("redirectTo", request.nextUrl.pathname);
+
+    url.searchParams.set("redirectTo", pathname);
+
     return NextResponse.redirect(url);
   }
-
-  // IMPORTANT: You *must* return the supabaseResponse object as it is.
-  // If you're creating a new response object with NextResponse.next() make sure to:
-  // 1. Pass the request in it, like so: NextResponse.next({ request })
-  // 2. Copy over the cookies, like so: supabaseResponse.cookies.getAll().forEach(...)
-  // 3. Change the supabaseResponse object to your new response object and return it
 
   return supabaseResponse;
 }
