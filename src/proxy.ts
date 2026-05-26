@@ -1,20 +1,11 @@
 import { SUPPORTED_LANGUAGES } from "@/4-shared/config/i18n";
 import { getSiteByDomain } from "@/4-shared/lib/getSiteByDomain";
 import { updateSession } from "@/4-shared/lib/supabase/middleware";
-import { NextResponse, type NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-/**
- * Minimal reliable list of known search engine crawler User-Agents.
- */
 const BOT_REGEX =
   /googlebot|bingbot|duckduckbot|slurp|yandexbot|applebot|baiduspider/i;
 
-/**
- * Detect Next.js internal RSC (React Server Component) payload requests.
- * These are made by the client-side router during hydration and navigation.
- * They do NOT carry the original browser/bot UA, so they must be identified
- * by their Next.js-specific headers instead.
- */
 function isNextInternalRequest(request: NextRequest): boolean {
   return (
     request.headers.has("rsc") ||
@@ -24,10 +15,34 @@ function isNextInternalRequest(request: NextRequest): boolean {
   );
 }
 
+/**
+ * Extract the best language from a pathname.
+ * Returns "en" for the root path or any unrecognised segment.
+ */
+function extractLang(pathname: string): string {
+  const segment = pathname.split("/")[1] ?? "";
+  return SUPPORTED_LANGUAGES.includes(
+    segment as (typeof SUPPORTED_LANGUAGES)[number],
+  )
+    ? segment
+    : "en";
+}
+
+/**
+ * Build a new NextRequest that forwards all original headers plus
+ * x-detected-lang so the root layout can set <html lang="…"> correctly.
+ * Safe for GET requests (no body). POST/mutations never hit the root page.
+ */
+function withLangHeader(request: NextRequest, lang: string): NextRequest {
+  const headers = new Headers(request.headers);
+  headers.set("x-detected-lang", lang);
+  return new NextRequest(request.url, { headers });
+}
+
 export async function proxy(request: NextRequest) {
   const { pathname, hostname } = request.nextUrl;
 
-  // PHASE ONE: Handle Root Language Routing (/)
+  // ─── PHASE ONE: Root Language Routing (/) ────────────────────────────────
   if (pathname === "/") {
     const host = hostname.toLowerCase().trim();
 
@@ -37,23 +52,25 @@ export async function proxy(request: NextRequest) {
     if (isMarketing) {
       const ua = request.headers.get("user-agent") || "";
 
-      // Let bots through → renders page.tsx SEO content
+      // Bots: fall through to page.tsx which renders indexable SEO content
       if (BOT_REGEX.test(ua)) {
-        return NextResponse.next();
+        return NextResponse.next({
+          request: { headers: withLangHeader(request, "en").headers },
+        });
       }
 
-      // Let Next.js internal RSC fetches through →
-      // prevents client router from being redirected mid-hydration,
-      // which was causing Google's JS renderer to end up on /en/
+      // Next.js RSC fetches during hydration: fall through so the client
+      // router is not redirected mid-render (fixes Google WRS canonical issue)
       if (isNextInternalRequest(request)) {
-        return NextResponse.next();
+        return NextResponse.next({
+          request: { headers: withLangHeader(request, "en").headers },
+        });
       }
     }
 
     let allowedLangs: string[] = [...SUPPORTED_LANGUAGES];
     let defaultLang = "en";
 
-    // Resolve tenant language preferences for custom domains
     if (!isMarketing) {
       const site = await getSiteByDomain(host);
       if (site) {
@@ -65,23 +82,21 @@ export async function proxy(request: NextRequest) {
       }
     }
 
-    // Parse browser language preference
     const acceptLang = request.headers.get("accept-language") || "";
     const langCandidates = acceptLang
       .split(",")
       .map((l) => l.split("-")[0].split(";")[0].toLowerCase().trim());
 
-    // Match to best supported language
     const bestLang =
-      langCandidates.find((candidate) => allowedLangs.includes(candidate)) ||
-      defaultLang;
+      langCandidates.find((c) => allowedLangs.includes(c)) || defaultLang;
 
-    // Edge redirect — before any React rendering, no flash for humans
     return NextResponse.redirect(new URL(`/${bestLang}`, request.url));
   }
 
-  // PHASE TWO: Handle Supabase Session & Protected Dashboard Routes
-  return await updateSession(request);
+  // ─── PHASE TWO: Supabase Session + Protected Routes ──────────────────────
+  // Forward the detected lang so root layout can set <html lang="…"> correctly
+  const lang = extractLang(pathname);
+  return updateSession(withLangHeader(request, lang));
 }
 
 export default proxy;
