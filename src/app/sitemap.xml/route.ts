@@ -10,7 +10,7 @@ export async function GET(request: Request) {
   const host = (await headers()).get("host") || "";
 
   // Detect if the request is for the main marketing site
-  const isMainDomain = host.includes("weddweb.com");
+  const isMainDomain = host === "weddweb.com" || host === "www.weddweb.com";
 
   if (isMainDomain) {
     // Return the Main Index for the SaaS

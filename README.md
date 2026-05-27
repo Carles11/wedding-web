@@ -86,9 +86,10 @@ Each context uses a specialized fetcher with in-memory caching and automatic lan
 The i18n system is directly tied to platform SEO health:
 
 - **Language routing** — The active `lang` determines the URL path (e.g., `/en`, `/ca`).
-- **Metadata sync** — `generateSiteMetadata.ts` uses the `languages` array from the `sites` table to generate `hreflang` and `x-default` tags.
+- **Metadata sync** — `generateSiteMetadata.ts` uses the `languages` array from the `sites` table to dynamically build hreflang + canonical
 - **JSON-LD** — The `inLanguage` property in the `WeddingEvent` schema stays in sync with the current i18n context.
-- **Search engine pings** — Adding a new language triggers an IndexNow ping to Bing/Yandex automatically (when `seo_enabled` is true).
+- **Sitemap system** — Fully split into marketing + tenant + single-tenant streams
+- **IndexNow** — Automated Bing/Yandex pinging for content updates
 
 ### Adding or Updating Languages
 
