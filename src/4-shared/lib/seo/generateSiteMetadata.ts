@@ -8,6 +8,20 @@ import type { Metadata } from "next";
  * - Manages canonical and hreflang for custom domains vs subdomains.
  * - Enforces robots policy based on site settings or page kind.
  */
+const TITLE_SUFFIX: Record<string, string> = {
+  en: " Wedding Website | WeddWeb",
+  es: " - Sitio Web de Boda | WeddWeb",
+  ca: " - Lloc Web de Boda | WeddWeb",
+  fr: " - Site de Mariage | WeddWeb",
+  de: " - Hochzeitswebsite | WeddWeb",
+  it: " - Sito Web di Nozze | WeddWeb",
+  pt: " - Site de Casamento | WeddWeb",
+  ru: " - Свадебный сайт | WeddWeb",
+  zh: " 婚礼网站制作平台 | WeddWeb",
+  hi: " की विवाह वेबसाइट | WeddWeb",
+  ar: " موقع زفاف ويب | WeddWeb",
+};
+
 export function generateSiteMetadata({
   site,
   lang,
@@ -25,7 +39,7 @@ export function generateSiteMetadata({
 
   // Title and description logic
   const title = isTenant
-    ? translations["sections.hero.title"] || site?.title || `${site.subdomain} Wedding`
+    ? translations["sections.hero.title"] || site?.title || `${site.subdomain}${TITLE_SUFFIX[lang] || TITLE_SUFFIX.en}`
     : translations["meta.marketing_title"] || "Welcome | WeddWeb";
 
   const description = isTenant
