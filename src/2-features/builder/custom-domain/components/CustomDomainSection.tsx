@@ -274,12 +274,12 @@ export const CustomDomainSection: React.FC<CustomDomainSectionProps> = ({
 
   return (
     <section className="mt-8">
-      <Heading as="h3" className="font-semibold text-gray-900 pb-2">
+      <Heading as="h3" className="font-semibold text-gray-900 dark:text-gray-100 pb-2">
         {t(translations, "builder.domain.custom_domain_title", "Custom Domain")}
       </Heading>
 
       {/* Dynamic Subtitles applied here */}
-      <p className="text-sm text-gray-500 mb-4 max-w-xl">
+      <p className="text-sm text-gray-500 dark:text-gray-400 mb-4 max-w-xl">
         {userIsPremium
           ? t(
               translations,
@@ -294,8 +294,8 @@ export const CustomDomainSection: React.FC<CustomDomainSectionProps> = ({
       </p>
 
       {!userIsPremium ? (
-        <div className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 bg-gray-50 border border-gray-200 rounded-xl">
-          <div className="flex items-center gap-3 text-gray-500 flex-1">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl">
+          <div className="flex items-center gap-3 text-gray-500 dark:text-gray-400 flex-1">
             <span aria-hidden className="text-xl">
               🔒
             </span>
@@ -333,7 +333,7 @@ export const CustomDomainSection: React.FC<CustomDomainSectionProps> = ({
               <input
                 id="custom-domain-input"
                 type="text"
-                className="border border-gray-300 px-3 py-2 rounded-lg w-full sm:w-72 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                className="border border-gray-300 dark:border-gray-600 px-3 py-2 rounded-lg w-full sm:w-72 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent outline-none transition-all"
                 placeholder="yourwedding.com"
                 disabled={loading || localStatus === "saving"}
                 value={inputDomain}
@@ -356,26 +356,26 @@ export const CustomDomainSection: React.FC<CustomDomainSectionProps> = ({
 
             {!!localMsg && (
               <div
-                className={`text-xs mt-1 ${localStatus === "success" ? "text-green-700" : "text-red-500"}`}
+                className={`text-xs mt-1 ${localStatus === "success" ? "text-green-700 dark:text-green-400" : "text-red-500 dark:text-red-400"}`}
               >
                 {localMsg}
               </div>
             )}
             {!!domainError && (
-              <div className="text-xs mt-1 text-red-500">{domainError}</div>
+              <div className="text-xs mt-1 text-red-500 dark:text-red-400">{domainError}</div>
             )}
           </form>
 
           {allDomains.length > 0 && (
             <div className="mt-8">
-              <h5 className="font-semibold text-gray-900 mb-3">
+              <h5 className="font-semibold text-gray-900 dark:text-gray-100 mb-3">
                 {t(
                   translations,
                   "builder.domain.custom_domain_list_title",
                   "Connected Domains",
                 )}
               </h5>
-              <ul className="divide-y border border-gray-200 rounded-xl bg-white overflow-hidden shadow-sm">
+              <ul className="divide-y border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 overflow-hidden shadow-sm">
                 {allDomains.map((domain) => {
                   const status = getEffectiveStatus(domain);
                   const info = domainInfo[domain];
@@ -390,7 +390,7 @@ export const CustomDomainSection: React.FC<CustomDomainSectionProps> = ({
                     }
                   > = {
                     verified: {
-                      className: "bg-green-100 text-green-700",
+                      className: "bg-green-100 text-green-700 dark:text-green-400 dark:bg-green-950/40",
                       icon: (
                         <CheckCircle2
                           size={12}
@@ -404,7 +404,7 @@ export const CustomDomainSection: React.FC<CustomDomainSectionProps> = ({
                       ),
                     },
                     pending_certificate: {
-                      className: "bg-blue-100 text-blue-700",
+                      className: "bg-blue-100 text-blue-700 dark:text-blue-400 dark:bg-blue-950/40",
                       icon: (
                         <RefreshCw
                           size={12}
@@ -418,7 +418,7 @@ export const CustomDomainSection: React.FC<CustomDomainSectionProps> = ({
                       ),
                     },
                     pending: {
-                      className: "bg-yellow-100 text-yellow-700",
+                      className: "bg-yellow-100 text-yellow-700 dark:text-yellow-400 dark:bg-yellow-950/40",
                       icon: (
                         <AlertCircle size={12} className="inline mr-1 -mt-px" />
                       ),
@@ -429,7 +429,7 @@ export const CustomDomainSection: React.FC<CustomDomainSectionProps> = ({
                       ),
                     },
                     error: {
-                      className: "bg-red-100 text-red-700",
+                      className: "bg-red-100 text-red-700 dark:text-red-400 dark:bg-red-950/40",
                       icon: (
                         <XCircle size={12} className="inline mr-1 -mt-px" />
                       ),
@@ -447,9 +447,9 @@ export const CustomDomainSection: React.FC<CustomDomainSectionProps> = ({
                   return (
                     <React.Fragment key={domain}>
                       {/* Domain row */}
-                      <li className="flex items-center px-4 py-3 justify-between hover:bg-gray-50 transition-colors">
+                      <li className="flex items-center px-4 py-3 justify-between hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                         <div className="flex items-center gap-3">
-                          <span className="font-medium text-gray-700">
+                          <span className="font-medium text-gray-700 dark:text-gray-300">
                             {domain}
                           </span>
                           {status && (
@@ -497,9 +497,9 @@ export const CustomDomainSection: React.FC<CustomDomainSectionProps> = ({
 
                       {/* State C: Verified / Live */}
                       {status === "verified" && (
-                        <li className="bg-green-50/50 px-4 py-3 border-t border-green-100">
+                        <li className="bg-green-50/50 dark:bg-green-950/30 px-4 py-3 border-t border-green-100 dark:border-green-800/50">
                           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                            <div className="flex items-start gap-2 text-xs text-green-800">
+                            <div className="flex items-start gap-2 text-xs text-green-800 dark:text-green-400">
                               <CheckCircle2
                                 size={16}
                                 className="mt-0.5 shrink-0"
@@ -553,8 +553,8 @@ export const CustomDomainSection: React.FC<CustomDomainSectionProps> = ({
 
                       {/* State B: SSL Pending / Almost Ready */}
                       {status === "pending_certificate" && (
-                        <li className="bg-blue-50/50 px-4 py-3 border-t border-blue-100">
-                          <div className="flex items-start gap-2 text-xs text-blue-800">
+                        <li className="bg-blue-50/50 dark:bg-blue-950/30 px-4 py-3 border-t border-blue-100 dark:border-blue-800/50">
+                          <div className="flex items-start gap-2 text-xs text-blue-800 dark:text-blue-400">
                             <RefreshCw
                               size={16}
                               className="mt-0.5 shrink-0 animate-spin"
@@ -581,9 +581,9 @@ export const CustomDomainSection: React.FC<CustomDomainSectionProps> = ({
 
                       {/* State A: DNS Required */}
                       {status === "pending" && (
-                        <li className="bg-yellow-50/50 px-4 py-3 border-t border-yellow-100">
+                        <li className="bg-yellow-50/50 dark:bg-amber-950/30 px-4 py-3 border-t border-yellow-100 dark:border-yellow-800/50">
                           <div className="flex flex-col gap-2">
-                            <div className="flex items-start gap-2 text-xs text-yellow-800">
+                            <div className="flex items-start gap-2 text-xs text-yellow-800 dark:text-yellow-400">
                               <AlertCircle
                                 size={16}
                                 className="mt-0.5 shrink-0"
@@ -606,7 +606,7 @@ export const CustomDomainSection: React.FC<CustomDomainSectionProps> = ({
                               </div>
                             </div>
                             {info?.dnsInstructions && (
-                              <div className="bg-white border border-yellow-100 rounded-md p-3 font-mono text-[11px] text-yellow-900 overflow-x-auto">
+                              <div className="bg-white dark:bg-gray-800 border border-yellow-100 dark:border-yellow-800/50 rounded-md p-3 font-mono text-[11px] text-yellow-900 dark:text-yellow-400 overflow-x-auto">
                                 {info.dnsInstructions
                                   .split("\n")
                                   .map((line, idx) => (
@@ -632,8 +632,8 @@ export const CustomDomainSection: React.FC<CustomDomainSectionProps> = ({
 
                       {/* State D: Error */}
                       {status === "error" && (
-                        <li className="bg-red-50/50 px-4 py-3 border-t border-red-100">
-                          <div className="flex items-start gap-2 text-xs text-red-800">
+                        <li className="bg-red-50/50 dark:bg-red-950/30 px-4 py-3 border-t border-red-100 dark:border-red-800/50">
+                          <div className="flex items-start gap-2 text-xs text-red-800 dark:text-red-400">
                             <XCircle size={16} className="mt-0.5 shrink-0" />
                             <div>
                               <p className="font-semibold mb-0.5">
@@ -652,7 +652,7 @@ export const CustomDomainSection: React.FC<CustomDomainSectionProps> = ({
                                   )}
                               </p>
                               {info?.dnsInstructions && (
-                                <div className="mt-2 bg-white border border-red-100 rounded-md p-3 font-mono text-[11px] text-red-900 overflow-x-auto">
+                                <div className="mt-2 bg-white dark:bg-gray-800 border border-red-100 dark:border-red-800/50 rounded-md p-3 font-mono text-[11px] text-red-900 dark:text-red-400 overflow-x-auto">
                                   {info.dnsInstructions
                                     .split("\n")
                                     .map((line, idx) => (

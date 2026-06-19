@@ -117,7 +117,7 @@ export function ProgramEventForm(props: ProgramEventFormProps) {
 
   return (
     <div ref={formRef} className="mt-8">
-      <span className="font-semibold text-lg text-gray-700">{formTitle}</span>
+      <span className="font-semibold text-lg text-gray-700 dark:text-gray-300">{formTitle}</span>
 
       <BuilderFormCard title="" error={error}>
         <div className="space-y-6">
@@ -137,7 +137,7 @@ export function ProgramEventForm(props: ProgramEventFormProps) {
               />
             </div>
             <div className="flex-1">
-              <label className="block text-xs font-medium text-gray-600 mb-1">
+              <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
                 {dateLabel} *
               </label>
               <DateInput
@@ -149,7 +149,7 @@ export function ProgramEventForm(props: ProgramEventFormProps) {
               />
             </div>
             <div className="flex-1">
-              <label className="block text-xs font-medium text-gray-600 mb-1">
+              <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
                 {t(translations, "builder.program_events.field.time", "Time")} *
               </label>
               <TimeInput
@@ -176,7 +176,7 @@ export function ProgramEventForm(props: ProgramEventFormProps) {
           </div>
 
           {form.day_tag === "wedding_day" && (
-            <div className="py-2 border-y border-gray-100">
+            <div className="py-2 border-y border-gray-100 dark:border-gray-700">
               <Toggle
                 checked={!!form.is_main_event}
                 label={t(

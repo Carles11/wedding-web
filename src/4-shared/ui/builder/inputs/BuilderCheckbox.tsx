@@ -35,10 +35,10 @@ export function BuilderCheckbox({
               w-5 h-5 border rounded transition-all duration-200 flex items-center justify-center
               ${
                 checked
-                  ? "bg-blue-600 border-blue-600"
+                  ? "bg-blue-600 border-blue-600 dark:bg-blue-500 dark:border-blue-500"
                   : error
-                    ? "border-red-500 bg-red-50"
-                    : "border-gray-300 bg-white group-hover:border-blue-400"
+                    ? "border-red-500 bg-red-50 dark:border-red-800/50 dark:bg-red-950/30"
+                    : "border-gray-300 bg-white group-hover:border-blue-400 dark:border-gray-600 dark:bg-gray-800 dark:group-hover:border-blue-400"
               }
             `}
           >
@@ -62,7 +62,7 @@ export function BuilderCheckbox({
         </div>
 
         {/* Label Text */}
-        <span className="text-sm text-gray-700 leading-tight">{label}</span>
+        <span className="text-sm text-gray-700 leading-tight dark:text-gray-300">{label}</span>
       </label>
 
       {/* Error Message - Matches BuilderTextInput logic */}

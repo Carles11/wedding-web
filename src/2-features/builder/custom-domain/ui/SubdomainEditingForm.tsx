@@ -29,8 +29,8 @@ export const SubdomainEditingForm: React.FC<Props> = ({
   return (
     <div className="space-y-4 animate-in fade-in zoom-in-95 duration-200">
       <div className="flex flex-col gap-2">
-        <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-[#6ABDA6]/20 transition-all">
-          <span className="bg-gray-50 px-3 py-2 text-xs text-gray-400   border-r select-none">
+        <div className="flex items-center border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-[#6ABDA6]/20 transition-all">
+          <span className="bg-gray-50 dark:bg-gray-900 px-3 py-2 text-xs text-gray-400 dark:text-gray-500   border-r select-none">
             https://
           </span>
           <input
@@ -43,14 +43,14 @@ export const SubdomainEditingForm: React.FC<Props> = ({
             spellCheck={false}
             disabled={isSaving}
           />
-          <span className="bg-gray-50 px-3 py-2 text-xs text-gray-400   border-l select-none">
+          <span className="bg-gray-50 dark:bg-gray-900 px-3 py-2 text-xs text-gray-400 dark:text-gray-500   border-l select-none">
             .{domainSuffix}
           </span>
         </div>
 
         {status !== "idle" && (
           <p
-            className={`text-xs font-medium ${status.startsWith("error") ? "text-red-500" : "text-green-600"}`}
+            className={`text-xs font-medium ${status.startsWith("error") ? "text-red-500 dark:text-red-400" : "text-green-600 dark:text-green-400"}`}
           >
             {helpText}
           </p>
@@ -68,7 +68,7 @@ export const SubdomainEditingForm: React.FC<Props> = ({
         </BuilderButton>
         <button
           onClick={onCancel}
-          className="text-xs text-gray-500 hover:text-gray-700 font-medium"
+          className="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium"
           disabled={isSaving}
         >
           {translations["builder.actions.cancel"] || "Cancel"}

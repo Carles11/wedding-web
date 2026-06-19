@@ -50,7 +50,7 @@ export const MultilingualMatrixPage = ({ translations, lang }: Props) => {
           "marketing.multilingual.title.part1",
           "One Website. Every Language.",
         )}
-        <span className="block mt-2 text-emerald-600">
+        <span className="block mt-2 text-emerald-600/700 dark:text-emerald-400">
           {t(
             translations,
             "marketing.multilingual.title.part2",

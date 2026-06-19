@@ -97,16 +97,16 @@ export default function WhatElseSection({
           return (
             <article
               key={it.id}
-              className="p-4 border rounded-lg bg-neutral-50"
+              className="p-4 border rounded-lg bg-neutral-50 dark:bg-neutral-800"
             >
               <Heading
                 as="h3"
-                className="font-semibold text-2xl text-neutral-800"
+                className="font-semibold text-2xl text-neutral-800 dark:text-neutral-200"
               >
                 {titleText}
               </Heading>
               {descText && (
-                <p className="text-sm text-neutral-600 mt-2">{descText}</p>
+                <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-2">{descText}</p>
               )}
               {it.location_url && (
                 <div className="mt-3">

@@ -53,7 +53,7 @@ export function BuilderHeader({
   };
 
   return (
-    <header className="border-b bg-white">
+    <header className="border-b bg-white dark:bg-gray-900 dark:border-gray-800">
       {/* ── MOBILE HEADER (< sm) ────────────────────────────────────── */}
       <div className="flex sm:hidden items-center gap-2 px-4 py-2.5 min-w-0">
         {/* Title — pushes icons to the right, never wraps */}
@@ -74,7 +74,7 @@ export function BuilderHeader({
               "text-xs font-medium px-2.5 py-1 rounded-full border whitespace-nowrap shrink-0 transition-opacity",
               allRequiredDone
                 ? "text-(--builder-color-primary) border-(--builder-color-primary) hover:opacity-70"
-                : "text-gray-300 border-gray-200",
+                      : "text-gray-300 border-gray-200 dark:text-gray-600 dark:border-gray-700",
             ].join(" ")}
           >
             {translations["builder.header.preview_short"] || "Preview ↗"}
@@ -89,7 +89,7 @@ export function BuilderHeader({
             translations["marketing.lang_selector.label"] ?? "Language"
           }
           aria-expanded={mobileLangOpen}
-          className="flex items-center justify-center w-8 h-8 shrink-0 rounded-lg border border-gray-200 text-gray-500 hover:text-gray-700 hover:border-gray-300 hover:bg-gray-50 transition-colors"
+          className="flex items-center justify-center w-8 h-8 shrink-0 rounded-lg border border-gray-200 text-gray-500 hover:text-gray-700 hover:border-gray-300 hover:bg-gray-50 transition-colors dark:border-gray-700 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:border-gray-600 dark:hover:bg-gray-800"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -113,7 +113,7 @@ export function BuilderHeader({
 
       {/* Language selector — slides open below the compact bar on mobile */}
       {mobileLangOpen && (
-        <div className="sm:hidden px-4 pb-3 pt-2 border-t border-gray-100">
+        <div className="sm:hidden px-4 pb-3 pt-2 border-t border-gray-100 dark:border-gray-800">
           <LanguageSelector
             currentLang={currentLang}
             label={translations["marketing.lang_selector.label"] ?? "Language"}
@@ -134,7 +134,7 @@ export function BuilderHeader({
               {translations["builder.header.title"] ||
                 "Wedding website — Builder"}
             </h2>
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-sm text-gray-500 mt-1 dark:text-gray-400">
               {translations["builder.header.subtitle"] ||
                 "Manage the content of your website"}
             </p>
@@ -149,7 +149,7 @@ export function BuilderHeader({
                     "text-xs font-medium px-2.5 py-1 rounded-full border whitespace-nowrap shrink-0 transition-opacity",
                     allRequiredDone
                       ? "text-(--builder-color-primary) border-(--builder-color-primary) hover:opacity-70"
-                      : "text-gray-300 border-gray-200",
+                : "text-gray-300 border-gray-200 dark:text-gray-600 dark:border-gray-700",
                   ].join(" ")}
                   href={getPreviewUrl}
                   target="_blank"
@@ -162,7 +162,7 @@ export function BuilderHeader({
                     "Open site preview"}
                 </a>
               ) : (
-                <span className="text-sm text-gray-400">
+                <span className="text-sm text-gray-400 dark:text-gray-500">
                   {translations["builder.header.no_site_yet"]}
                 </span>
               )}

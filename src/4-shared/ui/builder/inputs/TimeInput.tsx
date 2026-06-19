@@ -48,7 +48,7 @@ export function TimeInput({
   return (
     <div className="w-full">
       {label && (
-        <label className="block text-xs text-gray-600 mb-1">
+        <label className="block text-xs text-gray-600 mb-1 dark:text-gray-400">
           {label}
           {required ? " *" : ""}
         </label>
@@ -68,7 +68,7 @@ export function TimeInput({
             ),
           )}
         </select>
-        <span className="text-sm font-medium text-gray-400">:</span>
+        <span className="text-sm font-medium text-gray-400 dark:text-gray-500">:</span>
         <select
           value={mm}
           onChange={(e) => handleChange(hh, e.target.value)}

@@ -108,17 +108,17 @@ export default function AccommodationSection({
         {hotels.map((h, i) => (
           <article
             key={h.id ?? i}
-            className="relative p-4 bg-white rounded-lg shadow-sm border border-neutral-100 overflow-hidden"
+            className="relative p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-neutral-100 dark:border-neutral-700 overflow-hidden"
           >
             <div
               className="absolute left-0 top-0 h-full w-1 bg-linear-to-b from-indigo-200 to-indigo-100 opacity-60"
               aria-hidden
             />
             <div className="pl-3">
-              <Heading as="h3" className="font-semibold text-neutral-800">
+              <Heading as="h3" className="font-semibold text-neutral-800 dark:text-neutral-200">
                 {h.name}
               </Heading>
-              <address className="not-italic text-sm text-neutral-600 mt-1">
+              <address className="not-italic text-sm text-neutral-600 dark:text-neutral-400 mt-1">
                 {h.address}
               </address>
               <div className="mt-3 text-sm space-y-1">
@@ -128,7 +128,7 @@ export default function AccommodationSection({
                     <UnderlinedLink
                       href={`tel:${h.phone}`}
                       external
-                      className="text-neutral-700 inline-flex items-center"
+                      className="text-neutral-700 dark:text-neutral-300 inline-flex items-center"
                       ariaLabel={`Call ${h.name || "hotel"}`}
                       thicknessClass="h-0.5"
                       {...underlineConfig}
@@ -143,7 +143,7 @@ export default function AccommodationSection({
                     <UnderlinedLink
                       href={`mailto:${h.email}`}
                       external
-                      className="text-neutral-700 inline-flex items-center"
+                      className="text-neutral-700 dark:text-neutral-300 inline-flex items-center"
                       ariaLabel={`Email ${h.name || "hotel"}`}
                       thicknessClass="h-0.5"
                       {...underlineConfig}
@@ -158,7 +158,7 @@ export default function AccommodationSection({
                     <UnderlinedLink
                       href={h.website}
                       external
-                      className="text-neutral-700"
+                      className="text-neutral-700 dark:text-neutral-300"
                       ariaLabel={`Visit website of ${h.name || "hotel"}`}
                       thicknessClass="h-0.5"
                       {...underlineConfig}

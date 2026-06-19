@@ -64,7 +64,7 @@ export default async function ResetPasswordPage({
   const translations = await fetchGlobalTranslations(lang, "en");
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gray-50">
+    <main className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
       <div className="w-full max-w-md p-4">
         <ResetPasswordForm translations={translations} lang={lang} />
       </div>

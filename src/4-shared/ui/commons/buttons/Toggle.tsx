@@ -49,7 +49,7 @@ export const Toggle: React.FC<ToggleProps> = ({
       >
         <span
           className={`
-            block w-5 h-5 bg-white rounded-full shadow absolute top-0.5 transition-transform duration-200
+            block w-5 h-5 bg-white rounded-full shadow absolute top-0.5 transition-transform duration-200 dark:bg-gray-300
             ${checked ? "translate-x-4" : "translate-x-0"}
           `}
         />
@@ -57,7 +57,7 @@ export const Toggle: React.FC<ToggleProps> = ({
       {label && (
         <label
           htmlFor={toggleId}
-          className={`select-none text-sm ${disabled ? "text-gray-400" : "text-gray-800"}`}
+          className={`select-none text-sm ${disabled ? "text-gray-400 dark:text-gray-500" : "text-gray-800 dark:text-gray-200"}`}
         >
           {label}
         </label>

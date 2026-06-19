@@ -37,11 +37,11 @@ export default async function RsvpSuccessPage({
     return (
       <main className="min-h-screen bg-(--color-background) py-10 sm:py-14">
         <div className="mx-auto w-full max-w-xl px-4 sm:px-6">
-          <section className="rounded-xl border border-gray-200 bg-white p-6 text-center shadow-sm sm:p-8">
+          <section className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6 text-center shadow-sm sm:p-8">
             <h1 className="text-3xl text-(--color-foreground) sm:text-4xl">
               RSVP
             </h1>
-            <p className="mt-3 text-sm leading-6 text-gray-500">
+            <p className="mt-3 text-sm leading-6 text-gray-500 dark:text-gray-400">
               Your RSVP has been submitted. Thank you!
             </p>
           </section>
@@ -55,11 +55,11 @@ export default async function RsvpSuccessPage({
   return (
     <main className="min-h-screen bg-(--color-background) py-10 sm:py-14">
       <div className="mx-auto w-full max-w-xl px-4 sm:px-6">
-        <section className="rounded-xl border border-gray-200 bg-white p-6 text-center shadow-sm sm:p-8">
+        <section className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6 text-center shadow-sm sm:p-8">
           <h1 className="text-3xl text-(--color-foreground) sm:text-4xl">
             RSVP
           </h1>
-          <p className="mt-3 text-sm leading-6 text-gray-500">
+          <p className="mt-3 text-sm leading-6 text-gray-500 dark:text-gray-400">
             {tr(
               t,
               "rsvp.success.message",

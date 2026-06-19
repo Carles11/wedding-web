@@ -124,7 +124,7 @@ export function Footer({
         </a>
       </nav>
       <style>{`
-        .footer-nav-link { color: var(--builder-color-text-muted); text-decoration: none; transition: color 0.2s; }
+        .footer-nav-link { color: var(--builder-color-text-muted, #78716c); text-decoration: none; transition: color 0.2s; }
         .footer-nav-link:hover { color: var(--marketing-color-primary); }
         .footer-author-link { color: var(--marketing-color-primary); font-weight: 500; text-decoration: none; transition: color 0.2s; }
         .footer-author-link:hover { color: var(--marketing-color-primary-hover); text-decoration: underline; }
@@ -170,7 +170,7 @@ export function Footer({
                 </em>
               </h3>
             </Link>
-            <p className="max-w-xs text-sm font-light leading-relaxed text-slate-500">
+            <p className="max-w-xs text-sm font-light leading-relaxed text-slate-500 dark:text-slate-400">
               {t(
                 translations,
                 "marketing.footer.about",
@@ -212,7 +212,7 @@ export function Footer({
 
           {/* Resources Column */}
           <div className="flex flex-col gap-4 text-sm md:col-span-2">
-            <h4 className="text-[9px] font-medium uppercase tracking-[0.2em] opacity-60 text-slate-400">
+            <h4 className="text-[9px] font-medium uppercase tracking-[0.2em] opacity-60 text-slate-400 dark:text-slate-500">
               {t(translations, "marketing.footer.resources", "Resources")}
             </h4>
             <nav className="flex flex-col gap-2.5">
@@ -242,7 +242,7 @@ export function Footer({
 
           {/* Legal Column - RESTORED COOKIE POLICY */}
           <div className="flex flex-col gap-4 text-sm md:col-span-2">
-            <h4 className="text-[9px] font-medium uppercase tracking-[0.2em] opacity-60 text-slate-400">
+            <h4 className="text-[9px] font-medium uppercase tracking-[0.2em] opacity-60 text-slate-400 dark:text-slate-500">
               {t(translations, "marketing.footer.legal", "Legal")}
             </h4>
             <nav className="flex flex-col gap-2.5">
@@ -269,10 +269,10 @@ export function Footer({
 
           {/* Languages Column */}
           <div className="flex flex-col gap-4 text-sm md:col-span-2">
-            <h4 className="text-[9px] font-medium uppercase tracking-[0.2em] opacity-60 text-slate-400">
+            <h4 className="text-[9px] font-medium uppercase tracking-[0.2em] opacity-60 text-slate-400 dark:text-slate-500">
               {t(translations, "marketing.footer.languages", "Global Reach")}
             </h4>
-            <div className="flex flex-wrap gap-1.5 font-mono text-[10px] text-slate-400">
+            <div className="flex flex-wrap gap-1.5 font-mono text-[10px] text-slate-400 dark:text-slate-500">
               {SUPPORTED_LANGUAGES.map((l) => (
                 <span key={l} className="footer-lang-tag">
                   {l.toUpperCase()}
@@ -302,7 +302,7 @@ export function Footer({
           </div>
 
           <div>
-            <p className="mb-1.5 font-serif text-[10px] italic tracking-wide text-emerald-600">
+            <p className="mb-1.5 font-serif text-[10px] italic tracking-wide text-emerald-600 dark:text-emerald-400">
               {t(
                 translations,
                 "marketing.footer.at_a_glance.title",
@@ -311,7 +311,7 @@ export function Footer({
             </p>
             <p
               id="platform-summary"
-              className="text-[11.5px] font-light leading-[1.8] text-slate-500"
+              className="text-[11.5px] font-light leading-[1.8] text-slate-500 dark:text-slate-400"
             >
               {t(
                 translations,
@@ -327,7 +327,7 @@ export function Footer({
         </section>
 
         {/* ── Bottom Bar ────────────────────────────────────────── */}
-        <div className="flex flex-col items-center justify-between gap-6 border-t border-black/5 pt-8 text-[10px] uppercase tracking-[0.2em] opacity-40 md:flex-row">
+        <div className="flex flex-col items-center justify-between gap-6 border-t border-black/5 dark:border-white/10 pt-8 text-[10px] uppercase tracking-[0.2em] opacity-40 md:flex-row">
           <p>
             © {currentYear} {siteName}
           </p>

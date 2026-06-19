@@ -20,8 +20,8 @@ export default function CopyButton({
       className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium ml-2 border transition-colors
         ${
           copied
-            ? "bg-green-400/10 border-green-400/25 text-green-400"
-            : "bg-indigo-400/10 border-indigo-400/25 text-indigo-300"
+            ? "bg-green-400/10 border-green-400/25 text-green-400 dark:bg-green-400/20 dark:border-green-400/40 dark:text-green-400"
+            : "bg-indigo-400/10 border-indigo-400/25 text-indigo-300 dark:bg-indigo-400/20 dark:border-indigo-400/40 dark:text-indigo-300"
         } ${className}`}
       style={{ fontFamily: "'DM Mono', monospace" }}
     >

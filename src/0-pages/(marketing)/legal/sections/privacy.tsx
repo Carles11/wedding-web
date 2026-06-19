@@ -44,10 +44,10 @@ export function PrivacyCollectSection({ translations, lang }: SectionProps) {
           <div key={i} className="flex gap-4">
             <div className="w-1 h-auto rounded-full bg-teal-200" />
             <div>
-              <strong className="block text-gray-900 mb-1">
+              <strong className="block text-gray-900 dark:text-gray-100 mb-1">
                 {t(translations, item.label, item.defaultLabel)}
               </strong>
-              <p className="text-gray-600 text-sm leading-relaxed">
+              <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
                 {t(translations, item.desc, item.defaultDesc)}
               </p>
             </div>
@@ -55,7 +55,7 @@ export function PrivacyCollectSection({ translations, lang }: SectionProps) {
         ))}
         <div className="flex gap-4">
           <div className="w-1 h-auto rounded-full bg-orange-200" />
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
             <strong>
               {t(
                 translations,
@@ -70,7 +70,7 @@ export function PrivacyCollectSection({ translations, lang }: SectionProps) {
             )}
             <a
               href={`/${lang?.toLowerCase() || "en"}/cookie-policy`}
-              className="underline font-medium text-teal-600"
+              className="underline font-medium text-teal-600 dark:text-teal-400"
             >
               {t(
                 translations,
@@ -94,7 +94,7 @@ export function PrivacyUseSection({ translations }: SectionProps) {
   return (
     <section
       id="use"
-      className="mb-16 scroll-mt-24 p-8 rounded-3xl bg-white/40 border border-white/80 shadow-sm"
+      className="mb-16 scroll-mt-24 p-8 rounded-3xl bg-white/40 dark:bg-gray-800/40 border border-white/80 dark:border-gray-700/80 shadow-sm"
     >
       <Heading as="h2" className="font-display text-3xl pb-4">
         {t(
@@ -122,7 +122,7 @@ export function PrivacyUseSection({ translations }: SectionProps) {
             label: "Preventing fraud and unauthorized access",
           },
         ].map((item, i) => (
-          <li key={i} className="flex items-center gap-3 text-sm text-gray-700">
+          <li key={i} className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300">
             <span className="w-1.5 h-1.5 rounded-full bg-teal-400" />
             {t(translations, item.key, item.label)}
           </li>
@@ -142,7 +142,7 @@ export function PrivacySharingSection({ translations }: SectionProps) {
           "3. Third-Party Service Providers",
         )}
       </Heading>
-      <p className="text-gray-700 leading-relaxed opacity-90">
+      <p className="text-gray-700 dark:text-gray-300 leading-relaxed opacity-90">
         {t(
           translations,
           "marketing.legal.privacy.sharing.desc",
@@ -163,7 +163,7 @@ export function PrivacyTransfersSection({ translations }: SectionProps) {
           "4. International Data Transfers",
         )}
       </Heading>
-      <p className="text-gray-700 leading-relaxed opacity-90">
+      <p className="text-gray-700 dark:text-gray-300 leading-relaxed opacity-90">
         {t(
           translations,
           "marketing.legal.privacy.transfers.desc",
@@ -178,7 +178,7 @@ export function PrivacyRightsSection({ translations }: SectionProps) {
   return (
     <section
       id="rights"
-      className="mb-16 scroll-mt-24 border-t border-black/5 pt-12"
+      className="mb-16 scroll-mt-24 border-t border-black/5 dark:border-white/10 pt-12"
     >
       <Heading as="h2" className="font-display text-3xl pb-4">
         {t(
@@ -210,10 +210,10 @@ export function PrivacyRightsSection({ translations }: SectionProps) {
             key={i}
             className="group p-4 rounded-xl transition-all hover:bg-white/80 border border-transparent hover:border-teal-100 flex items-center justify-between"
           >
-            <span className="text-gray-700 font-medium">
+            <span className="text-gray-700 dark:text-gray-300 font-medium">
               {t(translations, item.key, item.label)}
             </span>
-            <span className="opacity-0 group-hover:opacity-100 transition-opacity text-teal-500">
+            <span className="opacity-0 group-hover:opacity-100 transition-opacity text-teal-500 dark:text-teal-400">
               →
             </span>
           </div>
@@ -233,7 +233,7 @@ export function PrivacySecuritySection({ translations }: SectionProps) {
           "6. Data Security",
         )}
       </Heading>
-      <p className="text-gray-700 leading-relaxed opacity-90">
+      <p className="text-gray-700 dark:text-gray-300 leading-relaxed opacity-90">
         {t(
           translations,
           "marketing.legal.privacy.security.desc",
@@ -254,7 +254,7 @@ export function PrivacyRetentionSection({ translations }: SectionProps) {
           "7. Data Retention",
         )}
       </Heading>
-      <p className="text-gray-700 leading-relaxed opacity-90">
+      <p className="text-gray-700 dark:text-gray-300 leading-relaxed opacity-90">
         {t(
           translations,
           "marketing.legal.privacy.retention.desc",
@@ -275,7 +275,7 @@ export function PrivacyUpdatesSection({ translations }: SectionProps) {
           "8. Policy Updates",
         )}
       </Heading>
-      <p className="text-gray-700 leading-relaxed opacity-90">
+      <p className="text-gray-700 dark:text-gray-300 leading-relaxed opacity-90">
         {t(
           translations,
           "marketing.legal.privacy.updates.desc",
@@ -290,7 +290,7 @@ export function PrivacyContactSection({ translations }: SectionProps) {
   return (
     <section
       id="contact"
-      className="mb-16 scroll-mt-24 pt-12 border-t-2 border-teal-500/20"
+      className="mb-16 scroll-mt-24 pt-12 border-t-2 border-teal-500/20 dark:border-teal-400/20"
     >
       <Heading as="h2" className="font-display text-3xl pb-4">
         {t(
@@ -299,7 +299,7 @@ export function PrivacyContactSection({ translations }: SectionProps) {
           "9. Privacy Contact",
         )}
       </Heading>
-      <div className="p-8 rounded-3xl bg-teal-900 text-white shadow-xl shadow-teal-900/10">
+      <div className="p-8 rounded-3xl bg-teal-900 dark:bg-teal-950 text-white shadow-xl shadow-teal-900/10 dark:shadow-teal-950/30">
         <p className="mb-6 opacity-80 text-sm">
           {t(
             translations,
@@ -318,7 +318,7 @@ export function PrivacyContactSection({ translations }: SectionProps) {
           <div className="pt-6">
             <a
               href="mailto:carles@rio-frances.com"
-              className="inline-block px-6 py-3 rounded-full bg-white text-teal-900 font-bold transition-transform hover:scale-105"
+              className="inline-block px-6 py-3 rounded-full bg-white dark:bg-gray-800 text-teal-900 dark:text-teal-200 font-bold transition-transform hover:scale-105"
             >
               carles@rio-frances.com
             </a>

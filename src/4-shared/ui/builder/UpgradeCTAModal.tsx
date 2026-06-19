@@ -54,7 +54,7 @@ export function UpgradeCTAModal({
       className="builder-theme fixed inset-0 z-50 flex items-center justify-center p-4"
       style={{ background: "rgba(0,0,0,0.45)" }}
     >
-      <div className="relative w-full max-w-sm bg-white rounded-2xl overflow-hidden">
+      <div className="relative w-full max-w-sm bg-white rounded-2xl overflow-hidden dark:bg-gray-800">
         {/* Top accent */}
         <div className="h-1 w-full bg-linear-to-r from-teal-400 to-teal-600" />
 
@@ -63,7 +63,7 @@ export function UpgradeCTAModal({
           <button
             type="button"
             onClick={onClose}
-            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors dark:text-gray-500 dark:hover:text-gray-400"
             aria-label="Close"
           >
             <svg
@@ -82,9 +82,9 @@ export function UpgradeCTAModal({
           </button>
 
           {/* Icon */}
-          <div className="w-10 h-10 rounded-full bg-teal-50 flex items-center justify-center mb-4">
+          <div className="w-10 h-10 rounded-full bg-teal-50 flex items-center justify-center mb-4 dark:bg-teal-950/40">
             <svg
-              className="w-5 h-5 text-teal-600"
+              className="w-5 h-5 text-teal-600 dark:text-teal-400"
               fill="none"
               stroke="currentColor"
               strokeWidth={1.5}
@@ -98,13 +98,13 @@ export function UpgradeCTAModal({
             </svg>
           </div>
 
-          <h2 className="text-lg font-semibold text-gray-900 mb-2 py-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-2 py-6 dark:text-gray-100">
             {title}
           </h2>
-          <p className="text-sm text-gray-500 mb-6">{description}</p>
+          <p className="text-sm text-gray-500 mb-6 dark:text-gray-400">{description}</p>
           {note && (
-            <p className="flex items-start gap-2 text-xs italic text-gray-500 border-t pt-3 pb-3">
-              <Info className="w-4 h-4 shrink-0 mt-0.5 text-blue-500" />
+            <p className="flex items-start gap-2 text-xs italic text-gray-500 border-t pt-3 pb-3 dark:text-gray-400 dark:border-gray-700">
+              <Info className="w-4 h-4 shrink-0 mt-0.5 text-blue-500 dark:text-blue-400" />
               <span>{note}</span>
             </p>
           )}

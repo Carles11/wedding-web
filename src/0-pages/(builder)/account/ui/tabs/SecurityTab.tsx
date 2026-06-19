@@ -114,7 +114,7 @@ export const SecurityTab = ({
             </div>
             <div className="flex items-center gap-3">
               {seoLoading && (
-                <span className="text-[10px] uppercase tracking-widest text-gray-400 animate-pulse">
+                <span className="text-[10px] uppercase tracking-widest text-gray-400 dark:text-gray-500 animate-pulse">
                   Saving...
                 </span>
               )}

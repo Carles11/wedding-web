@@ -58,7 +58,7 @@ export function BuilderLangTabs({
 
   return (
     <>
-      <p className=" pt-6 pb-3 text-gray-500">
+      <p className=" pt-6 pb-3 text-gray-500 dark:text-gray-400">
         {translations["builder.languages.tabs.edit_selection"] ??
           "Select to edit the fields for each language:"}
       </p>
@@ -68,7 +68,7 @@ export function BuilderLangTabs({
           translations["builder.languages.tabs.edit_selection"] ??
           "Select to edit the fields for each language"
         }
-        className="flex flex-wrap gap-1.5 mb-6 bg-gray-50 rounded-xl w-fit border border-gray-100"
+        className="flex flex-wrap gap-1.5 mb-6 bg-gray-50 rounded-xl w-fit border border-gray-100 dark:bg-gray-900 dark:border-gray-800"
       >
         {languages.map((lang, index) => {
           const isActive = activeLang === lang;
@@ -97,14 +97,14 @@ export function BuilderLangTabs({
     text-[11px] font-semibold uppercase tracking-wider min-w-[72px]
     ${
       isActive
-        ? "bg-white text-gray-900 shadow-sm"
-        : "bg-transparent text-gray-400 hover:bg-white hover:text-gray-700"
+        ? "bg-white text-gray-900 shadow-sm dark:bg-gray-800 dark:text-gray-100"
+        : "bg-transparent text-gray-400 hover:bg-white hover:text-gray-700 dark:text-gray-500 dark:hover:bg-gray-800 dark:hover:text-gray-300"
     }
   `}
             >
               <span className="flex items-center gap-1">
                 {isActive && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-teal-500 inline-block" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-teal-500 inline-block dark:bg-teal-400" />
                 )}
                 {label}
               </span>
@@ -117,9 +117,9 @@ export function BuilderLangTabs({
   transition-opacity duration-150
   ${
     isDefault
-      ? "text-teal-600 opacity-100"
+      ? "text-teal-600 opacity-100 dark:text-teal-400"
       : isActive
-        ? "text-gray-400 opacity-100 md:opacity-0 md:group-hover:opacity-100"
+        ? "text-gray-400 opacity-100 md:opacity-0 md:group-hover:opacity-100 dark:text-gray-500"
         : "opacity-0"
   }
 `}

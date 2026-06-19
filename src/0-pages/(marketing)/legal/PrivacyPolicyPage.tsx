@@ -26,8 +26,8 @@ export default function PrivacyPolicyPage({ translations, lang }: Props) {
       style={{ background: "var(--marketing-bg-gradient)" }}
     >
       {/* Hero Header */}
-      <header className="py-12 px-4 text-center border-b border-black/5">
-        <div className="inline-block px-3 py-1 mb-4 text-[10px] font-bold tracking-[0.2em] uppercase rounded-full bg-teal-50 text-teal-600 border border-teal-100">
+      <header className="py-12 px-4 text-center border-b border-black/5 dark:border-white/10">
+        <div className="inline-block px-3 py-1 mb-4 text-[10px] font-bold tracking-[0.2em] uppercase rounded-full bg-teal-50 dark:bg-teal-950/30 text-teal-600 dark:text-teal-400 border border-teal-100 dark:border-teal-800">
           {t(translations, "marketing.legal.privacy.badge", "Privacy First")}
         </div>
         <Heading
@@ -37,7 +37,7 @@ export default function PrivacyPolicyPage({ translations, lang }: Props) {
         >
           {t(translations, "marketing.legal.privacy.title", "Privacy Policy")}
         </Heading>
-        <div className="inline-block px-3 py-1 mb-4 text-[10px] font-bold tracking-[0.2em] uppercase rounded-full bg-teal-50 text-teal-600 border border-teal-100">
+        <div className="inline-block px-3 py-1 mb-4 text-[10px] font-bold tracking-[0.2em] uppercase rounded-full bg-teal-50 dark:bg-teal-950/30 text-teal-600 dark:text-teal-400 border border-teal-100 dark:border-teal-800">
           {t(
             translations,
             "marketing.legal.privacy.version",

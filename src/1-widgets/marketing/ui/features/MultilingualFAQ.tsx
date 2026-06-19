@@ -47,7 +47,7 @@ export default function MultilingualFAQ({ translations }: Props) {
   ];
 
   return (
-    <section className="w-full py-24 px-6 bg-gray-50/50">
+    <section className="w-full py-24 px-6 bg-gray-50/50 dark:bg-gray-900/50">
       <div className="max-w-3xl mx-auto">
         <Heading as="h2" className="text-3xl font-bold mb-12 text-center pb-6">
           {t(
@@ -58,11 +58,11 @@ export default function MultilingualFAQ({ translations }: Props) {
         </Heading>
         <div className="space-y-8">
           {faqs.map((faq, i) => (
-            <div key={i} className="border-b border-gray-200 pb-8">
-              <h3 className="text-lg font-bold mb-3 text-gray-900 pb-4 ">
+            <div key={i} className="border-b border-gray-200 dark:border-gray-700 pb-8">
+              <h3 className="text-lg font-bold mb-3 text-gray-900 dark:text-gray-100 pb-4 ">
                 {faq.q}
               </h3>
-              <p className="text-gray-600 leading-relaxed">{faq.a}</p>
+              <p className="text-gray-600 dark:text-gray-400 leading-relaxed">{faq.a}</p>
             </div>
           ))}
         </div>

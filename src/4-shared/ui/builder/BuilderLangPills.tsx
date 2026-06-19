@@ -26,7 +26,7 @@ export const BuilderLangPills = ({
 }: BuilderLangPillsProps) => {
   return (
     <>
-      <p className=" pt-6 pb-3 text-gray-500">
+      <p className=" pt-6 pb-3 text-gray-500 dark:text-gray-400">
         {translations["builder.languages.tabs.label"] ??
           "Select the languages you want to use for your wedding site:"}
       </p>
@@ -70,7 +70,7 @@ export const BuilderLangPills = ({
               />
 
               <span
-                className={`h-1.5 w-1.5 rounded-full ${isSelected ? "bg-white" : "bg-gray-300"}`}
+                className={`h-1.5 w-1.5 rounded-full ${isSelected ? "bg-white dark:bg-gray-100" : "bg-gray-300 dark:bg-gray-600"}`}
               />
 
               {SUPPORTED_LANGUAGE_LABELS[langCode]}

@@ -12,7 +12,7 @@ export default function FAQItem({ question, answer }: FAQItemProps) {
 
   return (
     <div
-      className="mb-3 overflow-hidden transition-all duration-200 border bg-white/50 backdrop-blur-sm"
+      className="mb-3 overflow-hidden transition-all duration-200 border bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm"
       style={{
         borderRadius: "var(--marketing-radius-rect)",
         borderColor: isOpen
@@ -22,9 +22,9 @@ export default function FAQItem({ question, answer }: FAQItemProps) {
     >
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex justify-between items-center p-5 text-left transition-colors hover:bg-white"
+        className="w-full flex justify-between items-center p-5 text-left transition-colors hover:bg-white dark:hover:bg-gray-800"
       >
-        <span className="font-semibold text-gray-800 pr-4">{question}</span>
+        <span className="font-semibold text-gray-800 dark:text-gray-200 pr-4">{question}</span>
         <span
           className={`transform transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}
           style={{ color: "var(--marketing-color-primary)" }}
@@ -44,7 +44,7 @@ export default function FAQItem({ question, answer }: FAQItemProps) {
       <div
         className={`transition-all duration-300 ease-in-out ${isOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"}`}
       >
-        <div className="p-5 pt-0 text-gray-600 leading-relaxed border-t border-gray-50">
+        <div className="p-5 pt-0 text-gray-600 dark:text-gray-400 leading-relaxed border-t border-gray-50 dark:border-gray-800">
           {renderAnswerWithEmail(answer)}
         </div>
       </div>

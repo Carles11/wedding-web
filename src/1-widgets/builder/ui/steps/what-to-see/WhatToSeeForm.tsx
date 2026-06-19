@@ -99,7 +99,7 @@ export function WhatToSeeForm({
 
   return (
     <>
-      <span className="font-semibold text-lg text-gray-700">
+      <span className="font-semibold text-lg text-gray-700 dark:text-gray-300">
         {t(translations, "builder.what_to_see.form.details", "Place Details")}
       </span>
 

@@ -58,13 +58,13 @@ export function RSVPFormComponent(props: RSVPFormComponentProps) {
         <input type="hidden" name="code" value={rawCode} />
         <input type="hidden" name="lang" value={lang} />
 
-        <fieldset className="space-y-3 rounded-lg border border-gray-200 bg-gray-50 p-4">
+        <fieldset className="space-y-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 p-4">
           <legend className="px-1 text-sm font-semibold text-(--color-foreground)">
             {tr(t, "rsvp.form.status.label", "Will you attend?")}
           </legend>
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <label className="flex items-start gap-3 rounded-lg border border-gray-200 bg-white px-3 py-3 text-sm text-(--color-foreground)">
+            <label className="flex items-start gap-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-3 text-sm text-(--color-foreground)">
               <input
                 type="radio"
                 name="status"
@@ -77,7 +77,7 @@ export function RSVPFormComponent(props: RSVPFormComponentProps) {
               </span>
             </label>
 
-            <label className="flex items-start gap-3 rounded-lg border border-gray-200 bg-white px-3 py-3 text-sm text-(--color-foreground)">
+            <label className="flex items-start gap-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-3 text-sm text-(--color-foreground)">
               <input
                 type="radio"
                 name="status"
@@ -96,7 +96,7 @@ export function RSVPFormComponent(props: RSVPFormComponentProps) {
           </div>
 
           {/* SSR-only hint: server enforces headcount=0 when not attending */}
-          <p className="text-xs leading-5 text-gray-500">
+          <p className="text-xs leading-5 text-gray-500 dark:text-gray-400">
             {tr(
               t,
               "rsvp.form.headcount.note",
@@ -105,7 +105,7 @@ export function RSVPFormComponent(props: RSVPFormComponentProps) {
           </p>
         </fieldset>
 
-        <div className="space-y-1.5 rounded-lg border border-gray-200 bg-gray-50 p-4">
+        <div className="space-y-1.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 p-4">
           <label
             htmlFor="rsvp-headcount"
             className="block text-sm font-medium text-(--color-foreground)"
@@ -117,7 +117,7 @@ export function RSVPFormComponent(props: RSVPFormComponentProps) {
             id="rsvp-headcount"
             name="headcount"
             defaultValue={defaultHeadcount}
-            className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-(--color-foreground) outline-none focus:border-[var(--marketing-color-primary)] focus:ring-2 focus:ring-[var(--marketing-color-primary-focus)]"
+            className="w-full rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-(--color-foreground) outline-none focus:border-[var(--marketing-color-primary)] focus:ring-2 focus:ring-[var(--marketing-color-primary-focus)]"
           >
             {headcountOptions.map((n) => (
               <option key={n} value={String(n)}>
@@ -127,7 +127,7 @@ export function RSVPFormComponent(props: RSVPFormComponentProps) {
           </select>
         </div>
 
-        <div className="space-y-1.5 rounded-lg border border-gray-200 bg-gray-50 p-4">
+        <div className="space-y-1.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 p-4">
           <label
             htmlFor="rsvp-comment"
             className="block text-sm font-medium text-(--color-foreground)"
@@ -140,13 +140,13 @@ export function RSVPFormComponent(props: RSVPFormComponentProps) {
             name="comment"
             rows={4}
             defaultValue={defaultComment}
-            className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-(--color-foreground) outline-none focus:border-(--marketing-color-primary) focus:ring-2 focus:ring-(--marketing-color-primary-focus)"
+            className="w-full rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-(--color-foreground) outline-none focus:border-(--marketing-color-primary) focus:ring-2 focus:ring-(--marketing-color-primary-focus)"
           />
         </div>
 
         {isPremium && (
           <>
-            <div className="space-y-1.5 rounded-lg border border-gray-200 bg-gray-50 p-4">
+            <div className="space-y-1.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 p-4">
               <label
                 htmlFor="rsvp-meal-intolerances"
                 className="block text-sm font-medium text-(--color-foreground)"
@@ -168,11 +168,11 @@ export function RSVPFormComponent(props: RSVPFormComponentProps) {
                   "rsvp.form.meal_intolerances.placeholder",
                   "E.g.: nuts, gluten, dairy, vegetarian, vegan, etc.",
                 )}
-                className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-(--color-foreground) outline-none focus:border-(--marketing-color-primary) focus:ring-2 focus:ring-(--marketing-color-primary-focus)"
+                className="w-full rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-(--color-foreground) outline-none focus:border-(--marketing-color-primary) focus:ring-2 focus:ring-(--marketing-color-primary-focus)"
               />
             </div>
 
-            <div className="space-y-1.5 rounded-lg border border-gray-200 bg-gray-50 p-4">
+            <div className="space-y-1.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 p-4">
               <label
                 htmlFor="rsvp-song-request"
                 className="block text-sm font-medium text-(--color-foreground)"
@@ -194,7 +194,7 @@ export function RSVPFormComponent(props: RSVPFormComponentProps) {
                   "rsvp.form.song_request.placeholder",
                   "Let us know a song you want to hear on the dance floor!",
                 )}
-                className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-(--color-foreground) outline-none focus:border-(--marketing-color-primary) focus:ring-2 focus:ring-(--marketing-color-primary-focus)"
+                className="w-full rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-(--color-foreground) outline-none focus:border-(--marketing-color-primary) focus:ring-2 focus:ring-(--marketing-color-primary-focus)"
               />
             </div>
           </>
@@ -202,7 +202,7 @@ export function RSVPFormComponent(props: RSVPFormComponentProps) {
 
         <button
           type="submit"
-          className="w-full rounded-md bg-(--marketing-color-primary) px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-(--marketing-color-primary-hover) focus:outline-none focus:ring-2 focus:ring-(--marketing-color-primary-focus) focus:ring-offset-2"
+          className="w-full rounded-md bg-(--marketing-color-primary) px-4 py-2.5 text-sm font-semibold text-white dark:text-gray-100 transition-colors hover:bg-(--marketing-color-primary-hover) focus:outline-none focus:ring-2 focus:ring-(--marketing-color-primary-focus) focus:ring-offset-2"
         >
           {tr(t, "rsvp.form.submit", "Send RSVP")}
         </button>

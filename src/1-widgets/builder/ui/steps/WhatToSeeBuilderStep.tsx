@@ -339,7 +339,7 @@ export default function WhatToSeeBuilderStep({
         </BuilderButton>
       </div>
 
-      <div className="text-gray-600 mb-4">
+      <div className="text-gray-600 dark:text-gray-400 mb-4">
         {isUnlimited
           ? translations["builder.what_to_see.limit_info_unlimited"] ||
             "With your Premium plan, add as many as you like."
@@ -355,7 +355,7 @@ export default function WhatToSeeBuilderStep({
           {items.map((it) => (
             <div
               key={it.id}
-              className="border rounded-lg p-3 flex justify-between items-start bg-white"
+              className="border rounded-lg p-3 flex justify-between items-start bg-white dark:bg-gray-800"
             >
               <div className="min-w-0">
                 <div className="font-medium text-sm truncate">

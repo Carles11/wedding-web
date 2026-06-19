@@ -31,7 +31,7 @@ export default function BuilderStepNav({
     <div className="lg:flex">
       {/*********************** MOBILE STEP SCROLLER ***********************/}
 
-      <div className="lg:hidden border-b bg-white">
+      <div className="lg:hidden border-b bg-white dark:bg-gray-800">
         <div className="flex overflow-x-auto gap-2 p-3">
           {stepKeys.map((k, i) => (
             <Fragment key={k}>
@@ -60,7 +60,7 @@ export default function BuilderStepNav({
                     {shouldRenderMobileDivider && (
                       <span
                         aria-hidden="true"
-                        className="mx-2 h-9 border-l border-gray-300 opacity-60"
+                        className="mx-2 h-9 border-l border-gray-300 dark:border-gray-600 opacity-60"
                         style={{
                           display: "inline-block",
                           verticalAlign: "middle",
@@ -89,7 +89,7 @@ export default function BuilderStepNav({
       {/*********************** DESKTOP SIDEBAR ***********************/}
 
       <nav className="hidden lg:block w-64 border-r p-4">
-        <h3 className="font-semibold text-gray-700 text-2xl">
+        <h3 className="font-semibold text-gray-700 dark:text-gray-300 text-2xl">
           {translations["builder.nav.steps_title"] || "Setup Steps"}
         </h3>
         <ul className="mt-4 flex md:block gap-2 md:gap-0 space-y-0 md:space-y-2 min-w-max md:min-w-0">

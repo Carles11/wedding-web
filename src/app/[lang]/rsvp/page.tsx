@@ -48,11 +48,11 @@ export default async function RsvpPage({
     return (
       <main className="min-h-screen bg-(--color-background) py-10 sm:py-14">
         <div className="mx-auto w-full max-w-2xl px-4 sm:px-6">
-          <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm sm:p-7">
+          <section className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5 shadow-sm sm:p-7">
             <h1 className="text-3xl text-(--color-foreground) sm:text-4xl">
               {t(globalTranslations, "rsvp.page.title", "RSVP")}
             </h1>
-            <p className="mt-3 text-sm leading-6 text-gray-500">
+            <p className="mt-3 text-sm leading-6 text-gray-500 dark:text-gray-400">
               Site not found.
             </p>
           </section>
@@ -77,11 +77,11 @@ export default async function RsvpPage({
     return (
       <main className="min-h-screen bg-(--color-background) py-10 sm:py-14">
         <div className="mx-auto w-full max-w-2xl px-4 sm:px-6">
-          <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm sm:p-7">
+          <section className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5 shadow-sm sm:p-7">
             <h1 className="text-3xl text-(--color-foreground) sm:text-4xl">
               {t(globalTranslations, "rsvp.page.title", "RSVP")}
             </h1>
-            <p className="mt-3 text-sm leading-6 text-gray-500">
+            <p className="mt-3 text-sm leading-6 text-gray-500 dark:text-gray-400">
               {t(
                 globalTranslations,
                 "rsvp.page.invalid_link",
@@ -101,11 +101,11 @@ export default async function RsvpPage({
     return (
       <main className="min-h-screen bg-(--color-background) py-10 sm:py-14">
         <div className="mx-auto w-full max-w-2xl px-4 sm:px-6">
-          <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm sm:p-7">
+          <section className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5 shadow-sm sm:p-7">
             <h1 className="text-3xl text-(--color-foreground) sm:text-4xl">
               {t(globalTranslations, "rsvp.page.title", "Guests & RSVP")}
             </h1>
-            <p className="mt-3 text-sm leading-6 text-gray-500">
+            <p className="mt-3 text-sm leading-6 text-gray-500 dark:text-gray-400">
               {t(
                 globalTranslations,
                 "rsvp.page.invalid_link",
@@ -125,11 +125,11 @@ export default async function RsvpPage({
     return (
       <main className="min-h-screen bg-(--color-background) py-10 sm:py-14">
         <div className="mx-auto w-full max-w-2xl px-4 sm:px-6">
-          <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm sm:p-7">
+          <section className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5 shadow-sm sm:p-7">
             <h1 className="text-3xl text-(--color-foreground) sm:text-4xl">
               {t(globalTranslations, "rsvp.page.title", "RSVP")}
             </h1>
-            <p className="mt-3 text-sm leading-6 text-gray-500">
+            <p className="mt-3 text-sm leading-6 text-gray-500 dark:text-gray-400">
               {t(
                 globalTranslations,
                 "rsvp.page.invalid_link",
@@ -145,7 +145,7 @@ export default async function RsvpPage({
   return (
     <main className="min-h-screen bg-(--color-background) py-10 sm:py-14">
       <div className="mx-auto w-full max-w-2xl px-4 sm:px-6">
-        <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm sm:p-7">
+        <section className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5 shadow-sm sm:p-7">
           <h1 className="text-3xl text-(--color-foreground) sm:text-4xl">
             {t(globalTranslations, "rsvp.page.title", "RSVP")}
           </h1>

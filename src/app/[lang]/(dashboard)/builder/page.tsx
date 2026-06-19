@@ -48,7 +48,7 @@ export default async function BuilderPage({
 
   const isLegacy = userProfile?.plan_type === "free" && lastActivity < cutoff;
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <BuilderClient
         initialLang={lang}
         translations={translations}

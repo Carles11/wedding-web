@@ -48,12 +48,12 @@ function ImageCard({
     ? "w-full aspect-[3/4] object-cover rounded-lg"
     : "w-full h-48 md:h-56 object-cover rounded-lg";
   const fallbackClass = vertical
-    ? "aspect-[3/4] bg-gray-100 flex items-center justify-center text-xs text-gray-500"
-    : "h-48 md:h-56 bg-gray-100 flex items-center justify-center text-xs text-gray-500";
+    ? "aspect-[3/4] bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-xs text-gray-500 dark:text-gray-400"
+    : "h-48 md:h-56 bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-xs text-gray-500 dark:text-gray-400";
 
   return (
     <div className="relative group w-full md:max-w-md">
-      <div className="border rounded-lg hover:ring-2 hover:ring-blue-500 transition">
+      <div className="border rounded-lg hover:ring-2 hover:ring-blue-500 dark:hover:ring-blue-400 transition">
         {url ? (
           <Image
             src={url}
@@ -422,7 +422,7 @@ export default function ImagesBuilderStep({
     <StepLayout showActions={false}>
       <div className="space-y-6 min-w-0">
         {/* HEADER */}
-        <div className="mb-4 text-md text-gray-600 leading-relaxed">
+        <div className="mb-4 text-md text-gray-600 dark:text-gray-400 leading-relaxed">
           {translations["builder.images.label.intro"] ||
             "Personalize your site with a stunning Hero image and a Contact photo to add a personal touch."}
         </div>
@@ -440,18 +440,18 @@ export default function ImagesBuilderStep({
         )}
         {!loading && (
           <div className="grid gap-6 lg:grid-cols-2">
-            <div className="rounded-xl border bg-white p-4 space-y-4">
+            <div className="rounded-xl border bg-white dark:bg-gray-800 p-4 space-y-4">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <h4 className="text-base font-semibold text-gray-900">
+                  <h4 className="text-base font-semibold text-gray-900 dark:text-gray-100">
                     {translations["builder.images.label.hero"] || "Hero image"}
                   </h4>
-                  <p className="text-sm text-gray-600 mt-1">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                     {translations["builder.images.hint.hero"] ||
                       "Required. This image is shown in the main hero section."}
                   </p>
                 </div>
-                <span className="rounded-full bg-red-50 px-2.5 py-1 text-xs font-medium text-red-700">
+                <span className="rounded-full bg-red-50 dark:bg-red-950/30 px-2.5 py-1 text-xs font-medium text-red-700 dark:text-red-400">
                   {translations["builder.images.label.required"] || "Required"}
                 </span>
               </div>
@@ -488,23 +488,23 @@ export default function ImagesBuilderStep({
               )}
             </div>
 
-            <div className="rounded-xl border bg-white p-4 space-y-4">
+            <div className="rounded-xl border bg-white dark:bg-gray-800 p-4 space-y-4">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <h4 className="text-base font-semibold text-gray-900">
+                  <h4 className="text-base font-semibold text-gray-900 dark:text-gray-100">
                     {translations["builder.images.label.contact"] ||
                       "Contact image"}
                   </h4>
-                  <p className="text-sm text-gray-600 mt-1">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                     {translations["builder.images.hint.contact"] ||
                       "Optional. This image can be shown in the contact section."}
                   </p>
-                  <p className="text-xs text-amber-700 mt-1">
+                  <p className="text-xs text-amber-700 dark:text-amber-400 mt-1">
                     {translations["builder.images.hint.contact_vertical_tip"] ||
                       "For best resultsss, use a portrait (vertical) image."}
                   </p>
                 </div>
-                <span className="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-700">
+                <span className="rounded-full bg-gray-100 dark:bg-gray-800 px-2.5 py-1 text-xs font-medium text-gray-700 dark:text-gray-300">
                   {translations["builder.images.label.optional"] || "Optional"}
                 </span>
               </div>

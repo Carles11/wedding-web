@@ -41,7 +41,7 @@ const MainModal: React.FC<ModalProps> = ({
         className="
         relative w-full
         rounded-t-2xl sm:rounded-2xl
-        bg-white border border-gray-300 shadow-2xl
+        bg-white border border-gray-300 shadow-2xl dark:bg-gray-800 dark:border-gray-600
         flex flex-col
         max-h-[90dvh] sm:max-h-[85vh]
         sm:max-w-lg
@@ -53,9 +53,9 @@ const MainModal: React.FC<ModalProps> = ({
         <div className="h-1 w-full flex-shrink-0 bg-linear-to-r from-indigo-500 via-violet-500 to-purple-200" />
 
         {/* Header — fixed, never scrolls */}
-        <div className="flex-shrink-0 flex items-center justify-between px-6 pt-5 pb-4 border-b border-gray-200">
+        <div className="flex-shrink-0 flex items-center justify-between px-6 pt-5 pb-4 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-indigo-100 text-indigo-500 border border-indigo-200">
+            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-indigo-100 text-indigo-500 border border-indigo-200 dark:bg-indigo-950/40 dark:text-indigo-400 dark:border-indigo-800/50">
               <svg
                 width={15}
                 height={15}
@@ -70,13 +70,13 @@ const MainModal: React.FC<ModalProps> = ({
                 <path d="M2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20" />
               </svg>
             </div>
-            <h2 className="font-semibold text-gray-900 text-base tracking-tight font-sans">
+            <h2 className="font-semibold text-gray-900 text-base tracking-tight font-sans dark:text-gray-100">
               {title}
             </h2>
           </div>
           <button
             onClick={onClose}
-            className="flex items-center justify-center w-7 h-7 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+            className="flex items-center justify-center w-7 h-7 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors dark:hover:bg-gray-700 dark:text-gray-500 dark:hover:text-gray-400"
             aria-label="Close"
           >
             <svg

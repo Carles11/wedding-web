@@ -183,7 +183,7 @@ export default function DomainAndBillingBuilderStep({
         {/* Subtitle + Share CTA */}
         <div className="mb-6">
           {/* Subtitle */}
-          <p className="text-md text-gray-600 sm:max-w-2xl">
+          <p className="text-md text-gray-600 dark:text-gray-400 sm:max-w-2xl">
             {planType === "premium"
               ? translations["builder.step.domain_billing_subtitle_premium"] ||
                 "Manage your professional web address and billing details below."
@@ -241,7 +241,7 @@ export default function DomainAndBillingBuilderStep({
         onClose={() => setShareModalOpen(false)}
       >
         <div className="space-y-4">
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
             {translations["builder.share.modal_subtitle"] ||
               "Choose the link you want to send. Each option can be shared natively, copied, emailed, or posted on social media."}
           </p>
@@ -265,7 +265,7 @@ export default function DomainAndBillingBuilderStep({
                       rel="noopener noreferrer"
                       aria-label={share.label}
                       title={share.label}
-                      className="inline-flex items-center gap-1 px-3 py-1 rounded-lg border border-gray-200 bg-white text-xs font-medium text-gray-700 hover:bg-gray-50 focus-visible:ring-2"
+                      className="inline-flex items-center gap-1 px-3 py-1 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 focus-visible:ring-2"
                     >
                       {share.icon}
                       <span className="sr-only md:not-sr-only">

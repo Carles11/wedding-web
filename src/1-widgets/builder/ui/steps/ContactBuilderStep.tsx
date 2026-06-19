@@ -295,7 +295,7 @@ export default function ContactBuilderStep({
       translations={translations}
     >
       <div className="space-y-4">
-        <div className="mb-4 text-md text-gray-600">
+        <div className="mb-4 text-md text-gray-600 dark:text-gray-400">
           {translations["builder.contact.description"] ||
             "Add your contact details so your guests can easily reach out with any questions for your special day."}
         </div>
@@ -306,7 +306,7 @@ export default function ContactBuilderStep({
           <div className="space-y-4">
             {contactImageUrl && (
               <div className="max-w-xs">
-                <div className="text-xs text-gray-600 mb-1">
+                <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">
                   {translations["builder.contact.image_label"] ||
                     "Contact image"}
                 </div>
@@ -319,7 +319,7 @@ export default function ContactBuilderStep({
               </div>
             )}
 
-            <div className="border rounded-xl p-4 bg-gray-50">
+            <div className="border rounded-xl p-4 bg-gray-50 dark:bg-gray-900">
               <ContactForm
                 form={form}
                 errors={formErrors}

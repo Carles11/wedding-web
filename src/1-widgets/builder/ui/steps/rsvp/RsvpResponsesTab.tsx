@@ -56,9 +56,9 @@ function formatDateTime(iso: string | null): string {
 }
 
 function statusBadgeClass(status: RsvpResponseStatus): string {
-  if (status === "attending") return "bg-green-100 text-green-800";
-  if (status === "not_attending") return "bg-red-100 text-red-700";
-  return "bg-gray-100 text-gray-700";
+  if (status === "attending") return "bg-green-100 text-green-800 dark:bg-green-950/30 dark:text-green-400";
+  if (status === "not_attending") return "bg-red-100 text-red-700 dark:bg-red-950/30 dark:text-red-400";
+  return "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300";
 }
 
 function escapeCsvValue(value: string | number | boolean | null): string {
@@ -469,8 +469,8 @@ export function RsvpResponsesTab({ siteId, translations }: Props) {
       </div>
 
       {loadError && (
-        <div className="rounded border border-red-300 bg-red-50 px-4 py-3">
-          <p className="text-sm text-red-700">{loadError}</p>
+        <div className="rounded border border-red-300 dark:border-red-800/50 bg-red-50 dark:bg-red-950/30 px-4 py-3">
+          <p className="text-sm text-red-700 dark:text-red-400">{loadError}</p>
         </div>
       )}
 
@@ -577,7 +577,7 @@ export function RsvpResponsesTab({ siteId, translations }: Props) {
                 </tr>
               ) : (
                 rows.map((row) => (
-                  <tr key={row.party.id} className="hover:bg-gray-50">
+                  <tr key={row.party.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
                     <td className="px-4 py-2 font-medium text-(--builder-color-text)">
                       {row.party.name}
                     </td>
@@ -594,8 +594,8 @@ export function RsvpResponsesTab({ siteId, translations }: Props) {
                       <span
                         className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
                           row.party.is_active
-                            ? "bg-green-100 text-green-800"
-                            : "bg-gray-100 text-gray-500"
+                            ? "bg-green-100 text-green-800 dark:bg-green-950/30 dark:text-green-400"
+                            : "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400"
                         }`}
                       >
                         {row.party.is_active
@@ -794,8 +794,8 @@ export function RsvpResponsesTab({ siteId, translations }: Props) {
               </h4>
 
               {submissionsError && (
-                <div className="rounded border border-red-300 bg-red-50 px-4 py-3">
-                  <p className="text-sm text-red-700">{submissionsError}</p>
+                <div className="rounded border border-red-300 dark:border-red-800/50 bg-red-50 dark:bg-red-950/30 px-4 py-3">
+                  <p className="text-sm text-red-700 dark:text-red-400">{submissionsError}</p>
                 </div>
               )}
 

@@ -17,15 +17,15 @@ export function LegacyModeBanner({
   buttonText,
 }: LegacyModeBannerProps) {
   return (
-    <div className="w-full bg-amber-50 border-b border-amber-200 py-3 px-4 sm:px-6">
+    <div className="w-full bg-amber-50 dark:bg-amber-950/30 border-b border-amber-200 dark:border-amber-800/50 py-3 px-4 sm:px-6">
       <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="bg-amber-100 p-2 rounded-full">
-            <Lock className="w-5 h-5 text-amber-700" />
+          <div className="bg-amber-100 dark:bg-amber-950/40 p-2 rounded-full">
+            <Lock className="w-5 h-5 text-amber-700 dark:text-amber-400" />
           </div>
           <div>
-            <p className="text-sm font-semibold text-amber-900">{title}</p>
-            <p className="text-xs text-amber-800">{description}</p>
+            <p className="text-sm font-semibold text-amber-900 dark:text-amber-100">{title}</p>
+            <p className="text-xs text-amber-800 dark:text-amber-200">{description}</p>
           </div>
         </div>
 

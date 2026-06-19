@@ -159,7 +159,7 @@ export default function RsvpBuilderStep({
   if (saveError) {
     return (
       <div className="rounded border border-(--builder-color-border) bg-white p-6">
-        <p className="text-sm text-red-600">{saveError}</p>
+        <p className="text-sm text-red-600 dark:text-red-400">{saveError}</p>
       </div>
     );
   }
@@ -250,11 +250,11 @@ export default function RsvpBuilderStep({
                 onClick={handleToggle}
                 disabled={loading || saving}
                 className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${
-                  isEnabled ? "bg-(--builder-color-primary)" : "bg-gray-200"
+                  isEnabled ? "bg-(--builder-color-primary)" : "bg-gray-200 dark:bg-gray-700"
                 } ${saving ? "opacity-70 pointer-events-none" : ""}`}
               >
                 <span
-                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition-transform ${
+                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white dark:bg-gray-800 shadow ring-0 transition-transform ${
                     isEnabled ? "translate-x-5" : "translate-x-0"
                   }`}
                 />
@@ -298,12 +298,12 @@ export default function RsvpBuilderStep({
               </div>
             )}
             {saveSuccess && (
-              <span className="text-sm ml-2 text-green-600">
+              <span className="text-sm ml-2 text-green-600 dark:text-green-400">
                 {translations["builder.rsvp.save.success"] || "Saved!"}
               </span>
             )}
             {saveError && (
-              <span className="text-sm ml-2 text-red-600">{saveError}</span>
+              <span className="text-sm ml-2 text-red-600 dark:text-red-400">{saveError}</span>
             )}
           </div>
         </>

@@ -89,8 +89,8 @@ export function AIPromptModal({
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-2xl">
-        <h3 className="text-xl font-semibold text-gray-800">
+      <div className="w-full max-w-md rounded-xl bg-white dark:bg-gray-800 p-6 shadow-2xl">
+        <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200">
           {action === "translate"
             ? t(
                 translations,
@@ -104,7 +104,7 @@ export function AIPromptModal({
               )}
         </h3>
 
-        <p className="mt-2 text-sm text-gray-500">
+        <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
           {t(
             translations,
             "builder.ai.modal.description",
@@ -113,11 +113,11 @@ export function AIPromptModal({
         </p>
 
         <div className="mt-6">
-          <label className="text-sm font-medium text-gray-700">
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
             {t(translations, "builder.ai.modal.label.mode", "Select AI Mode")}
           </label>
           <select
-            className="mt-1 block w-full rounded border border-gray-200 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none"
+            className="mt-1 block w-full rounded border border-gray-200 dark:border-gray-700 px-3 py-2 text-sm focus:border-emerald-500 dark:focus:border-emerald-400 focus:outline-none"
             value={tone}
             onChange={(e) => setTone(e.target.value)}
             disabled={loading}
@@ -158,7 +158,7 @@ export function AIPromptModal({
             </optgroup>
           </select>
 
-          <p className="mt-2 text-[11px] text-gray-400 italic">
+          <p className="mt-2 text-[11px] text-gray-400 dark:text-gray-500 italic">
             {tone === "Natural"
               ? t(
                   translations,
@@ -172,11 +172,11 @@ export function AIPromptModal({
                 )}
           </p>
         </div>
-        <div className="mt-4 rounded-lg bg-amber-50 p-3 flex gap-3">
-          <div className="text-amber-600">
+        <div className="mt-4 rounded-lg bg-amber-50 dark:bg-amber-950/30 p-3 flex gap-3">
+          <div className="text-amber-600 dark:text-amber-400">
             <Info size={16} />
           </div>
-          <p className="text-[12px] leading-tight text-amber-700">
+          <p className="text-[12px] leading-tight text-amber-700 dark:text-amber-400">
             {t(
               translations,
               "builder.ai.modal.save_reminder",

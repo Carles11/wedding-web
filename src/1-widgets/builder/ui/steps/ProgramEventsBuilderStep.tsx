@@ -262,7 +262,7 @@ export default function ProgramEventsBuilderStep({
       onBack={hasPendingChanges ? clearForm : undefined}
     >
       <div className="flex justify-between items-center mb-6">
-        <div className="text-gray-600 text-sm">
+        <div className="text-gray-600 dark:text-gray-400 text-sm">
           Manage your wedding schedule events.
         </div>
         <BuilderButton

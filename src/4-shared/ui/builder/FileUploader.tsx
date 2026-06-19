@@ -62,8 +62,8 @@ export function FileUploader({
   return (
     <div
       {...getRootProps()}
-      className={`border-2 border-dashed rounded-lg p-4 cursor-pointer bg-white flex flex-col items-center transition ${
-        isDragActive ? "border-blue-600 bg-blue-50" : "border-gray-300"
+      className={`border-2 border-dashed rounded-lg p-4 cursor-pointer bg-white flex flex-col items-center transition dark:bg-gray-800 ${
+        isDragActive ? "border-blue-600 bg-blue-50 dark:border-blue-400 dark:bg-blue-950/30" : "border-gray-300 dark:border-gray-600"
       } ${disabled ? "opacity-40 pointer-events-none" : ""} ${className}`}
       aria-disabled={disabled}
       aria-labelledby="file-uploader-label"
@@ -72,11 +72,11 @@ export function FileUploader({
       <div id="file-uploader-label" className="text-sm font-medium mb-2">
         {labelText}
       </div>
-      <div className="text-xs text-gray-500 mb-2">
+      <div className="text-xs text-gray-500 mb-2 dark:text-gray-400">
         {isDragActive ? dropText : clickOrDragText}
       </div>
       {selectedFileNames.length > 0 && (
-        <div className="text-xs text-blue-700 mt-2">
+        <div className="text-xs text-blue-700 mt-2 dark:text-blue-400">
           {selectedFilesText} {selectedFileNames.join(", ")}
         </div>
       )}

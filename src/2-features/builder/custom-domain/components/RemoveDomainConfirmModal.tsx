@@ -34,7 +34,7 @@ const RemoveDomainConfirmModal: React.FC<RemoveDomainConfirmModalProps> = ({
       onClose={onClose}
     >
       <div className="space-y-4 p-2 text-sm">
-        <p className="text-gray-600">
+        <p className="text-gray-600 dark:text-gray-400">
           {interpolate(
             t(
               translations,

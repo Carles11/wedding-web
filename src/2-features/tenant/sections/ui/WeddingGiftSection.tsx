@@ -56,14 +56,14 @@ export default function WeddingGiftSection({ data, translations }: Props) {
       <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 text-center md:text-left items-start">
         {/* BANK TRANSFER */}
         {hasBank && (
-          <div className="flex flex-col space-y-3 p-6 bg-white/40 rounded-2xl border border-white/60 backdrop-blur-sm shadow-sm transition-all hover:shadow-md">
+          <div className="flex flex-col space-y-3 p-6 bg-white/40 dark:bg-neutral-900/40 rounded-2xl border border-white/60 dark:border-neutral-700/60 backdrop-blur-sm shadow-sm transition-all hover:shadow-md">
             <Heading
               as="h3"
-              className="font-semibold text-2xl text-neutral-800"
+              className="font-semibold text-2xl text-neutral-800 dark:text-neutral-200"
             >
               {t(translations, "wedding_gift.bank", "Bank Transfer")}
             </Heading>
-            <div className="text-neutral-800 space-y-1">
+            <div className="text-neutral-800 dark:text-neutral-200 space-y-1">
               {data.bank_account_holder && (
                 <p className="font-medium text-lg">
                   {data.bank_account_holder}
@@ -96,10 +96,10 @@ export default function WeddingGiftSection({ data, translations }: Props) {
 
         {/* PAYPAL */}
         {hasPaypal && (
-          <div className="flex flex-col justify-center p-6 bg-white/40 rounded-2xl border border-white/60 backdrop-blur-sm shadow-sm transition-all hover:shadow-md">
+          <div className="flex flex-col justify-center p-6 bg-white/40 dark:bg-neutral-900/40 rounded-2xl border border-white/60 dark:border-neutral-700/60 backdrop-blur-sm shadow-sm transition-all hover:shadow-md">
             <Heading
               as="h3"
-              className="font-semibold text-2xl text-neutral-800 pb-4"
+              className="font-semibold text-2xl text-neutral-800 dark:text-neutral-200 pb-4"
             >
               {t(translations, "wedding_gift.paypal", "PayPal")}
             </Heading>
@@ -118,7 +118,7 @@ export default function WeddingGiftSection({ data, translations }: Props) {
                   href={`https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=${encodeURIComponent(data.paypal_url ?? "")}&currency_code=EUR`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-lg font-medium text-neutral-800 hover:text-neutral-500 transition-colors"
+                  className="text-lg font-medium text-neutral-800 dark:text-neutral-200 hover:text-neutral-500 transition-colors"
                 >
                   {/* We still show the email as the label so they know who they are paying */}
                   {data.paypal_url}
@@ -132,7 +132,7 @@ export default function WeddingGiftSection({ data, translations }: Props) {
                     ? data.paypal_url
                     : `https://${data.paypal_url}`
                 }
-                className="text-neutral-800 text-lg font-medium"
+                className="text-neutral-800 dark:text-neutral-200 text-lg font-medium"
                 ariaLabel="PayPal link"
                 thicknessClass="h-[1px]"
                 external
@@ -145,10 +145,10 @@ export default function WeddingGiftSection({ data, translations }: Props) {
 
         {/* MOBILE PAYMENTS */}
         {(hasBizum || hasVenmo) && (
-          <div className="flex flex-col justify-center p-6 bg-white/40 rounded-2xl border border-white/60 backdrop-blur-sm shadow-sm transition-all hover:shadow-md">
+          <div className="flex flex-col justify-center p-6 bg-white/40 dark:bg-neutral-900/40 rounded-2xl border border-white/60 dark:border-neutral-700/60 backdrop-blur-sm shadow-sm transition-all hover:shadow-md">
             <Heading
               as="h3"
-              className="font-semibold text-2xl text-neutral-800 pb-4"
+              className="font-semibold text-2xl text-neutral-800 dark:text-neutral-200 pb-4"
             >
               {t(translations, "wedding_gift.mobile", "Mobile Transfer")}
             </Heading>
@@ -160,7 +160,7 @@ export default function WeddingGiftSection({ data, translations }: Props) {
                     {t(translations, "wedding_gift.bizum_phone", "Bizum")}
                   </p>
                   <div className="flex items-center justify-between">
-                    <p className="text-lg font-medium text-neutral-800">
+                    <p className="text-lg font-medium text-neutral-800 dark:text-neutral-200">
                       {data.bizum_phone}
                     </p>
                   </div>
@@ -173,7 +173,7 @@ export default function WeddingGiftSection({ data, translations }: Props) {
                     {t(translations, "wedding_gift.venmo_username", "Venmo")}
                   </p>
                   <div className="flex items-center justify-between">
-                    <p className="text-lg font-medium text-neutral-800">
+                    <p className="text-lg font-medium text-neutral-800 dark:text-neutral-200">
                       @{data.venmo_username?.replace("@", "")}
                     </p>
                   </div>
@@ -185,16 +185,16 @@ export default function WeddingGiftSection({ data, translations }: Props) {
 
         {/* REGISTRY / GIFTLIST */}
         {hasGiftlist && (
-          <div className="flex flex-col justify-center p-6 bg-white/40 rounded-2xl border border-white/60 backdrop-blur-sm shadow-sm transition-all hover:shadow-md">
+          <div className="flex flex-col justify-center p-6 bg-white/40 dark:bg-neutral-900/40 rounded-2xl border border-white/60 dark:border-neutral-700/60 backdrop-blur-sm shadow-sm transition-all hover:shadow-md">
             <Heading
               as="h3"
-              className="font-semibold text-2xl text-neutral-800 pb-4"
+              className="font-semibold text-2xl text-neutral-800 dark:text-neutral-200 pb-4"
             >
               {t(translations, "wedding_gift.giftlist", "Registry")}
             </Heading>
             <UnderlinedLink
               href={data.giftlist_url!}
-              className="text-neutral-800 text-lg font-medium"
+              className="text-neutral-800 dark:text-neutral-200 text-lg font-medium"
               ariaLabel="Gift Registry"
               thicknessClass="h-[1px]"
               external
@@ -206,16 +206,16 @@ export default function WeddingGiftSection({ data, translations }: Props) {
 
         {/* HONEYMOON */}
         {hasHoneymoon && (
-          <div className="flex flex-col justify-center p-6 bg-white/40 rounded-2xl border border-white/60 backdrop-blur-sm shadow-sm transition-all hover:shadow-md">
+          <div className="flex flex-col justify-center p-6 bg-white/40 dark:bg-neutral-900/40 rounded-2xl border border-white/60 dark:border-neutral-700/60 backdrop-blur-sm shadow-sm transition-all hover:shadow-md">
             <Heading
               as="h3"
-              className="font-semibold text-2xl text-neutral-800 mb-3"
+              className="font-semibold text-2xl text-neutral-800 dark:text-neutral-200 mb-3"
             >
               {t(translations, "wedding_gift.honeymoon", "Honeymoon Fund")}
             </Heading>
             <UnderlinedLink
               href={data.honeymoon_fund_url!}
-              className="text-neutral-800 text-lg font-medium"
+              className="text-neutral-800 dark:text-neutral-200 text-lg font-medium"
               ariaLabel="Honeymoon Fund"
               thicknessClass="h-[1px]"
               external
@@ -231,23 +231,23 @@ export default function WeddingGiftSection({ data, translations }: Props) {
 
         {/* OTHER OPTIONS */}
         {hasOther && (
-          <div className="flex flex-col justify-center p-6 bg-white/40 rounded-2xl border border-white/60 backdrop-blur-sm shadow-sm transition-all hover:shadow-md md:col-span-2">
+          <div className="flex flex-col justify-center p-6 bg-white/40 dark:bg-neutral-900/40 rounded-2xl border border-white/60 dark:border-neutral-700/60 backdrop-blur-sm shadow-sm transition-all hover:shadow-md md:col-span-2">
             <Heading
               as="h3"
-              className="font-semibold text-2xl text-neutral-800 mb-3"
+              className="font-semibold text-2xl text-neutral-800 dark:text-neutral-200 mb-3"
             >
               {t(translations, "wedding_gift.other", "Other Information")}
             </Heading>
             <div className="space-y-2">
               {data.other_method_desc && (
-                <p className="text-neutral-700 leading-relaxed italic">
+                <p className="text-neutral-700 dark:text-neutral-300 leading-relaxed italic">
                   {data.other_method_desc}
                 </p>
               )}
               {data.other_method_url && (
                 <UnderlinedLink
                   href={data.other_method_url!}
-                  className="text-neutral-800 font-medium"
+                  className="text-neutral-800 dark:text-neutral-200 font-medium"
                   ariaLabel="Other contribution option"
                   thicknessClass="h-[1px]"
                   external

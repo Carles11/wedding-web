@@ -364,7 +364,7 @@ export default function AccommodationBuilderStep({
         </div>
       </div>
 
-      <div className="mb-4 text-md text-gray-600">
+      <div className="mb-4 text-md text-gray-600 dark:text-gray-400">
         {accommodationLimit === -1
           ? translations["builder.accommodation.description_unlimited"] ||
             "Add hotels or places to stay. With your Premium plan, you can add as many as you like."
@@ -377,7 +377,7 @@ export default function AccommodationBuilderStep({
 
       <div className="mb-2">
         <button
-          className="text-sm font-medium text-gray-700 hover:text-gray-900 flex items-center gap-2"
+          className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 flex items-center gap-2"
           onClick={() => setIsListOpen((s) => !s)}
         >
           <span>{isListOpen ? "▼" : "▶"}</span>
@@ -400,7 +400,7 @@ export default function AccommodationBuilderStep({
           ) : (
             <div className="space-y-3">
               {items.length === 0 ? (
-                <div className="text-sm text-gray-500">
+                <div className="text-sm text-gray-500 dark:text-gray-400">
                   {translations["builder.accommodation.empty"] ||
                     "No accommodations yet."}
                 </div>
@@ -409,7 +409,7 @@ export default function AccommodationBuilderStep({
                   {items.map((it) => (
                     <div
                       key={it.id}
-                      className="group border rounded-lg p-3 sm:p-0 sm:border-0 sm:rounded-none flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4 bg-white sm:bg-transparent"
+                      className="group border rounded-lg p-3 sm:p-0 sm:border-0 sm:rounded-none flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4 bg-white dark:bg-gray-800 sm:bg-transparent sm:dark:bg-transparent"
                     >
                       <div className="min-w-0">
                         <div className="font-medium text-sm truncate">
@@ -417,14 +417,14 @@ export default function AccommodationBuilderStep({
                             (translations["builder.accommodation.no_name"] ||
                               "(no name)")}
                         </div>
-                        <div className="text-xs text-gray-600 wrap-break-word">
+                        <div className="text-xs text-gray-600 dark:text-gray-400 wrap-break-word">
                           {it.address ?? ""}
                         </div>
-                        <div className="text-xs text-gray-600 wrap-break-word">
+                        <div className="text-xs text-gray-600 dark:text-gray-400 wrap-break-word">
                           {it.notes ?? ""}
                         </div>
                         {it.website && (
-                          <div className="text-xs text-blue-600 break-all mt-1">
+                          <div className="text-xs text-blue-600 dark:text-blue-400 break-all mt-1">
                             <a
                               href={it.website}
                               target="_blank"
@@ -435,7 +435,7 @@ export default function AccommodationBuilderStep({
                           </div>
                         )}
                         {it.phone && (
-                          <div className="text-xs text-gray-600 mt-0.5">
+                          <div className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
                             <span>
                               {translations["builder.accommodation.phone"] ||
                                 "Phone"}
@@ -444,7 +444,7 @@ export default function AccommodationBuilderStep({
                           </div>
                         )}
                         {it.email && (
-                          <div className="text-xs text-gray-600 mt-0.5 break-all">
+                          <div className="text-xs text-gray-600 dark:text-gray-400 mt-0.5 break-all">
                             <span>
                               {translations["builder.accommodation.email"] ||
                                 "Email"}

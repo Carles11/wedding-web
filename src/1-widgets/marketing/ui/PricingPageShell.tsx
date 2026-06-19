@@ -32,7 +32,7 @@ export default function PricingPageShell({
           >
             {title}
           </Heading>
-          <p className="text-gray-600 text-lg max-w-2xl mx-auto leading-relaxed">
+          <p className="text-gray-600 dark:text-gray-400 text-lg max-w-2xl mx-auto leading-relaxed">
             {summary}
           </p>
         </div>
@@ -41,7 +41,7 @@ export default function PricingPageShell({
         {children}
 
         {/* FINE PRINT */}
-        <p className="text-sm text-gray-500 text-center mt-20 max-w-xl mx-auto">
+        <p className="text-sm text-gray-500 dark:text-gray-400 text-center mt-20 max-w-xl mx-auto">
           {fine_print}
         </p>
       </div>

@@ -42,33 +42,33 @@ export default function MarketingHeader({ translations, lang }: Props) {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-gray-100 bg-white/90 backdrop-blur-md">
+    <header className="sticky top-0 z-50 w-full border-b border-gray-100 dark:border-gray-700 bg-white/90 dark:bg-gray-800/90 backdrop-blur-md">
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 md:px-6">
         {/* LOGO */}
         <Link
           href={langPrefix}
           className="flex items-center gap-1 font-serif text-xl md:text-2xl font-bold tracking-tight shrink-0"
         >
-          WeddWeb<span className="text-emerald-600">.com</span>
+          WeddWeb<span className="text-emerald-600 dark:text-emerald-400">.com</span>
         </Link>
 
         {/* DESKTOP NAV */}
         <nav className="hidden lg:flex items-center gap-8">
           <Link
             href={`${langPrefix}/features/multilingual-wedding-website`}
-            className="text-sm font-medium text-slate-600 hover:text-emerald-600 transition-colors"
+            className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
           >
             {t(translations, "marketing.nav.features", "Multilingual")}
           </Link>
           <a
             href={`${langPrefix}/pricing`}
-            className="text-sm font-medium text-slate-600 hover:text-emerald-600 transition-colors"
+            className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
           >
             {t(translations, "marketing.nav.pricing", "Pricing")}
           </a>
           <Link
             href={`${langPrefix}/faq`}
-            className="text-sm font-medium text-slate-600 hover:text-emerald-600 transition-colors"
+            className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
           >
             {t(translations, "marketing.nav.faq", "FAQ")}
           </Link>
@@ -81,9 +81,9 @@ export default function MarketingHeader({ translations, lang }: Props) {
             <button
               onClick={() => setIsLangOpen(!isLangOpen)}
               onBlur={() => setTimeout(() => setIsLangOpen(false), 200)}
-              className="flex items-center gap-1 rounded-full border border-gray-200 bg-gray-50 px-2 py-1.5 md:px-3 text-[11px] md:text-xs font-semibold text-slate-700 hover:border-emerald-200 transition-all"
+              className="flex items-center gap-1 rounded-full border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 px-2 py-1.5 md:px-3 text-[11px] md:text-xs font-semibold text-slate-700 dark:text-slate-300 hover:border-emerald-200 dark:hover:border-emerald-800 transition-all"
             >
-              <Globe className="w-3.5 h-3.5 text-emerald-600" />
+              <Globe className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
               <span>{lang.toUpperCase()}</span>
               <ChevronDown
                 className={`w-3 h-3 opacity-40 transition-transform ${
@@ -100,7 +100,7 @@ export default function MarketingHeader({ translations, lang }: Props) {
                   : "scale-95 opacity-0 invisible lg:group-hover:scale-100 lg:group-hover:opacity-100 lg:group-hover:visible"
               }`}
             >
-              <div className="rounded-xl border border-gray-200 bg-white p-1 shadow-xl shadow-black/5">
+              <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-1 shadow-xl shadow-black/5">
                 <div className="max-h-[60vh] overflow-y-auto">
                   {SUPPORTED_LANGUAGES.map((l) => (
                     <button
@@ -111,8 +111,8 @@ export default function MarketingHeader({ translations, lang }: Props) {
                       }}
                       className={`w-full text-left px-3 py-2 text-xs rounded-lg transition-colors ${
                         l === lang
-                          ? "bg-emerald-50 text-emerald-700 font-bold"
-                          : "hover:bg-gray-50 text-slate-600"
+                          ? "bg-emerald-50 text-emerald-700 font-bold dark:bg-emerald-950/30 dark:text-emerald-300"
+                          : "hover:bg-gray-50 text-slate-600 dark:hover:bg-gray-900 dark:text-slate-400"
                       }`}
                     >
                       {
@@ -131,7 +131,7 @@ export default function MarketingHeader({ translations, lang }: Props) {
           {!user ? (
             <Link
               href={logInRef}
-              className="hidden sm:block text-md font-medium text-emerald-600"
+              className="hidden sm:block text-md font-medium text-emerald-600 dark:text-emerald-400"
             >
               {t(translations, "marketing.nav.login", "Log in")}
             </Link>
@@ -147,7 +147,7 @@ export default function MarketingHeader({ translations, lang }: Props) {
           {/* MOBILE MENU TOGGLE */}
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="lg:hidden p-2 text-slate-600 hover:bg-gray-100 rounded-lg transition-colors"
+            className="lg:hidden p-2 text-slate-600 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
           >
             {isMenuOpen ? (
               <X className="w-6 h-6" />
@@ -160,34 +160,34 @@ export default function MarketingHeader({ translations, lang }: Props) {
 
       {/* MOBILE OVERLAY BURGER MENU */}
       {isMenuOpen && (
-        <div className="lg:hidden absolute top-20 left-0 w-full bg-white border-b border-gray-100 p-6 shadow-xl animate-in slide-in-from-top-2 z-40">
+        <div className="lg:hidden absolute top-20 left-0 w-full bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 p-6 shadow-xl animate-in slide-in-from-top-2 z-40">
           <nav className="flex flex-col gap-6">
             <Link
               href={`${langPrefix}/features/multilingual-wedding-website`}
               onClick={() => setIsMenuOpen(false)}
-              className="text-lg font-medium text-slate-900"
+              className="text-lg font-medium text-slate-900 dark:text-slate-100"
             >
               {t(translations, "marketing.nav.features", "Multilingual")}
             </Link>
             <a
               href={`${langPrefix}/pricing`}
               onClick={() => setIsMenuOpen(false)}
-              className="text-lg font-medium text-slate-900"
+              className="text-lg font-medium text-slate-900 dark:text-slate-100"
             >
               {t(translations, "marketing.nav.pricing", "Pricing")}
             </a>
             <Link
               href={`${langPrefix}/faq`}
               onClick={() => setIsMenuOpen(false)}
-              className="text-lg font-medium text-slate-900"
+              className="text-lg font-medium text-slate-900 dark:text-slate-100"
             >
               {t(translations, "marketing.nav.faq", "FAQ")}
             </Link>
-            <hr className="border-gray-100" />
+            <hr className="border-gray-100 dark:border-gray-700" />
             {!user ? (
               <Link
                 href={logInRef}
-                className="text-md font-medium text-emerald-600"
+                className="text-md font-medium text-emerald-600 dark:text-emerald-400"
               >
                 {t(translations, "marketing.nav.login", "Log in")}
               </Link>

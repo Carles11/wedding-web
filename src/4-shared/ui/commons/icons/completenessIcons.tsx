@@ -1,7 +1,7 @@
 export const GreenCheckIcon = () => {
   return (
     <svg
-      className="inline mr-2 text-green-500"
+      className="inline mr-2 text-green-500 dark:text-green-400"
       width={16}
       height={16}
       fill="none"
@@ -31,7 +31,7 @@ export const GreenCheckIcon = () => {
 export const RedDotIcon = () => {
   return (
     <svg
-      className="inline mr-2 text-red-500"
+      className="inline mr-2 text-red-500 dark:text-red-400"
       width={12}
       height={12}
       viewBox="0 0 16 16"
@@ -46,7 +46,7 @@ export const RedDotIcon = () => {
 export const GrayCircleIcon = () => {
   return (
     <svg
-      className="inline mr-2 text-gray-400"
+      className="inline mr-2 text-gray-400 dark:text-gray-500"
       width={16}
       height={16}
       fill="none"

@@ -38,9 +38,9 @@ export default function SectionContainer({
   dividerOpacity,
   children,
 }: SectionContainerProps) {
-  const bgClass = variant === "muted" ? "bg-transparent" : "bg-white";
+  const bgClass = variant === "muted" ? "bg-transparent" : "bg-white dark:bg-gray-900";
   const innerBg =
-    variant === "white" ? "bg-white" : "bg-white/60 backdrop-blur-sm";
+    variant === "white" ? "bg-white dark:bg-gray-900" : "bg-white/60 backdrop-blur-sm dark:bg-gray-900/60";
   const motive = dividerMotive ?? "flower1";
   const motifClass = dividerClassName ?? "w-36 h-auto";
   const size = dividerSize ?? 120;
@@ -71,13 +71,13 @@ export default function SectionContainer({
                 <Heading
                   as="h2"
                   id={headingId}
-                  className="text-2xl md:text-3xl font-extrabold leading-tight text-neutral-800 drop-shadow-[0_2px_8px_rgba(0,0,0,0.18)]"
+                  className="text-2xl md:text-3xl font-extrabold leading-tight text-neutral-800 dark:text-neutral-200 drop-shadow-[0_2px_8px_rgba(0,0,0,0.18)]"
                 >
                   {heading}
                 </Heading>
               )}
               {subtitle && (
-                <p className="bg-white/60 min-w-fit w-fit leading-tight text-neutral-800 px-2 py-1">
+                <p className="bg-white/60 min-w-fit w-fit leading-tight text-neutral-800 px-2 py-1 dark:text-neutral-200">
                   {subtitle}
                 </p>
               )}
@@ -85,7 +85,7 @@ export default function SectionContainer({
           )}
 
           <div
-            className={`${innerBg} rounded-2xl p-6 md:p-8 shadow-sm border border-neutral-100`}
+            className={`${innerBg} rounded-2xl p-6 md:p-8 shadow-sm border border-neutral-100 dark:border-neutral-700`}
           >
             {children}
           </div>

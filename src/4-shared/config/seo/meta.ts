@@ -78,5 +78,6 @@ export const ICONS = [
 ];
 
 export const THEME_COLOR = "#ffffff";
+export const THEME_COLOR_DARK = "#292d41";
 export const GOOGLE_SITE_VERIFICATION =
   "qZVellQZ9wEjIzSSd7ZE-1UxU0cTUDrFZa1hq20yHe4";

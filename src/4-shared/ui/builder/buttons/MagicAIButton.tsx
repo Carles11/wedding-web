@@ -46,7 +46,7 @@ export const MagicAIButton = ({
       <BuilderButton
         variant="secondary"
         size="sm"
-        icon={<Sparkles size={14} className="text-emerald-500" />}
+        icon={<Sparkles size={14} className="text-emerald-500 dark:text-emerald-400" />}
         onClick={handleClick}
       >
         {translations["builder.ai.action.button_text"] || "Write & Translate"}

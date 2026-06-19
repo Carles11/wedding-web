@@ -42,11 +42,11 @@ export default function MembershipSection({
 
   return (
     <section className="mt-12 max-w-3xl">
-      <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+      <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
         {translations["builder.billing.membership_title"]}
       </h4>
 
-      <div className="group relative border border-gray-200 rounded-3xl bg-white p-1 shadow-sm transition-all hover:shadow-md">
+      <div className="group relative border border-gray-200 dark:border-gray-700 rounded-3xl bg-white dark:bg-gray-800 p-1 shadow-sm transition-all hover:shadow-md">
         {/* Subtle Gradient Inner Border for Premium */}
         <div
           className={`rounded-[22px] p-6 flex flex-col md:flex-row md:items-center gap-6 ${
@@ -62,12 +62,12 @@ export default function MembershipSection({
                 className={`px-3 py-1 text-[10px] font-bold tracking-widest uppercase rounded-full border ${
                   planType === "premium"
                     ? "bg-(--builder-color-primary) text-white border-(--builder-color-primary-hover)"
-                    : "bg-gray-100 text-gray-600 border-gray-200"
+                    : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700"
                 }`}
               >
                 {planLabel}
               </div>
-              <span className="text-xs text-gray-400 font-medium italic">
+              <span className="text-xs text-gray-400 dark:text-gray-500 font-medium italic">
                 {translations["builder.billing.current_plan"]}
               </span>
             </div>
@@ -76,7 +76,7 @@ export default function MembershipSection({
               {localizedFeatures.map((feature, index) => (
                 <li
                   key={index}
-                  className="flex items-center gap-2 text-sm text-gray-600"
+                  className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400"
                 >
                   <Check className="w-4 h-4 text-(--builder-color-primary) shrink-0" />
                   <span className="truncate">{feature}</span>
@@ -86,7 +86,7 @@ export default function MembershipSection({
           </div>
 
           {/* RIGHT: Action (Responsive divider on mobile) */}
-          <div className="pt-6 md:pt-0 md:pl-6 border-t md:border-t-0 md:border-l border-gray-100 flex items-center justify-center">
+          <div className="pt-6 md:pt-0 md:pl-6 border-t md:border-t-0 md:border-l border-gray-100 dark:border-gray-700 flex items-center justify-center">
             <BuilderButton
               type="button"
               variant={canUpgrade ? "primary" : "secondary"}
@@ -110,7 +110,7 @@ export default function MembershipSection({
       </div>
 
       <button
-        className="mt-4 text-xs font-medium text-gray-400 hover:text-blue-600 transition-colors flex items-center gap-1"
+        className="mt-4 text-xs font-medium text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center gap-1"
         onClick={() => router.push(`/${lang}/pricing`)}
       >
         {translations["builder.billing.learn_more"]}

@@ -18,7 +18,7 @@ export function CookieWhatSection({ translations }: SectionProps) {
           "1. What Are Cookies?",
         )}
       </Heading>
-      <p className="text-gray-700 leading-relaxed opacity-90">
+      <p className="text-gray-700 dark:text-gray-300 leading-relaxed opacity-90">
         {t(
           translations,
           "marketing.legal.cookie.what_are_cookies.desc",
@@ -62,7 +62,7 @@ export function CookieTypesSection({ translations }: SectionProps) {
   return (
     <section
       id="types"
-      className="mb-16 scroll-mt-24 border-t border-black/5 pt-12"
+      className="mb-16 scroll-mt-24 border-t border-black/5 dark:border-white/10 pt-12"
     >
       <Heading as="h2" className="font-display text-3xl pb-4">
         {t(
@@ -75,17 +75,17 @@ export function CookieTypesSection({ translations }: SectionProps) {
         {cookies.map((cookie) => (
           <div
             key={cookie.key}
-            className="p-6 rounded-2xl bg-white/50 border border-white shadow-sm flex gap-5"
+            className="p-6 rounded-2xl bg-white/50 dark:bg-gray-800/50 border border-white dark:border-gray-700 shadow-sm flex gap-5"
           >
             <div
               className="w-2 h-auto rounded-full"
               style={{ background: cookie.color }}
             />
             <div>
-              <h3 className="font-bold text-gray-900 mb-2">
+              <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-2">
                 {t(translations, cookie.title, cookie.defaultLabel)}
               </h3>
-              <p className="text-sm text-gray-600 leading-relaxed">
+              <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
                 {t(translations, cookie.desc, cookie.defaultDesc)}
               </p>
             </div>
@@ -106,7 +106,7 @@ export function CookieUsageSection({ translations }: SectionProps) {
           "3. Our Usage Policy",
         )}
       </Heading>
-      <p className="mb-6 text-gray-700">
+      <p className="mb-6 text-gray-700 dark:text-gray-300">
         {t(
           translations,
           "marketing.legal.cookie.usage.current",
@@ -127,7 +127,7 @@ export function CookieManageSection({ translations }: SectionProps) {
           "4. Managing Your Preferences",
         )}
       </Heading>
-      <p className="text-gray-700 leading-relaxed opacity-90">
+      <p className="text-gray-700 dark:text-gray-300 leading-relaxed opacity-90">
         {t(
           translations,
           "marketing.legal.cookie.manage.current",
@@ -148,7 +148,7 @@ export function CookieThirdPartySection({ translations }: SectionProps) {
           "5. Third-Party Cookies",
         )}
       </Heading>
-      <p className="text-gray-700 leading-relaxed opacity-90">
+      <p className="text-gray-700 dark:text-gray-300 leading-relaxed opacity-90">
         {t(
           translations,
           "marketing.legal.cookie.third_party.current",
@@ -169,7 +169,7 @@ export function CookieUpdatesSection({ translations }: SectionProps) {
           "6. Policy Updates",
         )}
       </Heading>
-      <p className="text-gray-700 leading-relaxed opacity-90">
+      <p className="text-gray-700 dark:text-gray-300 leading-relaxed opacity-90">
         {t(
           translations,
           "marketing.legal.cookie.updates.desc",
@@ -184,7 +184,7 @@ export function CookieContactSection({ translations }: SectionProps) {
   return (
     <section
       id="contact"
-      className="mb-16 scroll-mt-24 pt-10 border-t border-black/5"
+      className="mb-16 scroll-mt-24 pt-10 border-t border-black/5 dark:border-white/10"
     >
       <Heading as="h2" className="font-display text-3xl pb-4">
         {t(
@@ -193,8 +193,8 @@ export function CookieContactSection({ translations }: SectionProps) {
           "7. Cookie Inquiries",
         )}
       </Heading>
-      <div className="p-8 rounded-3xl bg-white border border-black/5 shadow-xl shadow-black/5">
-        <p className="text-gray-700 pb-4">
+      <div className="p-8 rounded-3xl bg-white dark:bg-gray-800 border border-black/5 dark:border-white/10 shadow-xl shadow-black/5 dark:shadow-black/20">
+        <p className="text-gray-700 dark:text-gray-300 pb-4">
           {t(
             translations,
             "marketing.legal.cookie.contact.desc",

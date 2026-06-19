@@ -56,11 +56,11 @@ export const SubdomainSection: React.FC<Props> = ({
   return (
     <div className="flex flex-col md:flex-row items-center justify-between">
       <div className="flex items-center gap-1   text-sm">
-        <span className="text-gray-400 select-none">
+        <span className="text-gray-400 dark:text-gray-500 select-none">
           {getPreviewUrl.startsWith("https") ? "https://" : "http://"}
         </span>
-        <span className="font-bold text-gray-800">{site.subdomain}</span>
-        <span className="text-gray-400 select-none">.{domainSuffix}</span>
+        <span className="font-bold text-gray-800 dark:text-gray-200">{site.subdomain}</span>
+        <span className="text-gray-400 dark:text-gray-500 select-none">.{domainSuffix}</span>
       </div>
 
       <div className="flex items-center gap-3">
@@ -68,12 +68,12 @@ export const SubdomainSection: React.FC<Props> = ({
           <button
             onClick={onCopy}
             title={translations["builder.domain.copy_url"]}
-            className="text-sm font-medium px-3 py-1 text-gray-600 hover:bg-gray-100 rounded-md transition-colors cursor-pointer"
+            className="text-sm font-medium px-3 py-1 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors cursor-pointer"
           >
             {copied ? (
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-4 w-4 text-green-500"
+                  className="h-4 w-4 text-green-500 dark:text-green-400"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -113,7 +113,7 @@ export const SubdomainSection: React.FC<Props> = ({
               "inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 whitespace-nowrap shrink-0 transition-opacity",
               allStepsComplete
                 ? "text-(--builder-color-primary) border-(--builder-color-primary-hover) hover:opacity-70"
-                : "text-gray-300 border-gray-200",
+                : "text-gray-300 dark:text-gray-500 border-gray-200 dark:border-gray-700",
             ].join(" ")}
             onClick={handlePreviewClick}
           >
@@ -138,7 +138,7 @@ export const SubdomainSection: React.FC<Props> = ({
         {canEdit && (
           <button
             onClick={onEdit}
-            className="text-sm font-medium px-3 py-1 text-gray-600 hover:bg-gray-100 rounded-md transition-colors cursor-pointer"
+            className="text-sm font-medium px-3 py-1 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors cursor-pointer"
           >
             {translations["builder.general.edit"] || "Change"}
           </button>

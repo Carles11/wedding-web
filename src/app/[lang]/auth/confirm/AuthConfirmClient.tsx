@@ -154,14 +154,14 @@ export default function AuthConfirmClient({ translations, lang }: Props) {
   }, [lang, router, searchParams, supabase, translations]);
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gray-50 px-6">
-      <div className="w-full max-w-md rounded-lg bg-white p-8 text-center shadow-md">
-        <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-4 border-blue-100 border-t-blue-600" />
+    <main className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-6">
+      <div className="w-full max-w-md rounded-lg bg-white dark:bg-gray-800 p-8 text-center shadow-md">
+        <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-4 border-blue-100 dark:border-blue-900 border-t-blue-600 dark:border-t-blue-400" />
         <Heading as="h2">
           {tr(translations, "auth.confirm.title", "Confirming Access")}
         </Heading>
 
-        <p className="mt-3 text-gray-600">{message}</p>
+        <p className="mt-3 text-gray-600 dark:text-gray-400">{message}</p>
       </div>
     </main>
   );

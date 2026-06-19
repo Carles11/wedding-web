@@ -86,7 +86,7 @@ export function PasswordChangeModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-      <div className="bg-white rounded-xl shadow-lg max-w-sm w-full p-6 space-y-4">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg max-w-sm w-full p-6 space-y-4">
         <h3 className="text-lg font-semibold mb-2">
           {translations["auth.common.change_password_title"] ||
             "Change Password"}
@@ -128,7 +128,7 @@ export function PasswordChangeModal({
         </div>
         <div className="flex gap-2 justify-end mt-4">
           <button
-            className="px-4 py-2 rounded bg-gray-100 text-gray-700 hover:bg-gray-200"
+            className="px-4 py-2 rounded bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
             onClick={() => {
               onClose();
               setCurrentPassword("");
@@ -141,7 +141,7 @@ export function PasswordChangeModal({
             {translations["auth.common.cancel"] || "Cancel"}
           </button>
           <button
-            className="px-4 py-2 rounded bg-(--builder-color-primary) text-white hover:bg-(--builder-color-primary)/90 disabled:opacity-60"
+            className="px-4 py-2 rounded bg-(--builder-color-primary) text-white dark:text-gray-100 hover:bg-(--builder-color-primary)/90 disabled:opacity-60"
             onClick={handleChangePassword}
             disabled={loading}
           >

@@ -35,7 +35,7 @@ export default function HeroMarketing({
           </Heading>
           <p
             id="hero-summary"
-            className="mt-6 text-xl md:text-2xl text-gray-600"
+            className="mt-6 text-xl md:text-2xl text-gray-600 dark:text-gray-300"
           >
             {subheadline}
           </p>

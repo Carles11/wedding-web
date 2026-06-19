@@ -25,7 +25,7 @@ export function ContactForm({
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
       {/* Bride */}
-      <div className="p-3 border rounded-xl bg-white">
+      <div className="p-3 border rounded-xl bg-white dark:bg-gray-800">
         <div className="font-medium">
           {translations["builder.contact.bride"] || "Side A"}
         </div>
@@ -63,7 +63,7 @@ export function ContactForm({
         </div>
       </div>
       {/* Groom */}
-      <div className="p-3 border rounded-xl bg-white">
+      <div className="p-3 border rounded-xl bg-white dark:bg-gray-800">
         <div className="font-medium">
           {translations["builder.contact.groom"] || "Side B"}
         </div>

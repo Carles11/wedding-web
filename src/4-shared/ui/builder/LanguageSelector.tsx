@@ -35,7 +35,7 @@ export default function LanguageSelector({
           value={currentLang}
           onChange={handleChange}
           aria-label={label ?? "Select language"}
-          className={`appearance-none px-3 py-2 pr-8 border border-gray-300 rounded-md bg-white text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#6ABDA6] ${
+          className={`appearance-none px-3 py-2 pr-8 border border-gray-300 rounded-md bg-white text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#6ABDA6] dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200 dark:focus:ring-[#6ABDA6] ${
             preferencesTab ? "w-full" : "w-auto"
           }`}
         >
@@ -45,7 +45,7 @@ export default function LanguageSelector({
             </option>
           ))}
         </select>
-        <span className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-gray-400">
+        <span className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-gray-400 dark:text-gray-500">
           ▾
         </span>
       </div>

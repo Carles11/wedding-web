@@ -17,20 +17,20 @@ export function BuilderLanguageCard({
 }: BuilderLanguageCardProps) {
   return (
     <section
-      className={`rounded-xl border bg-white p-4 shadow-sm transition sm:p-5 ${
+      className={`rounded-xl border bg-white p-4 shadow-sm transition sm:p-5 dark:bg-gray-800 dark:border-gray-700 ${
         isDefault ? "ring-2 ring-blue-600/10" : "hover:shadow-md"
       }`}
     >
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <div className="flex items-center gap-2">
           <span className="font-normal text-xs">{title}</span>
-          <span className="uppercase text-xs tracking-widest text-blue-500">
+          <span className="uppercase text-xs tracking-widest text-blue-500 dark:text-blue-400">
             ({languageCode})
           </span>
         </div>
 
         {isDefault && defaultBadgeLabel && (
-          <span className="rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700">
+          <span className="rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700 dark:bg-blue-950/40 dark:text-blue-400">
             {defaultBadgeLabel}
           </span>
         )}

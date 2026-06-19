@@ -9,7 +9,7 @@ const baseOptions: ToastOptions = {
   closeOnClick: true,
   pauseOnHover: true,
   draggable: true,
-  theme: "light",
+  theme: "auto",
 };
 
 export const notify = {

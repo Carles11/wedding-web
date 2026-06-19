@@ -100,7 +100,7 @@ export default function MultilingualLogic({ translations }: Props) {
         <div className="max-w-5xl mx-auto">
           {/* ── Section Header ── */}
 
-          <p className="text-center text-gray-500 mb-16 max-w-2xl mx-auto">
+          <p className="text-center text-gray-500 dark:text-gray-400 mb-16 max-w-2xl mx-auto">
             {t(
               translations,
               "marketing.multilingual.subtitle",
@@ -126,7 +126,7 @@ export default function MultilingualLogic({ translations }: Props) {
                 >
                   {pillar.title}
                 </Heading>
-                <p className="text-sm leading-relaxed text-gray-600">
+                <p className="text-sm leading-relaxed text-gray-600 dark:text-gray-400">
                   {pillar.body}
                 </p>
               </article>
@@ -165,7 +165,7 @@ export default function MultilingualLogic({ translations }: Props) {
                       {nativeName}
                     </span>
                     {/* English name — visually subordinate, human-readable */}
-                    <span className="text-[10px] uppercase tracking-wide text-gray-400">
+                    <span className="text-[10px] uppercase tracking-wide text-gray-400 dark:text-gray-500">
                       {name}
                     </span>
                     {/* BCP-47 code — machine-readable; crawlers index this */}

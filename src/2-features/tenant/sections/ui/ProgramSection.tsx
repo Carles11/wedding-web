@@ -58,7 +58,7 @@ export default function ProgramSectionComponent({
           id="program-headline"
           className="
           text-2xl md:text-md  tracking-wider
-          text-neutral-700 font-semibold text-center mb-10
+          text-neutral-700 dark:text-neutral-300 font-semibold text-center mb-10
           letter-spacing-wide
         "
         >
@@ -68,19 +68,19 @@ export default function ProgramSectionComponent({
         <div
           className="
           grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x
-          divide-neutral-200
+          divide-neutral-200 dark:divide-neutral-700
           w-full text-center
         "
         >
           <div className="pb-6 md:pb-0 md:pr-8">
-            <div className="text-xs uppercase mb-2 tracking-wider text-neutral-600 font-bold">
+            <div className="text-xs uppercase mb-2 tracking-wider text-neutral-600 dark:text-neutral-400 font-bold">
               {whenLabel}
             </div>
             <div className="text-lg font-light">{when}</div>
           </div>
 
           <div className="py-6 md:py-0 md:px-8">
-            <div className="text-xs uppercase mb-2 tracking-wider text-neutral-600 font-bold">
+            <div className="text-xs uppercase mb-2 tracking-wider text-neutral-600 dark:text-neutral-400 font-bold">
               {whereLabel}
             </div>
             <div className="text-lg font-light whitespace-pre-line">
@@ -91,7 +91,7 @@ export default function ProgramSectionComponent({
 
         {/* Uncomment if you wish to show the event description here */}
         {/* {description && (
-          <div className="mt-2 text-base text-neutral-600 text-center">
+          <div className="mt-2 text-base text-neutral-600 dark:text-neutral-400 text-center">
             {description}
           </div>
         )} */}

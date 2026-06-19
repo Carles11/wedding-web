@@ -16,7 +16,7 @@ export function TermsUseSection({ translations }: SectionProps) {
           "1. Use of Service",
         )}
       </Heading>
-      <p className="text-gray-700 leading-relaxed opacity-90">
+      <p className="text-gray-700 dark:text-gray-300 leading-relaxed opacity-90">
         {t(
           translations,
           "marketing.legal.terms.use.desc",
@@ -37,7 +37,7 @@ export function TermsAccountSection({ translations }: SectionProps) {
           "2. Account Registration",
         )}
       </Heading>
-      <p className="text-gray-700 leading-relaxed opacity-90">
+      <p className="text-gray-700 dark:text-gray-300 leading-relaxed opacity-90">
         {t(
           translations,
           "marketing.legal.terms.account.desc",
@@ -61,7 +61,7 @@ export function TermsSubscriptionSection({ translations }: SectionProps) {
           "3. Payments & Subscriptions",
         )}
       </Heading>
-      <p className="text-gray-700 leading-relaxed opacity-90">
+      <p className="text-gray-700 dark:text-gray-300 leading-relaxed opacity-90">
         {t(
           translations,
           "marketing.legal.terms.billing.desc",
@@ -82,7 +82,7 @@ export function TermsContentSection({ translations }: SectionProps) {
           "4. Intellectual Property",
         )}
       </Heading>
-      <p className="text-gray-700 leading-relaxed opacity-90">
+      <p className="text-gray-700 dark:text-gray-300 leading-relaxed opacity-90">
         {t(
           translations,
           "marketing.legal.terms.content.desc",
@@ -103,7 +103,7 @@ export function TermsUserContentSection({ translations }: SectionProps) {
           "5. User Content",
         )}
       </Heading>
-      <p className="text-gray-700 leading-relaxed opacity-90">
+      <p className="text-gray-700 dark:text-gray-300 leading-relaxed opacity-90">
         {t(
           translations,
           "marketing.legal.terms.user_content.desc",
@@ -118,7 +118,7 @@ export function TermsProhibitedSection({ translations }: SectionProps) {
   return (
     <section
       id="prohibited"
-      className="mb-14 scroll-mt-24 p-8 rounded-3xl bg-white/50 border border-white/80 shadow-sm"
+      className="mb-14 scroll-mt-24 p-8 rounded-3xl bg-white/50 dark:bg-gray-800/50 border border-white/80 dark:border-gray-700/80 shadow-sm"
     >
       <Heading as="h2" className="font-display text-3xl pb-4">
         {t(
@@ -153,8 +153,8 @@ export function TermsProhibitedSection({ translations }: SectionProps) {
               "Circumventing domain, event, or plan limits (for example, by repeatedly swapping custom domains or sharing your account access).",
           },
         ].map((item, i) => (
-          <li key={i} className="flex items-start gap-4 text-sm text-gray-700">
-            <span className="shrink-0 w-5 h-5 rounded-full bg-red-50 text-red-400 flex items-center justify-center text-[10px] font-bold">
+          <li key={i} className="flex items-start gap-4 text-sm text-gray-700 dark:text-gray-300">
+            <span className="shrink-0 w-5 h-5 rounded-full bg-red-50 dark:bg-red-950/30 text-red-400 flex items-center justify-center text-[10px] font-bold">
               ✕
             </span>
             {t(translations, item.key, item.label)}
@@ -175,7 +175,7 @@ export function TermsTerminationSection({ translations }: SectionProps) {
           "7. Termination",
         )}
       </Heading>
-      <p className="text-gray-700 leading-relaxed opacity-90">
+      <p className="text-gray-700 dark:text-gray-300 leading-relaxed opacity-90">
         {t(
           translations,
           "marketing.legal.terms.termination.desc",
@@ -196,7 +196,7 @@ export function TermsDisclaimerSection({ translations }: SectionProps) {
           "8. Disclaimers & Liability",
         )}
       </Heading>
-      <div className="p-6 rounded-2xl bg-slate-900/5 italic text-sm border-l-4 border-slate-300">
+      <div className="p-6 rounded-2xl bg-slate-900/5 dark:bg-slate-100/10 italic text-sm border-l-4 border-slate-300 dark:border-slate-600">
         {t(
           translations,
           "marketing.legal.terms.disclaimer.desc",
@@ -217,7 +217,7 @@ export function TermsChangesSection({ translations }: SectionProps) {
           "9. Changes to Terms",
         )}
       </Heading>
-      <p className="text-gray-700 leading-relaxed opacity-90">
+      <p className="text-gray-700 dark:text-gray-300 leading-relaxed opacity-90">
         {t(
           translations,
           "marketing.legal.terms.changes.desc",
@@ -232,12 +232,12 @@ export function TermsContactSection({ translations }: SectionProps) {
   return (
     <section
       id="contact"
-      className="mb-14 scroll-mt-24 pt-10 border-t border-black/5"
+      className="mb-14 scroll-mt-24 pt-10 border-t border-black/5 dark:border-white/10"
     >
       <Heading as="h2" className="font-display text-3xl pb-4">
         {t(translations, "marketing.legal.terms.contact.title", "10. Contact")}
       </Heading>
-      <p className="text-gray-700">
+      <p className="text-gray-700 dark:text-gray-300">
         {t(
           translations,
           "marketing.legal.terms.contact.desc",

@@ -132,14 +132,14 @@ export function CookiesConsentBanner({
       aria-live="polite"
     >
       <div
-        className="m-4 px-4 py-3 rounded-lg shadow-lg bg-white/95 border border-gray-200 flex flex-col sm:flex-row items-center gap-3 pointer-events-auto"
+        className="m-4 px-4 py-3 rounded-lg shadow-lg bg-white/95 border border-gray-200 flex flex-col sm:flex-row items-center gap-3 pointer-events-auto dark:bg-gray-900/95 dark:border-gray-700"
         style={{ maxWidth: 480 }}
         role="dialog"
         aria-label={
           translations["cookies.banner.aria_label"] || "Cookies consent banner"
         }
       >
-        <span className="text-sm text-gray-700 flex-1">
+        <span className="text-sm text-gray-700 flex-1 dark:text-gray-300">
           {translations["cookies.banner.message"] ||
             "We use cookies to improve your experience. By using our site, you accept our use of cookies."}
         </span>

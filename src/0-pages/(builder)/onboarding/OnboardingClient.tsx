@@ -58,15 +58,15 @@ export default function OnboardingClient({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
       <div className="max-w-6xl mx-auto px-6">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold pb-4 text-gray-900">
+          <h1 className="text-4xl md:text-5xl font-bold pb-4 text-gray-900 dark:text-gray-100">
             {translations["onboarding.welcome"] ??
               "Welcome to Your Wedding Website"}
           </h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto leading-relaxed">
             {translations["onboarding.subtitle"] ??
               "Choose a plan that works for you. Start free and upgrade anytime."}
           </p>
@@ -87,12 +87,12 @@ export default function OnboardingClient({
         </div>
 
         {/* Free plan info box */}
-        <div className="max-w-3xl mx-auto bg-white rounded-lg border border-gray-200 p-8 shadow-sm">
-          <h3 className="text-lg font-semibold text-gray-900 pb-4">
+        <div className="max-w-3xl mx-auto bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-8 shadow-sm">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 pb-4">
             {translations["onboarding.free_plan_note"] ??
               "Ready to start free?"}
           </h3>
-          <ul className="space-y-3 text-gray-700">
+          <ul className="space-y-3 text-gray-700 dark:text-gray-300">
             {[1, 2, 3].map((num) => (
               <li key={num} className="flex items-start gap-3">
                 <span className="text-blue-600 font-bold">✓</span>

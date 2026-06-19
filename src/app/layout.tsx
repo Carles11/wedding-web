@@ -11,6 +11,7 @@ import { SUPPORTED_LANGUAGES } from "@/4-shared/config/i18n";
 import {
   GOOGLE_SITE_VERIFICATION,
   THEME_COLOR,
+  THEME_COLOR_DARK,
 } from "@/4-shared/config/seo/meta";
 import { allFontInstances } from "@/4-shared/lib/fonts/fontRegistry";
 import type { Metadata } from "next";
@@ -61,7 +62,8 @@ export default async function RootLayout({
           href={`/manifests/${lang}/site.webmanifest`}
           crossOrigin="use-credentials"
         />
-        <meta name="theme-color" content={THEME_COLOR} />
+        <meta name="theme-color" content={THEME_COLOR} media="(prefers-color-scheme: light)" />
+        <meta name="theme-color" content={THEME_COLOR_DARK} media="(prefers-color-scheme: dark)" />
         <meta name="language" content={lang} />
         <meta
           name="google-site-verification"

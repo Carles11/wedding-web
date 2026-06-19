@@ -117,7 +117,7 @@ export function PreferencesTab({
                 preferencesTab={true}
               />
               {loading && (
-                <span className="ml-2 text-xs text-gray-400">Saving...</span>
+                <span className="ml-2 text-xs text-gray-400 dark:text-gray-500">Saving...</span>
               )}
             </div>
           </div>

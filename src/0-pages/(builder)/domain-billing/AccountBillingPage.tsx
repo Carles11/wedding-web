@@ -14,8 +14,8 @@ export default async function AccountBillingPage({ lang }: { lang: string }) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="bg-white border-b border-gray-200">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
         <div className="max-w-4xl mx-auto px-6 py-5 flex items-center gap-4">
           <div className="w-10 h-10 rounded-full bg-(--builder-color-primary) flex items-center justify-center shrink-0">
             <span className="text-white text-sm font-semibold">
@@ -23,10 +23,10 @@ export default async function AccountBillingPage({ lang }: { lang: string }) {
             </span>
           </div>
           <div>
-            <Heading as="h1" className="text-lg font-semibold text-gray-900">
+            <Heading as="h1" className="text-lg font-semibold text-gray-900 dark:text-gray-100">
               {t["billing.header"] ?? "Subscription & Billing"}
             </Heading>
-            <p className="text-sm text-gray-500">{user.email}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{user.email}</p>
           </div>
         </div>
       </div>

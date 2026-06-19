@@ -12,7 +12,7 @@ export const ToastProvider = () => {
       closeOnClick
       pauseOnHover
       draggable
-      theme="light"
+      theme="auto"
     />
   );
 };

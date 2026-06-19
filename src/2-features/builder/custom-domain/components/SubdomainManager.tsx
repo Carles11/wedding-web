@@ -98,16 +98,16 @@ export default function SubdomainManager({
   return (
     <div className="space-y-6 max-w-xl">
       <div>
-        <Heading as="h3" className="font-semibold text-gray-900 pb-2">
+        <Heading as="h3" className="font-semibold text-gray-900 dark:text-gray-100 pb-2">
           {translations["builder.status.subdomain"] || "Subdomain"}
         </Heading>
-        <p className="text-sm text-gray-500 mt-1">
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
           {translations["builder.domain.subdomain_desc"] ||
             "Guests will reach your site at this subdomain. Letters, numbers, and hyphens only."}
         </p>
       </div>
 
-      <div className="p-4 bg-white border border-gray-200 rounded-xl shadow-sm">
+      <div className="p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm">
         {!editing ? (
           <SubdomainSection
             site={site}

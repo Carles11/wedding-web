@@ -31,7 +31,7 @@ const DeleteAccountConfirmModal: React.FC<DeleteAccountConfirmModalProps> = ({
       onClose={onClose}
     >
       <div className="space-y-4 p-2 text-sm">
-        <p className="text-gray-600">
+        <p className="text-gray-600 dark:text-gray-400">
           {t(
             translations,
             "builder.account.page.delete_confirm_modal_message",

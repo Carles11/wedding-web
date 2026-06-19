@@ -36,7 +36,7 @@ export default function CTASection({
           {headline}
         </Heading>
 
-        <p className="mt-5 text-base md:text-lg text-gray-500 max-w-xl mx-auto leading-relaxed">
+        <p className="mt-5 text-base md:text-lg text-gray-500 dark:text-gray-400 max-w-xl mx-auto leading-relaxed">
           {description}.
         </p>
 

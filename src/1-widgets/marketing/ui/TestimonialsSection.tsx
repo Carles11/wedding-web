@@ -26,7 +26,7 @@ export default function TestimonialsSection({
           >
             {sectionTitle}
           </Heading>
-          <p className="mt-3 text-base md:text-lg text-gray-500">
+          <p className="mt-3 text-base md:text-lg text-gray-500 dark:text-gray-400">
             {sectionSubtitle}
           </p>
         </div>
@@ -36,7 +36,7 @@ export default function TestimonialsSection({
           className="flex flex-col md:flex-row items-center gap-10 md:gap-16 rounded-3xl overflow-hidden p-8 md:p-12"
           style={{
             background: "var(--color-background)",
-            border: "1px solid var(--builder-color-border)",
+            border: "1px solid var(--builder-color-border, #e8e6e1)",
             boxShadow: "0 4px 32px 0 rgba(106,189,166,0.08)",
           }}
         >
@@ -64,11 +64,11 @@ export default function TestimonialsSection({
 
           {/* Copy side */}
           <div className="flex flex-col items-start gap-5 w-full md:w-1/2">
-            <h3 className="text-2xl md:text-3xl font-bold text-gray-900 leading-snug">
+            <h3 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100 leading-snug">
               {premium.siteName}
             </h3>
 
-            <p className="text-sm md:text-base text-gray-500 leading-relaxed">
+            <p className="text-sm md:text-base text-gray-500 dark:text-gray-400 leading-relaxed">
               {premium.siteDescription}
             </p>
 

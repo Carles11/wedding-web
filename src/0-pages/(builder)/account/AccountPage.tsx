@@ -192,7 +192,7 @@ export default function AccountPage({ account, translations, site }: Props) {
               </Heading>
               {currentAccount.onboarding_completed && (
                 <div className="flex justify-center sm:justify-start">
-                  <span className="px-2.5 py-0.5 text-[10px] uppercase tracking-wider font-bold rounded-full bg-green-100 text-green-700 border border-green-200">
+                  <span className="px-2.5 py-0.5 text-[10px] uppercase tracking-wider font-bold rounded-full bg-green-100 dark:bg-green-950/40 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800">
                     {translations["builder.account.page.onboarded"] ||
                       "Onboarded"}
                   </span>

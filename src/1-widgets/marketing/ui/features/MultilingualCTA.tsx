@@ -37,7 +37,7 @@ export default function MultilingualCTA({ translations, lang }: Props) {
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center relative z-10">
           <Link
             href={`/${lang}/auth/signup`}
-            className="px-8 py-4 bg-white text-emerald-900 font-bold rounded-full hover:bg-emerald-50 transition-all transform hover:scale-105"
+            className="px-8 py-4 bg-white dark:bg-gray-100 text-emerald-900 font-bold rounded-full hover:bg-emerald-50 dark:hover:bg-gray-200 transition-all transform hover:scale-105"
           >
             {t(
               translations,
@@ -47,7 +47,7 @@ export default function MultilingualCTA({ translations, lang }: Props) {
           </Link>
           <Link
             href={`/${lang}/pricing`}
-            className="px-8 py-4 bg-emerald-800/50 text-white font-semibold rounded-full border border-emerald-700 hover:bg-emerald-800 transition-all"
+            className="px-8 py-4 bg-emerald-800/50 text-white font-semibold rounded-full border border-emerald-700 dark:border-emerald-800/50 hover:bg-emerald-800 transition-all"
           >
             {t(
               translations,

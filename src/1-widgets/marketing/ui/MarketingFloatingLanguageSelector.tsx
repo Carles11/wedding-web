@@ -26,7 +26,7 @@ export default function MarketingFloatingLanguageSelector({
   };
 
   return (
-    <div className="fixed top-4 right-4 z-50 bg-white/80 shadow-lg rounded-lg backdrop-blur-sm">
+    <div className="fixed top-4 right-4 z-50 bg-white/80 dark:bg-gray-800/80 shadow-lg rounded-lg backdrop-blur-sm">
       <LanguageSelector
         currentLang={currentLang}
         label={label}

@@ -27,7 +27,7 @@ export const BuilderDropdownInput = ({
       {label && (
         <label
           className={`text-xs font-medium ${
-            prominent ? "text-teal-700" : "text-(--builder-color-text-muted)"
+            prominent ? "text-teal-700 dark:text-teal-400" : "text-(--builder-color-text-muted)"
           }`}
         >
           {label}
@@ -51,7 +51,7 @@ export const BuilderDropdownInput = ({
                 ? `bg-teal-50 border border-teal-300
                  text-teal-900
                  focus:border-teal-500
-                 focus:ring-teal-100`
+                 focus:ring-teal-100 dark:bg-teal-950/40 dark:border-teal-800 dark:text-teal-100`
                 : `bg-(--builder-color-surface)
                  border border-(--builder-color-border)
                  text-(--builder-color-text)
@@ -70,7 +70,7 @@ export const BuilderDropdownInput = ({
 
         <span
           className={`pointer-events-none absolute inset-y-0 right-3 flex items-center ${
-            prominent ? "text-teal-500" : "text-(--builder-color-text-muted)"
+            prominent ? "text-teal-500 dark:text-teal-400" : "text-(--builder-color-text-muted)"
           }`}
         >
           <ChevronDown className="h-4 w-4" />

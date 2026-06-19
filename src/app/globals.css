@@ -68,11 +68,13 @@
   );
 }
 
-/* Dark mode token overrides */
+/* Dark mode token overrides — core */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #292d41; /* azul acero */
-    --foreground: #ffffff; /* blanco nieve */
+    --background: #292d41;
+    --foreground: #ffffff;
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
   }
 }
 
@@ -430,6 +432,23 @@ Builder theme tokens and reusable surface/button styles.
   color: var(--marketing-color-primary);
 }
 
+/* Dark mode — builder theme overrides */
+@media (prefers-color-scheme: dark) {
+  .builder-theme {
+    --builder-color-page-bg: #1a1a24;
+    --builder-color-surface: #242430;
+    --builder-color-muted-surface: #2a2a36;
+    --builder-color-text: #e5e5e5;
+    --builder-color-text-muted: #9ca3af;
+    --builder-color-border: #3a3a48;
+    --builder-color-secondary-bg: #242430;
+    --builder-color-secondary-hover: #2a2a36;
+    --builder-color-danger-border: rgba(254, 202, 202, 0.15);
+    --builder-color-danger-hover-bg: rgba(220, 38, 38, 0.15);
+    --builder-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  }
+}
+
 /* ── Marketing + Auth Theme ─────────────────────────────────────────────
 #########################################################################
 #########################################################################
@@ -463,6 +482,32 @@ Builder theme tokens and reusable surface/button styles.
     #fffaf5
   );
   --marketing-bg-subtle-gradient: linear-gradient(to bottom, #ffffff, #f9fafb);
+}
+
+/* Dark mode — marketing theme overrides */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --marketing-bg-gradient: linear-gradient(
+      to bottom right,
+      #1a2a3a,
+      #292d41,
+      #1e2a35
+    );
+    --marketing-bg-light-gradient: linear-gradient(
+      to bottom right,
+      #1e2e3a,
+      #292d41,
+      #1f2d34
+    );
+    --marketing-bg-subtle-gradient: linear-gradient(
+      to bottom,
+      #292d41,
+      #1e2a35
+    );
+    --marketing-color-on-gradient-text: #6abda6;
+    --marketing-color-link: #6abda6;
+    --marketing-color-link-hover: #4aa693;
+  }
 }
 
 .marketing-theme {
@@ -623,6 +668,21 @@ Builder theme tokens and reusable surface/button styles.
   box-shadow:
     0 0 0 2px #fff,
     0 0 0 4px var(--marketing-color-primary);
+}
+
+/* Dark mode — button variant overrides */
+@media (prefers-color-scheme: dark) {
+  .marketing-btn-secondary {
+    background: rgba(0, 0, 0, 0.3);
+  }
+
+  .marketing-btn-secondary:hover:not(:disabled) {
+    background: rgba(0, 0, 0, 0.45);
+  }
+
+  .marketing-btn-on-gradient {
+    background: rgba(0, 0, 0, 0.25);
+  }
 }
 
 /* Input — auth form fields with teal focus ring */

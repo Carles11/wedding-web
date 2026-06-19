@@ -593,7 +593,7 @@ export default function GeneralSiteForm({
       </div>
       {/* Title */}
       <div className="mt-8">
-        <p className="text-gray-500">
+        <p className="text-gray-500 dark:text-gray-400 dark:text-gray-400">
           {translations["builder.general.form.label.main_title"] ??
             "Main title"}
         </p>
@@ -615,7 +615,7 @@ export default function GeneralSiteForm({
       </div>
       {/* Subtitle */}
       <div>
-        <p className=" pt-6 pb-3 text-gray-500">
+        <p className=" pt-6 pb-3 text-gray-500 dark:text-gray-400">
           {translations["builder.general.form.label.subtitle"] ?? "Subtitle"}
         </p>
         <textarea
@@ -634,8 +634,8 @@ export default function GeneralSiteForm({
         />
       </div>
       {/* ── Font Selectors ─────────────────────────────────── */}
-      <fieldset className="space-y-4 rounded-lg border border-gray-200 p-4 mt-6">
-        <legend className="pt-3 pb-3 text-gray-500">
+      <fieldset className="space-y-4 rounded-lg border border-gray-200 dark:border-gray-700 p-4 mt-6">
+        <legend className="pt-3 pb-3 text-gray-500 dark:text-gray-400">
           {translations["builder.fonts.section.title"] ?? "Typography"}
         </legend>
 
@@ -643,7 +643,7 @@ export default function GeneralSiteForm({
         <div>
           <label
             htmlFor="title-font-select"
-            className="block text-sm font-normal text-gray-600"
+            className="block text-sm font-normal text-gray-600 dark:text-gray-400"
           >
             {translations["builder.fonts.label.title_font"] ?? "Title Font"}
           </label>
@@ -652,7 +652,7 @@ export default function GeneralSiteForm({
             value={selectedTitleFont}
             onChange={(e) => handleFontChange("title", e.target.value)}
             disabled={savingFonts}
-            className="mt-1 block w-full rounded border border-gray-300 bg-white px-3 py-2 text-sm focus:border-indigo-500 focus:ring-indigo-500"
+            className="mt-1 block w-full rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-indigo-500"
           >
             {Object.entries(groupByStyle(AVAILABLE_TITLE_FONTS)).map(
               ([style, fonts]) => (
@@ -672,7 +672,7 @@ export default function GeneralSiteForm({
         <div>
           <label
             htmlFor="body-font-select"
-            className="block text-sm font-normal text-gray-600"
+            className="block text-sm font-normal text-gray-600 dark:text-gray-400"
           >
             {translations["builder.fonts.label.body_font"] ?? "Body Font"}
           </label>
@@ -681,7 +681,7 @@ export default function GeneralSiteForm({
             value={selectedBodyFont}
             onChange={(e) => handleFontChange("body", e.target.value)}
             disabled={savingFonts}
-            className="mt-1 block w-full rounded border border-gray-300 bg-white px-3 py-2 text-sm focus:border-indigo-500 focus:ring-indigo-500"
+            className="mt-1 block w-full rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-indigo-500"
           >
             {Object.entries(groupByStyle(AVAILABLE_BODY_FONTS)).map(
               ([style, fonts]) => (
@@ -698,8 +698,8 @@ export default function GeneralSiteForm({
         </div>
 
         {/* Font Preview */}
-        <div className="rounded-md border border-dashed border-gray-300 bg-gray-50 p-4 text-center">
-          <p className="mb-1 text-xs uppercase tracking-wide text-gray-400">
+        <div className="rounded-md border border-dashed border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 p-4 text-center">
+          <p className="mb-1 text-xs uppercase tracking-wide text-gray-400 dark:text-gray-500">
             {translations["builder.fonts.preview.label"] ?? "Preview"}
           </p>
           <p
@@ -711,7 +711,7 @@ export default function GeneralSiteForm({
             {content[activeLang]?.title || "We are getting married!"}
           </p>
           <p
-            className="mt-2 text-lg text-gray-600"
+            className="mt-2 text-lg text-gray-600 dark:text-gray-400"
             style={{
               fontFamily: `var(${AVAILABLE_BODY_FONTS.find((f) => f.id === selectedBodyFont)?.variable ?? "--font-roboto"})`,
             }}

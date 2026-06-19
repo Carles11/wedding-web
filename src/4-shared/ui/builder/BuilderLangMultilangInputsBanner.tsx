@@ -12,21 +12,21 @@ export const MultiLangInputsBanner = ({
   defaultLang?: string;
 }) => {
   return (
-    <div className="flex items-center gap-3 px-3.5 py-2.5 bg-emerald-50 border border-emerald-200 rounded-xl mb-4">
+    <div className="flex items-center gap-3 px-3.5 py-2.5 bg-emerald-50 border border-emerald-200 rounded-xl mb-4 dark:bg-emerald-950/30 dark:border-emerald-900/50">
       {/* Lucide Icon for consistency */}
-      <div className="w-8 h-8 shrink-0 bg-teal-600 rounded-lg flex items-center justify-center">
-        <Languages className="w-4 h-4 text-white" />
+      <div className="w-8 h-8 shrink-0 bg-teal-600 rounded-lg flex items-center justify-center dark:bg-teal-800">
+        <Languages className="w-4 h-4 text-white dark:text-gray-100" />
       </div>
 
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-emerald-900 leading-none mb-0.5">
+        <p className="text-sm font-medium text-emerald-900 leading-none mb-0.5 dark:text-emerald-100">
           {t(
             translations,
             "builder.program_events.form.multi_language",
             "Multi-language fields",
           )}
         </p>
-        <p className="text-xs text-emerald-700 leading-snug">
+        <p className="text-xs text-emerald-700 leading-snug dark:text-emerald-400">
           {interpolate(
             t(
               translations,
@@ -39,7 +39,7 @@ export const MultiLangInputsBanner = ({
       </div>
 
       {/* Language Count Badge */}
-      <span className="shrink-0 text-[11px] font-medium text-teal-700 bg-white border border-teal-300 rounded-full px-2.5 py-1 whitespace-nowrap">
+      <span className="shrink-0 text-[11px] font-medium text-teal-700 bg-white border border-teal-300 rounded-full px-2.5 py-1 whitespace-nowrap dark:text-teal-300 dark:bg-gray-800 dark:border-teal-700">
         {languages.length}{" "}
         {languages.length === 1
           ? t(

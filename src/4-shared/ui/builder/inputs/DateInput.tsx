@@ -52,7 +52,7 @@ export function DateInput({
   return (
     <div className="w-fit">
       {label && (
-        <label className="block text-xs text-gray-600 mb-1">
+        <label className="block text-xs text-gray-600 mb-1 dark:text-gray-400">
           {label}
           {required ? " *" : ""}
         </label>

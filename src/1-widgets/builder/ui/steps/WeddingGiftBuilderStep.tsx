@@ -381,7 +381,7 @@ export default function WeddingGiftBuilderStep({
       nextLabel={t(translations, "builder.common.save", "Save")}
       backLabel={t(translations, "builder.gift.clear_all", "Clear all data")}
     >
-      <div className="mb-4 text-md text-gray-600">
+      <div className="mb-4 text-md text-gray-600 dark:text-gray-400">
         {t(
           translations,
           "builder.gift.desc",

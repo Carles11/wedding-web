@@ -87,10 +87,10 @@ export default function PricingTable({
                 : undefined,
             }}
             className={`
-            relative flex flex-col rounded-2xl border bg-white
+            relative flex flex-col rounded-2xl border bg-white dark:bg-gray-800
             p-8 shadow-sm transition
             ${isLoading ? "opacity-80 pointer-events-none" : "hover:shadow-xl hover:-translate-y-1"}
-            ${highlight ? "shadow-lg ring-1 ring-[--marketing-color-primary]" : "border-gray-200"}
+            ${highlight ? "shadow-lg ring-1 ring-[--marketing-color-primary]" : "border-gray-200 dark:border-gray-700"}
             `}
           >
             {highlight && (
@@ -114,7 +114,7 @@ export default function PricingTable({
               {targetPrice !== -1 ? (
                 <>
                   <p className="text-4xl font-bold">{formattedPrice}</p>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
                     {def.billing === "one-time"
                       ? billingLabel
                       : `${billingLabel}`}
@@ -155,7 +155,7 @@ export default function PricingTable({
                 <div className="space-y-2">
                   {Object.entries(def.limits).map(([prop, val]) => (
                     <div key={prop} className="flex justify-between">
-                      <span className="text-gray-500 capitalize">
+                      <span className="text-gray-500 dark:text-gray-400 capitalize">
                         {t(
                           translations,
                           `pricing.limit.${prop}`,

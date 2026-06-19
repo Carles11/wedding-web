@@ -73,11 +73,11 @@ export default function ForgotPasswordForm({ translations, lang }: Props) {
 
   if (success) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50">
-        <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-md text-center">
-          <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
+      <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
+        <div className="w-full max-w-md p-8 bg-white dark:bg-gray-800 rounded-lg shadow-md text-center">
+          <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 dark:bg-green-950/30 mb-4">
             <svg
-              className="h-6 w-6 text-green-600"
+              className="h-6 w-6 text-green-600 dark:text-green-400"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -90,10 +90,10 @@ export default function ForgotPasswordForm({ translations, lang }: Props) {
               />
             </svg>
           </div>
-          <Heading as="h2" className="text-2xl font-bold text-gray-900 mb-2">
+          <Heading as="h2" className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
             {tr(translations, "auth.common.check_email", "Check Your Email")}
           </Heading>
-          <p className="text-gray-600 mb-6">
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
             {tr(
               translations,
               "auth.forgot.success_message",
@@ -110,10 +110,10 @@ export default function ForgotPasswordForm({ translations, lang }: Props) {
 
   return (
     <div className="flex items-center justify-center min-h-screen">
-      <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-md">
+      <div className="w-full max-w-md p-8 bg-white dark:bg-gray-800 rounded-lg shadow-md">
         <Heading
           as="h2"
-          className="text-2xl font-bold text-center text-gray-800 mb-6"
+          className="text-2xl font-bold text-center text-gray-800 dark:text-gray-200 mb-6"
         >
           {tr(translations, "auth.forgot.title", "Reset Your Password")}
         </Heading>
@@ -154,7 +154,7 @@ export default function ForgotPasswordForm({ translations, lang }: Props) {
           </p>
         )}
         <div className="mt-6 text-center">
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
             {tr(
               translations,
               "auth.forgot.remember_password",

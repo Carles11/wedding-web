@@ -141,7 +141,7 @@ export default function ContactSection({
               priority={false}
             />
             {/* overlay only over the image area */}
-            <div className="absolute inset-0 bg-white/75 md:bg-white/44" />
+            <div className="absolute inset-0 bg-white/75 md:bg-white/44 dark:bg-black/50" />
           </div>
         </div>
       )}
@@ -169,16 +169,16 @@ export default function ContactSection({
               >
                 <Heading
                   as="h4"
-                  className="font-semibold text-2xl text-neutral-800"
+                  className="font-semibold text-2xl text-neutral-800 dark:text-neutral-200"
                 >
                   {p.name}
                 </Heading>
-                <div className="text-sm text-neutral-600 mt-2 space-y-1">
+                <div className="text-sm text-neutral-600 dark:text-neutral-400 mt-2 space-y-1">
                   {p.email && (
                     <div>
                       <UnderlinedLink
                         href={`mailto:${p.email}`}
-                        className="text-neutral-700"
+                        className="text-neutral-700 dark:text-neutral-300"
                         ariaLabel={`Email ${p.name}`}
                         thicknessClass="h-0.5"
                         {...underlineConfig}
@@ -191,7 +191,7 @@ export default function ContactSection({
                     <div>
                       <UnderlinedLink
                         href={`tel:${p.phone}`}
-                        className="text-neutral-700"
+                        className="text-neutral-700 dark:text-neutral-300"
                         ariaLabel={`Call ${p.name}`}
                         thicknessClass="h-0.5"
                         {...underlineConfig}

@@ -24,7 +24,7 @@ export default function PricingSection({
   const premiumFeaturesList = premiumPlanFeatures ?? [];
 
   return (
-    <section aria-labelledby="pricing-heading" className="py-12 bg-gray-50">
+    <section aria-labelledby="pricing-heading" className="py-12 bg-gray-50 dark:bg-gray-900">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2
           id="pricing-heading"
@@ -35,17 +35,17 @@ export default function PricingSection({
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
           {/* Free Plan */}
-          <div className="flex flex-col h-full bg-white border border-gray-200 rounded-lg shadow-md p-6 hover:shadow-lg transition transform duration-150">
+          <div className="flex flex-col h-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-md p-6 hover:shadow-lg transition transform duration-150">
             <div className="flex items-center justify-between">
               <h3 className="text-xl md:text-2xl font-bold">{freePlanName}</h3>
             </div>
 
             <div className="mt-6 flex-1">
-              <div className="text-4xl md:text-5xl font-extrabold text-gray-900">
+              <div className="text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-gray-100">
                 <span>{freePlanPrice}</span>
               </div>
 
-              <ul className="mt-6 space-y-3 text-sm text-gray-700">
+              <ul className="mt-6 space-y-3 text-sm text-gray-700 dark:text-gray-300">
                 {freeFeaturesList.map((f, index) => (
                   <li
                     key={`free-feature-${index}`}
@@ -73,7 +73,7 @@ export default function PricingSection({
           </div>
 
           {/* Premium Plan */}
-          <div className="relative flex flex-col h-full bg-white rounded-lg shadow-lg border-2 border-[#6ABDA6] p-6 transform transition duration-150 hover:scale-[1.01]">
+          <div className="relative flex flex-col h-full bg-white dark:bg-gray-800 rounded-lg shadow-lg border-2 border-[#6ABDA6] dark:border-(--marketing-color-primary) p-6 transform transition duration-150 hover:scale-[1.01]">
             <div
               className="absolute -top-3 right-4 px-3 py-1 rounded-full text-xs font-semibold text-white"
               style={{ background: "var(--marketing-color-primary)" }}
@@ -88,12 +88,12 @@ export default function PricingSection({
             </div>
 
             <div className="mt-6 flex-1">
-              <div className="text-4xl md:text-5xl font-extrabold text-gray-900">
+              <div className="text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-gray-100">
                 <span>{premiumPlanPrice}</span>
               </div>
-              <div className="text-sm text-gray-600 mt-2">{perSiteText}</div>
+              <div className="text-sm text-gray-600 dark:text-gray-400 mt-2">{perSiteText}</div>
 
-              <ul className="mt-6 space-y-3 text-sm text-gray-700">
+              <ul className="mt-6 space-y-3 text-sm text-gray-700 dark:text-gray-300">
                 {premiumFeaturesList.map((f, index) => (
                   <li
                     key={`premium-feature-${index}`}

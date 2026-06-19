@@ -232,13 +232,13 @@ export function PartyFormModal({
         />
 
         <div className="space-y-1">
-          <label className="block text-xs text-gray-600">
+          <label className="block text-xs text-gray-600 dark:text-gray-400">
             {t(
               translations,
               "builder.rsvp.guest.max_guests.label",
               "Max guests",
             )}
-            <span className="ml-0.5 text-red-500"> *</span>
+            <span className="ml-0.5 text-red-500 dark:text-red-400"> *</span>
           </label>
           <input
             type="number"
@@ -246,16 +246,16 @@ export function PartyFormModal({
             value={maxGuests}
             onChange={(e) => setMaxGuests(e.target.value)}
             required
-            className={`mt-1 w-full border rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-              maxGuestsError ? "border-red-500" : "border-gray-300"
+            className={`mt-1 w-full border rounded-md px-3 py-2 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+              maxGuestsError ? "border-red-500 dark:border-red-800/50" : "border-gray-300 dark:border-gray-600"
             }`}
           />
           {maxGuestsError && (
-            <p className="text-xs text-red-600 mt-1">{maxGuestsError}</p>
+            <p className="text-xs text-red-600 dark:text-red-400 mt-1">{maxGuestsError}</p>
           )}
         </div>
 
-        {submitError && <p className="text-sm text-red-600">{submitError}</p>}
+        {submitError && <p className="text-sm text-red-600 dark:text-red-400">{submitError}</p>}
 
         <div className="flex justify-end gap-2 pt-2">
           <BuilderButton

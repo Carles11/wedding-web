@@ -447,8 +447,8 @@ export function RsvpPartiesTab({
       </div>
 
       {loadError && (
-        <div className="rounded border border-red-300 bg-red-50 px-4 py-3">
-          <p className="text-sm text-red-700">{loadError}</p>
+        <div className="rounded border border-red-300 dark:border-red-800/50 bg-red-50 dark:bg-red-950/30 px-4 py-3">
+          <p className="text-sm text-red-700 dark:text-red-400">{loadError}</p>
         </div>
       )}
 
@@ -511,7 +511,7 @@ export function RsvpPartiesTab({
                 </tr>
               ) : (
                 parties.map((party) => (
-                  <tr key={party.id} className="hover:bg-gray-50">
+                  <tr key={party.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
                     <td className="px-4 py-2 font-medium text-(--builder-color-text)">
                       {party.name}
                     </td>
@@ -528,8 +528,8 @@ export function RsvpPartiesTab({
                       <span
                         className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
                           party.is_active
-                            ? "bg-green-100 text-green-800"
-                            : "bg-gray-100 text-gray-500"
+                            ? "bg-green-100 text-green-800 dark:bg-green-950/30 dark:text-green-400"
+                            : "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400"
                         }`}
                       >
                         {party.is_active

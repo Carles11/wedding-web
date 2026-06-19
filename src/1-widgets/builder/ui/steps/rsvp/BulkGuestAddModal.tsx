@@ -493,13 +493,13 @@ export function BulkGuestAddModal({
                       </td>
                       <td className="px-3 py-2 text-xs">
                         {row.errors.length === 0 ? (
-                          <span className="text-green-700">
+                          <span className="text-green-700 dark:text-green-400">
                             {translations[
                               "builder.rsvp.guests.bulk_add.ready"
                             ] || "Ready"}
                           </span>
                         ) : (
-                          <span className="text-red-700">
+                          <span className="text-red-700 dark:text-red-400">
                             {row.errors.join(" ")}
                           </span>
                         )}
@@ -513,7 +513,7 @@ export function BulkGuestAddModal({
         )}
 
         {submitError && (
-          <div className="rounded border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <div className="rounded border border-red-300 dark:border-red-800/50 bg-red-50 dark:bg-red-950/30 px-4 py-3 text-sm text-red-700 dark:text-red-400">
             {submitError}
           </div>
         )}
