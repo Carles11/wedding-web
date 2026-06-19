@@ -18,7 +18,7 @@ import { Footer } from "@/4-shared/ui/commons/footer/Footer";
 import { shouldShowBrandBadge, shouldShowFooter } from "@/4-shared/utils";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 export async function generateMetadata({
   params,
@@ -58,6 +58,8 @@ export async function generateMetadata({
           : undefined,
     };
   }
+
+  if (!site && (host.endsWith(".weddweb.com") || host.endsWith(".localhost:3000"))) notFound();
 
   const seo = getSEOMetadata(lang, "marketing", "home");
   return {
@@ -113,6 +115,8 @@ export default async function Page({
       </div>
     );
   }
+
+  if (!site && (host.endsWith(".weddweb.com") || host.endsWith(".localhost:3000"))) notFound();
 
   const lang = SUPPORTED_LANGUAGES.includes(langInput as SupportedLanguage)
     ? (langInput as SupportedLanguage)

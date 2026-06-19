@@ -25,7 +25,7 @@ export function generateSiteMetadata({
 
   // Title and description logic
   const title = isTenant
-    ? translations["sections.hero.title"] || site?.title || "Wedding"
+    ? translations["sections.hero.title"] || site?.title || `${site.subdomain} Wedding`
     : translations["meta.marketing_title"] || "Welcome | WeddWeb";
 
   const description = isTenant
