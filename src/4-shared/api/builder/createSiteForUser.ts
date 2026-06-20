@@ -27,12 +27,22 @@ export async function createSiteForUser(user: {
     ? user.preferredLanguage
     : "en";
 
-  const defaultDomains = [
-    `${defaultSubdomain}.localhost:3000`,
-    `www.${defaultSubdomain}.localhost:3000`,
-    `${defaultSubdomain}.weddweb.com`,
-    `www.${defaultSubdomain}.weddweb.com`,
-  ];
+  const isRealDeployment =
+    process.env.VERCEL_ENV === "production" ||
+    process.env.VERCEL_ENV === "preview" ||
+    (!process.env.VERCEL_ENV && process.env.NODE_ENV === "production");
+
+  const defaultDomains = isRealDeployment
+    ? [
+        `${defaultSubdomain}.weddweb.com`,
+        `www.${defaultSubdomain}.weddweb.com`,
+      ]
+    : [
+        `${defaultSubdomain}.localhost:3000`,
+        `www.${defaultSubdomain}.localhost:3000`,
+        `${defaultSubdomain}.weddweb.com`,
+        `www.${defaultSubdomain}.weddweb.com`,
+      ];
 
   // 1. Insert site row
   const { data: siteData, error: siteError } = await supabaseAdmin
