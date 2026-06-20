@@ -49,14 +49,7 @@ export function generateSiteMetadata({
   // Canonical logic: use verified custom domain for tenants, raw host otherwise
   const rawHost = baseUrl.replace(/^https?:\/\//, "");
   const canonicalHost = isTenant ? getPrimaryDomain(site, rawHost) : rawHost;
-  // Special-case: root homepage (/) should have og:url = /
-  const isRootHome =
-    pageKind === "marketing" &&
-    lang === "en" &&
-    baseUrl === "https://weddweb.com";
-  const canonicalUrl = isRootHome
-    ? "https://weddweb.com/"
-    : `https://${canonicalHost}/${lang}`;
+  const canonicalUrl = `https://${canonicalHost}/${lang}`;
 
   // Hreflang/alternates logic: Map all languages supported by this specific site
   const availableLangs =
@@ -91,7 +84,7 @@ export function generateSiteMetadata({
       title,
       description,
       type: "website",
-      url: isRootHome ? "https://weddweb.com/" : canonicalUrl,
+      url: canonicalUrl,
       siteName: isTenant ? title : "WeddWeb",
       locale: getOGLocale(lang),
       images: [ogImage],

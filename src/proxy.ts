@@ -3,18 +3,6 @@ import { getSiteByDomain } from "@/4-shared/lib/getSiteByDomain";
 import { updateSession } from "@/4-shared/lib/supabase/middleware";
 import { NextRequest, NextResponse } from "next/server";
 
-const BOT_REGEX =
-  /googlebot|bingbot|duckduckbot|slurp|yandexbot|applebot|baiduspider/i;
-
-function isNextInternalRequest(request: NextRequest): boolean {
-  return (
-    request.headers.has("rsc") ||
-    request.headers.has("next-router-state-tree") ||
-    request.headers.has("next-router-prefetch") ||
-    request.headers.has("next-router-segment-prefetch")
-  );
-}
-
 /**
  * Extract the best language from a pathname.
  * Returns "en" for the root path or any unrecognised segment.
@@ -49,30 +37,12 @@ export async function proxy(request: NextRequest) {
     const isMarketing =
       host === "weddweb.com" || host === "localhost" || host === "127.0.0.1";
 
-    if (isMarketing) {
-      const ua = request.headers.get("user-agent") || "";
-
-      // Bots: fall through to page.tsx which renders indexable SEO content
-      if (BOT_REGEX.test(ua)) {
-        return NextResponse.next({
-          request: { headers: withLangHeader(request, "en").headers },
-        });
-      }
-
-      // Next.js RSC fetches during hydration: fall through so the client
-      // router is not redirected mid-render (fixes Google WRS canonical issue)
-      if (isNextInternalRequest(request)) {
-        return NextResponse.next({
-          request: { headers: withLangHeader(request, "en").headers },
-        });
-      }
-    }
-
     let allowedLangs: string[] = [...SUPPORTED_LANGUAGES];
     let defaultLang = "en";
 
     if (!isMarketing) {
-      const site = await getSiteByDomain(host);
+      const requestHost = (request.headers.get("host") || host).toLowerCase().trim();
+      const site = await getSiteByDomain(requestHost);
       if (site) {
         allowedLangs =
           site.languages?.length > 0
