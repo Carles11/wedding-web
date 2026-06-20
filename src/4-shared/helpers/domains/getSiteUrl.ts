@@ -8,7 +8,7 @@ export function getSiteUrl(subdomain: string): string {
 
   // 1. Local Development
   if (hostname === "localhost" || hostname === "127.0.0.1") {
-    return `http://localhost:3000/en?preview=${subdomain}`;
+    return `http://${subdomain}.localhost:3000`;
   }
 
   // 2. Vercel Preview/Branch Deploys

@@ -22,23 +22,13 @@ import { notFound, redirect } from "next/navigation";
 
 export async function generateMetadata({
   params,
-  searchParams,
 }: {
   params: Promise<{ lang?: string }>;
-  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 }): Promise<Metadata> {
-  const resolvedParams = await (params ?? { lang: "en" });
-  const resolvedSearchParams = await (searchParams ?? Promise.resolve({} as Record<string, string | string[] | undefined>));
+  const resolvedParams = await params;
   const lang = (resolvedParams.lang as SupportedLanguage) ?? "en";
   const host = ((await headers()).get("host") ?? "").toLowerCase().trim();
-  let site = await getSiteByDomain(host);
-
-  if (!site) {
-    const preview = resolvedSearchParams?.preview;
-    if (typeof preview === "string") {
-      site = await getSiteByDomain(`${preview}.localhost:3000`);
-    }
-  }
+  const site = await getSiteByDomain(host);
 
   const { metadataBase, baseUrl } = getMetadataBase(host, !!site);
 
@@ -93,25 +83,15 @@ export const dynamic = "force-dynamic";
 
 export default async function Page({
   params,
-  searchParams,
 }: {
   params: Promise<{ lang?: string }>;
-  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const resolvedParams = await params;
-  const resolvedSearchParams = await (searchParams ?? Promise.resolve({} as Record<string, string | string[] | undefined>));
   const langInput = resolvedParams?.lang || "en";
   const headersList = await headers();
   const host = (headersList.get("host") ?? "").toLowerCase().trim();
   const countryHeader = headersList.get("x-vercel-ip-country") || "US";
-  let site = await getSiteByDomain(host);
-
-  if (!site) {
-    const preview = resolvedSearchParams?.preview;
-    if (typeof preview === "string") {
-      site = await getSiteByDomain(`${preview}.localhost:3000`);
-    }
-  }
+  const site = await getSiteByDomain(host);
 
   if (site) {
     const allowedLangs =

@@ -36,16 +36,16 @@ const nextConfig = {
     ],
   },
 
-  // 3. Update Dev Origins
-  // In Next 15/16, this moved to the top level under 'devIndicators'
-  // or is handled via the 'server' config. Try moving it here:
+  // 3. Allowed Dev Origins
+  // Required for *.localhost:3000 tenant subdomain preview links to work
+  // correctly in dev mode — without this, Next.js dev server's
+  // cross-origin protection does not trust subdomain-based localhost
+  // origins and will mangle the request host.
+  allowedDevOrigins: ["localhost:3000", "*.localhost:3000"],
+
   devIndicators: {
     appIsrStatus: true,
   },
-
-  // If you still need custom local domains,
-  // Next 16 often handles this automatically via the CLI.
-  // If 'allowedDevOrigins' causes a warning here, remove it.
 };
 
 export default nextConfig;

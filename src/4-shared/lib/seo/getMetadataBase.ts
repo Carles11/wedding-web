@@ -18,7 +18,7 @@ export function getMetadataBase(
   }
 
   // 2. Protocol
-  const protocol = currentHost.includes("localhost") || currentHost.startsWith("127.0.0.1") ? "http" : "https";
+  const protocol = currentHost.includes("localhost") ? "http" : "https";
 
   // 3. Absolute Base URL
   const baseUrl = `${protocol}://${currentHost}`;
