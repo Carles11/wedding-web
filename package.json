@@ -9,7 +9,8 @@
     "check:billing-hardlinks": "node scripts/check-billing-hardlinks.mjs",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "format": "prettier --write .",
-    "test": "jest"
+    "test": "jest",
+    "ping-sitemaps": "tsx scripts/ping-sitemaps.ts"
   },
   "dependencies": {
     "@next/third-parties": "^16.2.2",
@@ -53,6 +54,7 @@
     "prettier-plugin-organize-imports": "^4.3.0",
     "tailwindcss": "^4.1.17",
     "ts-jest": "^29.4.6",
+    "tsx": "^4.22.4",
     "typescript": "^5"
   }
 }

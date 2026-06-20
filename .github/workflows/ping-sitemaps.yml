@@ -1,0 +1,25 @@
+name: Ping Sitemaps After Deploy
+
+on:
+  deployment_status:
+
+jobs:
+  ping-sitemaps:
+    if: github.event.deployment_status.state == 'success' && github.event.deployment.environment == 'production'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: "npm"
+      - name: Install dependencies
+        run: npm ci
+      - name: Ping sitemaps
+        run: npm run ping-sitemaps
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          INDEXNOW_ENDPOINT: ${{ secrets.INDEXNOW_ENDPOINT }}
