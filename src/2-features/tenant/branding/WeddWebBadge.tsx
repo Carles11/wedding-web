@@ -7,7 +7,7 @@ export function WeddWebBadge() {
       >
         Powered by{" "}
         <a
-          href="https://www.weddweb.com/"
+          href="https://weddweb.com/"
           target="_blank"
           rel="noopener noreferrer"
           className="text-(--marketing-color-primary) hover:opacity-80 focus-visible:ring cursor-pointer"

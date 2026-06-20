@@ -88,7 +88,7 @@ export default function DomainAndBillingBuilderStep({
       description:
         translations["builder.share.weddweb_desc"] ||
         "Share the main platform directly with another couple.",
-      url: "https://www.weddweb.com",
+      url: "https://weddweb.com",
       shareText:
         translations["builder.share.weddweb_text"] ||
         "Create and share your own wedding website with WeddWeb.",

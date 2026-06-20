@@ -9,7 +9,7 @@ type TenantSite = {
   seo_enabled: boolean;
 };
 
-const MAIN_DOMAIN = "www.weddweb.com";
+const MAIN_DOMAIN = "weddweb.com";
 const MARKETING_SITEMAP = `https://${MAIN_DOMAIN}/sitemap-marketing.xml`;
 const MAIN_SITEMAP = `https://${MAIN_DOMAIN}/sitemap.xml`;
 

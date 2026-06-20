@@ -75,7 +75,7 @@ export function generateSiteMetadata({
   // Marketing pages are always indexed.
   // Tenant pages are indexed only if seo_enabled is true.
   const shouldIndex =
-    pageKind === "marketing" || (isTenant && site?.seo_enabled !== false);
+    pageKind === "marketing" || (isTenant && site?.seo_enabled === true);
 
   return {
     title,
